@@ -274,9 +274,10 @@ body {
 
 /* NTC Specifics */
 .ntc-header {
-    background: linear-gradient(120deg, #eef2ff 0%, #e0e7ff 50%, #f0f9ff 100%);
+    background: linear-gradient(120deg, #f5f3ff 0%, #ede9fe 50%, #f3f0ff 100%);
     padding: 28px 32px;
-    border: 1px solid #c7d2fe;
+    border: 1px solid #ddd6fe;
+    border-radius: 4px;
     position: relative;
     overflow: hidden;
 }

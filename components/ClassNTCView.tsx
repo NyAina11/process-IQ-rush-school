@@ -875,15 +875,15 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 w-full md:w-auto shrink-0">
-                        <div className="bg-white p-7 border border-[#e2e8f0] flex flex-col items-center justify-center min-w-[140px]">
-                            <div className="w-12 h-12 bg-[#e8f0fe] text-[#3b7cf4] flex items-center justify-center mb-4">
+                        <div className="bg-white rounded-[4px] p-7 border border-[#ddd6fe] flex flex-col items-center justify-center min-w-[140px]">
+                            <div className="w-12 h-12 rounded-[4px] bg-[#ede9fe] text-[#7c3aed] flex items-center justify-center mb-4">
                                 <Users size={24} />
                             </div>
                             <div className="text-3xl font-black text-slate-900 mb-1">{stats.total}</div>
                             <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Étudiants</div>
                         </div>
-                        <div className="bg-white p-7 border border-[#e2e8f0] flex flex-col items-center justify-center min-w-[140px]">
-                            <div className="w-12 h-12 bg-[#d1fae5] text-[#10c98f] flex items-center justify-center mb-4">
+                        <div className="bg-white rounded-[4px] p-7 border border-[#ddd6fe] flex flex-col items-center justify-center min-w-[140px]">
+                            <div className="w-12 h-12 rounded-[4px] bg-[#d1fae5] text-[#10c98f] flex items-center justify-center mb-4">
                                 <FileCheck size={24} />
                             </div>
                             <div className="text-3xl font-black text-slate-900 mb-1">{stats.complete}</div>
