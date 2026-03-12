@@ -1213,7 +1213,6 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4 text-center">
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center justify-center gap-2">
                                                             <div className="flex flex-col items-center gap-1">
@@ -1282,7 +1281,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                             </div>
                                                         </div>
                                                     </td>
-
+                                                    <td className="px-6 py-4 text-center">
                                                         <ActionsMenu student={rawStudent} />
                                                     </td>
                                                 </tr>
