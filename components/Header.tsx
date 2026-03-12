@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Menu, Search, Bell, Globe } from 'lucide-react';
+import { Menu, Bell, Globe, BellOff } from 'lucide-react';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -8,6 +8,18 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const location = useLocation();
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const moduleTitle = useMemo(() => {
     const path = location.pathname;
@@ -44,10 +56,25 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 
 
         <div className="flex items-center gap-2">
-          <button className="relative w-11 h-11 rounded-[4px] flex items-center justify-center text-slate-500 hover:bg-slate-100/80 hover:text-indigo-600 transition-all active:scale-95">
-            <Bell size={20} />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 border-2 border-white rounded-full"></span>
-          </button>
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={() => setNotifOpen(v => !v)}
+              className="relative w-11 h-11 rounded-[4px] flex items-center justify-center text-slate-500 hover:bg-slate-100/80 hover:text-indigo-600 transition-all active:scale-95"
+            >
+              <Bell size={20} />
+            </button>
+            {notifOpen && (
+              <div className="absolute right-0 top-14 w-72 bg-white border border-[#e2e8f0] rounded-[8px] shadow-xl z-50">
+                <div className="px-4 py-3 border-b border-[#e2e8f0]">
+                  <span className="text-xs font-black text-slate-700 uppercase tracking-widest">Notifications</span>
+                </div>
+                <div className="flex flex-col items-center justify-center py-10 gap-3 text-slate-400">
+                  <BellOff size={28} strokeWidth={1.5} />
+                  <span className="text-sm font-bold">Aucune notification</span>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="h-6 w-px bg-slate-200 mx-1"></div>
 

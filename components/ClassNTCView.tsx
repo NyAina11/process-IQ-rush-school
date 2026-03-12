@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     Download,
     CheckCircle2,
@@ -58,6 +58,26 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [filter, setFilter] = useState<'all' | 'withFiche' | 'withCerfa' | 'complete'>('all');
     const [formationFilter, setFormationFilter] = useState<string>('all');
+    const tableScrollRef = useRef<HTMLDivElement>(null);
+    const scrollAnimRef = useRef<number | null>(null);
+
+    const startScroll = useCallback((direction: 'left' | 'right') => {
+        const el = tableScrollRef.current;
+        if (!el) return;
+        const speed = 6;
+        const step = () => {
+            el.scrollLeft += direction === 'right' ? speed : -speed;
+            scrollAnimRef.current = requestAnimationFrame(step);
+        };
+        scrollAnimRef.current = requestAnimationFrame(step);
+    }, []);
+
+    const stopScroll = useCallback(() => {
+        if (scrollAnimRef.current !== null) {
+            cancelAnimationFrame(scrollAnimRef.current);
+            scrollAnimRef.current = null;
+        }
+    }, []);
 
     // Available formations
     const availableFormations = [
@@ -853,7 +873,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
             />
 
             {/* Header */}
-            <div className="ntc-header">
+            <div className="ntc-header rounded-[8px]">
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
                     <div className="flex-1 text-center md:text-left">
                         <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
@@ -862,7 +882,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                 GESTION EN DIRECT
                             </div>
                             <div className="hidden md:block w-px h-6 bg-blue-500/20"></div>
-                            <span className="text-[#3b7cf4] font-black text-xs uppercase tracking-widest">Promotion 2024-2025</span>
+                            <span className="text-[#3b7cf4] font-black text-xs uppercase tracking-widest">Promotion {new Date().getFullYear()}</span>
                         </div>
 
                         <h2 className="text-5xl font-black text-slate-900 tracking-tight mb-4 leading-tight">
@@ -979,8 +999,26 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
 
                     {/* Content View */}
                     {viewMode === 'table' ? (
-                        <div className="bg-white border border-[#e2e8f0] overflow-hidden">
-                            <div className="overflow-x-auto">
+                        <div className="bg-white border border-[#e2e8f0] overflow-hidden relative">
+                            {/* Left scroll zone */}
+                            <div
+                                className="absolute left-0 top-0 bottom-0 w-12 z-10 flex items-center justify-start pl-1 opacity-0 hover:opacity-100 transition-opacity cursor-w-resize"
+                                style={{ background: 'linear-gradient(to right, rgba(59,124,244,0.15), transparent)' }}
+                                onMouseEnter={() => startScroll('left')}
+                                onMouseLeave={stopScroll}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b7cf4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                            </div>
+                            {/* Right scroll zone */}
+                            <div
+                                className="absolute right-0 top-0 bottom-0 w-12 z-10 flex items-center justify-end pr-1 opacity-0 hover:opacity-100 transition-opacity cursor-e-resize"
+                                style={{ background: 'linear-gradient(to left, rgba(59,124,244,0.15), transparent)' }}
+                                onMouseEnter={() => startScroll('right')}
+                                onMouseLeave={stopScroll}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b7cf4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+                            <div className="overflow-x-auto" ref={tableScrollRef}>
                                 <table className="w-full border-collapse">
                                     <thead>
                                         <tr className="bg-[#f4f6fb] border-b border-[#e2e8f0]">
