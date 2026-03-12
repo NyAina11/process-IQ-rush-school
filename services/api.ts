@@ -21,11 +21,6 @@ const getField = (data: any, fieldName: string, defaultValue: any = "") => {
 const mapBackendToStudent = (backendData: any): any => {
   const fields = backendData.fields || {};
 
-  // DEBUG: Inspect Dupont to find the missing company link
-  if (fields["NOM de naissance"]?.toLowerCase().includes("dupont")) {
-    console.log("🔍 DEBUG DUPONT FIELDS:", JSON.stringify(fields, null, 2));
-  }
-
   return {
     // Meta
     id: backendData.id,

@@ -1,22 +1,29 @@
-import React, { useState, useMemo } from 'react';
+import React, { lazy, Suspense, useState, useMemo } from 'react';
 import { Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom';
 import { AppModule, ViewId } from './types';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import DashboardView from './components/DashboardView';
-import AdmissionView from './components/AdmissionView';
-import RHView from './components/RHView';
-import StudentView from './components/StudentView';
-import LoginPage from './components/LoginPage';
 import Toast from './components/ui/Toast';
-import ClassNTCView from './components/ClassNTCView';
 import { AdmissionTab } from './types';
-import AdminLoginPage from './components/AdminLoginPage';
-import AdminDashboard from './components/AdminDashboard';
-import TestPage from './components/TestPage';
-import LandingPage from './components/LandingPage';
-import RegisterPage from './components/RegisterPage';
-import ContactPage from './components/ContactPage';
+
+const Sidebar = lazy(() => import('./components/Sidebar'));
+const Header = lazy(() => import('./components/Header'));
+const DashboardView = lazy(() => import('./components/DashboardView'));
+const AdmissionView = lazy(() => import('./components/AdmissionView'));
+const RHView = lazy(() => import('./components/RHView'));
+const StudentView = lazy(() => import('./components/StudentView'));
+const LoginPage = lazy(() => import('./components/LoginPage'));
+const ClassNTCView = lazy(() => import('./components/ClassNTCView'));
+const AdminLoginPage = lazy(() => import('./components/AdminLoginPage'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const TestPage = lazy(() => import('./components/TestPage'));
+const LandingPage = lazy(() => import('./components/LandingPage'));
+const RegisterPage = lazy(() => import('./components/RegisterPage'));
+const ContactPage = lazy(() => import('./components/ContactPage'));
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center h-screen w-full bg-slate-50">
+    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const RequireAuth = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
   const isAuthenticated = localStorage.getItem('token'); // Changed from authToken to token
@@ -78,7 +85,7 @@ const App = () => {
       <Toast />
 
       {!isStandalonePage && (
-        <>
+        <Suspense fallback={null}>
           {/* Sidebar Overlay for Mobile */}
           {sidebarOpen && (
             <div
@@ -92,18 +99,21 @@ const App = () => {
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
           />
-        </>
+        </Suspense>
       )}
 
       {/* Main Content Wrapper */}
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${!isStandalonePage ? 'md:ml-[260px]' : ''}`}>
         {!isStandalonePage && (
-          <Header
-            toggleSidebar={toggleSidebar}
-          />
+          <Suspense fallback={null}>
+            <Header
+              toggleSidebar={toggleSidebar}
+            />
+          </Suspense>
         )}
 
         <main className={`${!isStandalonePage ? 'flex-1 p-8 md:p-10 overflow-y-auto' : 'h-screen'}`}>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/landing" element={<Navigate to="/" replace />} />
@@ -181,6 +191,7 @@ const App = () => {
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
         </main>
       </div>
     </div>

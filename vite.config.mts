@@ -16,6 +16,20 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [react()],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+            'vendor-ui': ['framer-motion', 'lucide-react'],
+            'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+            'vendor-pdf': ['jspdf'],
+            'vendor-state': ['zustand'],
+          }
+        }
+      },
+      chunkSizeWarningLimit: 800,
+    },
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
