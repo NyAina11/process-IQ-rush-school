@@ -199,10 +199,13 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
             const recordId = response?.record_id || response?.id;
             if (recordId) {
                 localStorage.setItem('candidateRecordId', recordId);
-                // Trigger CERFA generation in background with a 5s delay for Airtable/Backend sync
+                // Trigger pre-generations in background with a 5s delay for Airtable/Backend sync
                 setTimeout(() => {
-                    console.log('🕒 Triggering delayed CERFA generation for:', recordId);
-                    generateCerfaApi(recordId).catch(err => console.error("CERFA pre-generation failed:", err));
+                    console.log('🕒 Triggering delayed document generation for:', recordId);
+                    // Cerfa
+                    api.generateCerfa(recordId).catch(err => console.error("CERFA pre-generation failed:", err));
+                    // Certificat Scolarité
+                    api.generateCertificatScolarite(recordId).catch(err => console.error("Certificat Scolarité pre-generation failed:", err));
                 }, 5000);
             }
             clearDraftStudent();

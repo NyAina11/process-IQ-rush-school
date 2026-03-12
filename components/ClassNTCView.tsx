@@ -418,6 +418,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                 case 'cr': result = await api.generateCompteRendu(studentId); break;
                 case 'convention': result = await api.generateConventionApprentissage(studentId); break;
                 case 'livret': result = await api.generateLivretApprentissage(studentId); break;
+                case 'certificat': result = await api.generateCertificatScolarite(studentId); break;
             }
             showToast("Document régénéré avec succès", "success");
             refreshCandidates();
@@ -501,7 +502,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
         }
 
         if (studentInfo.alternance === 'Non') {
-            showToast('Attention: Cet étudiant est marqué comme "Non" alternance.', 'warning');
+            showToast('Attention: Cet étudiant est marqué comme "Non" alternance.', 'info');
         }
 
         onSelectStudent(student, AdmissionTab.ENTREPRISE);
@@ -625,6 +626,15 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                 <span>Régénérer Livret Appr.</span>
                             </button>
 
+                            <button
+                                onClick={() => handleRegenerateDoc(student.id, 'certificat')}
+                                disabled={isRegenerating === `${student.id}-certificat`}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                                <RefreshCw size={15} className={`text-cyan-400 ${isRegenerating === `${student.id}-certificat` ? 'animate-spin' : ''}`} />
+                                <span>Régénérer Certificat Scolarité</span>
+                            </button>
+
                             <div className="h-px bg-slate-50 my-1 mx-2" />
 
                             <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter pl-3 py-1 block">Signatures</span>
@@ -741,7 +751,8 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
             c.has_convention,
             c.has_atre,
             c.has_compte_rendu,
-            c.has_livret_apprentissage
+            c.has_livret_apprentissage,
+            c.has_certificat_scolarite
         ];
         const completed = docs.filter(Boolean).length;
         return Math.round((completed / docs.length) * 100);
@@ -1124,6 +1135,22 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 ) : (
                                                                     <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
                                                                         <BookOpen size={16} />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-col items-center gap-1.5">
+                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Cert.</span>
+                                                                {student.has_certificat_scolarite ? (
+                                                                    <button
+                                                                        onClick={() => handleDownload(student.certificat_scolarite_url, student.certificat_scolarite_name)}
+                                                                        className="w-9 h-9 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center hover:bg-cyan-600 hover:text-white transition-all shadow-sm border border-cyan-100/50"
+                                                                        title="Télécharger Certificat de Scolarité"
+                                                                    >
+                                                                        <FileCheck size={16} />
+                                                                    </button>
+                                                                ) : (
+                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
+                                                                        <FileCheck size={16} />
                                                                     </div>
                                                                 )}
                                                             </div>

@@ -40,6 +40,7 @@ export const getC = (c: any) => {
         has_compte_rendu: c.has_compte_rendu || d.has_compte_rendu,
         has_convention: c.has_convention || d.has_convention || !!((d['Convention Apprentissage'] || d['Convention']) && (d['Convention Apprentissage'] || d['Convention']).length > 0),
         has_livret_apprentissage: c.has_livret_apprentissage || d.has_livret_apprentissage || !!((d['livret dapprentissage'] || d['Livret Apprentissage']) && (d['livret dapprentissage'] || d['Livret Apprentissage']).length > 0),
+        has_certificat_scolarite: c.has_certificat_scolarite || d.has_certificat_scolarite || !!(d['certificat de scolarité'] && d['certificat de scolarité'].length > 0),
         atre_url: c.atre_url || d.atre_url,
         atre_name: c.atre_name || d.atre_name,
         compte_rendu_url: c.compte_rendu_url || d.compte_rendu_url,
@@ -48,6 +49,8 @@ export const getC = (c: any) => {
         convention_name: c.convention_name || d.convention_name || (d['Convention Apprentissage'] || d['Convention'])?.[0]?.filename || "",
         livret_apprentissage_url: c.livret_apprentissage_url || d.livret_apprentissage_url || (d['livret dapprentissage'] || d['Livret Apprentissage'])?.[0]?.url || "",
         livret_apprentissage_name: c.livret_apprentissage_name || d.livret_apprentissage_name || (d['livret dapprentissage'] || d['Livret Apprentissage'])?.[0]?.filename || "",
+        certificat_scolarite_url: c.certificat_scolarite_url || d.certificat_scolarite_url || d['certificat de scolarité']?.[0]?.url || "",
+        certificat_scolarite_name: c.certificat_scolarite_name || d.certificat_scolarite_name || d['certificat de scolarité']?.[0]?.filename || "",
         convention: c.convention || d.convention || (d['Convention Apprentissage'] || d['Convention'])?.[0] || null,
         cerfa: c.cerfa || d.cerfa || d['cerfa']?.[0] || null
     };
@@ -106,6 +109,7 @@ export const useCandidates = () => {
                 has_compte_rendu: fiche?.has_compte_rendu || c.has_compte_rendu || !!(d['compte rendu de visite'] && d['compte rendu de visite'].length > 0) || false,
                 has_convention: fiche?.has_convention || c.has_convention || !!((d['Convention Apprentissage'] || d['Convention']) && (d['Convention Apprentissage'] || d['Convention']).length > 0) || false,
                 has_livret_apprentissage: fiche?.has_livret_apprentissage || c.has_livret_apprentissage || !!((d['livret dapprentissage'] || d['Livret Apprentissage']) && (d['livret dapprentissage'] || d['Livret Apprentissage']).length > 0) || false,
+                has_certificat_scolarite: fiche?.has_certificat_scolarite || c.has_certificat_scolarite || !!(d['certificat de scolarité'] && d['certificat de scolarité'].length > 0) || false,
                 atre_url: fiche?.atre_url || c.atre_url || d['Atre']?.[0]?.url || "",
                 atre_name: fiche?.atre_name || c.atre_name || d['Atre']?.[0]?.filename || "",
                 compte_rendu_url: fiche?.compte_rendu_url || c.compte_rendu_url || d['compte rendu de visite']?.[0]?.url || "",
@@ -114,6 +118,8 @@ export const useCandidates = () => {
                 convention_name: fiche?.convention_name || c.convention_name || (d['Convention Apprentissage'] || d['Convention'])?.[0]?.filename || "",
                 livret_apprentissage_url: fiche?.livret_apprentissage_url || c.livret_apprentissage_url || (d['livret dapprentissage'] || d['Livret Apprentissage'])?.[0]?.url || "",
                 livret_apprentissage_name: fiche?.livret_apprentissage_name || c.livret_apprentissage_name || (d['livret dapprentissage'] || d['Livret Apprentissage'])?.[0]?.filename || "",
+                certificat_scolarite_url: fiche?.certificat_scolarite_url || c.certificat_scolarite_url || d['certificat de scolarité']?.[0]?.url || "",
+                certificat_scolarite_name: fiche?.certificat_scolarite_name || c.certificat_scolarite_name || d['certificat de scolarité']?.[0]?.filename || "",
                 convention: fiche?.convention || c.convention || (d['Convention Apprentissage'] || d['Convention'])?.[0] || null,
                 cerfa: fiche?.cerfa || c.cerfa || d['cerfa']?.[0] || null,
                 dossier_complet: fiche?.dossier_complet || false

@@ -121,6 +121,10 @@ const mapBackendToStudent = (backendData: any): any => {
     livret_apprentissage_url: (fields["livret dapprentissage"] || fields["Livret Apprentissage"])?.[0]?.url || "",
     livret_apprentissage_name: (fields["livret dapprentissage"] || fields["Livret Apprentissage"])?.[0]?.filename || "",
     has_livret_apprentissage: !!((fields["livret dapprentissage"] && fields["livret dapprentissage"].length > 0) || (fields["Livret Apprentissage"] && fields["Livret Apprentissage"].length > 0)),
+
+    certificat_scolarite_url: fields["certificat de scolarité"]?.[0]?.url || "",
+    certificat_scolarite_name: fields["certificat de scolarité"]?.[0]?.filename || "",
+    has_certificat_scolarite: !!(fields["certificat de scolarité"] && fields["certificat de scolarité"].length > 0),
   };
 };
 
@@ -936,6 +940,38 @@ export const api = {
         return json;
       } catch (e) {
         console.log('📥 Livret Apprentissage Generation Success (Non-JSON):', text);
+        return { success: true, message: text };
+      }
+    } catch (error) { throw error; }
+  },
+
+  async generateCertificatScolarite(recordId: string): Promise<any> {
+    try {
+      console.log('📤 Generating Certificat de Scolarité:', recordId);
+      const response = await fetch(`${BASE_URL}/candidats/${recordId}/certificat-scolarite`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!response.ok) {
+        let errorDetail = 'Generation failed';
+        try {
+          const errorData = await response.json();
+          errorDetail = errorData.detail || errorData.message || errorDetail;
+          console.error('❌ Certificat Scolarité Generation Failed:', errorData);
+        } catch (e) {
+          const errorText = await response.text().catch(() => '');
+          errorDetail = errorText || errorDetail;
+          console.error('❌ Certificat Scolarité Generation Failed (Text):', errorText);
+        }
+        throw new Error(errorDetail);
+      }
+      const text = await response.text();
+      try {
+        const json = JSON.parse(text);
+        console.log('📥 Certificat Scolarité Generation Success:', json);
+        return json;
+      } catch (e) {
+        console.log('📥 Certificat Scolarité Generation Success (Non-JSON):', text);
         return { success: true, message: text };
       }
     } catch (error) { throw error; }
