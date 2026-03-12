@@ -125,6 +125,22 @@ const mapBackendToStudent = (backendData: any): any => {
     certificat_scolarite_url: fields["certificat de scolarité"]?.[0]?.url || "",
     certificat_scolarite_name: fields["certificat de scolarité"]?.[0]?.filename || "",
     has_certificat_scolarite: !!(fields["certificat de scolarité"] && fields["certificat de scolarité"].length > 0),
+
+    cv_url: fields["CV"]?.[0]?.url || "",
+    cv_name: fields["CV"]?.[0]?.filename || "",
+    has_cv: !!(fields["CV"] && fields["CV"].length > 0),
+
+    cni_url: fields["CIN"]?.[0]?.url || fields["cin"]?.[0]?.url || "",
+    cni_name: fields["CIN"]?.[0]?.filename || fields["cin"]?.[0]?.filename || "",
+    has_cni: !!((fields["CIN"] && fields["CIN"].length > 0) || (fields["cin"] && fields["cin"].length > 0)),
+
+    diplome_url: fields["dernier diplome"]?.[0]?.url || fields["diplome"]?.[0]?.url || "",
+    diplome_name: fields["dernier diplome"]?.[0]?.filename || fields["diplome"]?.[0]?.filename || "",
+    has_diplome: !!((fields["dernier diplome"] && fields["dernier diplome"].length > 0) || (fields["diplome"] && fields["diplome"].length > 0)),
+
+    lettre_motivation_url: fields["lettre de motivation"]?.[0]?.url || fields["lettre"]?.[0]?.url || "",
+    lettre_motivation_name: fields["lettre de motivation"]?.[0]?.filename || fields["lettre"]?.[0]?.filename || "",
+    has_lettre_motivation: !!((fields["lettre de motivation"] && fields["lettre de motivation"].length > 0) || (fields["lettre"] && fields["lettre"].length > 0)),
   };
 };
 
@@ -1004,9 +1020,9 @@ export const api = {
       const json = await response.json();
       console.log('✅ [API] Signing Link Received:', json);
       return json;
-    } catch (error) { 
+    } catch (error) {
       console.error('💥 [API] Signing Link Error:', error);
-      throw error; 
+      throw error;
     }
   },
 

@@ -951,6 +951,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                             <th className="px-8 py-6 text-left text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Formation</th>
                                             <th className="px-8 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Complétion</th>
                                             <th className="px-8 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Documents</th>
+                                            <th className="px-8 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Documents Perso</th>
                                             <th className="px-8 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Actions</th>
                                         </tr>
                                     </thead>
@@ -1151,6 +1152,74 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 ) : (
                                                                     <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
                                                                         <FileCheck size={16} />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-8 py-6">
+                                                        <div className="flex items-center justify-center gap-3">
+                                                            <div className="flex flex-col items-center gap-1.5">
+                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">CIN</span>
+                                                                {student.has_cni ? (
+                                                                    <button
+                                                                        onClick={() => handleDownload(student.cni_url, student.cni_name)}
+                                                                        className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-blue-100/50"
+                                                                        title="Télécharger CIN"
+                                                                    >
+                                                                        <FileText size={16} />
+                                                                    </button>
+                                                                ) : (
+                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
+                                                                        <FileText size={16} />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-col items-center gap-1.5">
+                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">CV</span>
+                                                                {student.has_cv ? (
+                                                                    <button
+                                                                        onClick={() => handleDownload(student.cv_url, student.cv_name)}
+                                                                        className="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-200"
+                                                                        title="Télécharger CV"
+                                                                    >
+                                                                        <FileText size={16} />
+                                                                    </button>
+                                                                ) : (
+                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
+                                                                        <FileText size={16} />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-col items-center gap-1.5">
+                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Diplôme</span>
+                                                                {student.has_diplome ? (
+                                                                    <button
+                                                                        onClick={() => handleDownload(student.diplome_url, student.diplome_name)}
+                                                                        className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-all shadow-sm border border-amber-100/50"
+                                                                        title="Télécharger Diplôme"
+                                                                    >
+                                                                        <FileText size={16} />
+                                                                    </button>
+                                                                ) : (
+                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
+                                                                        <FileText size={16} />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-col items-center gap-1.5">
+                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Lettre</span>
+                                                                {student.has_lettre_motivation ? (
+                                                                    <button
+                                                                        onClick={() => handleDownload(student.lettre_motivation_url, student.lettre_motivation_name)}
+                                                                        className="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center hover:bg-teal-600 hover:text-white transition-all shadow-sm border border-teal-100/50"
+                                                                        title="Télécharger Lettre de motivation"
+                                                                    >
+                                                                        <FileText size={16} />
+                                                                    </button>
+                                                                ) : (
+                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
+                                                                        <FileText size={16} />
                                                                     </div>
                                                                 )}
                                                             </div>
