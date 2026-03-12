@@ -1,11 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
 import './LoginPage.css';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const roleParam = searchParams.get('role');
+
+    const roleIcons: Record<string, React.ReactElement> = {
+        etudiant: (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3.333 1.667 8.667 1.667 12 0v-5"/>
+            </svg>
+        ),
+        formateur: (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+        ),
+        entreprise: (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 21h18M9 21V7l6-4v18M9 21H3V10l6-3M15 21h6V10l-6-3"/>
+            </svg>
+        ),
+        pedagogique: (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+            </svg>
+        ),
+        commercial: (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+            </svg>
+        ),
+    };
+
+    const roleConfig: Record<string, { label: string; color: string }> = {
+        etudiant:    { label: 'Étudiant',            color: '#6B3CD2' },
+        formateur:   { label: 'Formateur',           color: '#059669' },
+        entreprise:  { label: 'Entreprise',          color: '#0284C7' },
+        pedagogique: { label: 'Service pédagogique', color: '#D97706' },
+        commercial:  { label: 'Commercial',          color: '#DC2626' },
+    };
+    const activeRole = roleParam && roleConfig[roleParam] ? roleConfig[roleParam] : null;
+
     const [formData, setFormData] = useState({ email: '', password: '' });
+    const passwordRef = useRef<HTMLInputElement>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
@@ -18,11 +59,18 @@ const LoginPage: React.FC = () => {
         const savedEmail = localStorage.getItem('userEmail');
         if (savedName && savedEmail) {
             setPreviousUser({ name: savedName, email: savedEmail });
-            setFormData(prev => ({ ...prev, email: savedEmail }));
+            // If coming from a role pill, skip "Bon retour" mode
+            // but pre-fill the email silently
+            if (roleParam) {
+                setShowPreviousAccount(false);
+                setFormData(prev => ({ ...prev, email: savedEmail }));
+            } else {
+                setFormData(prev => ({ ...prev, email: savedEmail }));
+            }
         }
         // Clear background scroll lock just in case
         document.body.style.overflow = '';
-    }, []);
+    }, [roleParam]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -191,7 +239,7 @@ const LoginPage: React.FC = () => {
                 </Link>
 
                 <div className="form-inner">
-                    {previousUser && showPreviousAccount ? (
+                    {previousUser && showPreviousAccount && !roleParam ? (
                         <div className="previous-account-card">
                             <h1 className="form-heading">Bon retour !</h1>
                             <p className="form-sub">Connectez-vous à votre espace ProcessIQ</p>
@@ -217,8 +265,9 @@ const LoginPage: React.FC = () => {
                                         <input
                                             className={`field-input ${fieldErrors.password ? 'error' : ''}`}
                                             type={showPassword ? 'text' : 'password'}
-                                            id="password"
+                                            id="password-card"
                                             name="password"
+                                            ref={passwordRef}
                                             placeholder="••••••••"
                                             autoComplete="current-password"
                                             required
@@ -244,7 +293,7 @@ const LoginPage: React.FC = () => {
                                 </div>
 
                                 <button type="submit" className="btn-submit" disabled={loading}>
-                                    <span>{loading ? 'Connexion…' : `Se connecter en tant que ${previousUser.name}`}</span>
+                                    <span>{loading ? 'Connexion…' : `Se connecter en tant qu'utilisateur admin`}</span>
                                 </button>
                             </form>
 
@@ -260,8 +309,28 @@ const LoginPage: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            <h1 className="form-heading">Bienvenue</h1>
-                            <p className="form-sub">Connectez-vous à votre espace ProcessIQ</p>
+                            {activeRole && (
+                                <div className="role-badge" style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.4rem 1rem',
+                                    borderRadius: '100px',
+                                    background: `${activeRole.color}18`,
+                                    border: `1.5px solid ${activeRole.color}40`,
+                                    color: activeRole.color,
+                                    fontFamily: 'var(--font-ui)',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 600,
+                                    marginBottom: '1rem',
+                                    letterSpacing: '0.02em',
+                                }}>
+                                    <span style={{ display: 'flex', alignItems: 'center' }}>{roleParam && roleIcons[roleParam]}</span>
+                                    <span>Connexion en tant que : {activeRole.label}</span>
+                                </div>
+                            )}
+                            <h1 className="form-heading">{activeRole ? `Bienvenue, ${activeRole.label} !` : 'Bienvenue'}</h1>
+                            <p className="form-sub">{activeRole ? `Connectez-vous à votre espace ${activeRole.label} ProcessIQ` : 'Connectez-vous à votre espace ProcessIQ'}</p>
 
                             {error && <div className="server-error" role="alert">{error}</div>}
 
@@ -301,6 +370,7 @@ const LoginPage: React.FC = () => {
                                             type={showPassword ? 'text' : 'password'}
                                             id="password"
                                             name="password"
+                                            ref={passwordRef}
                                             placeholder="••••••••"
                                             autoComplete="current-password"
                                             required
@@ -343,15 +413,16 @@ const LoginPage: React.FC = () => {
                                 </button>
                             </form>
 
-                            {previousUser && !showPreviousAccount && (
+                            {previousUser && (
                                 <button
                                     className="btn-back-to-previous"
                                     onClick={() => {
-                                        setShowPreviousAccount(true);
-                                        setFormData(prev => ({ ...prev, email: previousUser.email }));
+                                        setFormData(prev => ({ ...prev, email: previousUser.email, password: '' }));
+                                        passwordRef.current?.focus();
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
                                     }}
                                 >
-                                    Retour au compte de {previousUser.name}
+                                    Se connecter en tant qu'utilisateur admin
                                 </button>
                             )}
                         </>

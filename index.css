@@ -147,7 +147,7 @@ body {
 }
 
 .nav-item {
-    @apply flex items-center gap-3.5 px-4.5 py-3.5 rounded-xl cursor-pointer transition-all mb-1 text-slate-200 text-[0.95rem] font-medium;
+    @apply flex items-center gap-3.5 px-4.5 py-3.5 rounded-[4px] cursor-pointer transition-all mb-1 text-slate-200 text-[0.95rem] font-medium;
 }
 
 .nav-item:hover {
@@ -168,22 +168,24 @@ body {
 }
 
 .nav-subitem {
-    @apply flex items-center gap-3 px-4.5 py-3 pl-[52px] cursor-pointer transition-all text-slate-400 text-[0.9rem];
+    @apply flex items-center gap-3 px-4 py-2.5 pl-[46px] cursor-pointer transition-all text-slate-400 text-[0.88rem] font-medium;
+    border-left: 3px solid transparent;
 }
 
 .nav-subitem:hover {
     background: rgba(255, 255, 255, 0.05);
-    color: var(--sidebar-text);
+    color: #e2e8f0;
 }
 
 .nav-subitem.active {
-    color: var(--primary);
-    background: rgba(59, 130, 246, 0.1);
+    color: #a78bfa;
+    background: rgba(139, 92, 246, 0.08);
+    border-left-color: #7c3aed;
 }
 
 /* Header Tabs */
 .header-tab {
-    @apply flex items-center gap-2 px-5 py-2.5 rounded-lg text-[0.9rem] font-medium cursor-pointer transition-all border-none bg-[var(--bg-main)] text-[var(--text-secondary)];
+    @apply flex items-center gap-2 px-5 py-2.5 rounded-[4px] text-[0.9rem] font-medium cursor-pointer transition-all border-none bg-[var(--bg-main)] text-[var(--text-secondary)];
 }
 
 .header-tab.active {
@@ -272,15 +274,33 @@ body {
 
 /* NTC Specifics */
 .ntc-header {
-    @apply bg-gradient-to-br from-blue-500/[0.12] to-purple-500/[0.08] rounded-[28px] p-8 px-10 border border-blue-500/20 relative overflow-hidden;
+    background: linear-gradient(120deg, #eef2ff 0%, #e0e7ff 50%, #f0f9ff 100%);
+    padding: 28px 32px;
+    border: 1px solid #c7d2fe;
+    position: relative;
+    overflow: hidden;
 }
 
 .ntc-badge-live {
-    @apply bg-gradient-to-br from-teal-500 to-emerald-500 text-white px-4.5 py-2 rounded-full font-bold text-[0.85rem] inline-flex items-center gap-2.5;
+    background: #10c98f;
+    color: #fff;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .live-dot {
-    @apply w-2.5 h-2.5 bg-white rounded-full animate-pulse;
+    width: 7px;
+    height: 7px;
+    background: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 1.8s ease-in-out infinite;
 }
 
 /* Scrollbar Utility */

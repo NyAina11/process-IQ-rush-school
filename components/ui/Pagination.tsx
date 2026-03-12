@@ -57,9 +57,9 @@ const Pagination: React.FC<PaginationProps> = ({
     <button
       key={page}
       onClick={() => onPageChange(page)}
-      className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 ${currentPage === page
-          ? 'bg-brand text-white shadow-lg shadow-brand/25 scale-110 z-10'
-          : 'bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-800 border border-slate-100'
+      className={`w-10 h-10 rounded-[4px] flex items-center justify-center font-bold text-sm transition-all duration-200 ${currentPage === page
+          ? 'bg-[#3b7cf4] text-white'
+          : 'bg-white text-[#475569] hover:bg-[#f4f6fb] border border-[#e2e8f0]'
         }`}
     >
       {page}
@@ -71,7 +71,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+        className="w-10 h-10 rounded-[4px] bg-white border border-[#e2e8f0] flex items-center justify-center text-slate-400 hover:bg-[#f4f6fb] hover:text-[#3b7cf4] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
       >
         <ChevronLeft size={20} strokeWidth={2.5} />
       </button>
@@ -83,7 +83,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-brand hover:bg-brand/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+        className="w-10 h-10 rounded-[4px] bg-white border border-[#e2e8f0] flex items-center justify-center text-slate-400 hover:bg-[#f4f6fb] hover:text-[#3b7cf4] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
       >
         <ChevronRight size={20} strokeWidth={2.5} />
       </button>

@@ -154,23 +154,23 @@ const LandingPage: React.FC = () => {
                     <div className="hero-roles">
                         <span className="hero-roles-label">JE SUIS</span>
                         <div className="hero-roles-pills">
-                            <Link to="/login" className="hero-role-pill">
+                            <Link to="/login?role=etudiant" className="hero-role-pill">
                                 <GraduationCap size={15} strokeWidth={1.6} />
                                 Étudiant
                             </Link>
-                            <Link to="/login" className="hero-role-pill">
+                            <Link to="/login?role=formateur" className="hero-role-pill">
                                 <Monitor size={15} strokeWidth={1.6} />
                                 Formateur
                             </Link>
-                            <Link to="/login" className="hero-role-pill">
+                            <Link to="/login?role=entreprise" className="hero-role-pill">
                                 <Building2 size={15} strokeWidth={1.6} />
                                 Entreprise
                             </Link>
-                            <Link to="/login" className="hero-role-pill">
+                            <Link to="/login?role=pedagogique" className="hero-role-pill">
                                 <BookOpen size={15} strokeWidth={1.6} />
                                 Service pédagogique
                             </Link>
-                            <Link to="/login" className="hero-role-pill">
+                            <Link to="/login?role=commercial" className="hero-role-pill">
                                 <Briefcase size={15} strokeWidth={1.6} />
                                 Commercial
                             </Link>

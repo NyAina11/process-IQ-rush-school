@@ -20,7 +20,7 @@ const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center rounded-xl font-bold transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100';
+  const baseStyles = 'inline-flex items-center justify-center rounded-[4px] font-bold transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100';
 
   const variants = {
     primary: 'bg-gradient-to-r from-brand to-primary text-white shadow-lg shadow-brand/25 hover:shadow-brand/40 hover:-translate-y-0.5',

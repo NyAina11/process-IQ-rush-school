@@ -2,33 +2,48 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Users,
-  Briefcase,
   LayoutDashboard,
   Settings,
   LogOut,
   ChevronDown,
   BookOpen,
-  ShieldCheck
+  MessageSquare,
+  UserPlus,
+  CheckCircle,
+  FileText,
+  XCircle,
+  Box,
+  CheckCircle2,
+  Monitor,
 } from 'lucide-react';
+import { useCandidates } from '../hooks/useCandidates';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose?: () => void;
 }
 
+const SectionLabel = ({ label }: { label: string }) => (
+  <div className="px-5 pt-5 pb-1">
+    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-amber-400/80">
+      {label}
+    </span>
+  </div>
+);
+
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const userRole = localStorage.getItem('userRole');
+  const { candidates } = useCandidates();
 
   const [admissionOpen, setAdmissionOpen] = useState(false);
   const [commercialOpen, setCommercialOpen] = useState(false);
   const [rhOpen, setRhOpen] = useState(false);
 
-  // Auto-expand groups based on current path
   useEffect(() => {
     const path = location.pathname;
-    if (path.startsWith('/admission')) setAdmissionOpen(true);
+    if (path.startsWith('/admission') || path.startsWith('/classe-ntc')) setAdmissionOpen(true);
     if (path.startsWith('/commercial')) setCommercialOpen(true);
     if (path.startsWith('/rh')) setRhOpen(true);
   }, [location.pathname]);
@@ -36,64 +51,80 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const isModuleActive = (modulePrefix: string) => location.pathname.startsWith(modulePrefix);
 
   const handleLinkClick = () => {
-    if (window.innerWidth < 768 && onClose) {
-      onClose();
-    }
+    if (window.innerWidth < 768 && onClose) onClose();
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('userRole'); // Also clear userRole for consistency
+    localStorage.removeItem('userRole');
     navigate('/');
     if (onClose) onClose();
   };
+
+  const parentCls = (active: boolean) =>
+    `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] ${
+      active ? 'bg-violet-600/20 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-slate-200'
+    }`;
 
   return (
     <aside className={`fixed top-0 left-0 h-full w-[260px] bg-sidebar text-slate-200 flex flex-col z-50 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
 
       {/* Logo */}
-      <div className="p-6 flex items-center gap-3">
+      <div className="p-5 flex items-center gap-3">
         <img src="/images/logo-process-iq.png" alt="Process IQ" className="h-9 w-auto" />
-        <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-          ProcessIQ
+        <span className="text-[1.15rem] font-bold tracking-tight text-white">
+          PROCESSIQ
         </span>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
+      <nav className="flex-1 overflow-y-auto py-2 space-y-0.5">
+
+        {/* ── GESTION ── */}
+        {(userRole === 'admission' || userRole === 'commercial' || userRole === 'super_admin' || !userRole) && (
+          <SectionLabel label="Gestion" />
+        )}
 
         {/* Admissions Group */}
         {(userRole === 'admission' || userRole === 'super_admin' || !userRole) && (
-          <div className="mb-1">
+          <div className="px-3">
             <div
               onClick={() => setAdmissionOpen(!admissionOpen)}
-              className={`flex items-center gap-[14px] px-[18px] py-[14px] rounded-xl cursor-pointer transition-all duration-200 font-medium text-[0.95rem] relative ${isModuleActive('/admission') || isModuleActive('/classe-ntc') ? 'bg-brand text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'
-                }`}
+              className={parentCls(isModuleActive('/admission') || isModuleActive('/classe-ntc'))}
             >
-              <Briefcase size={22} className={isModuleActive('/admission') || isModuleActive('/classe-ntc') ? 'text-white' : 'text-slate-400'} />
+              <Users size={20} />
               <span>Admissions</span>
-              <ChevronDown size={18} className={`ml-auto transition-transform duration-300 ${admissionOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={16} className={`ml-auto transition-transform duration-300 ${admissionOpen ? 'rotate-180' : ''}`} />
             </div>
 
-            <div className={`overflow-hidden transition-all duration-300 bg-black/15 rounded-b-xl mt-[-4px] ${admissionOpen ? 'max-h-[400px]' : 'max-h-0'}`}>
+            <div className={`overflow-hidden transition-all duration-300 ${admissionOpen ? 'max-h-[400px]' : 'max-h-0'}`}>
               <NavLink
                 to="/admission"
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
-                <div className="w-[18px] h-[18px] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div>
-                </div>
-                <span>Inscription des élèves</span>
+                <LayoutDashboard size={15} />
+                <span>Tableau de bord</span>
               </NavLink>
               <NavLink
                 to="/classe-ntc"
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
-                <div className="w-[18px] h-[18px] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div>
-                </div>
-                <span>Tableau de bord</span>
+                <Users size={15} />
+                <span className="flex-1">Classe NTC</span>
+                {candidates.length > 0 && (
+                  <span className="ml-auto bg-violet-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px]">
+                    {candidates.length}
+                  </span>
+                )}
+              </NavLink>
+              <NavLink
+                to="/admission?tab=interviews"
+                onClick={handleLinkClick}
+                className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
+              >
+                <MessageSquare size={15} />
+                <span>Suivi des entretiens</span>
               </NavLink>
             </div>
           </div>
@@ -101,24 +132,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         {/* Commercial Group */}
         {(userRole === 'commercial' || userRole === 'super_admin' || !userRole) && (
-          <div className="mb-1">
+          <div className="px-3">
             <div
               onClick={() => setCommercialOpen(!commercialOpen)}
-              className={`flex items-center gap-[14px] px-[18px] py-[14px] rounded-xl cursor-pointer transition-all duration-200 font-medium text-[0.95rem] relative ${isModuleActive('/commercial') ? 'bg-brand text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'
-                }`}
+              className={parentCls(isModuleActive('/commercial'))}
             >
-              <LayoutDashboard size={22} className={isModuleActive('/commercial') ? 'text-white' : 'text-slate-400'} />
+              <Monitor size={20} />
               <span>Commercial</span>
-              <ChevronDown size={18} className={`ml-auto transition-transform duration-300 ${commercialOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={16} className={`ml-auto transition-transform duration-300 ${commercialOpen ? 'rotate-180' : ''}`} />
             </div>
 
-            <div className={`overflow-hidden transition-all duration-300 bg-black/15 rounded-b-xl mt-[-4px] ${commercialOpen ? 'max-h-[300px]' : 'max-h-0'}`}>
+            <div className={`overflow-hidden transition-all duration-300 ${commercialOpen ? 'max-h-[300px]' : 'max-h-0'}`}>
               <NavLink
                 to="/commercial/dashboard"
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
-                <div className="w-[18px] h-[18px] flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div></div>
+                <LayoutDashboard size={15} />
                 <span>Tableau de bord</span>
               </NavLink>
               <NavLink
@@ -126,41 +156,48 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
-                <div className="w-[18px] h-[18px] flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div></div>
-                <span>Élèves à placer</span>
+                <UserPlus size={15} />
+                <span className="flex-1">Élèves à placer</span>
+                <span className="ml-auto bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-[4px] border border-emerald-500/30">
+                  Actif
+                </span>
               </NavLink>
               <NavLink
                 to="/commercial/alternance"
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
-                <div className="w-[18px] h-[18px] flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div></div>
+                <CheckCircle size={15} />
                 <span>Élèves en alternance</span>
               </NavLink>
             </div>
           </div>
         )}
 
+        {/* ── ESPACE ── */}
+        {(userRole === 'rh' || userRole === 'super_admin' || !userRole) && (
+          <SectionLabel label="Espace" />
+        )}
+
         {/* RH Group */}
         {(userRole === 'rh' || userRole === 'super_admin' || !userRole) && (
-          <div className="mb-1">
+          <div className="px-3">
             <div
               onClick={() => setRhOpen(!rhOpen)}
-              className={`flex items-center gap-[14px] px-[18px] py-[14px] rounded-xl cursor-pointer transition-all duration-200 font-medium text-[0.95rem] relative ${isModuleActive('/rh') ? 'bg-brand text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'
-                }`}
+              className={parentCls(isModuleActive('/rh'))}
             >
-              <Users size={22} className={isModuleActive('/rh') ? 'text-white' : 'text-slate-400'} />
+              <Users size={20} />
               <span>RH</span>
-              <ChevronDown size={18} className={`ml-auto transition-transform duration-300 ${rhOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={16} className={`ml-auto transition-transform duration-300 ${rhOpen ? 'rotate-180' : ''}`} />
             </div>
 
-            <div className={`overflow-hidden transition-all duration-300 bg-black/15 rounded-b-xl mt-[-4px] ${rhOpen ? 'max-h-[300px]' : 'max-h-0'}`}>
+            <div className={`overflow-hidden transition-all duration-300 ${rhOpen ? 'max-h-[400px]' : 'max-h-0'}`}>
               <NavLink
                 to="/rh/dashboard"
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
-                <div className="w-[18px] h-[18px] flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div></div>
+                <LayoutDashboard size={15} />
                 <span>Vue d'ensemble</span>
               </NavLink>
               <NavLink
@@ -168,7 +205,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
-                <div className="w-[18px] h-[18px] flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div></div>
+                <Box size={15} />
                 <span>Fiche Entreprise</span>
               </NavLink>
               <NavLink
@@ -176,7 +213,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
-                <div className="w-[18px] h-[18px] flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div></div>
+                <FileText size={15} />
                 <span>CERFA</span>
               </NavLink>
               <NavLink
@@ -184,7 +221,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
-                <div className="w-[18px] h-[18px] flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div></div>
+                <CheckCircle2 size={15} />
                 <span>Prises en charge</span>
               </NavLink>
               <NavLink
@@ -192,7 +229,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
-                <div className="w-[18px] h-[18px] flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></div></div>
+                <XCircle size={15} />
                 <span>Ruptures</span>
               </NavLink>
             </div>
@@ -201,50 +238,48 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         {/* Étudiant */}
         {(userRole === 'eleve' || userRole === 'super_admin' || !userRole) && (
-          <NavLink
-            to="/etudiant"
-            onClick={handleLinkClick}
-            className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[14px] rounded-xl cursor-pointer transition-all duration-200 font-medium text-[0.95rem] mb-1 ${isActive
-              ? 'bg-brand text-white'
-              : 'text-slate-400 hover:bg-white/10 hover:text-white'
-              }`}
-          >
-            {({ isActive }) => (
-              <>
-                <BookOpen size={22} className={isActive ? 'text-white' : 'text-slate-400'} />
-                <span>Étudiant</span>
-              </>
-            )}
-          </NavLink>
+          <div className="px-3">
+            <NavLink
+              to="/etudiant"
+              onClick={handleLinkClick}
+              className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] ${isActive ? 'bg-violet-600/20 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-slate-200'}`}
+            >
+              {({ isActive }) => (
+                <>
+                  <BookOpen size={20} className={isActive ? 'text-white' : ''} />
+                  <span>Étudiant</span>
+                </>
+              )}
+            </NavLink>
+          </div>
         )}
 
         {/* Paramètres */}
         {(userRole === 'super_admin' || !userRole) && (
-          <NavLink
-            to="/parametres"
-            onClick={handleLinkClick}
-            className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[14px] rounded-xl cursor-pointer transition-all duration-200 font-medium text-[0.95rem] mb-1 ${isActive
-              ? 'bg-brand text-white'
-              : 'text-slate-400 hover:bg-white/10 hover:text-white'
-              }`}
-          >
-            {({ isActive }) => (
-              <>
-                <Settings size={22} className={isActive ? 'text-white' : 'text-slate-400'} />
-                <span>Paramètres</span>
-              </>
-            )}
-          </NavLink>
+          <div className="px-3">
+            <NavLink
+              to="/parametres"
+              onClick={handleLinkClick}
+              className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] ${isActive ? 'bg-violet-600/20 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-slate-200'}`}
+            >
+              {({ isActive }) => (
+                <>
+                  <Settings size={20} className={isActive ? 'text-white' : ''} />
+                  <span>Paramètres</span>
+                </>
+              )}
+            </NavLink>
+          </div>
         )}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-700/50">
+      <div className="px-3 py-3 border-t border-slate-700/50">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-[14px] px-[18px] py-[14px] rounded-xl cursor-pointer transition-all duration-200 font-medium text-[0.95rem] w-full hover:bg-rose-500/10 hover:text-rose-400 text-slate-400"
+          className="flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] w-full text-slate-400 hover:bg-rose-500/10 hover:text-rose-400"
         >
-          <LogOut size={22} className="nav-icon" />
+          <LogOut size={20} />
           <span>Déconnexion</span>
         </button>
       </div>

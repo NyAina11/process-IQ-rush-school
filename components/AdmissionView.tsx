@@ -32,7 +32,7 @@ import { AdmissionTab } from '../types';
 import QuestionnaireForm from './QuestionnaireForm';
 import EntrepriseForm from './EntrepriseForm';
 import { api } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import { useAppStore } from '../store/useAppStore';
 import { useApi } from '../hooks/useApi';
@@ -743,7 +743,10 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
 const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: AdmissionViewProps = {}) => {
     const { showToast } = useAppStore();
     const navigate = useNavigate();
-    const [mainTab, setMainTab] = useState<'dashboard' | 'interviews'>('dashboard');
+    const [searchParams] = useSearchParams();
+    const [mainTab, setMainTab] = useState<'dashboard' | 'interviews'>(
+        searchParams.get('tab') === 'interviews' ? 'interviews' : 'dashboard'
+    );
 
     const [activeTab, setActiveTab] = useState<AdmissionTab>(selectedTab || AdmissionTab.TESTS);
     const [prefilledStudent, setPrefilledStudent] = useState<any>(null);

@@ -24,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
       <div className="flex items-center gap-6">
         <button
           onClick={toggleSidebar}
-          className="p-2.5 text-slate-500 hover:bg-slate-100/80 rounded-xl transition-all active:scale-95 md:hidden"
+          className="p-2.5 text-slate-500 hover:bg-slate-100/80 rounded-[4px] transition-all active:scale-95 md:hidden"
         >
           <Menu size={20} />
         </button>
@@ -44,15 +44,15 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 
 
         <div className="flex items-center gap-2">
-          <button className="relative w-11 h-11 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100/80 hover:text-indigo-600 transition-all active:scale-95">
+          <button className="relative w-11 h-11 rounded-[4px] flex items-center justify-center text-slate-500 hover:bg-slate-100/80 hover:text-indigo-600 transition-all active:scale-95">
             <Bell size={20} />
             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 border-2 border-white rounded-full"></span>
           </button>
 
           <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
-          <button className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100/80 transition-all active:scale-95 group">
-            <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+          <button className="flex items-center gap-2.5 px-3 py-2 rounded-[4px] text-slate-600 hover:bg-slate-100/80 transition-all active:scale-95 group">
+            <div className="w-6 h-6 rounded-[4px] bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
               <Globe size={14} />
             </div>
             <span className="text-xs font-bold tracking-wider">FR</span>
@@ -65,9 +65,11 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
               </span>
               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Utilisateur</span>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 p-0.5 shadow-lg shadow-indigo-200 group-hover:shadow-indigo-300 transition-all active:scale-95">
-              <div className="w-full h-full rounded-[14px] bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-black text-sm uppercase">
-                {(localStorage.getItem('userRole') || 'G').charAt(0)}
+            <div className="w-11 h-11 rounded-[4px] bg-gradient-to-br from-indigo-500 to-violet-600 p-0.5 shadow-lg shadow-indigo-200 group-hover:shadow-indigo-300 transition-all active:scale-95">
+              <div className="w-full h-full rounded-[4px] bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22" aria-hidden="true">
+                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                </svg>
               </div>
             </div>
           </div>
