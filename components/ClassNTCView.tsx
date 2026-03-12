@@ -26,7 +26,10 @@ import {
     List,
     LayoutGrid,
     History as HistoryIcon,
-    BookOpen
+    BookOpen,
+    CreditCard,
+    FileUser,
+    GraduationCap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
@@ -770,6 +773,44 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
         return 'from-rose-400 to-rose-600';
     };
 
+    const CircularProgress = ({ percent }: { percent: number }) => {
+        const radius = 18;
+        const circumference = 2 * Math.PI * radius;
+        const offset = circumference - (percent / 100) * circumference;
+        const color = percent === 100 ? '#10b981' : percent >= 50 ? '#f59e0b' : '#f43f5e';
+
+        return (
+            <div className="relative inline-flex items-center justify-center p-1">
+                <svg className="w-12 h-12 transform -rotate-90">
+                    <circle
+                        cx="24"
+                        cy="24"
+                        r={radius}
+                        stroke="#f1f5f9"
+                        strokeWidth="4"
+                        fill="transparent"
+                        className="transition-all duration-500"
+                    />
+                    <circle
+                        cx="24"
+                        cy="24"
+                        r={radius}
+                        stroke={color}
+                        strokeWidth="4"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={offset}
+                        strokeLinecap="round"
+                        fill="transparent"
+                        className="transition-all duration-1000 ease-out"
+                    />
+                </svg>
+                <span className="absolute text-[10px] font-black" style={{ color }}>
+                    {percent}%
+                </span>
+            </div>
+        );
+    };
+
     return (
         <div className="animate-fade-in space-y-8 pb-20">
             {/* Company Modal */}
@@ -945,14 +986,14 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                 <table className="w-full border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                                            <th className="px-8 py-6 text-left text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Étudiant</th>
-                                            <th className="px-8 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Formulaire Étudiant</th>
-                                            <th className="px-8 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Formulaire Entreprise</th>
-                                            <th className="px-8 py-6 text-left text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Formation</th>
-                                            <th className="px-8 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Complétion</th>
-                                            <th className="px-8 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Documents</th>
-                                            <th className="px-8 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Documents Perso</th>
-                                            <th className="px-8 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Actions</th>
+                                            <th className="px-4 py-6 text-left text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Étudiant</th>
+                                            <th className="px-4 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Formulaire Étudiant</th>
+                                            <th className="px-4 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Formulaire Entreprise</th>
+                                            <th className="px-4 py-6 text-left text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Formation</th>
+                                            <th className="px-4 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Complétion</th>
+                                            <th className="px-4 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Docs Admin</th>
+                                            <th className="px-4 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Docs Perso</th>
+                                            <th className="px-4 py-6 text-center text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
@@ -982,19 +1023,19 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                             const student = getC(rawStudent);
                                             return (
                                                 <tr key={student.id} className="hover:bg-slate-50/50 transition-colors group">
-                                                    <td className="px-8 py-6">
-                                                        <div className="flex items-center gap-5">
-                                                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-400 font-black group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm relative overflow-hidden">
+                                                    <td className="px-4 py-6">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-400 font-black group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm relative overflow-hidden shrink-0">
                                                                 <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                                <span className="relative z-10 text-xl">{student.numero_inscription || `${student.prenom?.[0]}${student.nom?.[0]}`}</span>
+                                                                <span className="relative z-10 text-lg">{student.numero_inscription || `${student.prenom?.[0]}${student.nom?.[0]}`}</span>
                                                             </div>
-                                                            <div>
-                                                                <div className="font-black text-slate-900 text-lg group-hover:text-blue-600 transition-colors tracking-tight">{student.nom} {student.prenom}</div>
-                                                                <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">{student.email}</div>
+                                                            <div className="min-w-0">
+                                                                <div className="font-black text-slate-900 text-base group-hover:text-blue-600 transition-colors tracking-tight truncate">{student.nom} {student.prenom}</div>
+                                                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate mt-0.5">{student.email}</div>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-8 py-6 text-center">
+                                                    <td className="px-4 py-6 text-center">
                                                         <button
                                                             onClick={() => handleViewDetails(student.id)}
                                                             className="px-4 py-2 rounded-xl bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest border border-rose-100 hover:bg-rose-600 hover:text-white transition-all shadow-sm"
@@ -1002,7 +1043,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                             Fiche Étudiant
                                                         </button>
                                                     </td>
-                                                    <td className="px-8 py-6 text-center">
+                                                    <td className="px-4 py-6 text-center">
                                                         <button
                                                             onClick={() => isPlaced(rawStudent) ? handleViewCompanyDetails(rawStudent) : handleFillForm(rawStudent)}
                                                             className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all shadow-sm ${isPlaced(rawStudent)
@@ -1010,222 +1051,76 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 : 'bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-600 hover:text-white'
                                                                 }`}
                                                         >
-                                                            {isPlaced(rawStudent)
-                                                                ? 'Voir Entreprise'
-                                                                : 'Lier Entreprise'}
+                                                            {isPlaced(rawStudent) ? 'Voir Entreprise' : 'Lier Entreprise'}
                                                         </button>
                                                     </td>
-                                                    <td className="px-8 py-6">
+                                                    <td className="px-4 py-6">
                                                         <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-xl bg-slate-50 text-slate-600 border border-slate-100 font-black text-[10px] uppercase tracking-widest shadow-sm">
                                                             <Briefcase size={12} />
                                                             {student.formation}
                                                         </div>
                                                     </td>
-                                                    <td className="px-8 py-6">
-                                                        <div className="flex flex-col gap-1.5 min-w-[120px]">
-                                                            <div className="flex justify-between items-center px-0.5">
-                                                                <span className={`text-[10px] font-black uppercase tracking-widest ${calculateDocCompletion(student) === 100 ? 'text-emerald-500' : calculateDocCompletion(student) >= 50 ? 'text-amber-500' : 'text-rose-500'}`}>
-                                                                    {calculateDocCompletion(student)}%
-                                                                </span>
-                                                                <div className="flex gap-0.5">
-                                                                    {[1, 2, 3, 4, 5].map((s) => (
-                                                                        <div key={s} className={`w-1 h-1 rounded-full ${s <= Math.round(calculateDocCompletion(student) / 20) ? (calculateDocCompletion(student) === 100 ? 'bg-emerald-400' : calculateDocCompletion(student) >= 50 ? 'bg-amber-400' : 'bg-rose-400') : 'bg-slate-200'}`} />
-                                                                    ))}
+                                                    <td className="px-4 py-6 text-center">
+                                                        <CircularProgress percent={calculateDocCompletion(student)} />
+                                                    </td>
+                                                    <td className="px-4 py-6 font-black text-slate-900 text-base group-hover:text-blue-600 transition-colors tracking-tight truncate">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            {[
+                                                                { has: student.has_fiche_renseignement, label: 'Fiche', icon: CheckCircle2, color: 'emerald', url: rawStudent.fiche_entreprise?.url || rawStudent.fields?.["Fiche entreprise"]?.[0]?.url, name: rawStudent.fiche_entreprise?.filename || rawStudent.fields?.["Fiche entreprise"]?.[0]?.filename },
+                                                                { has: student.has_cerfa, label: 'CERFA', icon: ShieldCheck, color: 'indigo', url: rawStudent.cerfa?.url || rawStudent.fields?.["cerfa"]?.[0]?.url, name: rawStudent.cerfa?.filename || rawStudent.fields?.["cerfa"]?.[0]?.filename },
+                                                                { has: student.has_atre, label: 'ATRE', icon: FileText, color: 'orange', url: rawStudent.atre_url || rawStudent.fields?.["Atre"]?.[0]?.url, name: rawStudent.atre_name || rawStudent.fields?.["Atre"]?.[0]?.filename },
+                                                                { has: student.has_compte_rendu, label: 'CR', icon: ClipboardList, color: 'pink', url: rawStudent.compte_rendu_url || rawStudent.fields?.["compte rendu de visite"]?.[0]?.url, name: rawStudent.compte_rendu_name || rawStudent.fields?.["compte rendu de visite"]?.[0]?.filename },
+                                                                { has: student.has_convention, label: 'Conv.', icon: FileSignature, color: 'emerald', url: student.convention_url || (rawStudent.fields || rawStudent)?.["Convention Apprentissage"]?.[0]?.url, name: student.convention_name || (rawStudent.fields || rawStudent)?.["Convention Apprentissage"]?.[0]?.filename },
+                                                                { has: student.has_livret_apprentissage, label: 'Livret', icon: BookOpen, color: 'purple', url: student.livret_apprentissage_url || (rawStudent.fields || rawStudent)?.["Livret Apprentissage"]?.[0]?.url, name: student.livret_apprentissage_name || (rawStudent.fields || rawStudent)?.["Livret Apprentissage"]?.[0]?.filename },
+                                                                { has: student.has_certificat_scolarite, label: 'Cert.', icon: FileCheck, color: 'cyan', url: student.certificat_scolarite_url, name: student.certificat_scolarite_name }
+                                                            ].map((doc, idx) => (
+                                                                <div key={idx} className="flex flex-col items-center gap-1">
+                                                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">{doc.label}</span>
+                                                                    {doc.has ? (
+                                                                        <button
+                                                                            onClick={() => handleDownload(doc.url, doc.name)}
+                                                                            className={`w-8 h-8 rounded-lg bg-${doc.color}-50 text-${doc.color}-600 flex items-center justify-center hover:bg-${doc.color}-600 hover:text-white transition-all shadow-sm border border-${doc.color}-100/50`}
+                                                                            title={doc.label}
+                                                                        >
+                                                                            <doc.icon size={14} />
+                                                                        </button>
+                                                                    ) : (
+                                                                        <div className="w-8 h-8 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100" title={`${doc.label} (Manquant)`}>
+                                                                            <doc.icon size={14} />
+                                                                        </div>
+                                                                    )}
                                                                 </div>
-                                                            </div>
-                                                            <div className="h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/50 shadow-inner">
-                                                                <div
-                                                                    className={`h-full rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${getCompletionGradient(calculateDocCompletion(student))}`}
-                                                                    style={{ width: `${calculateDocCompletion(student)}%` }}
-                                                                ></div>
-                                                            </div>
+                                                            ))}
                                                         </div>
                                                     </td>
-                                                    <td className="px-8 py-6">
-                                                        <div className="flex items-center justify-center gap-3">
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Fiche</span>
-                                                                {student.has_fiche_renseignement ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(rawStudent.fiche_entreprise?.url || rawStudent.fields?.["Fiche entreprise"]?.[0]?.url, rawStudent.fiche_entreprise?.filename || rawStudent.fields?.["Fiche entreprise"]?.[0]?.filename)}
-                                                                        className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm border border-emerald-100/50"
-                                                                        title="Télécharger Fiche Renseignement"
-                                                                    >
-                                                                        <CheckCircle2 size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <CheckCircle2 size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">CERFA</span>
-                                                                {student.has_cerfa ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(rawStudent.cerfa?.url || rawStudent.fields?.["cerfa"]?.[0]?.url, rawStudent.cerfa?.filename || rawStudent.fields?.["cerfa"]?.[0]?.filename)}
-                                                                        className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-indigo-100/50"
-                                                                        title="Télécharger CERFA"
-                                                                    >
-                                                                        <ShieldCheck size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <ShieldCheck size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">ATRE</span>
-                                                                {student.has_atre ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(rawStudent.atre_url || rawStudent.fields?.["Atre"]?.[0]?.url, rawStudent.atre_name || rawStudent.fields?.["Atre"]?.[0]?.filename)}
-                                                                        className="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center hover:bg-orange-600 hover:text-white transition-all shadow-sm border border-orange-100/50"
-                                                                        title="Télécharger ATRE"
-                                                                    >
-                                                                        <FileText size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <FileText size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">CR</span>
-                                                                {student.has_compte_rendu ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(rawStudent.compte_rendu_url || rawStudent.fields?.["compte rendu de visite"]?.[0]?.url, rawStudent.compte_rendu_name || rawStudent.fields?.["compte rendu de visite"]?.[0]?.filename)}
-                                                                        className="w-9 h-9 rounded-lg bg-pink-50 text-pink-600 flex items-center justify-center hover:bg-pink-600 hover:text-white transition-all shadow-sm border border-pink-100/50"
-                                                                        title="Télécharger Compte Rendu"
-                                                                    >
-                                                                        <ClipboardList size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <ClipboardList size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Conv.</span>
-                                                                {student.has_convention ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(student.convention_url || (rawStudent.fields || rawStudent)?.["Convention Apprentissage"]?.[0]?.url, student.convention_name || (rawStudent.fields || rawStudent)?.["Convention Apprentissage"]?.[0]?.filename)}
-                                                                        className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm border border-emerald-100/50"
-                                                                        title="Télécharger Convention"
-                                                                    >
-                                                                        <FileSignature size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <FileSignature size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Livret</span>
-                                                                {student.has_livret_apprentissage ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(student.livret_apprentissage_url || (rawStudent.fields || rawStudent)?.["Livret Apprentissage"]?.[0]?.url, student.livret_apprentissage_name || (rawStudent.fields || rawStudent)?.["Livret Apprentissage"]?.[0]?.filename)}
-                                                                        className="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center hover:bg-purple-600 hover:text-white transition-all shadow-sm border border-purple-100/50"
-                                                                        title="Télécharger Livret d'Apprentissage"
-                                                                    >
-                                                                        <BookOpen size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <BookOpen size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Cert.</span>
-                                                                {student.has_certificat_scolarite ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(student.certificat_scolarite_url, student.certificat_scolarite_name)}
-                                                                        className="w-9 h-9 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center hover:bg-cyan-600 hover:text-white transition-all shadow-sm border border-cyan-100/50"
-                                                                        title="Télécharger Certificat de Scolarité"
-                                                                    >
-                                                                        <FileCheck size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <FileCheck size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                                    <td className="px-4 py-6 font-black text-slate-900 text-base group-hover:text-blue-600 transition-colors tracking-tight truncate">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            {[
+                                                                { has: student.has_cni, label: 'CIN', icon: CreditCard, color: 'blue', url: student.cni_url, name: student.cni_name },
+                                                                { has: student.has_cv, label: 'CV', icon: FileUser, color: 'cyan', url: student.cv_url, name: student.cv_name },
+                                                                { has: student.has_diplome, label: 'Diplôme', icon: GraduationCap, color: 'amber', url: student.diplome_url, name: student.diplome_name },
+                                                                { has: student.has_lettre_motivation, label: 'Lettre', icon: FileText, color: 'teal', url: student.lettre_motivation_url, name: student.lettre_motivation_name }
+                                                            ].map((doc, idx) => (
+                                                                <div key={idx} className="flex flex-col items-center gap-1">
+                                                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">{doc.label}</span>
+                                                                    {doc.has ? (
+                                                                        <button
+                                                                            onClick={() => handleDownload(doc.url, doc.name)}
+                                                                            className={`w-8 h-8 rounded-lg bg-${doc.color}-50 text-${doc.color}-600 flex items-center justify-center hover:bg-${doc.color}-600 hover:text-white transition-all shadow-sm border border-${doc.color}-100/50`}
+                                                                            title={doc.label}
+                                                                        >
+                                                                            <doc.icon size={14} />
+                                                                        </button>
+                                                                    ) : (
+                                                                        <div className="w-8 h-8 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100" title={`${doc.label} (Manquant)`}>
+                                                                            <doc.icon size={14} />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            ))}
                                                         </div>
                                                     </td>
-                                                    <td className="px-8 py-6">
-                                                        <div className="flex items-center justify-center gap-3">
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">CIN</span>
-                                                                {student.has_cni ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(student.cni_url, student.cni_name)}
-                                                                        className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-blue-100/50"
-                                                                        title="Télécharger CIN"
-                                                                    >
-                                                                        <FileText size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <FileText size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">CV</span>
-                                                                {student.has_cv ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(student.cv_url, student.cv_name)}
-                                                                        className="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-200"
-                                                                        title="Télécharger CV"
-                                                                    >
-                                                                        <FileText size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <FileText size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Diplôme</span>
-                                                                {student.has_diplome ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(student.diplome_url, student.diplome_name)}
-                                                                        className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-all shadow-sm border border-amber-100/50"
-                                                                        title="Télécharger Diplôme"
-                                                                    >
-                                                                        <FileText size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <FileText size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Lettre</span>
-                                                                {student.has_lettre_motivation ? (
-                                                                    <button
-                                                                        onClick={() => handleDownload(student.lettre_motivation_url, student.lettre_motivation_name)}
-                                                                        className="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center hover:bg-teal-600 hover:text-white transition-all shadow-sm border border-teal-100/50"
-                                                                        title="Télécharger Lettre de motivation"
-                                                                    >
-                                                                        <FileText size={16} />
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100">
-                                                                        <FileText size={16} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-8 py-6 text-center">
+                                                    <td className="px-4 py-6 text-center">
                                                         <ActionsMenu student={rawStudent} />
                                                     </td>
                                                 </tr>
