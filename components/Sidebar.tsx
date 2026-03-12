@@ -118,14 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   </span>
                 )}
               </NavLink>
-              <NavLink
-                to="/admission?tab=interviews"
-                onClick={handleLinkClick}
-                className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
-              >
-                <MessageSquare size={15} />
-                <span>Suivi des entretiens</span>
-              </NavLink>
+
             </div>
           </div>
         )}
