@@ -148,6 +148,37 @@ const LandingPage: React.FC = () => {
                 </div>
             </div>
 
+            {/* JE SUIS bar */}
+            <div className="je-suis-bar">
+                <div className="container">
+                    <div className="hero-roles">
+                        <span className="hero-roles-label">JE SUIS</span>
+                        <div className="hero-roles-pills">
+                            <Link to="/login" className="hero-role-pill">
+                                <GraduationCap size={15} strokeWidth={1.6} />
+                                Étudiant
+                            </Link>
+                            <Link to="/login" className="hero-role-pill">
+                                <Monitor size={15} strokeWidth={1.6} />
+                                Formateur
+                            </Link>
+                            <Link to="/login" className="hero-role-pill">
+                                <Building2 size={15} strokeWidth={1.6} />
+                                Entreprise
+                            </Link>
+                            <Link to="/login" className="hero-role-pill">
+                                <BookOpen size={15} strokeWidth={1.6} />
+                                Service pédagogique
+                            </Link>
+                            <Link to="/login" className="hero-role-pill">
+                                <Briefcase size={15} strokeWidth={1.6} />
+                                Commercial
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* 2. HERO */}
             <section id="hero" aria-label="ProcessIQ — Présentation">
                 <div className="hero-bg" aria-hidden="true"></div>
@@ -180,31 +211,6 @@ const LandingPage: React.FC = () => {
                             </Link>
                         </div>
 
-                        <div className="hero-roles reveal delay-4">
-                            <span className="hero-roles-label">JE SUIS</span>
-                            <div className="hero-roles-pills">
-                                <Link to="/login" className="hero-role-pill">
-                                    <GraduationCap size={15} strokeWidth={1.6} />
-                                    Étudiant
-                                </Link>
-                                <Link to="/login" className="hero-role-pill">
-                                    <Monitor size={15} strokeWidth={1.6} />
-                                    Formateur
-                                </Link>
-                                <Link to="/login" className="hero-role-pill">
-                                    <Building2 size={15} strokeWidth={1.6} />
-                                    Entreprise
-                                </Link>
-                                <Link to="/login" className="hero-role-pill">
-                                    <BookOpen size={15} strokeWidth={1.6} />
-                                    Service pédagogique
-                                </Link>
-                                <Link to="/login" className="hero-role-pill">
-                                    <Briefcase size={15} strokeWidth={1.6} />
-                                    Commercial
-                                </Link>
-                            </div>
-                        </div>
                     </div>
                 </div>
 

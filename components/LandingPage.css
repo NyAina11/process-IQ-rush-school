@@ -516,7 +516,7 @@
     align-items: center;
     position: relative;
     overflow: hidden;
-    padding: 11.5rem 0 5rem;
+    padding: 8rem 0 5rem;
 }
 
 .hero-bg {
@@ -678,14 +678,12 @@
 
 /* ── JE SUIS bar ── */
 .je-suis-bar {
-    position: fixed;
+    position: sticky;
     top: 73px;
-    left: 0;
-    right: 0;
+    margin-top: 90px;
     z-index: 999;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(107, 60, 210, 0.1);
     padding: 0.55rem 0;
 }

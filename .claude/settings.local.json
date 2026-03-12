@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"C:\\\\WORK\\\\process-IQ-rush-school-vercel\" -type f -name \"*admission*\" 2>/dev/null | head -20)"
+    ]
+  }
+}
