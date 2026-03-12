@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ProcessIQ – Tableau de bord</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0 !important; }
+
+  :root {
+    --dark:    #1a1f2e;
+    --sidebar-bg: #1a1f2e;
+    --sidebar-active: #2a3044;
+    --white:   #ffffff;
+    --bg:      #f4f6fb;
+    --blue:    #3b7cf4;
+    --blue-light: #e8f0fe;
+    --green:   #10c98f;
+    --teal:    #0bbfa8;
+    --red:     #e84242;
+    --orange:  #f97316;
+    --purple:  #7c3aed;
+    --border:  #e2e8f0;
+    --text:    #1e293b;
+    --muted:   #8898aa;
+    --tag-blue-bg: #dbeafe;
+    --tag-blue-txt: #1d4ed8;
+    --tag-red-bg: #fee2e2;
+    --tag-red-txt: #b91c1c;
+    --tag-green-bg: #d1fae5;
+    --tag-green-txt: #065f46;
+    --tag-orange-bg: #ffedd5;
+    --tag-orange-txt: #c2410c;
+    --tag-purple-bg: #ede9fe;
+    --tag-purple-txt: #6d28d9;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); display: flex; height: 100vh; overflow: hidden; color: var(--text); }
+
+  /* ── SIDEBAR ── */
+  aside {
+    width: 240px; min-width: 240px; background: var(--sidebar-bg); color: var(--white);
+    display: flex; flex-direction: column; padding: 0; overflow-y: auto;
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px; padding: 20px 20px 24px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px; background: linear-gradient(135deg,#6366f1,#3b82f6,#06b6d4);
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #fff;
+  }
+  .logo-text { font-size: 17px; font-weight: 700; color: #fff; }
+
+  .nav-section { padding: 0 12px 8px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.65); cursor: pointer;
+    transition: background .15s, color .15s; position: relative;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .nav-item.active { background: var(--sidebar-active); color: #fff; }
+  .nav-item .chevron { margin-left: auto; font-size: 12px; }
+  .nav-sub { padding-left: 16px; }
+  .nav-sub .nav-item { font-size: 13px; padding: 7px 12px; }
+  .nav-sub .nav-item::before { content:'•'; margin-right:6px; }
+  .nav-sub .nav-item.active-sub { color: #fff; }
+
+  .logout {
+    margin-top: auto; padding: 16px 20px; display: flex; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.5); font-size: 13px; cursor: pointer;
+  }
+  .logout:hover { color: #fff; }
+
+  /* ── MAIN ── */
+  main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--white); border-bottom: 1px solid var(--border);
+    padding: 0 28px; height: 60px; display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .topbar-title { font-size: 18px; font-weight: 700; }
+  .topbar-sub { font-size: 11px; color: var(--blue); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+  .icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 16px; }
+  .lang-btn { font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .user-chip { display: flex; align-items: center; gap: 8px; }
+  .user-info { text-align: right; }
+  .user-info .role { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .user-info .label { font-size: 12px; font-weight: 600; }
+  .avatar { width: 36px; height: 36px; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; }
+
+  /* CONTENT */
+  .content { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* HERO CARD */
+  .hero {
+    background: linear-gradient(120deg,#eef2ff 0%, #e0e7ff 50%, #f0f9ff 100%);
+    padding: 28px 32px; display: flex; align-items: center; gap: 24px;
+    border: 1px solid #c7d2fe;
+  }
+  .hero-left { flex: 1; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--green); color: #fff; font-size: 11px; font-weight: 700;
+    letter-spacing: .07em; padding: 5px 12px; text-transform: uppercase; margin-bottom: 12px;
+  }
+  .hero-badge::before { content:''; width:7px; height:7px; background:#fff; display:inline-block; border-radius:50% !important; }
+  .hero-promo { font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
+  .hero-title { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 12px; }
+  .hero-title span { color: var(--blue); }
+  .hero-desc { font-size: 13.5px; color: #475569; max-width: 480px; line-height: 1.6; }
+  .hero-stats { display: flex; gap: 16px; margin-left: auto; flex-shrink: 0; }
+  .stat-card {
+    background: #fff; border: 1px solid var(--border);
+    padding: 20px 28px; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 110px;
+  }
+  .stat-icon { font-size: 22px; color: var(--blue); }
+  .stat-icon.green { color: var(--teal); }
+  .stat-num { font-size: 30px; font-weight: 800; }
+  .stat-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); }
+  .tab {
+    padding: 10px 20px; font-size: 13px; font-weight: 600; color: var(--muted);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
+    text-transform: uppercase; letter-spacing: .05em; transition: color .15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  /* FILTERS */
+  .filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .search-box {
+    flex: 1; min-width: 260px; max-width: 400px; border: 1px solid var(--border);
+    background: #fff; padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .search-box input { border: none; outline: none; font-size: 13px; color: var(--text); width: 100%; background: transparent; font-family: inherit; }
+  .search-box input::placeholder { color: var(--muted); }
+  .select-wrap { position: relative; }
+  .filter-select {
+    border: 1px solid var(--border); background: #fff; padding: 10px 36px 10px 14px;
+    font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; appearance: none; color: var(--text); min-width: 180px;
+  }
+  .select-wrap::after { content:'▾'; position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; font-size:12px; color: var(--muted); }
+
+  .filter-btns { display: flex; gap: 0; }
+  .filter-btn {
+    padding: 9px 18px; font-size: 12px; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; border: 1px solid var(--border); cursor: pointer; background: #fff; color: var(--muted);
+    margin-left: -1px; transition: background .15s, color .15s;
+  }
+  .filter-btn:hover { background: var(--bg); color: var(--text); }
+  .filter-btn.active { background: var(--dark); color: #fff; border-color: var(--dark); z-index:1; position:relative; }
+
+  .view-btns { display: flex; gap: 0; margin-left: auto; }
+  .view-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; background: #fff; color: var(--muted); margin-left:-1px; }
+  .view-btn:hover, .view-btn.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+
+  /* TABLE */
+  .table-wrap { background: #fff; border: 1px solid var(--border); overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th {
+    padding: 12px 14px; text-align: left; font-size: 10px; font-weight: 700;
+    color: var(--muted); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+  }
+  td { padding: 14px 14px; vertical-align: middle; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--bg); }
+
+  .student-num { width: 30px; height: 30px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--muted); }
+  .student-name { font-weight: 700; font-size: 13.5px; }
+  .student-email { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .student-cell { display: flex; align-items: center; gap: 10px; }
+
+  .tag {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 5px 10px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    border: 1px solid transparent; white-space: nowrap;
+  }
+  .tag-red    { background: var(--tag-red-bg);    color: var(--tag-red-txt);    border-color: #fca5a5; }
+  .tag-orange { background: var(--tag-orange-bg); color: var(--tag-orange-txt); border-color: #fdba74; }
+  .tag-green  { background: var(--tag-green-bg);  color: var(--tag-green-txt);  border-color: #6ee7b7; }
+  .tag-blue   { background: var(--tag-blue-bg);   color: var(--tag-blue-txt);   border-color: #93c5fd; }
+  .tag-purple { background: var(--tag-purple-bg); color: var(--tag-purple-txt); border-color: #c4b5fd; }
+
+  .formation-cell { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; }
+  .formation-icon { font-size: 15px; }
+
+  /* progress ring */
+  .ring-wrap { position:relative; width:46px; height:46px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ring-wrap svg { position:absolute; top:0; left:0; transform:rotate(-90deg); }
+  .ring-label { font-size:11px; font-weight:700; z-index:1; }
+
+  /* doc icons row */
+  .docs-row { display:flex; gap:4px; align-items:center; flex-wrap:wrap; }
+  .doc-icon {
+    width:28px; height:28px; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; color:var(--muted); cursor:pointer; font-family: inherit;
+  }
+  .doc-icon.ok  { border-color:#10c98f; color:#10c98f; }
+  .doc-icon.pending { border-color:#f59e0b; color:#f59e0b; }
+  .doc-icon.purple { border-color:#7c3aed; color:#7c3aed; background:#ede9fe; }
+  .doc-label { font-size:8px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); display:block; text-align:center; margin-top:2px; }
+  .doc-col { display:flex; flex-direction:column; align-items:center; gap:0; }
+
+  .btn-action { padding:6px 12px; font-size:10px; font-weight:700; border:1.5px solid; cursor:pointer; font-family:inherit; text-transform:uppercase; letter-spacing:.05em; }
+  .btn-blue { border-color:var(--blue); color:var(--blue); background:transparent; }
+  .btn-blue:hover { background:var(--blue); color:#fff; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="logo">
+    <div class="logo-icon">P</div>
+    <span class="logo-text">ProcessIQ</span>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-item active">
+      <span>🎒</span> Admissions <span class="chevron">▲</span>
+    </div>
+    <div class="nav-sub">
+      <div class="nav-item">Inscription des élèves</div>
+      <div class="nav-item active-sub">Tableau de bord</div>
+    </div>
+  </div>
+
+  <div class="logout">
+    <span>↪</span> Déconnexion
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div>
+      <div class="topbar-title">Tableau de bord</div>
+      <div class="topbar-sub">● Rush School Portal</div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn">🔔</button>
+      <button class="icon-btn">🌐</button>
+      <span class="lang-btn">FR ▾</span>
+      <div class="user-chip">
+        <div class="user-info">
+          <div class="role">Admission</div>
+          <div class="label">Utilisateur</div>
+        </div>
+        <div class="avatar">A</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-left">
+        <div>
+          <span class="hero-badge">Gestion en direct</span>
+          <span class="hero-promo" style="margin-left:16px;">Promotion 2024–2025</span>
+        </div>
+        <div class="hero-title">Classe <span>TP NTC</span></div>
+        <div class="hero-desc">Supervision complète du groupe Négociateur Technico-Commercial. Suivez l'avancement des dossiers et facilitez les démarches entreprises.</div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-num">24</div>
+          <div class="stat-label">Étudiants</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">📄</div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">Complets</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active">Liste des étudiants</div>
+      <div class="tab">Statistiques</div>
+      <div class="tab">Historique global</div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters">
+      <div class="search-box">
+        <span style="color:var(--muted);font-size:15px;">🔍</span>
+        <input type="text" placeholder="Rechercher par nom, email ou formation…" />
+      </div>
+      <div class="select-wrap">
+        <select class="filter-select">
+          <option>Toutes formations</option>
+          <option>BTS NDRC</option>
+          <option>BTS MCO</option>
+        </select>
+      </div>
+      <div class="filter-btns">
+        <button class="filter-btn active">Tous</button>
+        <button class="filter-btn">Avec fiche</button>
+        <button class="filter-btn">Complets</button>
+      </div>
+      <div class="view-btns">
+        <button class="view-btn active">☰</button>
+        <button class="view-btn">⊞</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:220px;">Étudiant</th>
+            <th>Formulaire<br>Étudiant</th>
+            <th>Formulaire<br>Entreprise</th>
+            <th>Formation</th>
+            <th>Complétion</th>
+            <th colspan="8">Docs Admin</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Row 1 -->
+          <tr>
+            <td>
+              <div class="student-cell">
+                <div class="student-num">26</div>
+                <div>
+                  <div class="student-name">ERRACHIDI Elias</div>
+                  <div class="student-email">eliaserrachidipro@gmail.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="tag tag-red">Fiche Étudiant</span></td>
+            <td><span class="tag tag-orange">Lier Fiche Entreprise</span></td>
+            <td>
+              <div class="formation-cell">
+                <span class="formation-icon">💼</span> BTS NDRC 1
+              </div>
+            </td>
+            <td>
+              <div class="ring-wrap">
+                <svg width="46" height="46" viewBox="0 0 46 46">
+                  <circle cx="23" cy="23" r="18" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+                  <circle cx="23" cy="23" r="18" fill="none" stroke="#e84242" stroke-width="4" stroke-dasharray="113" stroke-dashoffset="66" stroke-linecap="butt"/>
+                </svg>
+                <span class="ring-label" style="color:#e84242;">42%</span>
+              </div>
+            </td>
+            <!-- Docs -->
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">Fiche</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon purple">✓</div><span class="doc-label">CERFA</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon pending">15</div><span class="doc-label">ATRE</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon pending">15</div><span class="doc-label">CR</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon pending">15</div><span class="doc-label">CONV.</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon pending">15</div><span class="doc-label">LIVRET</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon pending">15</div><span class="doc-label">CERT.</span></div></td>
+            <td><button class="btn-action btn-blue">→</button></td>
+          </tr>
+
+          <!-- Row 2 -->
+          <tr>
+            <td>
+              <div class="student-cell">
+                <div class="student-num">1</div>
+                <div>
+                  <div class="student-name">Dupont Jean</div>
+                  <div class="student-email">jean.dupont@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="tag tag-red">Fiche Étudiant</span></td>
+            <td><span class="tag tag-green">Voir Entreprise</span></td>
+            <td>
+              <div class="formation-cell">
+                <span class="formation-icon">💼</span> BTS MCO
+              </div>
+            </td>
+            <td>
+              <div class="ring-wrap">
+                <svg width="46" height="46" viewBox="0 0 46 46">
+                  <circle cx="23" cy="23" r="18" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+                  <circle cx="23" cy="23" r="18" fill="none" stroke="#f97316" stroke-width="4" stroke-dasharray="113" stroke-dashoffset="78" stroke-linecap="butt"/>
+                </svg>
+                <span class="ring-label" style="color:#f97316;">33%</span>
+              </div>
+            </td>
+            <td><div class="doc-col"><div class="doc-icon ok">✓</div><span class="doc-label">Fiche</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">CERFA</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">ATRE</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">CR</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">CONV.</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">LIVRET</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">CERT.</span></div></td>
+            <td><button class="btn-action btn-blue">→</button></td>
+          </tr>
+
+          <!-- Row 3 -->
+          <tr>
+            <td>
+              <div class="student-cell">
+                <div class="student-num">2</div>
+                <div>
+                  <div class="student-name">Martin Sophie</div>
+                  <div class="student-email">sophie.martin@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="tag tag-blue">Complété</span></td>
+            <td><span class="tag tag-green">Voir Entreprise</span></td>
+            <td>
+              <div class="formation-cell">
+                <span class="formation-icon">💼</span> BTS NDRC 2
+              </div>
+            </td>
+            <td>
+              <div class="ring-wrap">
+                <svg width="46" height="46" viewBox="0 0 46 46">
+                  <circle cx="23" cy="23" r="18" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+                  <circle cx="23" cy="23" r="18" fill="none" stroke="#10c98f" stroke-width="4" stroke-dasharray="113" stroke-dashoffset="23" stroke-linecap="butt"/>
+                </svg>
+                <span class="ring-label" style="color:#10c98f;">80%</span>
+              </div>
+            </td>
+            <td><div class="doc-col"><div class="doc-icon ok">✓</div><span class="doc-label">Fiche</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon ok">✓</div><span class="doc-label">CERFA</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon ok">✓</div><span class="doc-label">ATRE</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon ok">✓</div><span class="doc-label">CR</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon pending">!</div><span class="doc-label">CONV.</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">LIVRET</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">CERT.</span></div></td>
+            <td><button class="btn-action btn-blue">→</button></td>
+          </tr>
+
+          <!-- Row 4 -->
+          <tr>
+            <td>
+              <div class="student-cell">
+                <div class="student-num">3</div>
+                <div>
+                  <div class="student-name">Bernard Lucas</div>
+                  <div class="student-email">lucas.bernard@email.com</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="tag tag-red">Fiche Étudiant</span></td>
+            <td><span class="tag tag-orange">Lier Fiche Entreprise</span></td>
+            <td>
+              <div class="formation-cell">
+                <span class="formation-icon">💼</span> BTS MCO
+              </div>
+            </td>
+            <td>
+              <div class="ring-wrap">
+                <svg width="46" height="46" viewBox="0 0 46 46">
+                  <circle cx="23" cy="23" r="18" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+                  <circle cx="23" cy="23" r="18" fill="none" stroke="#e84242" stroke-width="4" stroke-dasharray="113" stroke-dashoffset="96" stroke-linecap="butt"/>
+                </svg>
+                <span class="ring-label" style="color:#e84242;">15%</span>
+              </div>
+            </td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">Fiche</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">CERFA</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">ATRE</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">CR</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">CONV.</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">LIVRET</span></div></td>
+            <td><div class="doc-col"><div class="doc-icon">○</div><span class="doc-label">CERT.</span></div></td>
+            <td><button class="btn-action btn-blue">→</button></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+</body>
+</html>
