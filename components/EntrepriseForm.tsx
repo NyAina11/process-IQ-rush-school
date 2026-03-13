@@ -707,72 +707,89 @@ const FICHE_STEPS = ['Entreprise', 'Contact', 'Formation', 'Contrat', 'Validatio
                             </div>
 
                             {/* Simulateur de salaire multi-années indépendant */}
-                            <div className="col-span-12 mt-8 pt-8 border-t border-slate-100">
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-12 h-12 rounded-2xl bg-secondary text-white flex items-center justify-center shadow-xl shadow-secondary/20">
-                                        <Calculator size={24} />
+                            <div className="col-span-12 mt-8">
+                                {/* Header bar */}
+                                <div className="rounded-t-2xl bg-[#1a1630] px-6 py-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                                            <Calculator size={16} className="text-white" />
+                                        </div>
+                                        <div>
+                                            <div className="text-white font-black text-[14px] tracking-tight">Simulateur de salaire apprenti</div>
+                                            <div className="text-white/40 text-[10px] font-bold uppercase tracking-widest">SMIC 2024 · 1 823,03 € brut/mois</div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-black text-slate-800 tracking-tight">Simulateur de salaire apprenti</h3>
-                                        <p className="text-slate-500 text-sm font-bold">Configurez les tranches d'âge pour chaque année d'apprentissage</p>
+                                    <div className="flex items-center gap-1.5">
+                                        {["1", "2", "3", "4"].map(y => {
+                                            const a = (formData.salaire as any)[`age${y}`];
+                                            return (
+                                                <div key={y} className={`w-2 h-2 rounded-full transition-colors ${a ? 'bg-emerald-400' : 'bg-white/20'}`} />
+                                            );
+                                        })}
+                                        <span className="text-white/40 text-[10px] font-bold ml-2">
+                                            {["1","2","3","4"].filter(y => (formData.salaire as any)[`age${y}`]).length}/4 configurées
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {["1", "2", "3", "4"].map((year) => {
+                                {/* Cards grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-t-0 border-slate-200 rounded-b-2xl overflow-hidden">
+                                    {["1", "2", "3", "4"].map((year, idx) => {
                                         const yearAge = (formData.salaire as any)[`age${year}`];
                                         const { pct, montant } = calculateSalary(yearAge, year);
+                                        const isRight = idx % 2 === 1;
+                                        const isBottom = idx >= 2;
 
                                         return (
                                             <div
                                                 key={year}
-                                                className="relative p-8 rounded-[2rem] border-2 border-slate-100 bg-white shadow-sm transition-all duration-300 text-left flex flex-col hover:border-brand/20 hover:shadow-xl hover:shadow-brand/5 group"
+                                                className={`relative bg-white flex flex-col transition-colors hover:bg-slate-50/60 ${isRight ? 'border-l border-slate-200' : ''} ${isBottom ? 'border-t border-slate-200' : ''}`}
                                             >
-                                                {/* En-tête de l'année */}
-                                                <div className="flex items-center justify-between mb-8">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-brand mb-1">Étape du contrat</span>
-                                                        <h4 className="text-lg font-black text-slate-800">
-                                                            {year}{year === "1" ? "ère" : "ème"} année
-                                                        </h4>
+                                                {/* Year strip */}
+                                                <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-7 h-7 rounded-lg bg-[#1a1630] flex items-center justify-center shrink-0">
+                                                            <span className="text-white text-[11px] font-black">{year}</span>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-0.5">Étape du contrat</div>
+                                                            <div className="text-[13px] font-black text-slate-800 leading-none">{year}{year === "1" ? "ère" : "ème"} année</div>
+                                                        </div>
                                                     </div>
-                                                    <div className={`p-3 rounded-2xl transition-colors ${yearAge ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-300'}`}>
-                                                        <CheckCircle2 size={20} />
+                                                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black transition-all ${yearAge ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
+                                                        <CheckCircle2 size={11} />
+                                                        {yearAge ? 'Configuré' : 'En attente'}
                                                     </div>
                                                 </div>
 
-                                                <div className="space-y-8 flex-grow">
+                                                <div className="p-5 space-y-4 flex-grow">
                                                     {/* Sélecteur d'âge */}
-                                                    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50">
-                                                        <Select
-                                                            label={`Configuration de l'âge`}
-                                                            required={year === "1"}
-                                                            value={yearAge}
-                                                            onChange={(e) => updateSalary(year, e.target.value)}
-                                                            options={AGE_TRANCHE_OPTIONS}
-                                                            className="!bg-white !py-3 !text-sm border-slate-200 focus:border-brand transition-colors"
-                                                            placeholder="Choisir l'âge..."
-                                                            error={(errors.salaire as any)?.[`age${year}`]?.message}
-                                                        />
-                                                    </div>
+                                                    <Select
+                                                        label={`Tranche d'âge`}
+                                                        required={year === "1"}
+                                                        value={yearAge}
+                                                        onChange={(e) => updateSalary(year, e.target.value)}
+                                                        options={AGE_TRANCHE_OPTIONS}
+                                                        placeholder="Choisir l'âge..."
+                                                        error={(errors.salaire as any)?.[`age${year}`]?.message}
+                                                    />
 
                                                     {/* Périodes de dates */}
-                                                    <div className="space-y-4">
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Périodes de rémunération</label>
+                                                    <div className="space-y-2.5">
+                                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Périodes de rémunération</div>
 
                                                         {year === "1" ? (
-                                                            <div className="bg-brand/5 p-4 rounded-2xl border border-brand/10 space-y-4">
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-brand/40"></div>
-                                                                    <span className="text-[10px] font-bold text-brand uppercase tracking-wider">2ème Période</span>
+                                                            <div className="rounded-lg border border-[#6B3CD2]/15 bg-[#6B3CD2]/3 p-3 space-y-3">
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]/50"></div>
+                                                                    <span className="text-[10px] font-black text-[#6B3CD2] uppercase tracking-wider">2ème Période</span>
                                                                 </div>
-                                                                <div className="grid grid-cols-2 gap-3">
+                                                                <div className="grid grid-cols-2 gap-2">
                                                                     <Input
                                                                         type="date"
                                                                         label="Début"
                                                                         required
                                                                         error={errors.contrat?.date_debut_2periode_1er_annee?.message}
-                                                                        className="!bg-white !shadow-none border-brand/20 focus:border-brand"
                                                                         {...register(`contrat.date_debut_2periode_1er_annee` as any)}
                                                                     />
                                                                     <Input
@@ -780,56 +797,48 @@ const FICHE_STEPS = ['Entreprise', 'Contact', 'Formation', 'Contrat', 'Validatio
                                                                         label="Fin"
                                                                         required
                                                                         error={errors.contrat?.date_fin_2periode_1er_annee?.message}
-                                                                        className="!bg-white !shadow-none border-brand/20 focus:border-brand"
                                                                         {...register(`contrat.date_fin_2periode_1er_annee` as any)}
                                                                     />
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <div className="grid grid-cols-1 gap-4">
-                                                                {/* Période 1 */}
-                                                                <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 space-y-4">
-                                                                    <div className="flex items-center gap-2 mb-1">
+                                                            <div className="space-y-2.5">
+                                                                <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 space-y-3">
+                                                                    <div className="flex items-center gap-1.5">
                                                                         <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-                                                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">1ère Période</span>
+                                                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">1ère Période</span>
                                                                     </div>
-                                                                    <div className="grid grid-cols-2 gap-3">
+                                                                    <div className="grid grid-cols-2 gap-2">
                                                                         <Input
                                                                             type="date"
                                                                             label="Début"
                                                                             error={(errors.contrat as any)?.[`date_debut_1periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee`]?.message}
-                                                                            className="!bg-white !shadow-none"
                                                                             {...register(`contrat.date_debut_1periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee` as any)}
                                                                         />
                                                                         <Input
                                                                             type="date"
                                                                             label="Fin"
                                                                             error={(errors.contrat as any)?.[`date_fin_1periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee`]?.message}
-                                                                            className="!bg-white !shadow-none"
                                                                             {...register(`contrat.date_fin_1periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee` as any)}
                                                                         />
                                                                     </div>
                                                                 </div>
-
-                                                                {/* Période 2 */}
-                                                                <div className="bg-brand/5 p-4 rounded-2xl border border-brand/10 space-y-4">
-                                                                    <div className="flex items-center gap-2 mb-1">
-                                                                        <div className="w-1.5 h-1.5 rounded-full bg-brand/40"></div>
-                                                                        <span className="text-[10px] font-bold text-brand uppercase tracking-wider">2ème Période</span>
+                                                                <div className="rounded-lg border border-[#6B3CD2]/15 bg-[#6B3CD2]/3 p-3 space-y-3">
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]/50"></div>
+                                                                        <span className="text-[10px] font-black text-[#6B3CD2] uppercase tracking-wider">2ème Période</span>
                                                                     </div>
-                                                                    <div className="grid grid-cols-2 gap-3">
+                                                                    <div className="grid grid-cols-2 gap-2">
                                                                         <Input
                                                                             type="date"
                                                                             label="Début"
                                                                             error={(errors.contrat as any)?.[`date_debut_2periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee`]?.message}
-                                                                            className="!bg-white !shadow-none border-brand/20 focus:border-brand"
                                                                             {...register(`contrat.date_debut_2periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee` as any)}
                                                                         />
                                                                         <Input
                                                                             type="date"
                                                                             label="Fin"
                                                                             error={(errors.contrat as any)?.[`date_fin_2periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee`]?.message}
-                                                                            className="!bg-white !shadow-none border-brand/20 focus:border-brand"
                                                                             {...register(`contrat.date_fin_2periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee` as any)}
                                                                         />
                                                                     </div>
@@ -839,35 +848,39 @@ const FICHE_STEPS = ['Entreprise', 'Contact', 'Formation', 'Contrat', 'Validatio
                                                     </div>
                                                 </div>
 
-                                                {/* Résumé de rémunération */}
-                                                <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
-                                                    <div>
-                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Taux SMIC</span>
-                                                        <div className="text-2xl font-black text-slate-900">
-                                                            {yearAge ? `${pct}%` : "--%"}
+                                                {/* Footer stats */}
+                                                <div className="mx-5 mb-5 rounded-xl bg-[#1a1630] overflow-hidden">
+                                                    {/* SMIC bar */}
+                                                    <div className="h-1 bg-white/10">
+                                                        <div
+                                                            className="h-full bg-gradient-to-r from-[#6B3CD2] to-emerald-400 transition-all duration-700"
+                                                            style={{ width: yearAge ? `${Math.min(pct, 100)}%` : '0%' }}
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-center justify-between px-4 py-3">
+                                                        <div>
+                                                            <div className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-0.5">Taux SMIC</div>
+                                                            <div className="text-white text-[18px] font-black leading-none">
+                                                                {yearAge ? `${pct}%` : <span className="text-white/30">--%</span>}
+                                                            </div>
+                                                        </div>
+                                                        <div className="w-px h-8 bg-white/10" />
+                                                        <div className="text-right">
+                                                            <div className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-0.5">Salaire Brut</div>
+                                                            <div className="text-[18px] font-black leading-none" style={{ color: yearAge ? '#a78bfa' : 'rgba(255,255,255,0.2)' }}>
+                                                                {yearAge ? montant.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }) : '-- €'}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Salaire Brut</span>
-                                                        <div className="text-2xl font-black text-brand">
-                                                            {yearAge ? `${montant.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 })}` : "-- €"}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-10 scale-150 rotate-12 transition-all pointer-events-none">
-                                                    <Calculator size={80} className="text-brand/10" />
                                                 </div>
                                             </div>
                                         );
                                     })}
                                 </div>
 
-                                <div className="mt-6 p-4 rounded-2xl bg-brand/5 border border-brand/10 flex items-start gap-4">
-                                    <Info size={18} className="text-brand shrink-0 mt-0.5" />
-                                    <p className="text-[10px] text-brand/80 font-medium leading-relaxed italic">
-                                        Note : La tranche d'âge peut évoluer au cours du contrat. Configurez l'âge attendu pour chaque période. Calcul basé sur le SMIC 2024 de 1 823,03 € brut mensuel.
-                                    </p>
+                                <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-400 italic">
+                                    <Info size={12} className="shrink-0" />
+                                    Note : La tranche d'âge peut évoluer au cours du contrat. Configurez l'âge attendu pour chaque période. Calcul basé sur le SMIC 2024 de 1 823,03 € brut mensuel.
                                 </div>
                             </div>
                         </div>
