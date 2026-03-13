@@ -131,14 +131,30 @@ const App = () => {
               {/* Commercial Routes */}
               <Route path="/commercial" element={<RequireAuth allowedRoles={['commercial']}><Outlet /></RequireAuth>}>
                 <Route path="dashboard" element={<DashboardView activeSubView="commercial-dashboard" />} />
-                <Route path="placer" element={<DashboardView activeSubView="commercial-placer" />} />
-                <Route path="alternance" element={<DashboardView activeSubView="commercial-alternance" />} />
+                <Route path="placer" element={
+                  <DashboardView 
+                    activeSubView="commercial-placer" 
+                    onSelectStudent={(student, tab) => {
+                      setSelectedStudent(student);
+                      setSelectedTab(tab);
+                    }}
+                  />
+                } />
+                <Route path="alternance" element={
+                  <DashboardView 
+                    activeSubView="commercial-alternance" 
+                    onSelectStudent={(student, tab) => {
+                      setSelectedStudent(student);
+                      setSelectedTab(tab);
+                    }}
+                  />
+                } />
                 <Route index element={<Navigate to="dashboard" replace />} />
               </Route>
 
               {/* Admission Routes */}
               <Route path="/admission" element={
-                <RequireAuth allowedRoles={['admission']}>
+                <RequireAuth allowedRoles={['admission', 'commercial']}>
                   <AdmissionView
                     selectedStudent={selectedStudent}
                     selectedTab={selectedTab}
@@ -150,7 +166,7 @@ const App = () => {
                 </RequireAuth>
               } />
               <Route path="/classe-ntc" element={
-                <RequireAuth allowedRoles={['admission']}>
+                <RequireAuth allowedRoles={['admission', 'commercial']}>
                   <ClassNTCView
                     onSelectStudent={(student, tab) => {
                       setSelectedStudent(student);

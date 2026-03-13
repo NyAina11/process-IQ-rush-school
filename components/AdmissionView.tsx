@@ -109,7 +109,7 @@ const NirAccordion = () => {
     const [isOpen, setIsOpen] = useState(false);
     return (
         <div className="bg-white border border-[#6B3CD2]/10 rounded-[4px] mb-8 overflow-hidden transition-all shadow-sm">
-            <div 
+            <div
                 className="flex items-center gap-4 p-5 cursor-pointer hover:bg-slate-50 transition-all"
                 onClick={() => setIsOpen(!isOpen)}
             >
@@ -160,22 +160,20 @@ const NirAccordion = () => {
 
 const StepItem = ({ step, label, isActive, isCompleted }: { step: number, label: string, isActive: boolean, isCompleted: boolean }) => (
     <div className="flex flex-col items-center gap-2.5 relative z-10">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-[13px] transition-all duration-300 ${
-            isCompleted
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-[13px] transition-all duration-300 ${isCompleted
                 ? 'bg-emerald-500 border-2 border-emerald-500 text-white shadow-md shadow-emerald-200'
                 : isActive
                     ? 'bg-[#4c1d95] border-2 border-[#4c1d95] text-white shadow-lg shadow-[#4c1d95]/25 ring-4 ring-[#4c1d95]/15'
                     : 'bg-white border-2 border-slate-200 text-slate-400'
-        }`}>
+            }`}>
             {isCompleted ? (
                 <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
-                    <path d="M4 10l4.5 4.5 8-8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M4 10l4.5 4.5 8-8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
             ) : step}
         </div>
-        <span className={`text-[9px] font-black uppercase tracking-[0.12em] transition-colors duration-300 ${
-            isActive ? 'text-[#4c1d95]' : isCompleted ? 'text-emerald-600' : 'text-slate-400'
-        }`}>{label}</span>
+        <span className={`text-[9px] font-black uppercase tracking-[0.12em] transition-colors duration-300 ${isActive ? 'text-[#4c1d95]' : isCompleted ? 'text-emerald-600' : 'text-slate-400'
+            }`}>{label}</span>
     </div>
 );
 
@@ -811,69 +809,69 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
 
 const _PaletteIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
-        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
-        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
     </svg>
 );
 const _BriefcaseIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
     </svg>
 );
 const _TargetIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+        <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
     </svg>
 );
 const _RocketIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-        <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-        <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+        <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+        <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" /><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
     </svg>
 );
 const _LightbulbIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
-        <path d="M9 18h6"/><path d="M10 22h4"/>
+        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+        <path d="M9 18h6" /><path d="M10 22h4" />
     </svg>
 );
 
 const _FaceSad = () => (
     <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
-        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5"/>
-        <circle cx="11" cy="13" r="1.5" fill="currentColor"/><circle cx="21" cy="13" r="1.5" fill="currentColor"/>
-        <path d="M11 22c1.5-2.5 8.5-2.5 10 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="11" cy="13" r="1.5" fill="currentColor" /><circle cx="21" cy="13" r="1.5" fill="currentColor" />
+        <path d="M11 22c1.5-2.5 8.5-2.5 10 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
 );
 const _FaceNeutral = () => (
     <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
-        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5"/>
-        <circle cx="11" cy="13" r="1.5" fill="currentColor"/><circle cx="21" cy="13" r="1.5" fill="currentColor"/>
-        <path d="M11 21h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="11" cy="13" r="1.5" fill="currentColor" /><circle cx="21" cy="13" r="1.5" fill="currentColor" />
+        <path d="M11 21h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
 );
 const _FaceSmile = () => (
     <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
-        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5"/>
-        <circle cx="11" cy="13" r="1.5" fill="currentColor"/><circle cx="21" cy="13" r="1.5" fill="currentColor"/>
-        <path d="M11 19.5c1 1.5 9 1.5 10 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="11" cy="13" r="1.5" fill="currentColor" /><circle cx="21" cy="13" r="1.5" fill="currentColor" />
+        <path d="M11 19.5c1 1.5 9 1.5 10 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
 );
 const _FaceHappy = () => (
     <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
-        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5"/>
-        <circle cx="11" cy="12" r="1.5" fill="currentColor"/><circle cx="21" cy="12" r="1.5" fill="currentColor"/>
-        <path d="M10 18c1.5 3.5 10.5 3.5 12 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="11" cy="12" r="1.5" fill="currentColor" /><circle cx="21" cy="12" r="1.5" fill="currentColor" />
+        <path d="M10 18c1.5 3.5 10.5 3.5 12 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
 );
 const _FaceExcellent = () => (
     <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
-        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M9.5 11.5l2 2m9-2l-2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M9 11c.7-1.2 2.2-1.5 3-1l-1 1M23 11c-.7-1.2-2.2-1.5-3-1l1 1" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
-        <path d="M9.5 18c1.5 4.5 11.5 4.5 13 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M9.5 11.5l2 2m9-2l-2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M9 11c.7-1.2 2.2-1.5 3-1l-1 1M23 11c-.7-1.2-2.2-1.5-3-1l1 1" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+        <path d="M9.5 18c1.5 4.5 11.5 4.5 13 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
 );
 
@@ -926,13 +924,12 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
         <label className="flex items-start gap-2.5 cursor-pointer group select-none">
             <div
                 onClick={onChange}
-                className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
-                    checked ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/50'
-                }`}
+                className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${checked ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/50'
+                    }`}
             >
                 {checked && (
                     <svg viewBox="0 0 10 10" fill="none" width="8" height="8">
-                        <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 )}
             </div>
@@ -940,18 +937,17 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
         </label>
     );
 
-    const RatingRow = ({ label, id }: { label: string; id: string }) => (
+    const RatingRow = ({ label, id }: { label: string; id: string; key?: string | number }) => (
         <tr className="border-b border-slate-100 hover:bg-slate-50/60 transition-colors">
             <td className="py-3 pr-4 text-[12px] font-medium text-slate-700">{label}</td>
-            {[1,2,3,4,5].map(v => (
+            {[1, 2, 3, 4, 5].map(v => (
                 <td key={v} className="text-center py-3 px-1.5">
                     <button
                         onClick={() => setRating(id, v)}
-                        className={`w-7 h-7 rounded-full border-2 text-[11px] font-black mx-auto flex items-center justify-center transition-all ${
-                            ratings[id] === v
+                        className={`w-7 h-7 rounded-full border-2 text-[11px] font-black mx-auto flex items-center justify-center transition-all ${ratings[id] === v
                                 ? 'bg-[#6B3CD2] border-[#6B3CD2] text-white shadow-md shadow-[#6B3CD2]/20'
                                 : 'border-slate-200 text-slate-400 hover:border-[#6B3CD2]/40 hover:text-[#6B3CD2]'
-                        }`}
+                            }`}
                     >{v}</button>
                 </td>
             ))}
@@ -966,7 +962,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                     <thead>
                         <tr className="bg-[#6B3CD2]/10 border-b border-[#6B3CD2]/20">
                             <th className="text-left py-2.5 px-3 text-[10px] font-black text-[#6B3CD2] uppercase tracking-widest"></th>
-                            {[1,2,3,4,5].map(v => (
+                            {[1, 2, 3, 4, 5].map(v => (
                                 <th key={v} className="text-center py-2.5 px-1.5 text-[11px] font-black text-[#6B3CD2] w-12">{v}</th>
                             ))}
                         </tr>
@@ -1110,7 +1106,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                 </div>
                 <div className="flex items-start gap-3 bg-[#6B3CD2]/5 border border-[#6B3CD2]/15 rounded-[4px] p-4">
                     <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" className="text-[#6B3CD2] mt-0.5 flex-shrink-0">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd"/>
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
                     </svg>
                     <p className="text-[11px] font-semibold text-[#6B3CD2] leading-relaxed">Reconnaître ses axes d'amélioration est une force : cela montre ta maturité et ta capacité à progresser.</p>
                 </div>
@@ -1209,7 +1205,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                             <div className="flex items-center gap-2.5 mb-3">
                                 <div className="w-6 h-6 rounded-full bg-white border-2 border-current flex items-center justify-center">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="12" height="12" className={obj.badge}>
-                                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                                        <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" />
                                     </svg>
                                 </div>
                                 <span className={`text-[11px] font-black uppercase tracking-widest ${obj.badge}`}>Objectif n° {obj.num} — {obj.horizon}</span>
@@ -1260,11 +1256,10 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                             <button
                                 key={i}
                                 onClick={() => setMotivation(motivation === i ? null : i)}
-                                className={`flex flex-col items-center gap-2 px-4 py-3 rounded-[4px] border-2 transition-all ${
-                                    motivation === i
+                                className={`flex flex-col items-center gap-2 px-4 py-3 rounded-[4px] border-2 transition-all ${motivation === i
                                         ? motivationActive[i]
                                         : 'border-slate-100 text-slate-300 hover:border-slate-200 hover:text-slate-400'
-                                }`}
+                                    }`}
                             >
                                 <span className={motivation === i ? motivationColors[i] : ''}>{m.face}</span>
                                 <span className="text-[10px] font-black uppercase tracking-wide whitespace-nowrap">{m.label}</span>
@@ -1324,6 +1319,16 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
 
     const [activeTab, setActiveTab] = useState<AdmissionTab>(selectedTab || AdmissionTab.TESTS);
     const [prefilledStudent, setPrefilledStudent] = useState<any>(null);
+    const userRole = localStorage.getItem('userRole');
+    const isCommercial = userRole === 'commercial';
+
+    // Force Entreprise tab for commercials
+    useEffect(() => {
+        if (isCommercial) {
+            setActiveTab(AdmissionTab.ENTREPRISE);
+            setMainTab('dashboard');
+        }
+    }, [isCommercial]);
 
     // Handle pre-selected student from ClassNTC
     useEffect(() => {
@@ -1463,7 +1468,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
         <div className="animate-fade-in max-w-6xl mx-auto pb-20 relative">
             <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
 
-            {mainTab === 'dashboard' && (
+            {mainTab === 'dashboard' && !isCommercial && (
                 <>
                     <div className="rounded-[8px] p-10 mb-6 overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #3b0764 0%, #4c1d95 45%, #5b21b6 100%)' }}>
                         {/* Decorative circles */}
@@ -1524,378 +1529,372 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
             </div>
 
             <div key={mainTabAnimKey} className="admission-rise">
-            {mainTab === 'interviews' ? (
-                <InterviewsTrackingView
-                    onLaunchInterview={(c) => {
-                        setStudentData(c);
-                        handleMainTabChange('dashboard');
-                        setActiveTab(AdmissionTab.ENTRETIEN);
-                    }}
-                />
-            ) : (
-                <>
-                    <div className="grid grid-cols-7 mb-10 border-2 border-slate-300 rounded-[4px] divide-x-2 divide-slate-300">
-                        {[
-                            { id: AdmissionTab.TESTS, label: 'Tests', icon: PenTool },
-                            { id: AdmissionTab.ENTRETIEN, label: 'Entretien', icon: UserCheck },
-                            { id: AdmissionTab.PROJET_PROFESSIONNEL, label: 'Projet Pro', icon: Target },
-                            { id: AdmissionTab.QUESTIONNAIRE, label: 'Étudiant', icon: Info },
-                            { id: AdmissionTab.DOCUMENTS, label: 'Documents', icon: Upload },
-                            { id: AdmissionTab.ENTREPRISE, label: 'Entreprise', icon: Building },
-                            { id: AdmissionTab.ADMINISTRATIF, label: 'Administratif', icon: Printer }
-                        ].map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id as AdmissionTab)}
-                                className={`flex flex-col items-center justify-center gap-1.5 py-3.5 px-2 text-[10px] font-black uppercase tracking-wider transition-all ${
-                                    activeTab === tab.id
-                                        ? 'bg-[#ede9fe] text-[#4c1d95]'
-                                        : 'bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-                                }`}
-                            >
-                                <tab.icon size={15} strokeWidth={activeTab === tab.id ? 3 : 2} />
-                                <span className="leading-tight text-center">{tab.label}</span>
-                            </button>
-                        ))}
-                    </div>
-
-                    {activeTab === AdmissionTab.TESTS && (
-                        <div className="space-y-6 animate-slide-in">
-                            <div className="bg-white border border-slate-300 rounded-[4px] p-8">
-                                <h3 className="text-xl font-black text-slate-800 mb-2 flex items-center gap-3">
-                                    <GraduationCap className="text-[#4c1d95]" /> Sélectionnez votre formation
-                                </h3>
-                                <p className="text-slate-500 mb-8 ml-9 font-medium">Choisissez la formation pour accéder au test.</p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                                    {[
-                                        { id: 'mco', title: 'BTS MCO', subtitle: 'Management Commercial Opérationnel', iconBg: '#dbeafe', iconColor: '#1d4ed8', duration: '~20 min' },
-                                        { id: 'ndrc', title: 'BTS NDRC', subtitle: 'Négociation et Digitalisation de la Relation Client', iconBg: '#d1fae5', iconColor: '#065f46', duration: '~20 min' },
-                                        { id: 'bachelor', title: 'BACHELOR RDC', subtitle: 'Responsable Développement Commercial', iconBg: '#ede9fe', iconColor: '#4c1d95', duration: '~25 min' },
-                                        { id: 'tpntc', title: 'TP NTC', subtitle: 'Titre Pro Négociateur Technico-Commercial', iconBg: '#ffedd5', iconColor: '#9a3412', duration: '~20 min' },
-                                    ].map(f => (
-                                        <div key={f.id} onClick={() => navigate(`/test?formation=${f.id}`)} className="bg-white border border-slate-300 rounded-[4px] p-6 text-center cursor-pointer hover:border-[#4c1d95] hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
-                                            <div className="w-14 h-14 rounded-[4px] mx-auto mb-5 flex items-center justify-center transition-all duration-300 group-hover:scale-105" style={{ background: f.iconBg }}>
-                                                <GraduationCap size={26} style={{ color: f.iconColor }} />
-                                            </div>
-                                            <h4 className="font-black text-[#1e293b] text-base mb-1 tracking-tight">{f.title}</h4>
-                                            <p className="text-[10px] text-slate-400 font-medium mb-5 italic leading-relaxed h-8 overflow-hidden">{f.subtitle}</p>
-                                            <span className="inline-block px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-widest text-slate-400 border border-slate-200 bg-slate-50 group-hover:border-[#4c1d95] group-hover:text-[#4c1d95] group-hover:bg-[#f5f3ff] transition-colors">{f.duration}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                {mainTab === 'interviews' ? (
+                    <InterviewsTrackingView
+                        onLaunchInterview={(c) => {
+                            setStudentData(c);
+                            handleMainTabChange('dashboard');
+                            setActiveTab(AdmissionTab.ENTRETIEN);
+                        }}
+                    />
+                ) : (
+                    <>
+                        <div className="grid grid-cols-7 mb-10 border-2 border-slate-300 rounded-[4px] divide-x-2 divide-slate-300">
+                            {[
+                                { id: AdmissionTab.TESTS, label: 'Tests', icon: PenTool },
+                                { id: AdmissionTab.ENTRETIEN, label: 'Entretien', icon: UserCheck },
+                                { id: AdmissionTab.PROJET_PROFESSIONNEL, label: 'Projet Pro', icon: Target },
+                                { id: AdmissionTab.QUESTIONNAIRE, label: 'Étudiant', icon: Info },
+                                { id: AdmissionTab.DOCUMENTS, label: 'Documents', icon: Upload },
+                                { id: AdmissionTab.ENTREPRISE, label: 'Entreprise', icon: Building },
+                                { id: AdmissionTab.ADMINISTRATIF, label: 'Administratif', icon: Printer }
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id as AdmissionTab)}
+                                    className={`flex flex-col items-center justify-center gap-1.5 py-3.5 px-2 text-[10px] font-black uppercase tracking-wider transition-all ${activeTab === tab.id
+                                            ? 'bg-[#ede9fe] text-[#4c1d95]'
+                                            : 'bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                                        }`}
+                                >
+                                    <tab.icon size={15} strokeWidth={activeTab === tab.id ? 3 : 2} />
+                                    <span className="leading-tight text-center">{tab.label}</span>
+                                </button>
+                            ))}
                         </div>
-                    )}
 
-                    {activeTab === AdmissionTab.QUESTIONNAIRE && (
-                        <div className="animate-slide-in">
-                            <QuestionnaireForm
-                                initialData={studentData}
-                                onNext={(data) => {
-                                    setStudentData(data);
-                                    setActiveTab(AdmissionTab.DOCUMENTS);
-                                }} />
-                        </div>
-                    )}
-
-                    {activeTab === AdmissionTab.DOCUMENTS && (
-                        <div className="animate-fade-in pb-12">
-                            {/* Header */}
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="w-12 h-12 rounded-[4px] bg-[#6B3CD2]/10 flex items-center justify-center text-[#6B3CD2]">
-                                    <Upload size={22} />
-                                </div>
-                                <div>
-                                    <h2 className="text-[17px] font-black text-slate-900">Documents à téléverser</h2>
-                                    <p className="text-[12px] text-slate-400 font-medium mt-0.5">Téléversez les documents suivants pour compléter votre dossier d'admission</p>
-                                </div>
-                            </div>
-
-                            {!studentData && (
-                                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-[4px] flex items-center gap-3">
-                                    <AlertCircle size={16} className="text-amber-500 flex-shrink-0" />
-                                    <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Veuillez compléter la Fiche Étudiant avant de transmettre vos documents.</p>
-                                </div>
-                            )}
-
-                            <div className="mb-7">
-                                <NirAccordion />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-                                {REQUIRED_DOCUMENTS.map((doc) => {
-                                    const isUploaded = uploadedFiles[doc.id];
-                                    const isUploadingDoc = uploadingFiles[doc.id];
-                                    const Icon = { cv: FileText, cni: Building, lettre: FileText, vitale: Activity, diplome: GraduationCap }[doc.id] || FileText;
-
-                                    return (
-                                        <div
-                                            key={doc.id}
-                                            className={`relative flex flex-col bg-white border rounded-[4px] p-5 transition-all duration-200 ${
-                                                isUploaded
-                                                    ? 'border-emerald-200 shadow-sm'
-                                                    : 'border-slate-200 hover:border-[#6B3CD2]/30 hover:shadow-md'
-                                            }`}
-                                        >
-                                            <input
-                                                type="file"
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-20"
-                                                disabled={isUploadingDoc || !studentData}
-                                                onChange={(e) => handleFileChange(e, doc.id)}
-                                                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                                            />
-
-                                            {/* Icon */}
-                                            <div className={`w-10 h-10 rounded-[4px] flex items-center justify-center mb-4 border-2 transition-all ${
-                                                isUploaded
-                                                    ? 'bg-emerald-100 border-emerald-200 text-emerald-600'
-                                                    : 'bg-slate-100 border-slate-200 text-slate-500'
-                                            }`}>
-                                                <Icon size={18} />
-                                            </div>
-
-                                            {/* Title + desc */}
-                                            <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-tight mb-1">{doc.title}</h4>
-                                            <p className="text-[11px] text-slate-400 font-medium leading-relaxed mb-4 flex-1">{doc.desc}</p>
-
-                                            {/* Status badge */}
-                                            <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] text-[10px] font-bold uppercase tracking-wide mb-3 self-start ${
-                                                isUploaded
-                                                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                                                    : 'bg-rose-50 border border-rose-200 text-rose-600'
-                                            }`}>
-                                                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isUploaded ? 'bg-emerald-500' : 'bg-rose-400'}`}></span>
-                                                {isUploaded ? 'Téléversé' : 'À fournir'}
-                                            </span>
-
-                                            {/* Upload button */}
-                                            <button className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-[4px] font-black text-[11px] uppercase tracking-widest transition-all ${
-                                                isUploadingDoc
-                                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                                    : isUploaded
-                                                        ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white'
-                                                        : 'bg-[#6B3CD2]/10 text-[#6B3CD2] hover:bg-[#6B3CD2] hover:text-white'
-                                            }`}>
-                                                {isUploadingDoc
-                                                    ? <><Loader2 size={13} className="animate-spin" /> Envoi…</>
-                                                    : <><Upload size={13} />{isUploaded ? 'Remplacer' : 'Téléverser'}</>
-                                                }
-                                            </button>
-
-                                            {/* External link */}
-                                            {isUploaded && (studentData as any)?.[`${doc.id}_url`] && (
-                                                <a
-                                                    href={(studentData as any)[`${doc.id}_url`]}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    className="mt-2 flex items-center justify-center gap-1.5 text-[10px] font-bold text-slate-400 hover:text-[#6B3CD2] transition-colors z-30"
-                                                >
-                                                    <ExternalLink size={11} /> Voir le document
-                                                </a>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            {/* Footer */}
-                            <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-2xl font-black text-slate-900">{uploadedCount}</span>
-                                        <span className="text-[12px] font-medium text-slate-400">/ {REQUIRED_DOCUMENTS.length} documents téléversés</span>
-                                    </div>
-                                    <div className="w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-[#6B3CD2] rounded-full transition-all duration-500"
-                                            style={{ width: `${progressPercent}%` }}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <button
-                                        disabled={!studentData}
-                                        onClick={() => setActiveTab(AdmissionTab.ENTREPRISE)}
-                                        className="flex items-center gap-2 px-6 py-2.5 rounded-[4px] bg-[#6B3CD2] text-white font-black text-[11px] uppercase tracking-widest hover:bg-[#5a2eb8] transition-all shadow-md shadow-[#6B3CD2]/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
-                                    >
-                                        Continuer
-                                        <ArrowRight size={14} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === AdmissionTab.ENTREPRISE && (
-                        <div className="animate-slide-in">
-                            <EntrepriseForm
-                                onNext={(response?: any) => {
-                                    if (response?.entreprise_info) {
-                                        setStudentData((prev: any) => ({
-                                            ...prev,
-                                            id_entreprise: response.entreprise_info.id,
-                                            entreprise_raison_sociale: response.entreprise_info.raison_sociale
-                                        }));
-                                    }
-                                    setEntrepriseCompleted(true);
-                                    setActiveTab(AdmissionTab.ADMINISTRATIF);
-                                }}
-                                studentRecordId={studentData?.record_id || studentData?.id || localStorage.getItem('candidateRecordId')}
-                            />
-                        </div>
-                    )}
-
-                    {activeTab === AdmissionTab.ADMINISTRATIF && (
-                        <div className="animate-fade-in bg-white rounded-[4px] border border-slate-100 shadow-sm relative overflow-hidden">
-                            <div className="formation-section" style={{ padding: '0 28px 28px' }}>
-                                {/* Header Administratif */}
-                                <div style={{ paddingTop: '24px' }}></div>
-                                <div className="fiche-header">
-                                    <div className="fiche-header-icon !bg-brand/5 !text-brand">
-                                        <Printer size={24} />
-                                    </div>
-                                    <div className="fiche-header-text">
-                                        <h2 className="text-[18.4px] font-black text-[#18162A]">Dossier Administratif</h2>
-                                        <p>Générez et complétez les documents contractuels officiels</p>
-                                    </div>
-                                </div>
-                                <div className="fiche-divider"></div>
-
-                                <div className="space-y-4">
-                                    {/* Section 1: Documents à générer */}
-                                    <div className="fiche-section">
-                                        <div className="fiche-section-title">
-                                            <span className="fiche-section-num">1</span>
-                                            <span className="fiche-section-label">Documents à Générer</span>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {ADMIN_DOCS.filter(d => d.btnText === 'Générer').map(doc => {
-                                                const isGenerating = (doc.id === 'renseignements' && isGeneratingFiche) ||
-                                                    (doc.id === 'cerfa' && isGeneratingCerfa) ||
-                                                    (doc.id === 'atre' && isGeneratingAtre) ||
-                                                    (doc.id === 'compte-rendu' && isGeneratingCompteRendu) ||
-                                                    (doc.id === 'convention-apprentissage' && isGeneratingConventionApprentissage) ||
-                                                    (doc.id === 'livret' && isGeneratingLivret);
-
-                                                const iconCls: Record<string, string> = {
-                                                    orange: 'bg-orange-100 border-orange-200 text-orange-600',
-                                                    blue:   'bg-blue-100 border-blue-200 text-blue-600',
-                                                    emerald:'bg-emerald-100 border-emerald-200 text-emerald-600',
-                                                    pink:   'bg-pink-100 border-pink-200 text-pink-600',
-                                                    indigo: 'bg-indigo-100 border-indigo-200 text-indigo-600',
-                                                    cyan:   'bg-cyan-100 border-cyan-200 text-cyan-600',
-                                                };
-
-                                                return (
-                                                    <div key={doc.id} className="relative flex flex-col bg-white border border-slate-200 rounded-[4px] p-5 hover:border-[#6B3CD2]/40 hover:shadow-md transition-all duration-200">
-                                                        <div className={`w-11 h-11 rounded-[4px] flex items-center justify-center mb-4 border-2 ${iconCls[doc.color] || 'bg-slate-100 border-slate-200 text-slate-500'}`}>
-                                                            <FileText size={20} />
-                                                        </div>
-                                                        <h4 className="font-black text-slate-800 text-[12px] mb-0.5 uppercase tracking-tight truncate">{doc.title}</h4>
-                                                        <p className="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-wide">{doc.subtitle}</p>
-                                                        <p className="text-[11px] text-slate-600 font-medium leading-tight mb-4 line-clamp-2 h-8">{doc.desc}</p>
-
-                                                        <div className="mt-auto">
-                                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold uppercase tracking-wide mb-3">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse flex-shrink-0"></span>
-                                                                Prêt à générer
-                                                            </span>
-                                                            <button
-                                                                disabled={isGenerating}
-                                                                onClick={() => handleDocAction(doc)}
-                                                                className={`w-full py-2.5 rounded-[4px] font-bold text-[11px] uppercase tracking-widest border-2 border-[#6B3CD2]/30 text-[#6B3CD2] bg-white hover:bg-[#6B3CD2] hover:text-white hover:border-[#6B3CD2] transition-all flex items-center justify-center gap-2 ${isGenerating ? 'opacity-60 cursor-not-allowed' : ''}`}
-                                                            >
-                                                                {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <PenTool size={14} />}
-                                                                {isGenerating ? 'Génération...' : doc.btnText}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    {/* Section 2: Documents à signer */}
-                                    <div className="fiche-section">
-                                        <div className="fiche-section-title">
-                                            <span className="fiche-section-num">2</span>
-                                            <span className="fiche-section-label">Documents à Signer</span>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                            {ADMIN_DOCS.filter(d => d.btnText === 'Signer').map(doc => (
-                                                <div key={doc.id} className="relative flex items-start gap-5 bg-white border border-slate-200 rounded-[4px] p-5 hover:border-[#6B3CD2]/40 hover:shadow-md transition-all duration-200">
-                                                    <div className={`w-11 h-11 rounded-[4px] flex items-center justify-center border-2 flex-shrink-0 ${
-                                                        doc.color === 'green' ? 'bg-emerald-100 border-emerald-200 text-emerald-700' : 'bg-purple-100 border-purple-200 text-purple-700'
-                                                    }`}>
-                                                        <FileCheck size={20} />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className="font-bold text-slate-900 text-[12px] mb-0.5 uppercase tracking-tight">{doc.title}</h4>
-                                                        <p className="text-[10px] text-slate-400 font-semibold mb-1 uppercase tracking-wide">{doc.subtitle}</p>
-                                                        <p className="text-[11px] text-slate-500 font-medium leading-tight mb-3">{doc.desc}</p>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-bold uppercase tracking-wide">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse flex-shrink-0"></span>
-                                                                Signature requise
-                                                            </span>
-                                                            <button
-                                                                onClick={() => handleDocAction(doc)}
-                                                                className="ml-auto px-5 py-2 rounded-[4px] font-bold text-[11px] uppercase tracking-widest border-2 border-[#6B3CD2]/30 text-[#6B3CD2] bg-white hover:bg-[#6B3CD2] hover:text-white hover:border-[#6B3CD2] transition-all flex items-center gap-2"
-                                                            >
-                                                                <PenTool size={14} />
-                                                                {doc.btnText}
-                                                            </button>
-                                                        </div>
-                                                    </div>
+                        {activeTab === AdmissionTab.TESTS && (
+                            <div className="space-y-6 animate-slide-in">
+                                <div className="bg-white border border-slate-300 rounded-[4px] p-8">
+                                    <h3 className="text-xl font-black text-slate-800 mb-2 flex items-center gap-3">
+                                        <GraduationCap className="text-[#4c1d95]" /> Sélectionnez votre formation
+                                    </h3>
+                                    <p className="text-slate-500 mb-8 ml-9 font-medium">Choisissez la formation pour accéder au test.</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                                        {[
+                                            { id: 'mco', title: 'BTS MCO', subtitle: 'Management Commercial Opérationnel', iconBg: '#dbeafe', iconColor: '#1d4ed8', duration: '~20 min' },
+                                            { id: 'ndrc', title: 'BTS NDRC', subtitle: 'Négociation et Digitalisation de la Relation Client', iconBg: '#d1fae5', iconColor: '#065f46', duration: '~20 min' },
+                                            { id: 'bachelor', title: 'BACHELOR RDC', subtitle: 'Responsable Développement Commercial', iconBg: '#ede9fe', iconColor: '#4c1d95', duration: '~25 min' },
+                                            { id: 'tpntc', title: 'TP NTC', subtitle: 'Titre Pro Négociateur Technico-Commercial', iconBg: '#ffedd5', iconColor: '#9a3412', duration: '~20 min' },
+                                        ].map(f => (
+                                            <div key={f.id} onClick={() => navigate(`/test?formation=${f.id}`)} className="bg-white border border-slate-300 rounded-[4px] p-6 text-center cursor-pointer hover:border-[#4c1d95] hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
+                                                <div className="w-14 h-14 rounded-[4px] mx-auto mb-5 flex items-center justify-center transition-all duration-300 group-hover:scale-105" style={{ background: f.iconBg }}>
+                                                    <GraduationCap size={26} style={{ color: f.iconColor }} />
                                                 </div>
-                                            ))}
-                                        </div>
+                                                <h4 className="font-black text-[#1e293b] text-base mb-1 tracking-tight">{f.title}</h4>
+                                                <p className="text-[10px] text-slate-400 font-medium mb-5 italic leading-relaxed h-8 overflow-hidden">{f.subtitle}</p>
+                                                <span className="inline-block px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-widest text-slate-400 border border-slate-200 bg-slate-50 group-hover:border-[#4c1d95] group-hover:text-[#4c1d95] group-hover:bg-[#f5f3ff] transition-colors">{f.duration}</span>
+                                            </div>
+                                        ))}
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === AdmissionTab.QUESTIONNAIRE && (
+                            <div className="animate-slide-in">
+                                <QuestionnaireForm
+                                    initialData={studentData}
+                                    onNext={(data) => {
+                                        setStudentData(data);
+                                        setActiveTab(AdmissionTab.DOCUMENTS);
+                                    }} />
+                            </div>
+                        )}
+
+                        {activeTab === AdmissionTab.DOCUMENTS && (
+                            <div className="animate-fade-in pb-12">
+                                {/* Header */}
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="w-12 h-12 rounded-[4px] bg-[#6B3CD2]/10 flex items-center justify-center text-[#6B3CD2]">
+                                        <Upload size={22} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-[17px] font-black text-slate-900">Documents à téléverser</h2>
+                                        <p className="text-[12px] text-slate-400 font-medium mt-0.5">Téléversez les documents suivants pour compléter votre dossier d'admission</p>
+                                    </div>
+                                </div>
+
+                                {!studentData && (
+                                    <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-[4px] flex items-center gap-3">
+                                        <AlertCircle size={16} className="text-amber-500 flex-shrink-0" />
+                                        <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Veuillez compléter la Fiche Étudiant avant de transmettre vos documents.</p>
+                                    </div>
+                                )}
+
+                                <div className="mb-7">
+                                    <NirAccordion />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+                                    {REQUIRED_DOCUMENTS.map((doc) => {
+                                        const isUploaded = uploadedFiles[doc.id];
+                                        const isUploadingDoc = uploadingFiles[doc.id];
+                                        const Icon = { cv: FileText, cni: Building, lettre: FileText, vitale: Activity, diplome: GraduationCap }[doc.id] || FileText;
+
+                                        return (
+                                            <div
+                                                key={doc.id}
+                                                className={`relative flex flex-col bg-white border rounded-[4px] p-5 transition-all duration-200 ${isUploaded
+                                                        ? 'border-emerald-200 shadow-sm'
+                                                        : 'border-slate-200 hover:border-[#6B3CD2]/30 hover:shadow-md'
+                                                    }`}
+                                            >
+                                                <input
+                                                    type="file"
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-20"
+                                                    disabled={isUploadingDoc || !studentData}
+                                                    onChange={(e) => handleFileChange(e, doc.id)}
+                                                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                                />
+
+                                                {/* Icon */}
+                                                <div className={`w-10 h-10 rounded-[4px] flex items-center justify-center mb-4 border-2 transition-all ${isUploaded
+                                                        ? 'bg-emerald-100 border-emerald-200 text-emerald-600'
+                                                        : 'bg-slate-100 border-slate-200 text-slate-500'
+                                                    }`}>
+                                                    <Icon size={18} />
+                                                </div>
+
+                                                {/* Title + desc */}
+                                                <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-tight mb-1">{doc.title}</h4>
+                                                <p className="text-[11px] text-slate-400 font-medium leading-relaxed mb-4 flex-1">{doc.desc}</p>
+
+                                                {/* Status badge */}
+                                                <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] text-[10px] font-bold uppercase tracking-wide mb-3 self-start ${isUploaded
+                                                        ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                                                        : 'bg-rose-50 border border-rose-200 text-rose-600'
+                                                    }`}>
+                                                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isUploaded ? 'bg-emerald-500' : 'bg-rose-400'}`}></span>
+                                                    {isUploaded ? 'Téléversé' : 'À fournir'}
+                                                </span>
+
+                                                {/* Upload button */}
+                                                <button className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-[4px] font-black text-[11px] uppercase tracking-widest transition-all ${isUploadingDoc
+                                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                        : isUploaded
+                                                            ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white'
+                                                            : 'bg-[#6B3CD2]/10 text-[#6B3CD2] hover:bg-[#6B3CD2] hover:text-white'
+                                                    }`}>
+                                                    {isUploadingDoc
+                                                        ? <><Loader2 size={13} className="animate-spin" /> Envoi…</>
+                                                        : <><Upload size={13} />{isUploaded ? 'Remplacer' : 'Téléverser'}</>
+                                                    }
+                                                </button>
+
+                                                {/* External link */}
+                                                {isUploaded && (studentData as any)?.[`${doc.id}_url`] && (
+                                                    <a
+                                                        href={(studentData as any)[`${doc.id}_url`]}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="mt-2 flex items-center justify-center gap-1.5 text-[10px] font-bold text-slate-400 hover:text-[#6B3CD2] transition-colors z-30"
+                                                    >
+                                                        <ExternalLink size={11} /> Voir le document
+                                                    </a>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
 
                                 {/* Footer */}
-                                <div className="mt-10 pt-8 border-t border-slate-100 flex justify-center">
-                                    <button 
-                                        onClick={() => navigate('/admin-dashboard')}
-                                        className="px-16 py-3.5 bg-[#18162A] text-white rounded-[4px] font-black text-[11px] uppercase tracking-widest hover:bg-black transition-all flex items-center gap-3 shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
-                                    >
-                                        <CheckCircle2 size={18} className="text-emerald-400" />
-                                        Finaliser le dossier complet
-                                        <ArrowRight size={16} />
-                                    </button>
+                                <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl font-black text-slate-900">{uploadedCount}</span>
+                                            <span className="text-[12px] font-medium text-slate-400">/ {REQUIRED_DOCUMENTS.length} documents téléversés</span>
+                                        </div>
+                                        <div className="w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-[#6B3CD2] rounded-full transition-all duration-500"
+                                                style={{ width: `${progressPercent}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            disabled={!studentData}
+                                            onClick={() => setActiveTab(AdmissionTab.ENTREPRISE)}
+                                            className="flex items-center gap-2 px-6 py-2.5 rounded-[4px] bg-[#6B3CD2] text-white font-black text-[11px] uppercase tracking-widest hover:bg-[#5a2eb8] transition-all shadow-md shadow-[#6B3CD2]/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                                        >
+                                            Continuer
+                                            <ArrowRight size={14} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {activeTab === AdmissionTab.ENTRETIEN && (
-                        <div className="animate-slide-in">
-                            <EvaluationGrid
-                                studentData={studentData}
-                                onNext={() => {
-                                    setInterviewCompleted(true);
-                                    setActiveTab(AdmissionTab.PROJET_PROFESSIONNEL);
-                                }}
-                            />
-                        </div>
-                    )}
+                        {activeTab === AdmissionTab.ENTREPRISE && (
+                            <div className="animate-slide-in">
+                                <EntrepriseForm
+                                    onNext={(response?: any) => {
+                                        if (response?.entreprise_info) {
+                                            setStudentData((prev: any) => ({
+                                                ...prev,
+                                                id_entreprise: response.entreprise_info.id,
+                                                entreprise_raison_sociale: response.entreprise_info.raison_sociale
+                                            }));
+                                        }
+                                        setEntrepriseCompleted(true);
+                                        setActiveTab(AdmissionTab.ADMINISTRATIF);
+                                    }}
+                                    studentRecordId={studentData?.record_id || studentData?.id || localStorage.getItem('candidateRecordId')}
+                                />
+                            </div>
+                        )}
 
-                    {activeTab === AdmissionTab.PROJET_PROFESSIONNEL && (
-                        <div className="animate-slide-in">
-                            <ProjetProfessionnel
-                                studentData={studentData}
-                                onNext={() => {
-                                    setProjetProCompleted(true);
-                                    setActiveTab(AdmissionTab.QUESTIONNAIRE);
-                                }}
-                            />
-                        </div>
-                    )}
-                </>
-            )}
+                        {activeTab === AdmissionTab.ADMINISTRATIF && (
+                            <div className="animate-fade-in bg-white rounded-[4px] border border-slate-100 shadow-sm relative overflow-hidden">
+                                <div className="formation-section" style={{ padding: '0 28px 28px' }}>
+                                    {/* Header Administratif */}
+                                    <div style={{ paddingTop: '24px' }}></div>
+                                    <div className="fiche-header">
+                                        <div className="fiche-header-icon !bg-brand/5 !text-brand">
+                                            <Printer size={24} />
+                                        </div>
+                                        <div className="fiche-header-text">
+                                            <h2 className="text-[18.4px] font-black text-[#18162A]">Dossier Administratif</h2>
+                                            <p>Générez et complétez les documents contractuels officiels</p>
+                                        </div>
+                                    </div>
+                                    <div className="fiche-divider"></div>
+
+                                    <div className="space-y-4">
+                                        {/* Section 1: Documents à générer */}
+                                        <div className="fiche-section">
+                                            <div className="fiche-section-title">
+                                                <span className="fiche-section-num">1</span>
+                                                <span className="fiche-section-label">Documents à Générer</span>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                {ADMIN_DOCS.filter(d => d.btnText === 'Générer').map(doc => {
+                                                    const isGenerating = (doc.id === 'renseignements' && isGeneratingFiche) ||
+                                                        (doc.id === 'cerfa' && isGeneratingCerfa) ||
+                                                        (doc.id === 'atre' && isGeneratingAtre) ||
+                                                        (doc.id === 'compte-rendu' && isGeneratingCompteRendu) ||
+                                                        (doc.id === 'convention-apprentissage' && isGeneratingConventionApprentissage) ||
+                                                        (doc.id === 'livret' && isGeneratingLivret);
+
+                                                    const iconCls: Record<string, string> = {
+                                                        orange: 'bg-orange-100 border-orange-200 text-orange-600',
+                                                        blue: 'bg-blue-100 border-blue-200 text-blue-600',
+                                                        emerald: 'bg-emerald-100 border-emerald-200 text-emerald-600',
+                                                        pink: 'bg-pink-100 border-pink-200 text-pink-600',
+                                                        indigo: 'bg-indigo-100 border-indigo-200 text-indigo-600',
+                                                        cyan: 'bg-cyan-100 border-cyan-200 text-cyan-600',
+                                                    };
+
+                                                    return (
+                                                        <div key={doc.id} className="relative flex flex-col bg-white border border-slate-200 rounded-[4px] p-5 hover:border-[#6B3CD2]/40 hover:shadow-md transition-all duration-200">
+                                                            <div className={`w-11 h-11 rounded-[4px] flex items-center justify-center mb-4 border-2 ${iconCls[doc.color] || 'bg-slate-100 border-slate-200 text-slate-500'}`}>
+                                                                <FileText size={20} />
+                                                            </div>
+                                                            <h4 className="font-black text-slate-800 text-[12px] mb-0.5 uppercase tracking-tight truncate">{doc.title}</h4>
+                                                            <p className="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-wide">{doc.subtitle}</p>
+                                                            <p className="text-[11px] text-slate-600 font-medium leading-tight mb-4 line-clamp-2 h-8">{doc.desc}</p>
+
+                                                            <div className="mt-auto">
+                                                                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold uppercase tracking-wide mb-3">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse flex-shrink-0"></span>
+                                                                    Prêt à générer
+                                                                </span>
+                                                                <button
+                                                                    disabled={isGenerating}
+                                                                    onClick={() => handleDocAction(doc)}
+                                                                    className={`w-full py-2.5 rounded-[4px] font-bold text-[11px] uppercase tracking-widest border-2 border-[#6B3CD2]/30 text-[#6B3CD2] bg-white hover:bg-[#6B3CD2] hover:text-white hover:border-[#6B3CD2] transition-all flex items-center justify-center gap-2 ${isGenerating ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                                                >
+                                                                    {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <PenTool size={14} />}
+                                                                    {isGenerating ? 'Génération...' : doc.btnText}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Section 2: Documents à signer */}
+                                        <div className="fiche-section">
+                                            <div className="fiche-section-title">
+                                                <span className="fiche-section-num">2</span>
+                                                <span className="fiche-section-label">Documents à Signer</span>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                {ADMIN_DOCS.filter(d => d.btnText === 'Signer').map(doc => (
+                                                    <div key={doc.id} className="relative flex items-start gap-5 bg-white border border-slate-200 rounded-[4px] p-5 hover:border-[#6B3CD2]/40 hover:shadow-md transition-all duration-200">
+                                                        <div className={`w-11 h-11 rounded-[4px] flex items-center justify-center border-2 flex-shrink-0 ${doc.color === 'green' ? 'bg-emerald-100 border-emerald-200 text-emerald-700' : 'bg-purple-100 border-purple-200 text-purple-700'
+                                                            }`}>
+                                                            <FileCheck size={20} />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-bold text-slate-900 text-[12px] mb-0.5 uppercase tracking-tight">{doc.title}</h4>
+                                                            <p className="text-[10px] text-slate-400 font-semibold mb-1 uppercase tracking-wide">{doc.subtitle}</p>
+                                                            <p className="text-[11px] text-slate-500 font-medium leading-tight mb-3">{doc.desc}</p>
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-bold uppercase tracking-wide">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse flex-shrink-0"></span>
+                                                                    Signature requise
+                                                                </span>
+                                                                <button
+                                                                    onClick={() => handleDocAction(doc)}
+                                                                    className="ml-auto px-5 py-2 rounded-[4px] font-bold text-[11px] uppercase tracking-widest border-2 border-[#6B3CD2]/30 text-[#6B3CD2] bg-white hover:bg-[#6B3CD2] hover:text-white hover:border-[#6B3CD2] transition-all flex items-center gap-2"
+                                                                >
+                                                                    <PenTool size={14} />
+                                                                    {doc.btnText}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="mt-10 pt-8 border-t border-slate-100 flex justify-center">
+                                        <button
+                                            onClick={() => navigate('/admin-dashboard')}
+                                            className="px-16 py-3.5 bg-[#18162A] text-white rounded-[4px] font-black text-[11px] uppercase tracking-widest hover:bg-black transition-all flex items-center gap-3 shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+                                        >
+                                            <CheckCircle2 size={18} className="text-emerald-400" />
+                                            Finaliser le dossier complet
+                                            <ArrowRight size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === AdmissionTab.ENTRETIEN && (
+                            <div className="animate-slide-in">
+                                <EvaluationGrid
+                                    studentData={studentData}
+                                    onNext={() => {
+                                        setInterviewCompleted(true);
+                                        setActiveTab(AdmissionTab.PROJET_PROFESSIONNEL);
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        {activeTab === AdmissionTab.PROJET_PROFESSIONNEL && (
+                            <div className="animate-slide-in">
+                                <ProjetProfessionnel
+                                    studentData={studentData}
+                                    onNext={() => {
+                                        setProjetProCompleted(true);
+                                        setActiveTab(AdmissionTab.QUESTIONNAIRE);
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
         </div>
     );

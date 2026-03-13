@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 
 export const useFilters = (onFilterChange?: () => void) => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterFormation, setFilterFormation] = useState('');
+    const [filterFormation, setFilterFormation] = useState('all');
     const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
     const handleSearchChange = useCallback((val: string) => {

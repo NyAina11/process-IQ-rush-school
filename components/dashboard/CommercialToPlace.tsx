@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, List, LayoutGrid, Eye, CheckCircle2 } from 'lucide-react';
+import React, { useRef, useCallback } from 'react';
+import { Search, List, LayoutGrid, Eye, CheckCircle2, FileUser, FileText, Download, Hash, Phone, Cake, ChevronLeft, ChevronRight } from 'lucide-react';
 import Button from '../ui/Button';
 import Pagination from '../ui/Pagination';
 
@@ -17,7 +17,18 @@ interface CommercialToPlaceProps {
     handleViewDetails: (id: string) => void;
     getC: (raw: any) => any;
     isPlaced: (raw: any) => boolean;
+    onPlacer?: (student: any) => void;
 }
+
+const calculateAge = (birthDate: string) => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+};
 
 const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
     candidates,
@@ -32,20 +43,72 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
     itemsPerPage,
     handleViewDetails,
     getC,
-    isPlaced
+    isPlaced,
+    onPlacer
 }) => {
+    const tableScrollRef = useRef<HTMLDivElement>(null);
+    const scrollAnimRef = useRef<number | null>(null);
+
+    const startScroll = useCallback((direction: 'left' | 'right') => {
+        const el = tableScrollRef.current;
+        if (!el) return;
+        const speed = 6;
+        const step = () => {
+            el.scrollLeft += direction === 'right' ? speed : -speed;
+            scrollAnimRef.current = requestAnimationFrame(step);
+        };
+        scrollAnimRef.current = requestAnimationFrame(step);
+    }, []);
+
+    const stopScroll = useCallback(() => {
+        if (scrollAnimRef.current !== null) {
+            cancelAnimationFrame(scrollAnimRef.current);
+            scrollAnimRef.current = null;
+        }
+    }, []);
+
+    const availableFormations = [
+        'BTS MCO A',
+        'BTS MCO 2',
+        'BTS NDRC 1',
+        'BTS COM',
+        'Titre Pro NTC',
+        'Titre Pro NTC B (rentrée decalée)',
+        'Bachelor RDC'
+    ];
+
     const filteredStudents = (candidates || []).filter(c => !isPlaced(c)).filter(raw => {
         if (!raw) return false;
-        const c = getC(raw);
-        if (!c) return false;
+        const studentInfo = getC(raw);
+        if (!studentInfo) return false;
 
         const searchLower = (searchQuery || '').toLowerCase();
-        const fullName = String(c.nom || '') + ' ' + String(c.prenom || '');
-        const matchesSearch = fullName.toLowerCase().includes(searchLower) ||
-            String(c.email || '').toLowerCase().includes(searchLower) ||
-            String(c.telephone || '').includes(searchQuery);
-        const matchesFormation = !filterFormation || String(c.formation || '').toLowerCase().includes(filterFormation.toLowerCase());
-        return matchesSearch && matchesFormation;
+        const fullName = `${studentInfo.nom || ''} ${studentInfo.prenom || ''}`.toLowerCase();
+        const email = (studentInfo.email || '').toLowerCase();
+        const formation = (studentInfo.formation || '').toLowerCase();
+        const telephone = String(studentInfo.telephone || '').toLowerCase();
+        const numInscription = String(studentInfo.numero_inscription || '').toLowerCase();
+
+        // Search match
+        const matchesSearch = fullName.includes(searchLower) ||
+            email.includes(searchLower) ||
+            formation.includes(searchLower) ||
+            telephone.includes(searchLower) ||
+            numInscription.includes(searchLower);
+
+        if (!matchesSearch) return false;
+
+        // Formation filter match
+        if (filterFormation && filterFormation !== 'all' && studentInfo.formation !== filterFormation) {
+            return false;
+        }
+
+        return true;
+    }).sort((a, b) => {
+        const numA = parseInt(getC(a).numero_inscription || '0', 10);
+        const numB = parseInt(getC(b).numero_inscription || '0', 10);
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        return (getC(a).numero_inscription || '').localeCompare(getC(b).numero_inscription || '');
     });
 
     const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
@@ -53,6 +116,17 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
+
+    const handleDownload = (element: any, url: string, filename: string) => {
+        if (!url) return;
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename || 'document';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
@@ -80,7 +154,7 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors duration-300" size={22} />
                         <input
                             type="text"
-                            placeholder="Rechercher un candidat..."
+                            placeholder="Rechercher par nom, email, téléphone ou n° inscription..."
                             className="w-full pl-14 pr-6 py-4 bg-slate-50/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-rose-500 focus:shadow-lg focus:shadow-rose-500/10 outline-none transition-all duration-300 font-bold text-slate-700 placeholder:text-slate-400"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -92,11 +166,10 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
                             value={filterFormation}
                             onChange={(e) => setFilterFormation(e.target.value)}
                         >
-                            <option value="">Toutes formations</option>
-                            <option value="mco">BTS MCO</option>
-                            <option value="ndrc">BTS NDRC</option>
-                            <option value="bachelor">Bachelor RDC</option>
-                            <option value="ntc">TP NTC</option>
+                            <option value="all">Toutes formations</option>
+                            {availableFormations.map(f => (
+                                <option key={f} value={f}>{f}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -109,17 +182,38 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
                     </button>
                 </div>
             </div>
-
             {viewMode === 'table' ? (
-                <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-2xl overflow-hidden">
-                    <div className="overflow-x-auto">
+                <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-2xl overflow-hidden relative group/table">
+                    {/* Left scroll zone */}
+                    <div
+                        className="absolute left-0 top-0 bottom-0 w-12 z-10 flex items-center justify-start pl-1 opacity-0 group-hover/table:opacity-100 transition-opacity cursor-w-resize"
+                        style={{ background: 'linear-gradient(to right, rgba(244,63,94,0.1), transparent)' }}
+                        onMouseEnter={() => startScroll('left')}
+                        onMouseLeave={stopScroll}
+                    >
+                        <ChevronLeft size={24} className="text-rose-500" strokeWidth={3} />
+                    </div>
+                    {/* Right scroll zone */}
+                    <div
+                        className="absolute right-0 top-0 bottom-0 w-12 z-10 flex items-center justify-end pr-1 opacity-0 group-hover/table:opacity-100 transition-opacity cursor-e-resize"
+                        style={{ background: 'linear-gradient(to left, rgba(244,63,94,0.1), transparent)' }}
+                        onMouseEnter={() => startScroll('right')}
+                        onMouseLeave={stopScroll}
+                    >
+                        <ChevronRight size={24} className="text-rose-500" strokeWidth={3} />
+                    </div>
+
+                    <div className="overflow-x-auto no-scrollbar" ref={tableScrollRef}>
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50/50 border-b border-slate-100">
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Formation</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Étudiant</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Ville</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Actions</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">N° Inscription</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Étudiant</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Formation</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400 text-center">Âge / Tél</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400 text-center">Docs</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Ville</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -128,27 +222,83 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
                                     return (
                                         <tr key={c.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
                                             <td className="px-8 py-6">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${c.formation.includes('MCO') ? 'bg-blue-50 text-blue-600' :
-                                                    c.formation.includes('NDRC') ? 'bg-emerald-50 text-emerald-600' :
-                                                        c.formation.includes('RDC') ? 'bg-purple-50 text-purple-600' : 'bg-orange-50 text-orange-600'
-                                                    }`}>
-                                                    {c.formation}
-                                                </span>
+                                                <div className="w-10 h-10 rounded-[4px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-[10px] uppercase shadow-inner">
+                                                    {c.numero_inscription || "N/A"}
+                                                </div>
                                             </td>
                                             <td className="px-8 py-6">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-500 text-xs"> {c.nom[0]}{c.prenom[0]} </div>
+                                                    <div className="w-10 h-10 rounded-[4px] bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-slate-500 text-xs"> {String(c.nom || '?')[0]}{String(c.prenom || '?')[0]} </div>
                                                     <div>
-                                                        <div className="text-sm font-black text-slate-800">{c.nom} {c.prenom}</div>
+                                                        <div className="text-sm font-black text-slate-800 tracking-tight">{c.nom} {c.prenom}</div>
                                                         <div className="text-[10px] font-bold text-slate-400">{c.email}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="inline-flex items-center px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-500 border border-slate-100 text-[10px] font-black uppercase tracking-wider">
+                                                    {c.formation}
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                                                        <Phone size={12} className="text-rose-500" strokeWidth={3} />
+                                                        {c.telephone || "N/A"}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
+                                                        <Cake size={11} className="text-rose-400" />
+                                                        {calculateAge(c.date_naissance) ? `${calculateAge(c.date_naissance)} ans` : "N/A"}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">CV</span>
+                                                        {c.has_cv ? (
+                                                            <button 
+                                                                onClick={() => handleDownload(raw, c.cv_url, c.cv_name)}
+                                                                className="w-8 h-8 rounded-[4px] bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all border border-rose-100 shadow-sm"
+                                                                title="Télécharger le CV"
+                                                            >
+                                                                <FileUser size={14} strokeWidth={2.5} />
+                                                            </button>
+                                                        ) : (
+                                                            <div className="w-8 h-8 rounded-[4px] bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100" title="CV non disponible">
+                                                                <FileUser size={14} strokeWidth={2.5} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Lettre</span>
+                                                        {c.has_lettre_motivation ? (
+                                                            <button 
+                                                                onClick={() => handleDownload(raw, c.lettre_motivation_url, c.lettre_motivation_name)}
+                                                                className="w-8 h-8 rounded-[4px] bg-orange-50 text-orange-600 flex items-center justify-center hover:bg-orange-600 hover:text-white transition-all border border-orange-100 shadow-sm"
+                                                                title="Télécharger la lettre de motivation"
+                                                            >
+                                                                <FileText size={14} strokeWidth={2.5} />
+                                                            </button>
+                                                        ) : (
+                                                            <div className="w-8 h-8 rounded-[4px] bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100" title="Lettre non disponible">
+                                                                <FileText size={14} strokeWidth={2.5} />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-8 py-6 text-sm font-bold text-slate-600">{c.ville}</td>
                                             <td className="px-8 py-6 text-right">
                                                 <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => handleViewDetails(c.id)} className="p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all"> <Eye size={18} /> </button>
-                                                    <button className="p-2 bg-rose-500 rounded-xl shadow-md text-white hover:bg-rose-600 transition-all"> <CheckCircle2 size={18} /> </button>
+                                                    <button onClick={() => handleViewDetails(c.id)} className="p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all" title="Détails"> <Eye size={18} /> </button>
+                                                    <button 
+                                                        onClick={() => onPlacer?.(raw)}
+                                                        className="p-2 bg-emerald-500 rounded-xl shadow-lg shadow-emerald-500/20 text-white hover:bg-emerald-600 transition-all scale-110"
+                                                        title="Placer l'étudiant (Fiche Entreprise)"
+                                                    > 
+                                                        <CheckCircle2 size={18} strokeWidth={3} /> 
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -163,36 +313,63 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
                     {paginatedStudents.map((raw) => {
                         const c = getC(raw);
                         return (
-                            <div key={c.id} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group relative overflow-hidden">
+                            <div key={c.id} className="bg-white rounded-none p-7 border border-slate-200 hover:shadow-xl transition-all group relative overflow-hidden flex flex-col">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-rose-500/10 transition-colors"></div>
                                 <div className="flex justify-between items-start mb-6 relative z-10">
-                                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-rose-500/20">
-                                        {c.nom[0]}{c.prenom[0]}
+                                    <div className="w-12 h-12 rounded-[4px] bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-lg shadow-sm">
+                                        {c.numero_inscription ? c.numero_inscription.slice(-4) : `${String(c.nom || '?')[0]}${String(c.prenom || '?')[0]}`}
                                     </div>
-                                    <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-wider">Hors poste</span>
+                                    <div className="flex flex-col items-end gap-1">
+                                        <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-[4px] text-[9px] font-black uppercase tracking-widest border border-rose-100">Hors poste</span>
+                                        <div className="flex items-center gap-1 font-black text-[9px] text-slate-400 tracking-widest uppercase">
+                                            <Hash size={10} strokeWidth={3} />
+                                            {c.numero_inscription}
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="mb-6 relative z-10">
-                                    <h3 className="text-xl font-black text-slate-800 mb-1">{c.nom} {c.prenom}</h3>
-                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${c.formation.includes('MCO') ? 'bg-blue-50 text-blue-600' :
-                                        c.formation.includes('NDRC') ? 'bg-emerald-50 text-emerald-600' :
-                                            c.formation.includes('RDC') ? 'bg-purple-50 text-purple-600' : 'bg-orange-50 text-orange-600'
-                                        }`}>
+                                    <h3 className="text-lg font-black text-slate-800 mb-1 tracking-tight">{c.nom} {c.prenom}</h3>
+                                    <p className="text-xs text-slate-400 truncate mb-3">{c.email}</p>
+                                    <div className="inline-flex items-center px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-600 border border-slate-200 text-[9px] font-black uppercase tracking-widest">
                                         {c.formation}
-                                    </span>
+                                    </div>
                                 </div>
-                                <div className="space-y-4 mb-8 relative z-10">
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-slate-400 font-bold uppercase text-[10px] tracking-wider">Localisation</span>
+                                <div className="space-y-4 mb-6 relative z-10 flex-grow">
+                                    <div className="flex items-center justify-between text-xs pb-3 border-b border-slate-50">
+                                        <span className="text-slate-400 font-bold uppercase text-[9px] tracking-widest">Localisation</span>
                                         <span className="text-slate-700 font-bold">{c.ville}</span>
                                     </div>
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-slate-400 font-bold uppercase text-[10px] tracking-wider">Contact</span>
-                                        <span className="text-slate-700 font-bold">{c.telephone}</span>
+                                    <div className="flex items-center justify-between text-xs pb-3 border-b border-slate-50">
+                                        <span className="text-slate-400 font-bold uppercase text-[9px] tracking-widest">Âge</span>
+                                        <span className="text-slate-700 font-bold">{calculateAge(c.date_naissance) ? `${calculateAge(c.date_naissance)} ans` : "N/A"}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs">
+                                        <span className="text-slate-400 font-bold uppercase text-[9px] tracking-widest">Contact</span>
+                                        <span className="text-slate-700 font-bold truncate max-w-[150px]">{c.telephone}</span>
                                     </div>
                                 </div>
-                                <div className="flex gap-3 relative z-10">
-                                    <Button variant="secondary" className="flex-1" onClick={() => handleViewDetails(c.id)} leftIcon={<Eye size={18} />}> Détails </Button>
-                                    <Button variant="danger" className="flex-1" leftIcon={<CheckCircle2 size={18} />}> Placer </Button>
+
+                                <div className="flex items-center gap-2 mb-8 p-3 bg-slate-50 border border-slate-100 rounded-[4px] relative z-10">
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mr-auto">Documents:</span>
+                                    <button 
+                                        disabled={!c.has_cv}
+                                        onClick={() => handleDownload(raw, c.cv_url, c.cv_name)}
+                                        className={`w-9 h-9 rounded-[4px] transition-all flex items-center justify-center ${c.has_cv ? 'bg-rose-50 text-rose-500 border border-rose-100 hover:bg-rose-500 hover:text-white shadow-sm' : 'bg-slate-100 text-slate-300 border border-slate-200'}`}
+                                    >
+                                        <FileUser size={16} strokeWidth={2.5} />
+                                    </button>
+                                    <button 
+                                        disabled={!c.has_lettre_motivation}
+                                        onClick={() => handleDownload(raw, c.lettre_motivation_url, c.lettre_motivation_name)}
+                                        className={`w-9 h-9 rounded-[4px] transition-all flex items-center justify-center ${c.has_lettre_motivation ? 'bg-orange-50 text-orange-600 border border-orange-100 hover:bg-orange-600 hover:text-white shadow-sm' : 'bg-slate-100 text-slate-300 border border-slate-200'}`}
+                                    >
+                                        <FileText size={16} strokeWidth={2.5} />
+                                    </button>
+                                </div>
+
+                                <div className="flex gap-0.5 relative z-10">
+                                    <Button variant="secondary" className="flex-1 font-black !rounded-none !py-4" onClick={() => handleViewDetails(c.id)} leftIcon={<Eye size={18} strokeWidth={3} />}> Détails </Button>
+                                    <Button variant="danger" className="flex-1 font-black !bg-rose-500 hover:!bg-rose-600 shadow-lg shadow-rose-500/20 !rounded-none !py-4" onClick={() => onPlacer?.(raw)} leftIcon={<CheckCircle2 size={18} strokeWidth={3} />}> Placer </Button>
                                 </div>
                             </div>
                         );

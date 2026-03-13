@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import {
     Loader2
 } from 'lucide-react';
-import { ViewId } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { ViewId, AdmissionTab } from '../types';
 import { useAppStore } from '../store/useAppStore';
 
 import CandidateDetailsModal from './dashboard/CandidateDetailsModal';
@@ -17,10 +18,13 @@ import { useFilters } from '../hooks/useFilters';
 
 interface DashboardViewProps {
     activeSubView: ViewId;
+    onSelectStudent?: (student: any, tab: AdmissionTab) => void;
 }
 
-const DashboardView: React.FC<DashboardViewProps> = ({ activeSubView }) => {
+const DashboardView: React.FC<DashboardViewProps> = ({ activeSubView, onSelectStudent }) => {
     const { candidates, loading, refresh } = useCandidates();
+    const navigate = useNavigate();
+    const { showToast } = useAppStore();
 
     const {
         searchQuery,
@@ -75,6 +79,15 @@ const DashboardView: React.FC<DashboardViewProps> = ({ activeSubView }) => {
         entreprisesPartenaires: new Set(studentsPlaced.map(s => getC(s).entreprise)).size
     };
 
+    const handleRedirectionToForm = (student: any) => {
+        if (!onSelectStudent) {
+            showToast("Navigation non disponible", "error");
+            return;
+        }
+        onSelectStudent(student, AdmissionTab.ENTREPRISE);
+        navigate('/admission');
+    };
+
     const renderMainContent = () => {
         if (loading) {
             return (
@@ -101,6 +114,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ activeSubView }) => {
                     getC={getC}
                     isPlaced={isPlaced}
                     statsToPlace={statsToPlace}
+                    onPlacer={handleRedirectionToForm}
                 />
             );
         }

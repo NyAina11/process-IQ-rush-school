@@ -38,6 +38,16 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
     isPlaced,
     statsPlaced
 }) => {
+    const availableFormations = [
+        'BTS MCO A',
+        'BTS MCO 2',
+        'BTS NDRC 1',
+        'BTS COM',
+        'Titre Pro NTC',
+        'Titre Pro NTC B (rentrée decalée)',
+        'Bachelor RDC'
+    ];
+
     const filteredStudents = (candidates || []).filter(c => isPlaced(c)).filter(raw => {
         if (!raw) return false;
         const c = getC(raw);
@@ -48,7 +58,8 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
         const matchesSearch = fullName.toLowerCase().includes(searchLower) ||
             String(c.email || '').toLowerCase().includes(searchLower) ||
             String(c.telephone || '').includes(searchQuery);
-        const matchesFormation = !filterFormation || String(c.formation || '').toLowerCase().includes(filterFormation.toLowerCase());
+        const formation = String(c.formation || '').toLowerCase();
+        const matchesFormation = filterFormation === 'all' || !filterFormation || formation === filterFormation.toLowerCase() || formation.includes(filterFormation.toLowerCase());
         return matchesSearch && matchesFormation;
     });
 
@@ -124,11 +135,10 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
                             value={filterFormation}
                             onChange={(e) => setFilterFormation(e.target.value)}
                         >
-                            <option value="">Toutes formations</option>
-                            <option value="mco">BTS MCO</option>
-                            <option value="ndrc">BTS NDRC</option>
-                            <option value="bachelor">Bachelor RDC</option>
-                            <option value="ntc">TP NTC</option>
+                            <option value="all">Toutes formations</option>
+                            {availableFormations.map(f => (
+                                <option key={f} value={f}>{f}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
