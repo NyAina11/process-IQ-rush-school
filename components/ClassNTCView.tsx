@@ -1082,7 +1082,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                             </>
                                         ) : paginatedItems.length === 0 ? (
                                             <tr>
-                                                <td colSpan={6} className="px-8 py-32 text-center">
+                                                <td colSpan={8} className="px-8 py-32 text-center">
                                                     <div className="w-20 h-20 bg-[#f4f6fb] border border-[#e2e8f0] flex items-center justify-center mx-auto mb-6">
                                                         <Search size={32} className="text-slate-300" />
                                                     </div>
@@ -1090,7 +1090,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                     <p className="text-slate-400 font-medium">Réessayez avec d'autres termes de recherche.</p>
                                                 </td>
                                             </tr>
-                                        ) : filteredStudents.map((rawStudent) => {
+                                        ) : paginatedItems.map((rawStudent) => {
                                             const student = getC(rawStudent);
                                             return (
                                                 <tr key={student.id} className="hover:bg-[#f4f6fb] transition-colors border-b border-[#e2e8f0] last:border-b-0">
