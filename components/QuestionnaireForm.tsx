@@ -536,35 +536,9 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                     hasError={hasSectionError(sectionDefs[3].fields)}
                 >
                     <div className="space-y-4">
-                        <Select label="Dernière année ou classe suivie" required error={errors.derniere_classe?.message} {...register('derniere_classe')} options={LAST_CLASS_OPTIONS} />
-                        <Input label="Intitulé précis du dernier diplôme préparé" placeholder="Ex : BTS Management Commercial Opérationnel" {...register('intitulePrecisDernierDiplome')} />
-
-                        <div>
-                            <FieldLabel required>Niveau d'études le plus élevé obtenu</FieldLabel>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
-                                {[
-                                    { t: 'Aucun', v: 'aucun' },
-                                    { t: 'CAP / BEP', v: 'cap-bep' },
-                                    { t: 'BAC', v: 'bac' },
-                                    { t: 'BAC + 2', v: 'bac2' },
-                                    { t: 'BAC + 3 / 4', v: 'bac34' },
-                                    { t: 'BAC + 5 et +', v: 'bac5' }
-                                ].map(opt => (
-                                    <label key={opt.v} className={`flex items-center gap-2.5 p-3 rounded-[4px] border-2 cursor-pointer transition-all ${
-                                        formValues.bac === opt.v
-                                            ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]'
-                                            : 'border-slate-200 text-slate-500 hover:border-[#6B3CD2]/30'
-                                    }`}>
-                                        <input type="radio" value={opt.v} className="hidden" {...register('bac')} />
-                                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${formValues.bac === opt.v ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
-                                            {formValues.bac === opt.v && <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]" />}
-                                        </div>
-                                        <span className="text-[11px] font-bold">{opt.t}</span>
-                                    </label>
-                                ))}
-                            </div>
-                            {errors.bac && <p className="mt-1.5 text-rose-500 text-[10px] font-bold">{errors.bac.message}</p>}
-                        </div>
+                        <Select label="Dernière année ou classe suivie" required error={errors.derniere_classe?.message} {...register('derniere_classe')} options={LAST_CLASS_OPTIONS} placeholder="Sélectionnez" />
+                        <Select label="Intitulé précis du dernier diplôme ou titre préparé" {...register('intitulePrecisDernierDiplome')} options={DETAILED_DIPLOMA_OPTIONS} placeholder="Sélectionnez" />
+                        <Select label="Diplôme ou titre le plus élevé obtenu" required error={errors.bac?.message} {...register('bac')} options={HIGHEST_DIPLOMA_OPTIONS} placeholder="Sélectionnez votre diplôme" />
                     </div>
                 </SectionAccordion>
 
