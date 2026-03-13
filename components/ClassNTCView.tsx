@@ -28,7 +28,8 @@ import {
     CreditCard,
     FileUser,
     GraduationCap,
-    HeartPulse
+    HeartPulse,
+    Award
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
@@ -1283,6 +1284,22 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 ) : (
                                                                     <div className="w-8 h-8 rounded-[4px] bg-[#f4f6fb] text-slate-300 flex items-center justify-center border border-[#e2e8f0]">
                                                                         <BookOpen size={14} />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">Cert.</span>
+                                                                {student.has_certificat_scolarite ? (
+                                                                    <button
+                                                                        onClick={() => handleDownload(student.certificat_scolarite_url || rawStudent.fields?.["certificat de scolarité"]?.[0]?.url, student.certificat_scolarite_name || rawStudent.fields?.["certificat de scolarité"]?.[0]?.filename)}
+                                                                        className="w-8 h-8 rounded-[4px] bg-[#fef3c7] text-[#b45309] flex items-center justify-center hover:bg-[#b45309] hover:text-white transition-all border border-[#fcd34d]"
+                                                                        title="Télécharger Certificat de Scolarité"
+                                                                    >
+                                                                        <Award size={14} />
+                                                                    </button>
+                                                                ) : (
+                                                                    <div className="w-8 h-8 rounded-[4px] bg-[#f4f6fb] text-slate-300 flex items-center justify-center border border-[#e2e8f0]">
+                                                                        <Award size={14} />
                                                                     </div>
                                                                 )}
                                                             </div>
