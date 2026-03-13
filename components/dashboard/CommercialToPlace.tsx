@@ -1,5 +1,5 @@
 import React, { useRef, useCallback } from 'react';
-import { Search, List, LayoutGrid, Eye, CheckCircle2, FileUser, FileText, Download, Hash, Phone, Cake, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, List, LayoutGrid, Eye, CheckCircle2, FileUser, FileText, Download, Hash, Phone, Cake, ChevronLeft, ChevronRight, HeartPulse } from 'lucide-react';
 import Button from '../ui/Button';
 import Pagination from '../ui/Pagination';
 
@@ -283,6 +283,22 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
                                                         ) : (
                                                             <div className="w-8 h-8 rounded-[4px] bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100" title="Lettre non disponible">
                                                                 <FileText size={14} strokeWidth={2.5} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Vitale</span>
+                                                        {c.has_vitale ? (
+                                                            <button 
+                                                                onClick={() => handleDownload(raw, c.vitale_url, c.vitale_name)}
+                                                                className="w-8 h-8 rounded-[4px] bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100 shadow-sm"
+                                                                title="Télécharger la carte vitale"
+                                                            >
+                                                                <HeartPulse size={14} strokeWidth={2.5} />
+                                                            </button>
+                                                        ) : (
+                                                            <div className="w-8 h-8 rounded-[4px] bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100" title="Carte vitale non disponible">
+                                                                <HeartPulse size={14} strokeWidth={2.5} />
                                                             </div>
                                                         )}
                                                     </div>

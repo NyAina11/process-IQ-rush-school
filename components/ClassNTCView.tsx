@@ -27,7 +27,8 @@ import {
     BookOpen,
     CreditCard,
     FileUser,
-    GraduationCap
+    GraduationCap,
+    HeartPulse
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
@@ -1350,6 +1351,22 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 ) : (
                                                                     <div className="w-8 h-8 rounded-[4px] bg-[#f4f6fb] text-slate-300 flex items-center justify-center border border-[#e2e8f0]">
                                                                         <FileText size={14} />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">Vitale</span>
+                                                                {student.has_vitale ? (
+                                                                    <button
+                                                                        onClick={() => handleDownload(student.vitale_url, student.vitale_name)}
+                                                                        className="w-8 h-8 rounded-[4px] bg-[#d1fae5] text-[#065f46] flex items-center justify-center hover:bg-[#065f46] hover:text-white transition-all border border-[#6ee7b7]"
+                                                                        title="Télécharger Carte Vitale"
+                                                                    >
+                                                                        <HeartPulse size={14} />
+                                                                    </button>
+                                                                ) : (
+                                                                    <div className="w-8 h-8 rounded-[4px] bg-[#f4f6fb] text-slate-300 flex items-center justify-center border border-[#e2e8f0]">
+                                                                        <HeartPulse size={14} />
                                                                     </div>
                                                                 )}
                                                             </div>

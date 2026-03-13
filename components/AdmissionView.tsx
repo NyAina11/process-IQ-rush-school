@@ -1359,7 +1359,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                 cv: studentData.has_cv || !!studentData.fields?.['CV'],
                 cni: studentData.has_cni || !!studentData.fields?.['CIN'] || !!studentData.fields?.['cin'],
                 lettre: studentData.has_lettre_motivation || !!studentData.fields?.['lettre de motivation'] || !!studentData.fields?.['lettre'],
-                vitale: studentData.has_vitale || !!studentData.fields?.['Carte Vitale'] || !!studentData.fields?.['vitale'],
+                vitale: studentData.has_vitale || !!studentData.fields?.['Photocopie carte vitale'] || !!studentData.fields?.['Carte Vitale'] || !!studentData.fields?.['vitale'],
                 diplome: studentData.has_diplome || !!studentData.fields?.['dernier diplome'] || !!studentData.fields?.['diplome'],
             });
         } else {
