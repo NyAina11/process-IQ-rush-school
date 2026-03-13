@@ -23,7 +23,11 @@ import {
     AlertCircle,
     RotateCcw,
     PenTool,
-    Info
+    Info,
+    Activity,
+    ChevronDown,
+    ChevronUp,
+    Target
 } from 'lucide-react';
 import Button from './ui/Button';
 import Card from './ui/Card';
@@ -85,8 +89,8 @@ const SuccessModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform transition-all scale-100 animate-slide-up text-center border border-white/20">
-                <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/20">
+            <div className="bg-white rounded-[4px] p-8 max-w-sm w-full shadow-2xl transform transition-all scale-100 animate-slide-up text-center border border-[#e2e8f0]">
+                <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-[4px] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/20">
                     <CheckCircle2 size={40} strokeWidth={2.5} />
                 </div>
                 <h3 className="text-2xl font-bold text-slate-800 mb-2">Félicitations !</h3>
@@ -101,24 +105,84 @@ const SuccessModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
     );
 };
 
+const NirAccordion = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div className="bg-white border border-[#6B3CD2]/10 rounded-[4px] mb-8 overflow-hidden transition-all shadow-sm">
+            <div 
+                className="flex items-center gap-4 p-5 cursor-pointer hover:bg-slate-50 transition-all"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <div className="w-9 h-9 bg-brand/5 text-brand rounded-[4px] border border-brand/10 flex items-center justify-center shrink-0">
+                    <Info size={18} />
+                </div>
+                <div className="flex-1">
+                    <h4 className="text-[14px] font-bold text-[#18162A]">Comment récupérer son NIR (Numéro de Sécurité Sociale) ?</h4>
+                    <p className="text-[12px] text-slate-400 font-medium">Cliquez pour voir les étapes à suivre</p>
+                </div>
+                <div className={`text-slate-300 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                    <ChevronDown size={20} />
+                </div>
+            </div>
+            {isOpen && (
+                <div className="p-5 pt-0 border-t border-slate-50 animate-fade-in">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+                        <div className="bg-slate-50 p-4 rounded-[4px] border border-slate-100">
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand/10 text-brand text-[12px] font-bold mb-3">1</span>
+                            <h5 className="text-[13px] font-bold text-slate-800 mb-1">Carte Vitale</h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed">Le NIR est inscrit au dos de votre carte Vitale (15 chiffres).</p>
+                        </div>
+                        <div className="bg-slate-50 p-4 rounded-[4px] border border-slate-100">
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand/10 text-brand text-[12px] font-bold mb-3">2</span>
+                            <h5 className="text-[13px] font-bold text-slate-800 mb-1">Attestation Ameli</h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed">Connectez-vous sur <a href="https://ameli.fr" target="_blank" rel="noreferrer" className="text-brand hover:underline font-bold">ameli.fr</a> pour la télécharger.</p>
+                        </div>
+                        <div className="bg-slate-50 p-4 rounded-[4px] border border-slate-100">
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand/10 text-brand text-[12px] font-bold mb-3">3</span>
+                            <h5 className="text-[13px] font-bold text-slate-800 mb-1">Bulletins de paye</h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed">Votre NIR apparaît sur vos bulletins si vous avez déjà travaillé.</p>
+                        </div>
+                        <div className="bg-slate-50 p-4 rounded-[4px] border border-slate-100">
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand/10 text-brand text-[12px] font-bold mb-3">4</span>
+                            <h5 className="text-[13px] font-bold text-slate-800 mb-1">CPAM</h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed">Contactez votre CPAM avec une pièce d'identité en dernier recours.</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 bg-brand/5 p-3 rounded-[4px] border border-brand/10 text-[11px] text-brand font-medium">
+                        <Info size={14} className="shrink-0" />
+                        <p>Le NIR est composé de 13 chiffres + une clé de 2 chiffres (ex: 1 85 12 75 108 123 45)</p>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const StepItem = ({ step, label, isActive, isCompleted }: { step: number, label: string, isActive: boolean, isCompleted: boolean }) => (
-    <div className="flex flex-col items-center gap-3 relative z-10 group">
-        <div className={`w-14 h-14 rounded-2xl border-2 flex items-center justify-center font-black text-lg transition-all duration-500 ${isCompleted
-            ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-            : isActive
-                ? 'bg-blue-600 border-blue-600 text-white scale-110 shadow-2xl shadow-blue-600/30'
-                : 'bg-slate-50 border-slate-100 text-slate-300'
-            }`}>
-            {isCompleted ? <CheckCircle2 size={24} strokeWidth={3} /> : step}
+    <div className="flex flex-col items-center gap-2.5 relative z-10">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-[13px] transition-all duration-300 ${
+            isCompleted
+                ? 'bg-emerald-500 border-2 border-emerald-500 text-white shadow-md shadow-emerald-200'
+                : isActive
+                    ? 'bg-[#4c1d95] border-2 border-[#4c1d95] text-white shadow-lg shadow-[#4c1d95]/25 ring-4 ring-[#4c1d95]/15'
+                    : 'bg-white border-2 border-slate-200 text-slate-400'
+        }`}>
+            {isCompleted ? (
+                <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
+                    <path d="M4 10l4.5 4.5 8-8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+            ) : step}
         </div>
-        <div className={`text-[10px] font-black uppercase tracking-[0.1em] transition-colors duration-300 ${isActive ? 'text-blue-600' : isCompleted ? 'text-emerald-600' : 'text-slate-400'}`}>
-            {label}
-        </div>
+        <span className={`text-[9px] font-black uppercase tracking-[0.12em] transition-colors duration-300 ${
+            isActive ? 'text-[#4c1d95]' : isCompleted ? 'text-emerald-600' : 'text-slate-400'
+        }`}>{label}</span>
     </div>
 );
 
 const StepLine = ({ isCompleted }: { isCompleted: boolean }) => (
-    <div className={`w-16 h-1 mx-2 rounded-full transition-colors duration-500 ${isCompleted ? 'bg-emerald-500' : 'bg-slate-100'}`}></div>
+    <div className="relative w-12 h-[2px] mx-1 mb-[34px] rounded-full overflow-hidden bg-slate-200">
+        <div className={`absolute inset-y-0 left-0 rounded-full bg-emerald-400 transition-all duration-500 ${isCompleted ? 'w-full' : 'w-0'}`} />
+    </div>
 );
 
 const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: () => void }) => {
@@ -386,18 +450,15 @@ const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: ()
     };
 
     return (
-        <div className="space-y-8">
-            <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="px-8 py-6 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex justify-between items-center">
+        <div className="space-y-6">
+            <div className="bg-white border border-[#e2e8f0] overflow-hidden">
+                <div className="flex justify-between items-center px-8 py-6 border-b border-black/10">
                     <div>
-                        <h2 className="text-xl font-bold">CR d'entretien / Grille d'évaluation</h2>
-                        <p className="text-slate-400 text-sm">Évaluation des compétences et du savoir-être</p>
+                        <h2 className="text-xl font-bold text-black">CR d'entretien / Grille d'évaluation</h2>
                     </div>
-                    <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-3">
-                        <img src="/images/logo-process-iq.png" alt="Process IQ" className="h-8 w-auto" />
-                        <span className="text-lg font-bold text-white tracking-tight">ProcessIQ</span>
-                    </div>
+                    <div className="text-right leading-none">
+                        <div className="font-bold text-sm tracking-widest text-[#1a113e]">RUSH</div>
+                        <div className="text-[10px] font-bold tracking-widest text-black/50">SCHOOL</div>
                     </div>
                 </div>
 
@@ -414,139 +475,147 @@ const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: ()
                         </div>
                     </div>
 
-                    <div className={`bg-slate-50 p-6 rounded-2xl border transition-all ${errors.formation ? 'border-rose-300 ring-4 ring-rose-500/10' : 'border-slate-100'}`}>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-4 ml-1">Formation visée <span className="text-red-500">*</span></label>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div className="bg-white">
+                        <label className="block text-[13px] font-semibold text-black mb-2.5">Formation : <span className="text-red-500">*</span></label>
+                        <div className="flex flex-wrap gap-2">
                             {['TP NTC', 'BTS CI', 'BTS COM', 'BTS MCO', 'BTS NDRC', 'BACHELOR RDC'].map((f) => (
-                                <label key={f} className={`relative cursor-pointer group`}>
-                                    <input
-                                        type="radio"
-                                        name="formation-eval"
-                                        className="peer sr-only"
-                                        value={f}
-                                        checked={evalData.formation === f}
-                                        onChange={(e) => setEvalData({ ...evalData, formation: e.target.value })}
-                                    />
-                                    <div className={`px-4 py-3 rounded-xl border-2 text-center text-xs font-bold transition-all ${evalData.formation === f ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-200'}`}>
-                                        {f}
-                                    </div>
-                                </label>
+                                <button
+                                    key={f}
+                                    type="button"
+                                    onClick={() => setEvalData({ ...evalData, formation: f })}
+                                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-[4px] border transition-all text-[13px]
+                                        ${evalData.formation === f
+                                            ? 'bg-[#6B3CD2] border-[#6B3CD2] text-white font-semibold'
+                                            : 'bg-white border-black/15 text-black hover:border-[#6B3CD2]/40 hover:bg-[#6B3CD2]/5 hover:text-[#6B3CD2]'}
+                                        ${errors.formation && evalData.formation !== f ? 'border-red-300' : ''}`}
+                                >
+                                    <div className={`w-2 h-2 rounded-full border-2 ${evalData.formation === f ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-black/20'}`}></div>
+                                    {f}
+                                </button>
                             ))}
                         </div>
-                        {errors.formation && <p className="mt-2 text-rose-500 text-[10px] font-black uppercase tracking-wider animate-slide-in">Veuillez sélectionner une formation</p>}
+                        {errors.formation && <p className="mt-2 text-red-500 text-[10px] font-bold uppercase tracking-wider">Veuillez sélectionner une formation</p>}
                     </div>
 
-                    <div className="space-y-6">
-                        <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-2 bg-slate-100 rounded-lg text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                            <div className="col-span-7">Critères d'évaluation</div>
-                            <div className="col-span-5 grid grid-cols-5 text-center">
-                                <div>Insuff. (1)</div>
-                                <div>Pass. (2)</div>
-                                <div>Satisf. (3)</div>
-                                <div>T.Satisf (4)</div>
-                                <div>Exc. (5)</div>
-                            </div>
-                        </div>
-
-                        {[
-                            { id: 'critere1', title: 'Savoir-être et présentation', desc: 'Capacité à bien se connaître : ses points forts, ses points de progression, culture générale, curiosité, ouverture aux autres.' },
-                            { id: 'critere2', title: 'Cohérence du projet académique et professionnel', desc: 'Logique de construction du projet d\'orientation, projet professionnel, motivation pour le programme.' },
-                            { id: 'critere3', title: 'Engagements et expérience péri ou extra-scolaires', desc: 'Activités extra-scolaires, richesse des expériences, valorisation des compétences développées.' },
-                            { id: 'critere4', title: 'Expression en Anglais', desc: 'Savoir répondre spontanément à quelques questions en anglais.' }
-                        ].map((c) => (
-                            <div key={c.id} className={`grid grid-cols-1 md:grid-cols-12 gap-6 p-4 rounded-2xl border transition-all ${errors[c.id] ? 'border-rose-300 bg-rose-50/10' : 'border-slate-100 hover:bg-slate-50'}`}>
-                                <div className="md:col-span-7">
-                                    <h4 className={`font-bold text-sm mb-1 ${errors[c.id] ? 'text-rose-600' : 'text-slate-800'}`}>
-                                        {c.title} <span className="text-red-500">*</span>
-                                    </h4>
-                                    <p className="text-xs text-slate-500 leading-relaxed">{c.desc}</p>
-                                </div>
-                                <div className="md:col-span-5 flex flex-col gap-2">
-                                    <div className="flex items-center justify-between md:grid md:grid-cols-5 gap-2">
+                    <div className="bg-white border border-black/10 rounded-[4px] overflow-hidden mb-5">
+                        <table className="w-full border-collapse">
+                            <thead>
+                                <tr>
+                                    <th className="bg-[#6B3CD2] text-white p-3 md:px-4 md:py-3 text-[13px] font-bold text-left border-x border-[#6B3CD2]/10">Critères</th>
+                                    <th className="bg-[#6B3CD2] text-white p-3 md:px-4 md:py-3 text-[12px] font-semibold text-center whitespace-nowrap border-x border-[#6B3CD2]/10 leading-tight">
+                                        Insuffisant<span className="block text-[10.5px] font-normal opacity-70 mt-0.5">(1pt)</span>
+                                    </th>
+                                    <th className="bg-[#6B3CD2] text-white p-3 md:px-4 md:py-3 text-[12px] font-semibold text-center whitespace-nowrap border-x border-[#6B3CD2]/10 leading-tight">
+                                        Passable<span className="block text-[10.5px] font-normal opacity-70 mt-0.5">(2pts)</span>
+                                    </th>
+                                    <th className="bg-[#6B3CD2] text-white p-3 md:px-4 md:py-3 text-[12px] font-semibold text-center whitespace-nowrap border-x border-[#6B3CD2]/10 leading-tight">
+                                        Satisfaisant<span className="block text-[10.5px] font-normal opacity-70 mt-0.5">(3pts)</span>
+                                    </th>
+                                    <th className="bg-[#6B3CD2] text-white p-3 md:px-4 md:py-3 text-[12px] font-semibold text-center whitespace-nowrap border-x border-[#6B3CD2]/10 leading-tight">
+                                        T. Satisfaisant<span className="block text-[10.5px] font-normal opacity-70 mt-0.5">(4pts)</span>
+                                    </th>
+                                    <th className="bg-[#6B3CD2] text-white p-3 md:px-4 md:py-3 text-[12px] font-semibold text-center whitespace-nowrap border-x border-[#6B3CD2]/10 leading-tight">
+                                        Excellent<span className="block text-[10.5px] font-normal opacity-70 mt-0.5">(5pts)</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {[
+                                    { id: 'critere1', title: 'Savoir-être et présentation :', desc: 'Capacité à bien se connaître : ses points forts, ses points de progression et la manière de s\'améliorer, exposer une ou plusieurs réussites personnelles de son choix lors d\'une activité (difficultés surmontées...) montrer comment il travaille sur sa culture générale, sa curiosité, son ouverture aux autres.' },
+                                    { id: 'critere2', title: 'Cohérence du projet académique et professionnel :', desc: 'Capacité à expliquer la logique de construction de son projet d\'orientation en fonction de ses appétences/compétences, capacité à exposer son projet professionnel, motivation à rejoindre le programme à travers des éléments concrets.' },
+                                    { id: 'critere3', title: 'Engagements et expérience péri ou extra-scolaires :', desc: 'Capacité à mettre en avant ses activités/engagements extra scolaires, richesse, profondeur et variété des expériences, capacité à valoriser les compétences développées au cours de ses activités et bénéfices pour son projet professionnel, envie de participer à la vie associative de l\'école et de quelle manière.' },
+                                    { id: 'critere4', title: 'Expression en Anglais :', desc: 'Savoir répondre spontanément à quelques questions en anglais.' }
+                                ].map((c) => (
+                                    <tr key={c.id} className="hover:bg-[#6B3CD2]/[0.03]">
+                                        <td className="p-4 border-b border-black/10 align-top max-w-[400px]">
+                                            <div className="text-[14px] font-semibold text-black mb-1.5 flex items-center gap-1">
+                                                {c.title}
+                                                {errors[c.id] && <AlertCircle size={14} className="text-red-500" />}
+                                            </div>
+                                            <div className="text-[12.5px] text-black/60 leading-relaxed">{c.desc}</div>
+                                        </td>
                                         {[1, 2, 3, 4, 5].map((score) => (
-                                            <label key={score} className="cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    name={c.id}
-                                                    className="peer sr-only"
-                                                    value={score}
-                                                    checked={evalData[c.id as keyof typeof evalData] === score}
-                                                    onChange={() => handleScoreChange(c.id, score)}
-                                                />
-                                                <div className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center font-bold text-sm transition-all ${evalData[c.id as keyof typeof evalData] === score ? 'bg-emerald-500 border-emerald-500 text-white shadow-md' : errors[c.id] ? 'bg-white border-rose-200 text-rose-300 hover:border-emerald-200' : 'bg-white border-slate-200 text-slate-400 hover:border-emerald-200'}`}>
+                                            <td key={score} className="p-4 border-b border-black/10 align-middle text-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleScoreChange(c.id, score)}
+                                                    className={`w-9 h-9 rounded-[4px] inline-flex items-center justify-center text-[13.5px] font-semibold transition-all border
+                                                        ${evalData[c.id as keyof typeof evalData] === score
+                                                            ? 'bg-[#6B3CD2] border-[#6B3CD2] text-white'
+                                                            : 'bg-white border-black/15 text-black hover:border-[#6B3CD2]/40 hover:text-[#6B3CD2]'}
+                                                    `}
+                                                >
                                                     {score}
-                                                </div>
-                                            </label>
+                                                </button>
+                                            </td>
                                         ))}
-                                    </div>
-                                    {errors[c.id] && <p className="text-rose-500 text-[10px] font-black uppercase tracking-wider animate-slide-in ml-1">Veuillez évaluer ce critère</p>}
-                                </div>
-                            </div>
-                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-slate-100">
-                        <div className="md:col-span-2">
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-3 ml-1">Commentaires et observations</label>
+                    <div className="flex flex-col md:flex-row gap-5 mb-5">
+                        <div className="flex-1 bg-white border border-[#6B3CD2]/10 rounded-[4px] p-6">
+                            <div className="text-[14px] font-bold text-black/60 mb-3">Commentaires :</div>
                             <textarea
-                                className="w-full h-32 px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-emerald-500 outline-none font-medium transition-all resize-none"
+                                className="w-full bg-white border border-[#6B3CD2]/15 rounded-[4px] p-3.5 text-[13.5px] text-[#18162A] focus:border-[#6B3CD2] outline-none transition-all resize-y min-h-[80px]"
                                 value={evalData.commentaires}
                                 onChange={(e) => setEvalData({ ...evalData, commentaires: e.target.value })}
                                 placeholder="Vos observations sur le candidat..."
-                            ></textarea>
+                            />
                         </div>
-                        <div className="bg-slate-900 rounded-3xl p-8 text-white flex flex-col items-center justify-center text-center shadow-2xl shadow-slate-900/20 relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-emerald-500/20 transition-colors"></div>
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Note globale</span>
-                            <div className="flex items-baseline gap-1 mb-2">
-                                <span className="text-6xl font-black text-emerald-400">{totalScore}</span>
-                                <span className="text-xl font-bold text-slate-500">/ 20</span>
+                        <div className="bg-[#6B3CD2]/5 border border-[#6B3CD2]/10 rounded-[4px] py-5 px-7 text-center min-w-[170px] flex flex-col justify-center shrink-0">
+                            <div className="text-[12.5px] font-medium text-black/50 mb-1.5">Note globale</div>
+                            <div className="text-4xl font-bold text-[#6B3CD2] leading-none mb-1">
+                                {totalScore}<span className="text-base font-medium text-black/40">/20</span>
                             </div>
-                            <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${totalScore >= 12 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                            <div className={`text-[13px] font-semibold mt-1 ${totalScore >= 12 ? 'text-[#34D399]' : 'text-[#F87171]'}`}>
                                 {getAppreciation(totalScore)}
                             </div>
                         </div>
                     </div>
 
-                    <div className="space-y-4 pt-8 border-t border-slate-100">
+                    <div className="space-y-4 pt-4">
                         {pdfUploadStatus === 'uploading' && (
-                            <div className="w-full py-4 bg-blue-50 text-blue-600 font-bold rounded-2xl flex items-center justify-center gap-3 border border-blue-100 animate-pulse">
+                            <div className="w-full py-4 bg-blue-50 text-blue-600 font-bold rounded-[4px] flex items-center justify-center gap-3 border border-blue-100 animate-pulse">
                                 <Loader2 size={20} className="animate-spin" />
                                 <span className="text-xs uppercase tracking-widest">Envoi du compte-rendu PDF...</span>
                             </div>
                         )}
 
                         {pdfUploadStatus === 'error' && (
-                            <div className="w-full py-4 bg-rose-50 text-rose-500 border border-rose-100 rounded-2xl flex items-center justify-center gap-3">
+                            <div className="w-full py-4 bg-rose-50 text-rose-500 border border-rose-100 rounded-[4px] flex items-center justify-center gap-3">
                                 <AlertCircle size={20} />
                                 <span className="text-xs font-bold uppercase tracking-widest">{pdfUploadError}</span>
                             </div>
                         )}
 
                         {pdfUploadStatus === 'success' && (
-                            <div className="w-full py-4 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-2xl flex items-center justify-center gap-3">
+                            <div className="w-full py-4 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-[4px] flex items-center justify-center gap-3">
                                 <CheckCircle2 size={20} />
                                 <span className="text-xs font-bold uppercase tracking-widest">Compte-rendu envoyé avec succès</span>
                             </div>
                         )}
 
-                        <div className="flex flex-col md:flex-row gap-4">
-                            <Button variant="secondary" className="flex-1" onClick={resetEvaluation} leftIcon={<RotateCcw size={18} />}>
+                        <div className="flex justify-end gap-2.5">
+                            <button onClick={resetEvaluation} className="flex items-center gap-2 px-5 py-2.5 rounded-[4px] text-[13.5px] font-medium transition-all bg-white border border-black/15 text-black/60 hover:border-black/30">
+                                <RotateCcw size={16} />
                                 Réinitialiser
-                            </Button>
-                            <Button
-                                variant="success"
-                                className="flex-1"
+                            </button>
+                            <button
                                 onClick={saveEvaluation}
-                                leftIcon={isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                                 disabled={isSaving}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-[4px] text-[13.5px] font-medium transition-all bg-[#059669] text-white hover:bg-[#047857]"
                             >
-                                {isSaving ? 'Enregistrement...' : 'Enregistrer'}
-                            </Button>
+                                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                Enregistrer
+                            </button>
                             {onNext && (
-                                <Button variant="outline" className="flex-1" onClick={onNext} rightIcon={<ArrowRight size={18} />}>
+                                <button onClick={onNext} className="flex items-center gap-2 px-5 py-2.5 rounded-[4px] text-[13.5px] font-medium transition-all bg-[#6B3CD2] text-white hover:bg-[#5831b0]">
+                                    <ArrowRight size={16} />
                                     Continuer
-                                </Button>
+                                </button>
                             )}
                         </div>
                     </div>
@@ -593,14 +662,14 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
     return (
         <div className="animate-fade-in space-y-8 pb-10">
             {/* Header / Hero */}
-            <div className="bg-white border border-slate-200 rounded-[32px] p-10 shadow-premium overflow-hidden relative">
+            <div className="bg-white border border-[#e2e8f0] rounded-[4px] p-10 overflow-hidden relative" style={{ background: 'linear-gradient(120deg, #f5f3ff 0%, #ede9fe 50%, #f3f0ff 100%)' }}>
                 <div className="absolute top-0 right-0 w-1/3 h-full bg-slate-50 border-l border-slate-100 hidden md:block"></div>
 
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
                     <div className="flex-1">
                         <div className="flex items-center gap-3 mb-4">
-                            <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-blue-100">Management</span>
-                            <div className="w-1.5 h-1.5 bg-slate-300 rounded-full"></div>
+                            <span className="px-3 py-1 bg-white/80 text-[#3b7cf4] rounded-[4px] text-[10px] font-black uppercase tracking-widest border border-[#ddd6fe]">Management</span>
+                            <div className="w-1.5 h-1.5 bg-slate-300 rounded-[4px]"></div>
                             <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Temps réel</span>
                         </div>
                         <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Suivi des Entretiens</h2>
@@ -610,13 +679,13 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 w-full md:w-auto shrink-0">
-                        <div className="bg-slate-900 p-6 rounded-2xl text-white shadow-xl shadow-slate-900/20 text-center">
-                            <div className="text-3xl font-black mb-1">{stats.completed}</div>
-                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Validés</div>
+                        <div className="bg-white/80 border border-[#ddd6fe] p-6 rounded-[4px] text-center">
+                            <div className="text-3xl font-black text-[#3b7cf4] mb-1">{stats.completed}</div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Validés</div>
                         </div>
-                        <div className="bg-white border-2 border-slate-100 p-6 rounded-2xl text-center">
-                            <div className="text-3xl font-black text-slate-800 mb-1">{stats.pending}</div>
-                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">En attente</div>
+                        <div className="bg-white/80 border border-[#ddd6fe] p-6 rounded-[4px] text-center">
+                            <div className="text-3xl font-black text-[#1e293b] mb-1">{stats.pending}</div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">En attente</div>
                         </div>
                     </div>
                 </div>
@@ -631,7 +700,7 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                         placeholder="Rechercher un candidat ou une formation..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-14 pr-6 py-4 bg-white border-2 border-slate-100 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-700 shadow-sm placeholder:text-slate-300"
+                        className="w-full pl-14 pr-6 py-4 bg-white border border-[#e2e8f0] rounded-[4px] focus:border-[#3b7cf4] outline-none transition-all font-bold text-slate-700 placeholder:text-slate-300"
                     />                </div>
                 <div className="flex items-center gap-3 w-full md:w-auto">
                     <Button variant="outline" className="flex-1 md:flex-none h-[56px] px-6" leftIcon={<Download size={18} />}>Exporter</Button>
@@ -640,7 +709,7 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
             </div>
 
             {/* Table */}
-            <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-premium">
+            <div className="bg-white border border-[#e2e8f0] rounded-[4px] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                         <thead>
@@ -662,14 +731,14 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                                 <tr key={item.c.id} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500 font-black text-sm group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+                                            <div className="w-12 h-12 rounded-[4px] bg-slate-100 flex items-center justify-center text-slate-500 font-black text-sm group-hover:bg-[#3b7cf4] group-hover:text-white transition-all">
                                                 {item.c.prenom?.[0]}{item.c.nom?.[0]}
                                             </div>
                                             <div className="font-black text-slate-800 text-base">{item.c.nom} {item.c.prenom}</div>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand/10 text-brand border border-brand/20">
+                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#ede9fe] text-[#3b7cf4] border border-[#ddd6fe]">
                                             <Briefcase size={14} />
                                             <span className="text-[11px] font-bold uppercase tracking-tight">{item.c.formation || 'Non spécifiée'}</span>
                                         </div>
@@ -682,13 +751,13 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                                     </td>
                                     <td className="px-8 py-6">
                                         {item.interviewStatus === 'Completed' ? (
-                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100/50">
-                                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                                <div className="w-1.5 h-1.5 bg-emerald-500"></div>
                                                 <span className="text-[10px] font-black uppercase tracking-wider">Terminé</span>
                                             </div>
                                         ) : (
-                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-100/50">
-                                                <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
+                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-amber-50 text-amber-600 border border-amber-100">
+                                                <div className="w-1.5 h-1.5 bg-amber-500 animate-pulse"></div>
                                                 <span className="text-[10px] font-black uppercase tracking-wider">En attente</span>
                                             </div>
                                         )}
@@ -714,14 +783,14 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                                     </td>
                                     <td className="px-8 py-6 text-right">
                                         {item.interviewStatus === 'Completed' ? (
-                                            <button className="p-2.5 rounded-xl text-slate-400 hover:text-brand hover:bg-brand/10 transition-all border border-transparent hover:border-brand/20">
+                                            <button className="p-2.5 rounded-[4px] text-slate-400 hover:text-[#3b7cf4] hover:bg-[#ede9fe] transition-all border border-transparent hover:border-[#ddd6fe]">
                                                 <ExternalLink size={20} />
                                             </button>
                                         ) : (
                                             <Button
                                                 variant="primary"
                                                 size="sm"
-                                                className="rounded-xl shadow-none"
+                                                className="rounded-[4px] shadow-none"
                                                 onClick={() => onLaunchInterview(item.raw)}
                                             >
                                                 Lancer
@@ -738,6 +807,500 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
     );
 };
 
+// --- PROJET PROFESSIONNEL QUESTIONNAIRE ---
+
+const _PaletteIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+    </svg>
+);
+const _BriefcaseIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+    </svg>
+);
+const _TargetIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+    </svg>
+);
+const _RocketIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+        <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+        <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+    </svg>
+);
+const _LightbulbIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+        <path d="M9 18h6"/><path d="M10 22h4"/>
+    </svg>
+);
+
+const _FaceSad = () => (
+    <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
+        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5"/>
+        <circle cx="11" cy="13" r="1.5" fill="currentColor"/><circle cx="21" cy="13" r="1.5" fill="currentColor"/>
+        <path d="M11 22c1.5-2.5 8.5-2.5 10 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+);
+const _FaceNeutral = () => (
+    <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
+        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5"/>
+        <circle cx="11" cy="13" r="1.5" fill="currentColor"/><circle cx="21" cy="13" r="1.5" fill="currentColor"/>
+        <path d="M11 21h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+);
+const _FaceSmile = () => (
+    <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
+        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5"/>
+        <circle cx="11" cy="13" r="1.5" fill="currentColor"/><circle cx="21" cy="13" r="1.5" fill="currentColor"/>
+        <path d="M11 19.5c1 1.5 9 1.5 10 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+);
+const _FaceHappy = () => (
+    <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
+        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5"/>
+        <circle cx="11" cy="12" r="1.5" fill="currentColor"/><circle cx="21" cy="12" r="1.5" fill="currentColor"/>
+        <path d="M10 18c1.5 3.5 10.5 3.5 12 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+);
+const _FaceExcellent = () => (
+    <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
+        <circle cx="16" cy="16" r="15" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M9.5 11.5l2 2m9-2l-2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M9 11c.7-1.2 2.2-1.5 3-1l-1 1M23 11c-.7-1.2-2.2-1.5-3-1l1 1" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
+        <path d="M9.5 18c1.5 4.5 11.5 4.5 13 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+);
+
+const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNext?: () => void }) => {
+    const [qualites, setQualites] = useState<Set<string>>(new Set());
+    const [axes, setAxes] = useState<Set<string>>(new Set());
+    const [structures, setStructures] = useState<Set<string>>(new Set());
+    const [timeline, setTimeline] = useState('');
+    const [ratings, setRatings] = useState<Record<string, number>>({});
+    const [motivation, setMotivation] = useState<number | null>(null);
+    const [texts, setTexts] = useState<Record<string, string>>({
+        nom: '', formation: '', entreprise: '', date: '', annee: '',
+        autresQualites: '', metier: '', pourquoi: '', specsAlternance: '',
+        obj1: '', obj2: '', obj3: '', obstacles: '', actions: '',
+        apport: '', succes: '', envie: '',
+    });
+
+    useEffect(() => {
+        if (studentData) {
+            const d = studentData.data || studentData;
+            const nom = `${d.prenom || ''} ${d.nom_naissance || ''}`.trim();
+            setTexts(prev => ({
+                ...prev,
+                nom,
+                formation: d.formation_souhaitee || '',
+                date: new Date().toLocaleDateString('fr-FR'),
+            }));
+        }
+    }, [studentData]);
+
+    const toggleSet = (set: Set<string>, setFn: React.Dispatch<React.SetStateAction<Set<string>>>, val: string) => {
+        const n = new Set(set);
+        n.has(val) ? n.delete(val) : n.add(val);
+        setFn(n);
+    };
+    const setRating = (key: string, val: number) => setRatings(prev => ({ ...prev, [key]: val }));
+    const setText = (key: string, val: string) => setTexts(prev => ({ ...prev, [key]: val }));
+
+    const SectionHeader = ({ icon, num, title }: { icon: React.ReactNode; num: number; title: string }) => (
+        <div className="flex items-center gap-3 mb-7 pb-5 border-b-2 border-[#6B3CD2]/10">
+            <div className="w-10 h-10 rounded-[4px] bg-[#6B3CD2]/10 text-[#6B3CD2] flex items-center justify-center flex-shrink-0">{icon}</div>
+            <div>
+                <span className="text-[10px] font-black text-[#6B3CD2] uppercase tracking-widest">Partie {num}</span>
+                <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-tight mt-0.5">{title}</h3>
+            </div>
+        </div>
+    );
+
+    const CheckItem = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) => (
+        <label className="flex items-start gap-2.5 cursor-pointer group select-none">
+            <div
+                onClick={onChange}
+                className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
+                    checked ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/50'
+                }`}
+            >
+                {checked && (
+                    <svg viewBox="0 0 10 10" fill="none" width="8" height="8">
+                        <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                )}
+            </div>
+            <span className="text-[12px] font-medium text-slate-700 group-hover:text-slate-900 transition-colors leading-relaxed">{label}</span>
+        </label>
+    );
+
+    const RatingRow = ({ label, id }: { label: string; id: string }) => (
+        <tr className="border-b border-slate-100 hover:bg-slate-50/60 transition-colors">
+            <td className="py-3 pr-4 text-[12px] font-medium text-slate-700">{label}</td>
+            {[1,2,3,4,5].map(v => (
+                <td key={v} className="text-center py-3 px-1.5">
+                    <button
+                        onClick={() => setRating(id, v)}
+                        className={`w-7 h-7 rounded-full border-2 text-[11px] font-black mx-auto flex items-center justify-center transition-all ${
+                            ratings[id] === v
+                                ? 'bg-[#6B3CD2] border-[#6B3CD2] text-white shadow-md shadow-[#6B3CD2]/20'
+                                : 'border-slate-200 text-slate-400 hover:border-[#6B3CD2]/40 hover:text-[#6B3CD2]'
+                        }`}
+                    >{v}</button>
+                </td>
+            ))}
+        </tr>
+    );
+
+    const RatingTable = ({ title, items }: { title: string; items: { label: string; id: string }[] }) => (
+        <div className="mb-6">
+            <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3">{title}</p>
+            <div className="border border-slate-200 rounded-[4px] overflow-hidden">
+                <table className="w-full">
+                    <thead>
+                        <tr className="bg-[#6B3CD2]/10 border-b border-[#6B3CD2]/20">
+                            <th className="text-left py-2.5 px-3 text-[10px] font-black text-[#6B3CD2] uppercase tracking-widest"></th>
+                            {[1,2,3,4,5].map(v => (
+                                <th key={v} className="text-center py-2.5 px-1.5 text-[11px] font-black text-[#6B3CD2] w-12">{v}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {items.map(item => <RatingRow key={item.id} label={item.label} id={item.id} />)}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+
+    const TextareaField = ({ id, placeholder, rows = 3 }: { id: string; placeholder?: string; rows?: number }) => (
+        <textarea
+            value={texts[id] || ''}
+            onChange={e => setText(id, e.target.value)}
+            placeholder={placeholder}
+            rows={rows}
+            className="w-full border border-slate-200 rounded-[4px] px-3 py-2.5 text-[12px] font-medium text-slate-800 placeholder-slate-300 focus:outline-none focus:border-[#6B3CD2]/50 focus:ring-2 focus:ring-[#6B3CD2]/10 resize-none transition-all"
+        />
+    );
+
+    const qualitesList: [string, string][] = [
+        ['Rigoureux(se)', 'Leader naturel(le)'],
+        ['Créatif(ve)', 'Adaptable'],
+        ['Organisé(e)', 'Fiable'],
+        ['Empathique', 'Analytique'],
+        ['Autonome', 'Enthousiaste'],
+        ['Persévérant(e)', 'Patient(e)'],
+        ['Communicant(e)', 'Force de proposition'],
+        ['Curieux(se)', 'À l\'écoute'],
+    ];
+    const axesList: [string, string][] = [
+        ['Manque de confiance', 'Manque d\'organisation'],
+        ['Procrastination', 'Éparpillement'],
+        ['Impatience', 'Difficulté à dire non'],
+        ['Perfectionnisme excessif', 'Stress sous pression'],
+        ['Difficultés à déléguer', 'Manque d\'initiative'],
+        ['Timidité à l\'oral', 'Trop réservé(e)'],
+    ];
+    const structuresList: [string, string][] = [
+        ['Grande entreprise (CAC 40)', 'Auto-entrepreneur / indépendant'],
+        ['PME / ETI (10-250 salariés)', 'Secteur public / associatif'],
+        ['Start-up / Scale-up', 'Restauration / Hôtellerie'],
+        ['Commerce de proximité / franchise', 'International'],
+    ];
+    const timelineList = ['Dès la fin de ma formation', 'Dans 1 à 2 ans', 'Dans 3 à 5 ans', 'À plus long terme (+ de 5 ans)'];
+
+    const motivationLevels = [
+        { label: 'Faible', face: <_FaceSad /> },
+        { label: 'Passable', face: <_FaceNeutral /> },
+        { label: 'Correct', face: <_FaceSmile /> },
+        { label: 'Bien', face: <_FaceHappy /> },
+        { label: 'Excellent', face: <_FaceExcellent /> },
+    ];
+
+    const motivationColors = ['text-rose-400', 'text-orange-400', 'text-amber-400', 'text-lime-500', 'text-emerald-500'];
+    const motivationActive = ['bg-rose-50 border-rose-300 text-rose-500', 'bg-orange-50 border-orange-300 text-orange-500', 'bg-amber-50 border-amber-300 text-amber-500', 'bg-lime-50 border-lime-300 text-lime-600', 'bg-emerald-50 border-emerald-300 text-emerald-600'];
+
+    const handleReset = () => {
+        if (window.confirm('Réinitialiser le questionnaire ? Toutes les données saisies seront perdues.')) {
+            setQualites(new Set());
+            setAxes(new Set());
+            setStructures(new Set());
+            setTimeline('');
+            setRatings({});
+            setMotivation(null);
+            setTexts({ nom: '', formation: '', entreprise: '', date: '', annee: '', autresQualites: '', metier: '', pourquoi: '', specsAlternance: '', obj1: '', obj2: '', obj3: '', obstacles: '', actions: '', apport: '', succes: '', envie: '' });
+        }
+    };
+
+    return (
+        <div className="mt-12 pt-10 border-t-2 border-slate-200">
+            {/* Document header */}
+            <div className="bg-white border border-slate-200 rounded-[4px] p-8 mb-8">
+                <div className="flex items-start justify-between mb-6">
+                    <div>
+                        <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Mon Projet Professionnel</h2>
+                        <p className="text-[12px] font-semibold text-slate-500 mt-1">Questionnaire de bilan &amp; d'orientation</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[11px] font-black text-[#6B3CD2] uppercase tracking-widest">Rush School – CFA Île-de-France</p>
+                        <div className="flex items-center gap-2 mt-2 justify-end">
+                            <span className="text-[11px] font-semibold text-slate-500">Année scolaire</span>
+                            <input
+                                value={texts.annee}
+                                onChange={e => setText('annee', e.target.value)}
+                                placeholder="20__ / 20__"
+                                className="w-28 border-b-2 border-slate-200 focus:border-[#6B3CD2] px-1 py-0.5 text-[12px] font-bold text-slate-700 text-center bg-transparent focus:outline-none transition-colors"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-x-10 gap-y-4 border-t border-slate-100 pt-5">
+                    {[
+                        { label: 'Nom & Prénom', id: 'nom', placeholder: '............................................' },
+                        { label: 'Formation', id: 'formation', placeholder: '............................................' },
+                        { label: 'Entreprise', id: 'entreprise', placeholder: '............................................' },
+                        { label: 'Date', id: 'date', placeholder: '............................................' },
+                    ].map(f => (
+                        <div key={f.id} className="flex items-center gap-3">
+                            <span className="text-[11px] font-black text-slate-500 uppercase tracking-wide whitespace-nowrap">{f.label}</span>
+                            <input
+                                value={texts[f.id] || ''}
+                                onChange={e => setText(f.id, e.target.value)}
+                                placeholder={f.placeholder}
+                                className="flex-1 border-b-2 border-slate-200 focus:border-[#6B3CD2] px-1 py-0.5 text-[12px] font-medium text-slate-800 bg-transparent focus:outline-none transition-colors placeholder-slate-200"
+                            />
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* PARTIE 1 – MON PORTRAIT */}
+            <div className="bg-white border border-slate-200 rounded-[4px] p-8 mb-5">
+                <SectionHeader icon={<_PaletteIcon />} num={1} title="Mon Portrait" />
+                <p className="text-[11px] text-slate-400 font-medium italic mb-6">Prends le temps de réfléchir sincèrement – il n'y a pas de bonne ou mauvaise réponse</p>
+
+                <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4">Mes qualités – Coche celles qui te correspondent (3 minimum)</p>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-3 mb-7">
+                    {qualitesList.map(([a, b]) => (
+                        <React.Fragment key={a}>
+                            <CheckItem label={a} checked={qualites.has(a)} onChange={() => toggleSet(qualites, setQualites, a)} />
+                            <CheckItem label={b} checked={qualites.has(b)} onChange={() => toggleSet(qualites, setQualites, b)} />
+                        </React.Fragment>
+                    ))}
+                </div>
+                <div className="mb-8">
+                    <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Autres qualités que tu t'attribues</p>
+                    <TextareaField id="autresQualites" rows={2} />
+                </div>
+
+                <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4">Mes axes d'amélioration – Coche ceux sur lesquels tu travailles</p>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-3 mb-6">
+                    {axesList.map(([a, b]) => (
+                        <React.Fragment key={a}>
+                            <CheckItem label={a} checked={axes.has(a)} onChange={() => toggleSet(axes, setAxes, a)} />
+                            <CheckItem label={b} checked={axes.has(b)} onChange={() => toggleSet(axes, setAxes, b)} />
+                        </React.Fragment>
+                    ))}
+                </div>
+                <div className="flex items-start gap-3 bg-[#6B3CD2]/5 border border-[#6B3CD2]/15 rounded-[4px] p-4">
+                    <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" className="text-[#6B3CD2] mt-0.5 flex-shrink-0">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd"/>
+                    </svg>
+                    <p className="text-[11px] font-semibold text-[#6B3CD2] leading-relaxed">Reconnaître ses axes d'amélioration est une force : cela montre ta maturité et ta capacité à progresser.</p>
+                </div>
+            </div>
+
+            {/* PARTIE 2 – MES COMPÉTENCES */}
+            <div className="bg-white border border-slate-200 rounded-[4px] p-8 mb-5">
+                <SectionHeader icon={<_BriefcaseIcon />} num={2} title="Mes Compétences" />
+                <p className="text-[11px] text-slate-400 font-medium italic mb-6">Note-toi honnêtement de 1 (débutant) à 5 (expert)</p>
+
+                <RatingTable
+                    title="Compétences commerciales & relationnelles"
+                    items={[
+                        { label: 'Accueil et relation client', id: 'c1' },
+                        { label: 'Argumentation et vente', id: 'c2' },
+                        { label: 'Négociation', id: 'c3' },
+                        { label: 'Gestion des réclamations', id: 'c4' },
+                        { label: 'Animation d\'équipe', id: 'c5' },
+                        { label: 'Communication orale', id: 'c6' },
+                    ]}
+                />
+                <RatingTable
+                    title="Compétences digitales & marketing"
+                    items={[
+                        { label: 'Réseaux sociaux (Instagram, LinkedIn…)', id: 'd1' },
+                        { label: 'Création de contenu (visuels, vidéos)', id: 'd2' },
+                        { label: 'Outils bureautiques (Word, Excel, PPT)', id: 'd3' },
+                        { label: 'Utilisation d\'un CRM', id: 'd4' },
+                        { label: 'E-mailing & prospection digitale', id: 'd5' },
+                    ]}
+                />
+                <RatingTable
+                    title="Compétences en gestion & organisation"
+                    items={[
+                        { label: 'Gestion du temps et des priorités', id: 'g1' },
+                        { label: 'Suivi d\'indicateurs et tableaux de bord', id: 'g2' },
+                        { label: 'Prise d\'initiative', id: 'g3' },
+                        { label: 'Gestion de projets', id: 'g4' },
+                        { label: 'Adaptabilité aux imprévus', id: 'g5' },
+                    ]}
+                />
+                <div>
+                    <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Compétences spécifiques acquises en alternance</p>
+                    <TextareaField id="specsAlternance" placeholder="Décris en 2-3 lignes les compétences spécifiques acquises…" rows={3} />
+                </div>
+            </div>
+
+            {/* PARTIE 3 – MON PROJET PROFESSIONNEL */}
+            <div className="bg-white border border-slate-200 rounded-[4px] p-8 mb-5">
+                <SectionHeader icon={<_TargetIcon />} num={3} title="Mon Projet Professionnel" />
+                <p className="text-[11px] text-slate-400 font-medium italic mb-6">Où veux-tu aller ? Sois précis(e) et ambitieux(se) !</p>
+
+                <div className="mb-6">
+                    <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Quel métier ou secteur t'attire après ta formation ?</p>
+                    <TextareaField id="metier" rows={2} />
+                </div>
+                <div className="mb-7">
+                    <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Pourquoi ce choix ? Qu'est-ce qui te motive dans ce domaine ?</p>
+                    <TextareaField id="pourquoi" rows={3} />
+                </div>
+
+                <div className="mb-7">
+                    <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4">Dans quel type de structure souhaites-tu travailler ?</p>
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                        {structuresList.map(([a, b]) => (
+                            <React.Fragment key={a}>
+                                <CheckItem label={a} checked={structures.has(a)} onChange={() => toggleSet(structures, setStructures, a)} />
+                                <CheckItem label={b} checked={structures.has(b)} onChange={() => toggleSet(structures, setStructures, b)} />
+                            </React.Fragment>
+                        ))}
+                    </div>
+                </div>
+
+                <div>
+                    <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4">Dans combien de temps souhaites-tu atteindre ton objectif ?</p>
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                        {timelineList.map(t => (
+                            <CheckItem key={t} label={t} checked={timeline === t} onChange={() => setTimeline(timeline === t ? '' : t)} />
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* PARTIE 4 – MES OBJECTIFS */}
+            <div className="bg-white border border-slate-200 rounded-[4px] p-8 mb-5">
+                <SectionHeader icon={<_RocketIcon />} num={4} title="Mes Objectifs" />
+                <p className="text-[11px] text-slate-400 font-medium italic mb-6">Des objectifs SMART : Spécifiques, Mesurables, Atteignables, Réalistes, Temporels</p>
+
+                <div className="grid grid-cols-1 gap-4 mb-7">
+                    {[
+                        { id: 'obj1', num: 1, horizon: 'Court terme (6 mois)', color: 'bg-blue-50 border-blue-200', badge: 'text-blue-700' },
+                        { id: 'obj2', num: 2, horizon: 'Moyen terme (1 à 2 ans)', color: 'bg-violet-50 border-violet-200', badge: 'text-violet-700' },
+                        { id: 'obj3', num: 3, horizon: 'Long terme (3 à 5 ans)', color: 'bg-emerald-50 border-emerald-200', badge: 'text-emerald-700' },
+                    ].map(obj => (
+                        <div key={obj.id} className={`border rounded-[4px] p-4 ${obj.color}`}>
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="w-6 h-6 rounded-full bg-white border-2 border-current flex items-center justify-center">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="12" height="12" className={obj.badge}>
+                                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </div>
+                                <span className={`text-[11px] font-black uppercase tracking-widest ${obj.badge}`}>Objectif n° {obj.num} — {obj.horizon}</span>
+                            </div>
+                            <textarea
+                                value={texts[obj.id] || ''}
+                                onChange={e => setText(obj.id, e.target.value)}
+                                rows={2}
+                                className="w-full bg-white/70 border border-white/80 rounded-[4px] px-3 py-2 text-[12px] font-medium text-slate-800 placeholder-slate-300 focus:outline-none focus:border-[#6B3CD2]/40 focus:ring-2 focus:ring-[#6B3CD2]/10 resize-none transition-all"
+                                placeholder="Décris ton objectif avec précision…"
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                <div className="mb-6">
+                    <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Quels obstacles peux-tu anticiper ? Comment les surmonter ?</p>
+                    <TextareaField id="obstacles" rows={3} />
+                </div>
+                <div>
+                    <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Quelles actions concrètes vas-tu mettre en place dès maintenant ?</p>
+                    <TextareaField id="actions" rows={3} />
+                </div>
+            </div>
+
+            {/* PARTIE 5 – MON BILAN & MA MOTIVATION */}
+            <div className="bg-white border border-slate-200 rounded-[4px] p-8">
+                <SectionHeader icon={<_LightbulbIcon />} num={5} title="Mon Bilan & Ma Motivation" />
+                <p className="text-[11px] text-slate-400 font-medium italic mb-6">Une dernière réflexion pour conclure</p>
+
+                <div className="mb-6">
+                    <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Qu'est-ce que cette formation t'a apporté jusqu'ici ?</p>
+                    <TextareaField id="apport" rows={3} />
+                </div>
+                <div className="mb-6">
+                    <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Quel est ton plus grand succès depuis le début de ton alternance ?</p>
+                    <TextareaField id="succes" rows={2} />
+                </div>
+                <div className="mb-8">
+                    <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Qu'est-ce qui te donne envie de te lever le matin pour aller travailler ?</p>
+                    <TextareaField id="envie" rows={2} />
+                </div>
+
+                <div className="border border-slate-200 rounded-[4px] p-6">
+                    <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-5 text-center">Mon niveau de motivation global aujourd'hui</p>
+                    <div className="flex items-end justify-center gap-4">
+                        {motivationLevels.map((m, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setMotivation(motivation === i ? null : i)}
+                                className={`flex flex-col items-center gap-2 px-4 py-3 rounded-[4px] border-2 transition-all ${
+                                    motivation === i
+                                        ? motivationActive[i]
+                                        : 'border-slate-100 text-slate-300 hover:border-slate-200 hover:text-slate-400'
+                                }`}
+                            >
+                                <span className={motivation === i ? motivationColors[i] : ''}>{m.face}</span>
+                                <span className="text-[10px] font-black uppercase tracking-wide whitespace-nowrap">{m.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Footer actions */}
+            <div className="mt-8 flex items-center justify-end gap-3">
+                <button
+                    onClick={handleReset}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-[4px] border-2 border-slate-200 text-slate-600 font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95"
+                >
+                    <RotateCcw size={14} />
+                    Réinitialiser
+                </button>
+                <button
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-[4px] bg-emerald-600 text-white font-black text-[11px] uppercase tracking-widest hover:bg-emerald-700 transition-all active:scale-95 shadow-md shadow-emerald-200"
+                >
+                    <Save size={14} />
+                    Enregistrer
+                </button>
+                <button
+                    onClick={onNext}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-[4px] bg-[#6B3CD2] text-white font-black text-[11px] uppercase tracking-widest hover:bg-[#5a2eb8] transition-all active:scale-95 shadow-md shadow-[#6B3CD2]/20"
+                >
+                    Continuer
+                    <ArrowRight size={14} />
+                </button>
+            </div>
+        </div>
+    );
+};
+
 // --- MAIN ADMISSION VIEW ---
 
 const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: AdmissionViewProps = {}) => {
@@ -747,6 +1310,17 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
     const [mainTab, setMainTab] = useState<'dashboard' | 'interviews'>(
         searchParams.get('tab') === 'interviews' ? 'interviews' : 'dashboard'
     );
+    const [mainTabAnimKey, setMainTabAnimKey] = useState(0);
+    const pageTopRef = React.useRef<HTMLDivElement>(null);
+
+    const handleMainTabChange = (tab: 'dashboard' | 'interviews') => {
+        if (tab === mainTab) return;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => {
+            setMainTab(tab);
+            setMainTabAnimKey(k => k + 1);
+        }, 180);
+    };
 
     const [activeTab, setActiveTab] = useState<AdmissionTab>(selectedTab || AdmissionTab.TESTS);
     const [prefilledStudent, setPrefilledStudent] = useState<any>(null);
@@ -773,9 +1347,25 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
     const [uploadedFiles, setUploadedFiles] = useState<Record<string, boolean>>({});
     const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
 
+    // Sync uploaded documents status when student data changes
+    useEffect(() => {
+        if (studentData) {
+            setUploadedFiles({
+                cv: studentData.has_cv || !!studentData.fields?.['CV'],
+                cni: studentData.has_cni || !!studentData.fields?.['CIN'] || !!studentData.fields?.['cin'],
+                lettre: studentData.has_lettre_motivation || !!studentData.fields?.['lettre de motivation'] || !!studentData.fields?.['lettre'],
+                vitale: studentData.has_vitale || !!studentData.fields?.['Carte Vitale'] || !!studentData.fields?.['vitale'],
+                diplome: studentData.has_diplome || !!studentData.fields?.['dernier diplome'] || !!studentData.fields?.['diplome'],
+            });
+        } else {
+            setUploadedFiles({});
+        }
+    }, [studentData]);
+
     const [entrepriseCompleted, setEntrepriseCompleted] = useState(false);
     const [adminCompleted, setAdminCompleted] = useState(false);
     const [interviewCompleted, setInterviewCompleted] = useState(false);
+    const [projetProCompleted, setProjetProCompleted] = useState(false);
 
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -875,111 +1465,121 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
 
             {mainTab === 'dashboard' && (
                 <>
-                    <div className="admission-hero">
-                        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 w-full max-w-[60%]">
+                    <div className="rounded-[8px] p-10 mb-6 overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #3b0764 0%, #4c1d95 45%, #5b21b6 100%)' }}>
+                        {/* Decorative circles */}
+                        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #a78bfa, transparent)' }}></div>
+                        <div className="absolute right-32 bottom-0 w-40 h-40 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #818cf8, transparent)' }}></div>
+
+                        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div className="flex-1">
-                                <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <img src="/images/logo-process-iq.png" alt="Process IQ" className="h-10 w-fit" />
-                                        <span className="text-2xl font-bold text-white tracking-tight">ProcessIQ</span>
-                                    </div>
-                                    <div className="hidden md:block w-px h-8 bg-white/20"></div>
-                                    <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm border border-white/10">
-                                        <Briefcase size={14} /> Processus d'admission
-                                    </div>
+                                <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-1.5 rounded-[4px] text-xs font-black uppercase tracking-widest text-white/80 mb-5">
+                                    <Briefcase size={12} /> Processus d'admission
                                 </div>
-                                <h1 className="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight text-white">Admission Rush School</h1>
-                                <p className="text-indigo-100 text-lg leading-relaxed opacity-90 font-medium">Complétez votre dossier d'admission : tests, documents et formalités administratives.</p>
+                                <h1 className="text-3xl md:text-4xl font-black mb-3 tracking-tight text-white">Admission Rush School</h1>
+                                <p className="text-white/60 text-base leading-relaxed font-medium">Complétez votre dossier d'admission : tests, documents et formalités administratives.</p>
+                            </div>
+                            <div className="shrink-0">
+                                <div className="w-16 h-16 rounded-[8px] bg-white/10 border border-white/20 flex items-center justify-center text-white">
+                                    <CheckCircle2 size={32} strokeWidth={1.5} />
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-[32px] p-8 mb-8 flex items-center justify-center overflow-x-auto shadow-premium">
-                        <div className="flex items-center min-w-max">
+                    <div className="bg-white border border-slate-200 rounded-[8px] px-10 py-7 mb-8 flex items-center justify-center shadow-sm">
+                        <div className="flex items-center w-full justify-between">
                             <StepItem step={1} label="Tests" isActive={activeTab === AdmissionTab.TESTS} isCompleted={testCompleted} />
                             <StepLine isCompleted={testCompleted} />
                             <StepItem step={2} label="Entretien" isActive={activeTab === AdmissionTab.ENTRETIEN} isCompleted={interviewCompleted} />
                             <StepLine isCompleted={interviewCompleted} />
-                            <StepItem step={3} label="Étudiant" isActive={activeTab === AdmissionTab.QUESTIONNAIRE} isCompleted={!!studentData} />
+                            <StepItem step={3} label="Projet Pro" isActive={activeTab === AdmissionTab.PROJET_PROFESSIONNEL} isCompleted={projetProCompleted} />
+                            <StepLine isCompleted={projetProCompleted} />
+                            <StepItem step={4} label="Étudiant" isActive={activeTab === AdmissionTab.QUESTIONNAIRE} isCompleted={!!studentData} />
                             <StepLine isCompleted={!!studentData} />
-                            <StepItem step={4} label="Documents" isActive={activeTab === AdmissionTab.DOCUMENTS} isCompleted={uploadedCount >= REQUIRED_DOCUMENTS.length} />
+                            <StepItem step={5} label="Documents" isActive={activeTab === AdmissionTab.DOCUMENTS} isCompleted={uploadedCount >= REQUIRED_DOCUMENTS.length} />
                             <StepLine isCompleted={uploadedCount >= REQUIRED_DOCUMENTS.length} />
-                            <StepItem step={5} label="Entreprise" isActive={activeTab === AdmissionTab.ENTREPRISE} isCompleted={entrepriseCompleted} />
+                            <StepItem step={6} label="Entreprise" isActive={activeTab === AdmissionTab.ENTREPRISE} isCompleted={entrepriseCompleted} />
                             <StepLine isCompleted={entrepriseCompleted} />
-                            <StepItem step={6} label="Admin" isActive={activeTab === AdmissionTab.ADMINISTRATIF} isCompleted={adminCompleted} />
+                            <StepItem step={7} label="Admin" isActive={activeTab === AdmissionTab.ADMINISTRATIF} isCompleted={adminCompleted} />
                         </div>
                     </div>
                 </>
             )}
 
-            <div className="flex gap-2 mb-8 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 w-fit shadow-inner">
+            <div ref={pageTopRef} className="flex gap-0 mb-8 border-b border-slate-300 w-fit">
                 <button
-                    onClick={() => setMainTab('dashboard')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${mainTab === 'dashboard' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                    onClick={() => handleMainTabChange('dashboard')}
+                    className={`relative flex items-center gap-2 px-5 py-3 text-sm font-black uppercase tracking-widest transition-all ${mainTab === 'dashboard' ? 'text-[#4c1d95]' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                     Tableau de bord
+                    {mainTab === 'dashboard' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4c1d95]"></span>}
                 </button>
                 <button
-                    onClick={() => setMainTab('interviews')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${mainTab === 'interviews' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                    onClick={() => handleMainTabChange('interviews')}
+                    className={`relative flex items-center gap-2 px-5 py-3 text-sm font-black uppercase tracking-widest transition-all ${mainTab === 'interviews' ? 'text-[#4c1d95]' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                     Suivi Entretiens
+                    {mainTab === 'interviews' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4c1d95]"></span>}
                 </button>
             </div>
 
+            <div key={mainTabAnimKey} className="admission-rise">
             {mainTab === 'interviews' ? (
                 <InterviewsTrackingView
                     onLaunchInterview={(c) => {
                         setStudentData(c);
-                        setMainTab('dashboard');
+                        handleMainTabChange('dashboard');
                         setActiveTab(AdmissionTab.ENTRETIEN);
                     }}
                 />
             ) : (
                 <>
-                    <div className="flex overflow-x-auto gap-2 mb-10 bg-slate-50 p-2 rounded-[24px] border border-slate-200 no-scrollbar shadow-inner">
+                    <div className="grid grid-cols-7 mb-10 border-2 border-slate-300 rounded-[4px] divide-x-2 divide-slate-300">
                         {[
                             { id: AdmissionTab.TESTS, label: 'Tests', icon: PenTool },
                             { id: AdmissionTab.ENTRETIEN, label: 'Entretien', icon: UserCheck },
-                            { id: AdmissionTab.QUESTIONNAIRE, label: 'Fiche Étudiant', icon: Info },
+                            { id: AdmissionTab.PROJET_PROFESSIONNEL, label: 'Projet Pro', icon: Target },
+                            { id: AdmissionTab.QUESTIONNAIRE, label: 'Étudiant', icon: Info },
                             { id: AdmissionTab.DOCUMENTS, label: 'Documents', icon: Upload },
-                            { id: AdmissionTab.ENTREPRISE, label: 'Fiche Entreprise', icon: Building },
+                            { id: AdmissionTab.ENTREPRISE, label: 'Entreprise', icon: Building },
                             { id: AdmissionTab.ADMINISTRATIF, label: 'Administratif', icon: Printer }
                         ].map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as AdmissionTab)}
-                                className={`flex items-center gap-3 px-6 py-4 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-white text-blue-600 shadow-premium' : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'}`}
+                                className={`flex flex-col items-center justify-center gap-1.5 py-3.5 px-2 text-[10px] font-black uppercase tracking-wider transition-all ${
+                                    activeTab === tab.id
+                                        ? 'bg-[#ede9fe] text-[#4c1d95]'
+                                        : 'bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                                }`}
                             >
-                                <tab.icon size={18} strokeWidth={activeTab === tab.id ? 3 : 2} /> {tab.label}
+                                <tab.icon size={15} strokeWidth={activeTab === tab.id ? 3 : 2} />
+                                <span className="leading-tight text-center">{tab.label}</span>
                             </button>
                         ))}
                     </div>
 
                     {activeTab === AdmissionTab.TESTS && (
                         <div className="space-y-6 animate-slide-in">
-                            <div className="bg-white border border-slate-200 rounded-[32px] p-10 shadow-premium">
+                            <div className="bg-white border border-slate-300 rounded-[4px] p-8">
                                 <h3 className="text-xl font-black text-slate-800 mb-2 flex items-center gap-3">
-                                    <GraduationCap className="text-blue-500" /> Sélectionnez votre formation
+                                    <GraduationCap className="text-[#4c1d95]" /> Sélectionnez votre formation
                                 </h3>
                                 <p className="text-slate-500 mb-8 ml-9 font-medium">Choisissez la formation pour accéder au test.</p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    {FORMATION_CARDS.map(f => (
-                                        <div key={f.id} onClick={() => navigate(`/test?formation=${f.id}`)} className="bg-white border-2 border-slate-100 rounded-[32px] p-8 text-center cursor-pointer hover:border-blue-500 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 group relative overflow-hidden">
-                                            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${f.gradient} opacity-0 group-hover:opacity-5 rounded-full -mr-8 -mt-8 blur-2xl transition-opacity`}></div>
-
-                                            <div className={`w-20 h-20 rounded-3xl mx-auto mb-8 flex items-center justify-center text-white bg-gradient-to-br ${f.gradient} shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-                                                <Briefcase size={32} />
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                                    {[
+                                        { id: 'mco', title: 'BTS MCO', subtitle: 'Management Commercial Opérationnel', iconBg: '#dbeafe', iconColor: '#1d4ed8', duration: '~20 min' },
+                                        { id: 'ndrc', title: 'BTS NDRC', subtitle: 'Négociation et Digitalisation de la Relation Client', iconBg: '#d1fae5', iconColor: '#065f46', duration: '~20 min' },
+                                        { id: 'bachelor', title: 'BACHELOR RDC', subtitle: 'Responsable Développement Commercial', iconBg: '#ede9fe', iconColor: '#4c1d95', duration: '~25 min' },
+                                        { id: 'tpntc', title: 'TP NTC', subtitle: 'Titre Pro Négociateur Technico-Commercial', iconBg: '#ffedd5', iconColor: '#9a3412', duration: '~20 min' },
+                                    ].map(f => (
+                                        <div key={f.id} onClick={() => navigate(`/test?formation=${f.id}`)} className="bg-white border border-slate-300 rounded-[4px] p-6 text-center cursor-pointer hover:border-[#4c1d95] hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
+                                            <div className="w-14 h-14 rounded-[4px] mx-auto mb-5 flex items-center justify-center transition-all duration-300 group-hover:scale-105" style={{ background: f.iconBg }}>
+                                                <GraduationCap size={26} style={{ color: f.iconColor }} />
                                             </div>
-                                            <h4 className="font-black text-slate-900 text-xl mb-2 tracking-tight">{f.title}</h4>
-                                            <p className="text-[10px] text-slate-400 font-black mb-8 h-10 leading-relaxed uppercase tracking-[0.2em]">{f.subtitle}</p>
-
-                                            <div className="flex items-center justify-center gap-2">
-                                                <span className="px-4 py-2 bg-slate-50 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-blue-600 group-hover:bg-blue-50 transition-colors border border-slate-100">~20 min</span>
-                                                <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all">
-                                                    <ArrowRight size={16} />
-                                                </div>
-                                            </div>
+                                            <h4 className="font-black text-[#1e293b] text-base mb-1 tracking-tight">{f.title}</h4>
+                                            <p className="text-[10px] text-slate-400 font-medium mb-5 italic leading-relaxed h-8 overflow-hidden">{f.subtitle}</p>
+                                            <span className="inline-block px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-widest text-slate-400 border border-slate-200 bg-slate-50 group-hover:border-[#4c1d95] group-hover:text-[#4c1d95] group-hover:bg-[#f5f3ff] transition-colors">{f.duration}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -999,89 +1599,130 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                     )}
 
                     {activeTab === AdmissionTab.DOCUMENTS && (
-                        <div className="animate-slide-in">
-                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl p-8 mb-8 flex items-center gap-6 relative overflow-hidden">
-                                <div className="w-16 h-16 bg-white text-blue-600 rounded-2xl flex items-center justify-center shrink-0 shadow-xl shadow-blue-500/10 relative z-10">
-                                    <Upload size={32} />
+                        <div className="animate-fade-in pb-12">
+                            {/* Header */}
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-12 h-12 rounded-[4px] bg-[#6B3CD2]/10 flex items-center justify-center text-[#6B3CD2]">
+                                    <Upload size={22} />
                                 </div>
-                                <div className="relative z-10">
-                                    <h3 className="text-xl font-black text-slate-800 tracking-tight">Documents à téléverser</h3>
-                                    <p className="text-slate-500 font-medium">Complétez votre dossier avec les pièces justificatives officielles.</p>
+                                <div>
+                                    <h2 className="text-[17px] font-black text-slate-900">Documents à téléverser</h2>
+                                    <p className="text-[12px] text-slate-400 font-medium mt-0.5">Téléversez les documents suivants pour compléter votre dossier d'admission</p>
                                 </div>
-                                {!studentData && (
-                                    <div className="absolute right-8 top-1/2 -translate-y-1/2 flex items-center gap-3 text-amber-600 bg-white px-5 py-2.5 rounded-2xl border-2 border-amber-100 shadow-sm">
-                                        <AlertCircle size={20} />
-                                        <span className="text-xs font-black uppercase tracking-widest">Dossier requis</span>
-                                    </div>
-                                )}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {!studentData && (
+                                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-[4px] flex items-center gap-3">
+                                    <AlertCircle size={16} className="text-amber-500 flex-shrink-0" />
+                                    <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Veuillez compléter la Fiche Étudiant avant de transmettre vos documents.</p>
+                                </div>
+                            )}
+
+                            <div className="mb-7">
+                                <NirAccordion />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
                                 {REQUIRED_DOCUMENTS.map((doc) => {
                                     const isUploaded = uploadedFiles[doc.id];
                                     const isUploadingDoc = uploadingFiles[doc.id];
+                                    const Icon = { cv: FileText, cni: Building, lettre: FileText, vitale: Activity, diplome: GraduationCap }[doc.id] || FileText;
 
                                     return (
-                                        <div key={doc.id} className={`border-2 rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer group relative overflow-hidden ${isUploaded
-                                            ? 'border-emerald-400 bg-emerald-50'
-                                            : 'border-slate-100 bg-white hover:border-brand hover:bg-slate-50 hover:shadow-xl'}
-                                        `}>
+                                        <div
+                                            key={doc.id}
+                                            className={`relative flex flex-col bg-white border rounded-[4px] p-5 transition-all duration-200 ${
+                                                isUploaded
+                                                    ? 'border-emerald-200 shadow-sm'
+                                                    : 'border-slate-200 hover:border-[#6B3CD2]/30 hover:shadow-md'
+                                            }`}
+                                        >
                                             <input
                                                 type="file"
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-20"
                                                 disabled={isUploadingDoc || !studentData}
                                                 onChange={(e) => handleFileChange(e, doc.id)}
                                                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                                             />
 
-                                            {isUploadingDoc ? (
-                                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm z-20">
-                                                    <Loader2 size={40} className="animate-spin text-brand mb-3" />
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-brand">Envoi en cours</span>
-                                                </div>
-                                            ) : null}
-
-                                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all ${isUploaded
-                                                ? 'bg-emerald-100 text-emerald-600 scale-110 shadow-lg shadow-emerald-500/10'
-                                                : 'bg-slate-50 text-slate-300 group-hover:bg-brand/10 group-hover:text-brand group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-brand/10'}
-                                            `}>
-                                                {isUploaded ? <CheckCircle2 size={32} strokeWidth={2.5} /> : <Upload size={32} />}
+                                            {/* Icon */}
+                                            <div className={`w-10 h-10 rounded-[4px] flex items-center justify-center mb-4 border-2 transition-all ${
+                                                isUploaded
+                                                    ? 'bg-emerald-100 border-emerald-200 text-emerald-600'
+                                                    : 'bg-slate-100 border-slate-200 text-slate-500'
+                                            }`}>
+                                                <Icon size={18} />
                                             </div>
-                                            <h4 className={`font-black text-lg mb-2 tracking-tight ${isUploaded ? 'text-emerald-800' : 'text-slate-800'}`}>{doc.title}</h4>
-                                            <p className={`text-xs font-medium mb-8 leading-relaxed px-4 ${isUploaded ? 'text-emerald-600' : 'text-slate-400'}`}>{doc.desc}</p>
 
-                                            <button className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all pointer-events-none ${isUploaded
-                                                ? 'bg-emerald-200 text-emerald-800 shadow-sm'
-                                                : 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 group-hover:bg-brand group-hover:shadow-brand/20'}`}>
-                                                {isUploaded ? 'Document reçu' : 'Téléverser'}
+                                            {/* Title + desc */}
+                                            <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-tight mb-1">{doc.title}</h4>
+                                            <p className="text-[11px] text-slate-400 font-medium leading-relaxed mb-4 flex-1">{doc.desc}</p>
+
+                                            {/* Status badge */}
+                                            <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] text-[10px] font-bold uppercase tracking-wide mb-3 self-start ${
+                                                isUploaded
+                                                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                                                    : 'bg-rose-50 border border-rose-200 text-rose-600'
+                                            }`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isUploaded ? 'bg-emerald-500' : 'bg-rose-400'}`}></span>
+                                                {isUploaded ? 'Téléversé' : 'À fournir'}
+                                            </span>
+
+                                            {/* Upload button */}
+                                            <button className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-[4px] font-black text-[11px] uppercase tracking-widest transition-all ${
+                                                isUploadingDoc
+                                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                    : isUploaded
+                                                        ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white'
+                                                        : 'bg-[#6B3CD2]/10 text-[#6B3CD2] hover:bg-[#6B3CD2] hover:text-white'
+                                            }`}>
+                                                {isUploadingDoc
+                                                    ? <><Loader2 size={13} className="animate-spin" /> Envoi…</>
+                                                    : <><Upload size={13} />{isUploaded ? 'Remplacer' : 'Téléverser'}</>
+                                                }
                                             </button>
+
+                                            {/* External link */}
+                                            {isUploaded && (studentData as any)?.[`${doc.id}_url`] && (
+                                                <a
+                                                    href={(studentData as any)[`${doc.id}_url`]}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="mt-2 flex items-center justify-center gap-1.5 text-[10px] font-bold text-slate-400 hover:text-[#6B3CD2] transition-colors z-30"
+                                                >
+                                                    <ExternalLink size={11} /> Voir le document
+                                                </a>
+                                            )}
                                         </div>
-                                    )
+                                    );
                                 })}
                             </div>
 
-                            <div className="mt-10 bg-white border border-slate-200 rounded-[32px] p-10 flex flex-col md:flex-row items-center justify-between gap-10 shadow-premium">
-                                <div className="w-full md:w-1/2">
-                                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest mb-4">
-                                        <span className="text-slate-400">{uploadedCount} / {REQUIRED_DOCUMENTS.length} documents déposés</span>
-                                        <span className="text-brand">{Math.round(progressPercent)}%</span>
+                            {/* Footer */}
+                            <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-2xl font-black text-slate-900">{uploadedCount}</span>
+                                        <span className="text-[12px] font-medium text-slate-400">/ {REQUIRED_DOCUMENTS.length} documents téléversés</span>
                                     </div>
-                                    <div className="h-3 bg-slate-50 rounded-full overflow-hidden border border-slate-100 p-0.5">
+                                    <div className="w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                         <div
-                                            className="h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-brand to-primary"
+                                            className="h-full bg-[#6B3CD2] rounded-full transition-all duration-500"
                                             style={{ width: `${progressPercent}%` }}
-                                        ></div>
+                                        />
                                     </div>
                                 </div>
-                                <Button
-                                    size="lg"
-                                    disabled={!studentData}
-                                    onClick={() => setActiveTab(AdmissionTab.ENTREPRISE)}
-                                    className="w-full md:w-auto px-12"
-                                    rightIcon={<ArrowRight size={20} />}
-                                >
-                                    Continuer
-                                </Button>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        disabled={!studentData}
+                                        onClick={() => setActiveTab(AdmissionTab.ENTREPRISE)}
+                                        className="flex items-center gap-2 px-6 py-2.5 rounded-[4px] bg-[#6B3CD2] text-white font-black text-[11px] uppercase tracking-widest hover:bg-[#5a2eb8] transition-all shadow-md shadow-[#6B3CD2]/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                                    >
+                                        Continuer
+                                        <ArrowRight size={14} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -1106,50 +1747,126 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                     )}
 
                     {activeTab === AdmissionTab.ADMINISTRATIF && (
-                        <div className="animate-slide-in">
-                            <div className="bg-white border border-slate-200 rounded-3xl p-8 mb-8 flex items-center gap-6 shadow-sm">
-                                <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-xl shadow-violet-500/20">
-                                    <Printer size={32} />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-black text-slate-800 tracking-tight">Dossier administratif</h3>
-                                    <p className="text-slate-500 font-medium">Documents officiels à compléter avec votre chargé d'admission.</p>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {ADMIN_DOCS.map(doc => (
-                                    <div key={doc.id} className="bg-white border border-slate-200 rounded-3xl p-8 hover:shadow-2xl hover:-translate-y-1 transition-all group">
-                                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${doc.gradient} flex items-center justify-center text-white mb-6 shadow-lg ${doc.shadow} group-hover:scale-110 transition-transform`}>
-                                            <FileText size={32} />
-                                        </div>
-                                        <h4 className="font-black text-slate-800 text-lg mb-1 tracking-tight">{doc.title}</h4>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">{doc.subtitle}</p>
-                                        <p className="text-sm text-slate-500 font-medium mb-8 leading-relaxed h-12 overflow-hidden">{doc.desc}</p>
-                                        {(() => {
-                                            const isGenerating = (doc.id === 'renseignements' && isGeneratingFiche) ||
-                                                (doc.id === 'cerfa' && isGeneratingCerfa) ||
-                                                (doc.id === 'atre' && isGeneratingAtre) ||
-                                                (doc.id === 'compte-rendu' && isGeneratingCompteRendu) ||
-                                                (doc.id === 'convention-apprentissage' && isGeneratingConventionApprentissage) ||
-                                                (doc.id === 'livret' && isGeneratingLivret);
-                                            return (
-                                                <button
-                                                    disabled={isGenerating}
-                                                    onClick={() => handleDocAction(doc)}
-                                                    className={`w-full py-3.5 rounded-xl border-2 border-slate-100 font-black text-[11px] uppercase tracking-widest text-slate-600 hover:border-brand hover:text-brand transition-all flex items-center justify-center gap-2 ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                >
-                                                    {isGenerating ? 'Génération...' : doc.btnText} <ArrowRight size={14} className={isGenerating ? 'animate-spin' : ''} />
-                                                </button>
-                                            );
-                                        })()}
+                        <div className="animate-fade-in bg-white rounded-[4px] border border-slate-100 shadow-sm relative overflow-hidden">
+                            <div className="formation-section" style={{ padding: '0 28px 28px' }}>
+                                {/* Header Administratif */}
+                                <div style={{ paddingTop: '24px' }}></div>
+                                <div className="fiche-header">
+                                    <div className="fiche-header-icon !bg-brand/5 !text-brand">
+                                        <Printer size={24} />
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="fiche-header-text">
+                                        <h2 className="text-[18.4px] font-black text-[#18162A]">Dossier Administratif</h2>
+                                        <p>Générez et complétez les documents contractuels officiels</p>
+                                    </div>
+                                </div>
+                                <div className="fiche-divider"></div>
 
-                            <div className="flex justify-end mt-10">
-                                <Button size="lg" className="px-12" onClick={() => navigate('/admin-dashboard')} rightIcon={<CheckCircle2 size={20} />}>
-                                    Terminer le dossier
-                                </Button>
+                                <div className="space-y-4">
+                                    {/* Section 1: Documents à générer */}
+                                    <div className="fiche-section">
+                                        <div className="fiche-section-title">
+                                            <span className="fiche-section-num">1</span>
+                                            <span className="fiche-section-label">Documents à Générer</span>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {ADMIN_DOCS.filter(d => d.btnText === 'Générer').map(doc => {
+                                                const isGenerating = (doc.id === 'renseignements' && isGeneratingFiche) ||
+                                                    (doc.id === 'cerfa' && isGeneratingCerfa) ||
+                                                    (doc.id === 'atre' && isGeneratingAtre) ||
+                                                    (doc.id === 'compte-rendu' && isGeneratingCompteRendu) ||
+                                                    (doc.id === 'convention-apprentissage' && isGeneratingConventionApprentissage) ||
+                                                    (doc.id === 'livret' && isGeneratingLivret);
+
+                                                const iconCls: Record<string, string> = {
+                                                    orange: 'bg-orange-100 border-orange-200 text-orange-600',
+                                                    blue:   'bg-blue-100 border-blue-200 text-blue-600',
+                                                    emerald:'bg-emerald-100 border-emerald-200 text-emerald-600',
+                                                    pink:   'bg-pink-100 border-pink-200 text-pink-600',
+                                                    indigo: 'bg-indigo-100 border-indigo-200 text-indigo-600',
+                                                    cyan:   'bg-cyan-100 border-cyan-200 text-cyan-600',
+                                                };
+
+                                                return (
+                                                    <div key={doc.id} className="relative flex flex-col bg-white border border-slate-200 rounded-[4px] p-5 hover:border-[#6B3CD2]/40 hover:shadow-md transition-all duration-200">
+                                                        <div className={`w-11 h-11 rounded-[4px] flex items-center justify-center mb-4 border-2 ${iconCls[doc.color] || 'bg-slate-100 border-slate-200 text-slate-500'}`}>
+                                                            <FileText size={20} />
+                                                        </div>
+                                                        <h4 className="font-black text-slate-800 text-[12px] mb-0.5 uppercase tracking-tight truncate">{doc.title}</h4>
+                                                        <p className="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-wide">{doc.subtitle}</p>
+                                                        <p className="text-[11px] text-slate-600 font-medium leading-tight mb-4 line-clamp-2 h-8">{doc.desc}</p>
+
+                                                        <div className="mt-auto">
+                                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold uppercase tracking-wide mb-3">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse flex-shrink-0"></span>
+                                                                Prêt à générer
+                                                            </span>
+                                                            <button
+                                                                disabled={isGenerating}
+                                                                onClick={() => handleDocAction(doc)}
+                                                                className={`w-full py-2.5 rounded-[4px] font-bold text-[11px] uppercase tracking-widest border-2 border-[#6B3CD2]/30 text-[#6B3CD2] bg-white hover:bg-[#6B3CD2] hover:text-white hover:border-[#6B3CD2] transition-all flex items-center justify-center gap-2 ${isGenerating ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                                            >
+                                                                {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <PenTool size={14} />}
+                                                                {isGenerating ? 'Génération...' : doc.btnText}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Section 2: Documents à signer */}
+                                    <div className="fiche-section">
+                                        <div className="fiche-section-title">
+                                            <span className="fiche-section-num">2</span>
+                                            <span className="fiche-section-label">Documents à Signer</span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            {ADMIN_DOCS.filter(d => d.btnText === 'Signer').map(doc => (
+                                                <div key={doc.id} className="relative flex items-start gap-5 bg-white border border-slate-200 rounded-[4px] p-5 hover:border-[#6B3CD2]/40 hover:shadow-md transition-all duration-200">
+                                                    <div className={`w-11 h-11 rounded-[4px] flex items-center justify-center border-2 flex-shrink-0 ${
+                                                        doc.color === 'green' ? 'bg-emerald-100 border-emerald-200 text-emerald-700' : 'bg-purple-100 border-purple-200 text-purple-700'
+                                                    }`}>
+                                                        <FileCheck size={20} />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="font-bold text-slate-900 text-[12px] mb-0.5 uppercase tracking-tight">{doc.title}</h4>
+                                                        <p className="text-[10px] text-slate-400 font-semibold mb-1 uppercase tracking-wide">{doc.subtitle}</p>
+                                                        <p className="text-[11px] text-slate-500 font-medium leading-tight mb-3">{doc.desc}</p>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-bold uppercase tracking-wide">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse flex-shrink-0"></span>
+                                                                Signature requise
+                                                            </span>
+                                                            <button
+                                                                onClick={() => handleDocAction(doc)}
+                                                                className="ml-auto px-5 py-2 rounded-[4px] font-bold text-[11px] uppercase tracking-widest border-2 border-[#6B3CD2]/30 text-[#6B3CD2] bg-white hover:bg-[#6B3CD2] hover:text-white hover:border-[#6B3CD2] transition-all flex items-center gap-2"
+                                                            >
+                                                                <PenTool size={14} />
+                                                                {doc.btnText}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="mt-10 pt-8 border-t border-slate-100 flex justify-center">
+                                    <button 
+                                        onClick={() => navigate('/admin-dashboard')}
+                                        className="px-16 py-3.5 bg-[#18162A] text-white rounded-[4px] font-black text-[11px] uppercase tracking-widest hover:bg-black transition-all flex items-center gap-3 shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+                                    >
+                                        <CheckCircle2 size={18} className="text-emerald-400" />
+                                        Finaliser le dossier complet
+                                        <ArrowRight size={16} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -1160,6 +1877,18 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                                 studentData={studentData}
                                 onNext={() => {
                                     setInterviewCompleted(true);
+                                    setActiveTab(AdmissionTab.PROJET_PROFESSIONNEL);
+                                }}
+                            />
+                        </div>
+                    )}
+
+                    {activeTab === AdmissionTab.PROJET_PROFESSIONNEL && (
+                        <div className="animate-slide-in">
+                            <ProjetProfessionnel
+                                studentData={studentData}
+                                onNext={() => {
+                                    setProjetProCompleted(true);
                                     setActiveTab(AdmissionTab.QUESTIONNAIRE);
                                 }}
                             />
@@ -1167,6 +1896,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                     )}
                 </>
             )}
+            </div>
         </div>
     );
 };

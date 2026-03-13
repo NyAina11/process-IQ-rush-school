@@ -11,7 +11,6 @@ import {
     ArrowRight,
     Briefcase,
     ShieldCheck,
-    Star,
     ChevronRight,
     ClipboardList,
     FileSignature,
@@ -58,8 +57,18 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [filter, setFilter] = useState<'all' | 'withFiche' | 'withCerfa' | 'complete'>('all');
     const [formationFilter, setFormationFilter] = useState<string>('all');
+    const [tabAnimKey, setTabAnimKey] = useState(0);
+    const [tabSlideDir, setTabSlideDir] = useState<'right' | 'left'>('right');
+    const tabOrder = { students: 0, stats: 1, history: 2 };
     const tableScrollRef = useRef<HTMLDivElement>(null);
     const scrollAnimRef = useRef<number | null>(null);
+
+    const handleTabChange = (tab: 'students' | 'stats' | 'history') => {
+        if (tab === currentTab) return;
+        setTabSlideDir(tabOrder[tab] > tabOrder[currentTab] ? 'right' : 'left');
+        setTabAnimKey((k: number) => k + 1);
+        setCurrentTab(tab);
+    };
 
     const startScroll = useCallback((direction: 'left' | 'right') => {
         const el = tableScrollRef.current;
@@ -308,8 +317,13 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
 
         const sexDist = { male: 0, female: 0, other: 0 };
         const ageDist = { under18: 0, age18_20: 0, age21_25: 0, over25: 0 };
+        const formationDist: Record<string, number> = {};
         let totalAge = 0;
         let studentsWithAge = 0;
+        let placed = 0;
+        let withFiche = 0;
+        let withCerfa = 0;
+        let withCV = 0;
 
         students.forEach(s => {
             const info = getC(s);
@@ -330,9 +344,18 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                 else if (age <= 25) ageDist.age21_25++;
                 else ageDist.over25++;
             }
+
+            // Formation
+            const formation = info.formation || 'Non renseigné';
+            formationDist[formation] = (formationDist[formation] || 0) + 1;
+
+            // Placement & docs
+            if (isPlaced(s)) placed++;
+            if (info.has_fiche_renseignement) withFiche++;
+            if (info.has_cerfa) withCerfa++;
+            if (info.has_cv) withCV++;
         });
 
-        // Calculate majority age group
         const ageGroups = [
             { label: '-18 ans', count: ageDist.under18 },
             { label: '18-20 ans', count: ageDist.age18_20 },
@@ -341,12 +364,21 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
         ];
         const majorityGroup = ageGroups.reduce((prev, current) => (prev.count > current.count) ? prev : current).label;
 
+        const formationList = Object.entries(formationDist)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8);
+
         return {
             sexDist,
             ageDist,
             total: students.length,
             averageAge: studentsWithAge > 0 ? (totalAge / studentsWithAge).toFixed(1) : "N/A",
-            majorityGroup: studentsWithAge > 0 ? majorityGroup : "N/A"
+            majorityGroup: studentsWithAge > 0 ? majorityGroup : "N/A",
+            placed,
+            withFiche,
+            withCerfa,
+            withCV,
+            formationList
         };
     }, [students, currentTab]);
 
@@ -916,21 +948,21 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
             {/* Navigation Tabs */}
             <div className="flex gap-4 border-b border-slate-200 mb-8">
                 <button
-                    onClick={() => setCurrentTab('students')}
+                    onClick={() => handleTabChange('students')}
                     className={`pb-4 px-2 text-sm font-black uppercase tracking-widest transition-all relative ${currentTab === 'students' ? 'text-[#3b7cf4]' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                     Liste des étudiants
                     {currentTab === 'students' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3b7cf4]"></div>}
                 </button>
                 <button
-                    onClick={() => setCurrentTab('stats')}
+                    onClick={() => handleTabChange('stats')}
                     className={`pb-4 px-2 text-sm font-black uppercase tracking-widest transition-all relative ${currentTab === 'stats' ? 'text-[#3b7cf4]' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                     Statistiques
                     {currentTab === 'stats' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3b7cf4]"></div>}
                 </button>
                 <button
-                    onClick={() => setCurrentTab('history')}
+                    onClick={() => handleTabChange('history')}
                     className={`pb-4 px-2 text-sm font-black uppercase tracking-widest transition-all relative ${currentTab === 'history' ? 'text-[#3b7cf4]' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                     Historique Global
@@ -938,6 +970,10 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                 </button>
             </div>
 
+            <div
+                key={tabAnimKey}
+                className={tabSlideDir === 'right' ? 'tab-slide-right' : 'tab-slide-left'}
+            >
             {currentTab === 'students' && (
                 <>
                     {/* Toolbar */}
@@ -1427,167 +1463,141 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
             )}
 
             {currentTab === 'stats' && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-4">
                     {loading ? (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-pulse">
-                            {/* Skeleton: Répartition par Sexe */}
-                            <div className="bg-white border border-[#e2e8f0] p-8">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-5 h-5 bg-[#e2e8f0]"></div>
-                                    <div className="h-4 bg-[#e2e8f0] rounded-[4px] w-40"></div>
-                                </div>
-                                <div className="space-y-6">
-                                    {[72, 56, 40].map((w, i) => (
-                                        <div key={i}>
-                                            <div className="flex justify-between items-end mb-2">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-7 h-7 bg-[#e2e8f0]"></div>
-                                                    <div className="h-3 bg-[#e2e8f0] rounded-[4px] w-24"></div>
-                                                </div>
-                                                <div className="h-3 bg-[#eef2f7] rounded-[4px] w-12"></div>
-                                            </div>
-                                            <div className="h-2 bg-[#f4f6fb] border border-[#e2e8f0]">
-                                                <div className="h-full bg-[#e2e8f0]" style={{ width: `${w}%` }}></div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="mt-8 p-5 bg-[#f4f6fb] border border-[#e2e8f0] flex items-center justify-around">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <div className="h-5 bg-[#e2e8f0] rounded-[4px] w-10"></div>
-                                        <div className="h-2 bg-[#eef2f7] rounded-[4px] w-20"></div>
-                                    </div>
-                                    <div className="w-px h-8 bg-[#e2e8f0]"></div>
-                                    <div className="flex flex-col items-center gap-2">
-                                        <div className="h-5 bg-[#e2e8f0] rounded-[4px] w-8"></div>
-                                        <div className="h-2 bg-[#eef2f7] rounded-[4px] w-24"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Skeleton: Pyramide des âges */}
-                            <div className="bg-white border border-[#e2e8f0] p-8">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-5 h-5 bg-[#e2e8f0]"></div>
-                                    <div className="h-4 bg-[#e2e8f0] rounded-[4px] w-36"></div>
-                                </div>
-                                <div className="flex items-end justify-between h-56 gap-4 px-2">
-                                    {[45, 90, 70, 30].map((h, i) => (
-                                        <div key={i} className="flex-1 flex flex-col items-center gap-3 h-full justify-end">
-                                            <div className="w-full flex justify-center" style={{ height: `${h}%` }}>
-                                                <div className="w-full max-w-[56px] bg-[#e2e8f0]"></div>
-                                            </div>
-                                            <div className="h-2 bg-[#eef2f7] rounded-[4px] w-full"></div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="mt-8 grid grid-cols-2 gap-3">
-                                    <div className="p-5 bg-[#f4f6fb] border border-[#e2e8f0]">
+                        <div className="animate-pulse space-y-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                {[1,2,3,4,5].map(i => (
+                                    <div key={i} className="bg-white border border-[#e2e8f0] rounded-[4px] p-4">
                                         <div className="h-2 bg-[#e2e8f0] rounded-[4px] w-20 mb-3"></div>
-                                        <div className="h-5 bg-[#e2e8f0] rounded-[4px] w-16"></div>
+                                        <div className="h-6 bg-[#e2e8f0] rounded-[4px] w-12 mb-2"></div>
+                                        <div className="h-2 bg-[#f4f6fb] rounded-[4px] w-16"></div>
                                     </div>
-                                    <div className="p-5 bg-[#f4f6fb] border border-[#e2e8f0]">
-                                        <div className="h-2 bg-[#e2e8f0] rounded-[4px] w-16 mb-3"></div>
-                                        <div className="h-5 bg-[#e2e8f0] rounded-[4px] w-20"></div>
+                                ))}
+                            </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                {[1,2].map(i => (
+                                    <div key={i} className="bg-white border border-[#e2e8f0] rounded-[4px] p-5">
+                                        <div className="h-2 bg-[#e2e8f0] rounded-[4px] w-32 mb-5"></div>
+                                        <div className="space-y-3">
+                                            {[80,55,20].map((w,j) => (
+                                                <div key={j} className="flex items-center gap-3">
+                                                    <div className="w-16 h-2 bg-[#e2e8f0] rounded-[4px]"></div>
+                                                    <div className="flex-1 h-5 bg-[#f4f6fb] rounded-[4px]">
+                                                        <div className="h-full bg-[#e2e8f0] rounded-[4px]" style={{width:`${w}%`}}></div>
+                                                    </div>
+                                                    <div className="w-12 h-2 bg-[#eef2f7] rounded-[4px]"></div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
                     ) : statsData ? (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Sex Distribution */}
-                            <div className="bg-white border border-[#e2e8f0] p-8">
-                                <h3 className="text-base font-bold text-[#1e293b] mb-6 flex items-center gap-3">
-                                    <Users className="text-[#3b7cf4]" size={18} /> Répartition par Sexe
-                                </h3>
+                        <>
+                            {/* KPI Row */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                {[
+                                    { label: 'Effectif total', value: statsData.total, sub: 'étudiants inscrits', color: '#3b7cf4' },
+                                    { label: 'En alternance', value: statsData.placed, sub: `${statsData.total > 0 ? Math.round((statsData.placed / statsData.total) * 100) : 0}% placés`, color: '#059669' },
+                                    { label: 'Âge moyen', value: statsData.averageAge, sub: 'ans · ' + statsData.majorityGroup + ' majorité', color: '#7c3aed' },
+                                    { label: 'CERFA générés', value: statsData.withCerfa, sub: `${statsData.total > 0 ? Math.round((statsData.withCerfa / statsData.total) * 100) : 0}% complétés`, color: '#d97706' },
+                                ].map((kpi) => (
+                                    <div key={kpi.label} className="bg-white border border-[#e2e8f0] rounded-[4px] p-4">
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">{kpi.label}</div>
+                                        <div className="text-2xl font-black" style={{ color: kpi.color }}>{kpi.value}</div>
+                                        <div className="text-[10px] text-slate-400 mt-1 truncate">{kpi.sub}</div>
+                                    </div>
+                                ))}
+                            </div>
 
-                                <div className="space-y-6">
-                                    {[
-                                        { label: 'Masculin', count: statsData.sexDist.male, color: 'bg-[#3b7cf4]', icon: 'M' },
-                                        { label: 'Féminin', count: statsData.sexDist.female, color: 'bg-[#e84242]', icon: 'F' },
-                                        { label: 'Autre / Non renseigné', count: statsData.sexDist.other, color: 'bg-slate-300', icon: '?' }
-                                    ].map((item) => {
-                                        const percent = statsData.total > 0 ? (item.count / statsData.total) * 100 : 0;
-                                        return (
-                                            <div key={item.label}>
-                                                <div className="flex justify-between items-end mb-2">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-7 h-7 ${item.color} text-white flex items-center justify-center font-bold text-xs`}>{item.icon}</div>
-                                                        <span className="font-medium text-[#475569] text-sm">{item.label}</span>
+                            {/* Genre + Âge */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                {/* Genre */}
+                                <div className="bg-white border border-[#e2e8f0] rounded-[4px] p-5">
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Répartition par genre</div>
+                                    <div className="space-y-3">
+                                        {[
+                                            { label: 'Masculin', count: statsData.sexDist.male, color: '#3b7cf4' },
+                                            { label: 'Féminin', count: statsData.sexDist.female, color: '#e84242' },
+                                            { label: 'Non renseigné', count: statsData.sexDist.other, color: '#94a3b8' },
+                                        ].map(row => {
+                                            const pct = statsData.total > 0 ? (row.count / statsData.total) * 100 : 0;
+                                            return (
+                                                <div key={row.label} className="flex items-center gap-3">
+                                                    <div className="w-28 text-xs font-semibold text-slate-500 flex-shrink-0">{row.label}</div>
+                                                    <div className="flex-1 h-5 bg-[#f4f6fb] rounded-[4px] overflow-hidden border border-[#e2e8f0]">
+                                                        <div className="h-full rounded-[4px] transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: row.color }}></div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <span className="text-base font-bold text-[#1e293b]">{item.count}</span>
-                                                        <span className="text-xs text-[#8898aa] ml-2">({Math.round(percent)}%)</span>
+                                                    <div className="w-20 text-right text-xs font-bold text-slate-700 flex-shrink-0">
+                                                        {row.count} <span className="text-slate-400 font-normal">({Math.round(pct)}%)</span>
                                                     </div>
                                                 </div>
-                                                <div className="h-2 bg-[#f4f6fb] overflow-hidden border border-[#e2e8f0]">
-                                                    <div
-                                                        className={`h-full transition-all duration-1000 ease-out ${item.color}`}
-                                                        style={{ width: `${percent}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
+                                    </div>
                                 </div>
 
-                                <div className="mt-8 p-5 bg-[#f4f6fb] border border-[#e2e8f0] flex items-center justify-around text-center">
-                                    <div>
-                                        <div className="text-xl font-bold text-[#1e293b]">{Math.round((statsData.sexDist.female / statsData.total) * 100)}%</div>
-                                        <div className="text-[9px] font-bold text-[#8898aa] uppercase tracking-widest mt-1">Taux de féminisation</div>
+                                {/* Âge */}
+                                <div className="bg-white border border-[#e2e8f0] rounded-[4px] p-5">
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
+                                        Pyramide des âges
+                                        <span className="text-slate-300 font-normal normal-case tracking-normal ml-2">· moy. {statsData.averageAge} ans</span>
                                     </div>
-                                    <div className="w-px h-8 bg-[#e2e8f0]"></div>
-                                    <div>
-                                        <div className="text-xl font-bold text-[#1e293b]">{statsData.total}</div>
-                                        <div className="text-[9px] font-bold text-[#8898aa] uppercase tracking-widest mt-1">Total échantillon</div>
+                                    <div className="space-y-3">
+                                        {[
+                                            { label: '-18 ans', count: statsData.ageDist.under18, color: '#3b7cf4' },
+                                            { label: '18-20 ans', count: statsData.ageDist.age18_20, color: '#7c3aed' },
+                                            { label: '21-25 ans', count: statsData.ageDist.age21_25, color: '#0bbfa8' },
+                                            { label: '26+ ans', count: statsData.ageDist.over25, color: '#475569' },
+                                        ].map(row => {
+                                            const maxAge = Math.max(statsData.ageDist.under18, statsData.ageDist.age18_20, statsData.ageDist.age21_25, statsData.ageDist.over25, 1);
+                                            const barPct = (row.count / maxAge) * 100;
+                                            const absPct = statsData.total > 0 ? (row.count / statsData.total) * 100 : 0;
+                                            return (
+                                                <div key={row.label} className="flex items-center gap-3">
+                                                    <div className="w-16 text-xs font-semibold text-slate-500 flex-shrink-0">{row.label}</div>
+                                                    <div className="flex-1 h-5 bg-[#f4f6fb] rounded-[4px] overflow-hidden border border-[#e2e8f0]">
+                                                        <div className="h-full rounded-[4px] transition-all duration-700" style={{ width: `${barPct}%`, backgroundColor: row.color }}></div>
+                                                    </div>
+                                                    <div className="w-20 text-right text-xs font-bold text-slate-700 flex-shrink-0">
+                                                        {row.count} <span className="text-slate-400 font-normal">({Math.round(absPct)}%)</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Age Distribution */}
-                            <div className="bg-white border border-[#e2e8f0] p-8">
-                                <h3 className="text-base font-bold text-[#1e293b] mb-6 flex items-center gap-3">
-                                    <Star className="text-[#7c3aed]" size={18} /> Pyramide des âges
-                                </h3>
-
-                                <div className="flex items-end justify-between h-56 gap-4 px-2">
-                                    {[
-                                        { label: '-18 ans', count: statsData.ageDist.under18, color: 'from-[#3b7cf4] to-[#2563EB]' },
-                                        { label: '18-20 ans', count: statsData.ageDist.age18_20, color: 'from-[#7c3aed] to-[#6d28d9]' },
-                                        { label: '21-25 ans', count: statsData.ageDist.age21_25, color: 'from-[#0bbfa8] to-[#0891b2]' },
-                                        { label: '26+ ans', count: statsData.ageDist.over25, color: 'from-[#1a1f2e] to-[#0f172a]' }
-                                    ].map((item) => {
-                                        const maxAge = Math.max(...(Object.values(statsData.ageDist) as number[]));
-                                        const height = maxAge > 0 ? (item.count / maxAge) * 100 : 0;
-                                        return (
-                                            <div key={item.label} className="flex-1 flex flex-col items-center gap-3 h-full justify-end group">
-                                                <div className="relative w-full flex justify-center" style={{ height: `${height}%` }}>
-                                                    <div className={`w-full max-w-[56px] bg-gradient-to-b ${item.color} relative min-h-[4px]`}>
-                                                        <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-[#1a1f2e] text-white px-2.5 py-1 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                                            {item.count} élève{item.count > 1 ? 's' : ''}
-                                                        </div>
+                            {/* Formations */}
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="bg-white border border-[#e2e8f0] rounded-[4px] p-5">
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Répartition par formation</div>
+                                    <div className="space-y-2.5">
+                                        {statsData.formationList.length > 0 ? statsData.formationList.map(([label, count]) => {
+                                            const pct = statsData.total > 0 ? (count / statsData.total) * 100 : 0;
+                                            return (
+                                                <div key={label} className="flex items-center gap-3">
+                                                    <div className="w-40 text-[11px] font-semibold text-slate-500 flex-shrink-0 truncate" title={label}>{label}</div>
+                                                    <div className="flex-1 h-4 bg-[#f4f6fb] rounded-[4px] overflow-hidden border border-[#e2e8f0]">
+                                                        <div className="h-full rounded-[4px] transition-all duration-700" style={{ width: `${pct}%`, background: 'linear-gradient(to right, #7c3aed, #3b7cf4)' }}></div>
+                                                    </div>
+                                                    <div className="w-20 text-right text-[11px] font-bold text-slate-700 flex-shrink-0">
+                                                        {count} <span className="text-slate-400 font-normal">({Math.round(pct)}%)</span>
                                                     </div>
                                                 </div>
-                                                <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-widest text-center">{item.label}</span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                <div className="mt-8 grid grid-cols-2 gap-3">
-                                    <div className="p-5 bg-[#dbeafe] border border-[#93c5fd]">
-                                        <div className="text-[9px] font-bold text-[#1d4ed8] uppercase tracking-widest mb-1">Moyenne d'âge</div>
-                                        <div className="text-xl font-bold text-[#1d4ed8]">{statsData.averageAge} ans</div>
-                                    </div>
-                                    <div className="p-5 bg-[#ede9fe] border border-[#c4b5fd]">
-                                        <div className="text-[9px] font-bold text-[#6d28d9] uppercase tracking-widest mb-1">Majorité</div>
-                                        <div className="text-xl font-bold text-[#6d28d9]">{statsData.majorityGroup}</div>
+                                            );
+                                        }) : (
+                                            <p className="text-sm text-slate-400 py-4 text-center">Aucune formation renseignée</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </>
                     ) : (
-                        <div className="text-center py-32 bg-[#f4f6fb] border border-dashed border-[#e2e8f0]">
+                        <div className="text-center py-32 bg-[#f4f6fb] border border-dashed border-[#e2e8f0] rounded-[4px]">
                             <AlertCircle size={48} className="text-slate-300 mx-auto mb-4" />
                             <p className="text-slate-500 font-bold">Impossible de générer les statistiques. Données insuffisantes.</p>
                         </div>
@@ -1609,6 +1619,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                     <HistoryTimeline history={globalHistory} loading={loadingHistory} />
                 </div>
             )}
+            </div>
         </div>
     );
 };

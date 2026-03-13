@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { User, Save, Loader2, ArrowRight } from 'lucide-react';
+import {
+    User, Save, Loader2, ArrowRight, CheckCircle2, Info, Activity,
+    MapPin, Phone, GraduationCap, Briefcase, ChevronDown, Users, BookOpen, Target
+} from 'lucide-react';
 import { api } from '../services/api';
 import { StudentFormData } from '../types';
 import { useAppStore } from '../store/useAppStore';
 import { useApi } from '../hooks/useApi';
-import Button from './ui/Button';
-
 import Input from './ui/Input';
 import Select from './ui/Select';
 import { formatPhone, formatNIR } from '../utils/formatters';
@@ -24,10 +25,7 @@ import {
     FORMATION_SOUHAITEE_OPTIONS,
     KNOW_RUSH_SCHOOL_OPTIONS
 } from '../constants/formOptions';
-import Card from './ui/Card';
 
-
-// Validation Schema with Zod
 const studentSchema = z.object({
     prenom: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
     nom_naissance: z.string().min(2, "Le nom de naissance est requis"),
@@ -77,31 +75,20 @@ const studentSchema = z.object({
     agreement: z.boolean().refine(val => val === true, {
         message: "Vous devez attester sur l'honneur l'exactitude des informations"
     }),
-
     add_second_representative: z.boolean().optional(),
     representant_legal_1: z.object({
-        nom: z.string().optional(),
-        prenom: z.string().optional(),
-        lien_parente: z.string().optional(),
-        numero: z.string().optional(),
-        voie: z.string().optional(),
-        complement: z.string().optional(),
-        code_postal: z.string().optional(),
-        ville: z.string().optional(),
-        email: z.string().optional(),
-        telephone: z.string().optional(),
+        nom: z.string().optional(), prenom: z.string().optional(),
+        lien_parente: z.string().optional(), numero: z.string().optional(),
+        voie: z.string().optional(), complement: z.string().optional(),
+        code_postal: z.string().optional(), ville: z.string().optional(),
+        email: z.string().optional(), telephone: z.string().optional(),
     }).optional(),
     representant_legal_2: z.object({
-        nom: z.string().optional(),
-        prenom: z.string().optional(),
-        lien_parente: z.string().optional(),
-        numero: z.string().optional(),
-        voie: z.string().optional(),
-        complement: z.string().optional(),
-        code_postal: z.string().optional(),
-        ville: z.string().optional(),
-        email: z.string().optional(),
-        telephone: z.string().optional(),
+        nom: z.string().optional(), prenom: z.string().optional(),
+        lien_parente: z.string().optional(), numero: z.string().optional(),
+        voie: z.string().optional(), complement: z.string().optional(),
+        code_postal: z.string().optional(), ville: z.string().optional(),
+        email: z.string().optional(), telephone: z.string().optional(),
     }).optional()
 });
 
@@ -113,27 +100,123 @@ interface QuestionnaireFormProps {
     initialData?: Partial<StudentFormValues>;
 }
 
+// ---- Accordion Section ----
+const SectionAccordion = ({
+    num, title, icon: Icon, isOpen, onToggle, isComplete, hasError, children
+}: {
+    num: number | string; title: string; icon: any;
+    isOpen: boolean; onToggle: () => void;
+    isComplete: boolean; hasError: boolean; children: React.ReactNode;
+}) => (
+    <div className={`border-2 rounded-[4px] transition-all duration-200 overflow-hidden ${
+        hasError ? 'border-rose-300' : isComplete ? 'border-emerald-200' : isOpen ? 'border-[#6B3CD2]/35' : 'border-slate-200'
+    }`}>
+        <button
+            type="button"
+            onClick={onToggle}
+            className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${
+                isOpen ? 'bg-slate-50/60 border-b-2 border-slate-100' : 'bg-white hover:bg-slate-50/40'
+            }`}
+        >
+            {/* Icon */}
+            <div className={`w-9 h-9 rounded-[4px] flex items-center justify-center flex-shrink-0 transition-all ${
+                isComplete ? 'bg-emerald-100 text-emerald-600 border border-emerald-200'
+                : hasError ? 'bg-rose-100 text-rose-500 border border-rose-200'
+                : isOpen ? 'bg-[#6B3CD2]/10 text-[#6B3CD2] border border-[#6B3CD2]/20'
+                : 'bg-slate-100 text-slate-400 border border-slate-200'
+            }`}>
+                {isComplete
+                    ? <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l3.5 3.5 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    : <Icon size={15} />
+                }
+            </div>
+
+            {/* Text */}
+            <div className="flex-1 min-w-0">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Section {num}</span>
+                <span className="text-[13px] font-black text-slate-900 tracking-tight">{title}</span>
+            </div>
+
+            {/* Badge */}
+            {isComplete && (
+                <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-[3px] uppercase tracking-wide flex-shrink-0">
+                    Complété
+                </span>
+            )}
+            {hasError && !isComplete && (
+                <span className="text-[9px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-[3px] uppercase tracking-wide flex-shrink-0">
+                    À corriger
+                </span>
+            )}
+
+            <ChevronDown size={15} className={`text-slate-400 flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isOpen && (
+            <div className="px-5 pt-5 pb-6 bg-white">
+                {children}
+            </div>
+        )}
+    </div>
+);
+
+// ---- Field label ----
+const FieldLabel = ({ children, required }: { children: React.ReactNode; required?: boolean }) => (
+    <label className="block text-[11px] font-black text-slate-500 uppercase tracking-wider mb-1.5">
+        {children}{required && <span className="text-rose-400 ml-1">*</span>}
+    </label>
+);
+
+// ---- Yes/No toggle ----
+const YesNo = ({ value, onChange, label }: { value: boolean | null; onChange: (v: boolean) => void; label: string }) => (
+    <div className={`flex items-center justify-between p-4 border rounded-[4px] transition-colors ${
+        value === null ? 'bg-white border-slate-200' : 'bg-slate-50/60 border-slate-200'
+    }`}>
+        <div className="flex items-center gap-2.5">
+            {value === null && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0"></span>}
+            <span className="text-[12px] font-bold text-slate-700">{label}</span>
+        </div>
+        <div className="flex gap-2">
+            {([true, false] as const).map(v => (
+                <button
+                    key={String(v)}
+                    type="button"
+                    onClick={() => onChange(v)}
+                    className={`px-4 py-1.5 rounded-[4px] text-[10px] font-black uppercase tracking-wider border-2 transition-all ${
+                        value === v
+                            ? 'bg-[#6B3CD2] border-[#6B3CD2] text-white shadow-sm shadow-[#6B3CD2]/20'
+                            : 'bg-white border-slate-200 text-slate-400 hover:border-[#6B3CD2]/30 hover:text-[#6B3CD2]'
+                    }`}
+                >{v ? 'Oui' : 'Non'}</button>
+            ))}
+        </div>
+    </div>
+);
+
+// ---- Form grid ----
+const FormGrid = ({ children }: { children: React.ReactNode }) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{children}</div>
+);
+const FullCol = ({ children }: { children: React.ReactNode }) => (
+    <div className="md:col-span-2">{children}</div>
+);
+
+
 const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialData }) => {
     const { showToast, draftStudent, setDraftStudent, clearDraftStudent } = useAppStore();
-    const [activeSection, setActiveSection] = useState<string | null>('personal');
+    const [openSections, setOpenSections] = useState<Set<string>>(new Set(['personal']));
 
-    // Merge default values: initialData takes precedence over draftStudent (or draftStudent over initialData? Usually draft is fresher if user edited)
-    // Here we assume if initialData is provided (from backend), we want to use it, unless draft is newer? 
-    // Actually, usually when opening a student profile, we want to see the backend data.
     const formDefaults = initialData || draftStudent;
 
-    const toggleSection = (section: string) => {
-        setActiveSection(prev => prev === section ? null : section);
+    const toggleSection = (id: string) => {
+        setOpenSections(prev => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
     };
 
-    const {
-        register,
-        handleSubmit,
-        watch,
-        setValue,
-        reset,
-        formState: { errors }
-    } = useForm<StudentFormValues>({
+    const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<StudentFormValues>({
         resolver: zodResolver(studentSchema),
         defaultValues: {
             prenom: formDefaults?.prenom || '',
@@ -153,12 +236,12 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
             email: formDefaults?.email || '',
             telephone: formDefaults?.telephone || '',
             nir: formDefaults?.nir || '',
-            situation: formDefaults?.situation || '',
-            regime_social: formDefaults?.regime_social || '',
-            declare_inscription_sportif_haut_niveau: formDefaults?.declare_inscription_sportif_haut_niveau || false,
-            declare_avoir_projet_creation_reprise_entreprise: formDefaults?.declare_avoir_projet_creation_reprise_entreprise || false,
-            declare_travailleur_handicape: formDefaults?.declare_travailleur_handicape || false,
-            alternance: formDefaults?.alternance || false,
+            situation: initialData?.situation || '',
+            regime_social: initialData?.regime_social || '',
+            declare_inscription_sportif_haut_niveau: formDefaults?.declare_inscription_sportif_haut_niveau ?? false,
+            declare_avoir_projet_creation_reprise_entreprise: formDefaults?.declare_avoir_projet_creation_reprise_entreprise ?? false,
+            declare_travailleur_handicape: formDefaults?.declare_travailleur_handicape ?? false,
+            alternance: formDefaults?.alternance ?? false,
             dernier_diplome_prepare: formDefaults?.dernier_diplome_prepare || '',
             derniere_classe: formDefaults?.derniere_classe || '',
             intitulePrecisDernierDiplome: formDefaults?.intitulePrecisDernierDiplome || '',
@@ -176,22 +259,11 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
         }
     });
 
-    // Reset form when initialData is loaded
-    React.useEffect(() => {
-        if (initialData) {
-            reset(initialData);
-        }
-    }, [initialData, reset]);
-
-    // Auto-save draft
+    React.useEffect(() => { if (initialData) reset(initialData); }, [initialData, reset]);
     React.useEffect(() => {
         const subscription = watch((value) => setDraftStudent(value));
         return () => subscription.unsubscribe();
     }, [watch, setDraftStudent]);
-
-    const { execute: generateCerfaApi } = useApi(api.generateCerfa, {
-        silentLoading: true // Don't block UI with multiple loaders
-    });
 
     const { execute: submitStudent, loading: isSubmitting } = useApi(api.submitStudent, {
         successMessage: "Inscription enregistrée avec succès !",
@@ -199,12 +271,8 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
             const recordId = response?.record_id || response?.id;
             if (recordId) {
                 localStorage.setItem('candidateRecordId', recordId);
-                // Trigger pre-generations in background with a 5s delay for Airtable/Backend sync
                 setTimeout(() => {
-                    console.log('🕒 Triggering delayed document generation for:', recordId);
-                    // Cerfa
                     api.generateCerfa(recordId).catch(err => console.error("CERFA pre-generation failed:", err));
-                    // Certificat Scolarité
                     api.generateCertificatScolarite(recordId).catch(err => console.error("Certificat Scolarité pre-generation failed:", err));
                 }, 5000);
             }
@@ -214,49 +282,33 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
         errorMessage: "Erreur lors de l'enregistrement. Veuillez réessayer."
     });
 
-    const onSubmit = async (data: StudentFormValues) => {
-        await submitStudent(data as any);
-    };
+    const onSubmit = async (data: StudentFormValues) => { await submitStudent(data as any); };
 
-    const onError = (errors: any) => {
-        const errorCount = Object.keys(errors).length;
+    const onError = (errs: any) => {
+        const errorCount = Object.keys(errs).length;
         showToast(`Veuillez corriger les ${errorCount} erreur(s) avant de continuer.`, "error");
-
-        // Auto-expand the first section with errors
-        const sections = [
-            { id: 'personal', fields: ['prenom', 'nom_naissance', 'nom_usage', 'sexe', 'date_naissance', 'nationalite', 'commune_naissance', 'departement'] },
-            { id: 'contact', fields: ['num_residence', 'rue_residence', 'complement_residence', 'code_postal', 'ville', 'email', 'telephone', 'nir'] },
-            { id: 'legal', fields: ['representant_legal_1', 'representant_legal_2'] },
-            { id: 'situation', fields: ['situation', 'regime_social', 'declare_inscription_sportif_haut_niveau', 'declare_avoir_projet_creation_reprise_entreprise', 'declare_travailleur_handicape', 'alternance'] },
-            { id: 'school', fields: ['dernier_diplome_prepare', 'derniere_classe', 'intitulePrecisDernierDiplome', 'bac'] },
-            { id: 'desire', fields: ['formation_souhaitee', 'date_de_visite', 'date_de_reglement', 'entreprise_d_accueil'] },
-            { id: 'extra', fields: ['connaissance_rush_how', 'motivation_projet_professionnel'] }
-        ];
-
-        for (const section of sections) {
-            if (section.id === 'legal' && !isMinor) continue;
-
-            const hasError = section.fields.some(field => errors[field]);
-            if (hasError) {
-                setActiveSection(section.id);
-                break;
+        const sectionMap: Record<string, string[]> = {
+            personal: ['prenom', 'nom_naissance', 'nom_usage', 'sexe', 'date_naissance', 'nationalite', 'commune_naissance', 'departement'],
+            contact: ['num_residence', 'rue_residence', 'complement_residence', 'code_postal', 'ville', 'email', 'telephone', 'nir'],
+            legal: ['representant_legal_1', 'representant_legal_2'],
+            situation: ['situation', 'regime_social', 'declare_inscription_sportif_haut_niveau', 'declare_avoir_projet_creation_reprise_entreprise', 'declare_travailleur_handicape', 'alternance'],
+            school: ['dernier_diplome_prepare', 'derniere_classe', 'intitulePrecisDernierDiplome', 'bac'],
+            formation: ['formation_souhaitee', 'date_de_visite', 'date_de_reglement', 'entreprise_d_accueil', 'connaissance_rush_how', 'motivation_projet_professionnel'],
+        };
+        setOpenSections(prev => {
+            const next = new Set(prev);
+            for (const [id, fields] of Object.entries(sectionMap)) {
+                if (fields.some(f => errs[f])) next.add(id);
             }
-        }
-    };
-
-    const selectedSexe = watch('sexe');
-    const selectedEntreprise = watch('entreprise_d_accueil');
-    const declarations = watch();
-    const dateNaissance = watch('date_naissance');
-    const addSecondRep = watch('add_second_representative');
-
-    // Helper to check if any field in a section has an error
-    const hasSectionError = (sectionFields: string[]) => {
-        return sectionFields.some(field => {
-            const fieldError = (errors as any)[field];
-            return !!fieldError;
+            return next;
         });
     };
+
+    const formValues = watch();
+    const selectedSexe = formValues.sexe;
+    const selectedEntreprise = formValues.entreprise_d_accueil;
+    const dateNaissance = formValues.date_naissance;
+    const addSecondRep = formValues.add_second_representative;
 
     const isMinor = React.useMemo(() => {
         if (!dateNaissance) return false;
@@ -268,433 +320,337 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
         return age < 18;
     }, [dateNaissance]);
 
-    return (
-        <form onSubmit={handleSubmit(onSubmit, onError)} className="bg-gradient-to-br from-slate-50 to-white rounded-3xl p-6 md:p-10 shadow-xl border border-slate-100 relative overflow-hidden animate-slide-in">
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-brand via-primary to-violet-500"></div>
+    const isSectionComplete = (fields: string[]) =>
+        fields.every(f => {
+            const v = (formValues as any)[f];
+            if (typeof v === 'boolean') return true; // true ou false = explicitement sélectionné
+            return v !== undefined && v !== '' && v !== null;
+        });
 
-            <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10 pb-8 border-b border-slate-100">
-                <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-brand to-primary rounded-2xl flex items-center justify-center text-white shadow-xl shadow-brand/20 shrink-0">
-                        <User size={32} />
-                    </div>
-                    <div className="w-px h-12 bg-slate-200 hidden md:block"></div>
-                    <div className="flex items-center gap-3">
-                        <img src="/images/logo-process-iq.png" alt="Process IQ" className="h-10 w-auto" />
-                        <span className="text-xl font-bold text-slate-900 tracking-tight">ProcessIQ</span>
-                    </div>
+    const hasSectionError = (fields: string[]) =>
+        fields.some(f => !!(errors as any)[f]);
+
+    const sectionDefs = [
+        { id: 'personal', fields: ['prenom', 'nom_naissance', 'sexe', 'date_naissance', 'nationalite', 'commune_naissance', 'departement'] },
+        { id: 'contact', fields: ['rue_residence', 'code_postal', 'ville', 'email', 'telephone'] },
+        { id: 'situation', fields: ['situation', 'declare_inscription_sportif_haut_niveau', 'declare_avoir_projet_creation_reprise_entreprise', 'declare_travailleur_handicape', 'alternance'] },
+        { id: 'school', fields: ['derniere_classe', 'bac'] },
+        { id: 'formation', fields: ['formation_souhaitee'] },
+    ];
+
+    const completedCount = sectionDefs.filter(s => isSectionComplete(s.fields)).length;
+    const progressPercent = Math.round((completedCount / sectionDefs.length) * 100);
+
+    const inputClass = "w-full px-3 py-2.5 bg-white border border-slate-200 rounded-[4px] focus:border-[#6B3CD2] focus:ring-2 focus:ring-[#6B3CD2]/10 outline-none font-medium text-slate-800 text-[12px] placeholder-slate-300 resize-none transition-all";
+
+    return (
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="animate-fade-in">
+
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 rounded-[4px] bg-[#6B3CD2]/10 flex items-center justify-center text-[#6B3CD2]">
+                    <User size={22} />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-900 mb-1">Fiche d'inscription étudiant</h2>
-                    <p className="text-slate-500">Complétez toutes les informations pour finaliser votre dossier</p>
+                    <h2 className="text-[17px] font-black text-slate-900">Fiche d'inscription Étudiant</h2>
+                    <p className="text-[12px] text-slate-400 font-medium mt-0.5">Informations personnelles et administratives pour votre dossier</p>
                 </div>
             </div>
 
-            <div className="space-y-6">
-                <Card
-                    step={1}
-                    title="Informations personnelles"
-                    collapsible
-                    isOpen={activeSection === 'personal'}
-                    onToggle={() => toggleSection('personal')}
-                    hasError={hasSectionError(['prenom', 'nom_naissance', 'nom_usage', 'sexe', 'date_naissance', 'nationalite', 'commune_naissance', 'departement'])}
+            {/* Progress bar */}
+            <div className="bg-white border border-slate-200 rounded-[4px] p-4 mb-6 flex items-center gap-5">
+                <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Progression</span>
+                        <span className="text-[11px] font-black text-[#6B3CD2]">{completedCount} / {sectionDefs.length} sections</span>
+                    </div>
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-[#6B3CD2] rounded-full transition-all duration-500"
+                            style={{ width: `${progressPercent}%` }}
+                        />
+                    </div>
+                </div>
+                <div className={`text-[13px] font-black transition-colors ${progressPercent === 100 ? 'text-emerald-600' : 'text-slate-300'}`}>
+                    {progressPercent === 100 ? '✓ Complet' : `${progressPercent}%`}
+                </div>
+            </div>
+
+            <div className="space-y-3">
+
+                {/* ─── SECTION 1 – Informations personnelles ─── */}
+                <SectionAccordion
+                    num={1} title="Informations personnelles" icon={User}
+                    isOpen={openSections.has('personal')} onToggle={() => toggleSection('personal')}
+                    isComplete={isSectionComplete(sectionDefs[0].fields)}
+                    hasError={hasSectionError(sectionDefs[0].fields)}
                 >
-                    <div className="grid grid-cols-12 gap-5">
-                        <div className="col-span-12 md:col-span-6">
-                            <Input label="Prénom" required placeholder="Votre prénom" error={errors.prenom?.message} {...register('prenom')} />
-                        </div>
-                        <div className="col-span-12 md:col-span-6">
-                            <Input label="Nom de naissance" required placeholder="Votre nom de naissance" error={errors.nom_naissance?.message} {...register('nom_naissance')} />
-                        </div>
-                        <div className="col-span-12">
-                            <Input label="Nom d'usage" placeholder="Si différent du nom de naissance" {...register('nom_usage')} />
-                        </div>
-                        <div className="col-span-12">
-                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Sexe *</label>
-                            <div className="flex gap-3 flex-wrap">
-                                {['Féminin', 'Masculin'].map((val, idx) => (
-                                    <label key={val} className="relative cursor-pointer group flex-1 min-w-[120px]">
-                                        <input className="peer sr-only" type="radio" value={val} {...register('sexe')} />
-                                        <div className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl border-2 transition-all ${selectedSexe === val ? 'bg-brand/10 border-brand shadow-brand/10' : 'bg-slate-50/50 border-transparent hover:border-slate-200'}`}>
-                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${selectedSexe === val ? 'bg-brand text-white' : 'bg-slate-200 text-slate-400'}`}>{String.fromCharCode(65 + idx)}</span>
-                                            <span className="font-bold text-slate-700">{val}</span>
+                    <FormGrid>
+                        <div><Input label="Prénom" required placeholder="Votre prénom" error={errors.prenom?.message} {...register('prenom')} /></div>
+                        <div><Input label="Nom de naissance" required placeholder="Votre nom" error={errors.nom_naissance?.message} {...register('nom_naissance')} /></div>
+                        <FullCol><Input label="Nom d'usage" placeholder="Si différent du nom de naissance" {...register('nom_usage')} /></FullCol>
+
+                        <FullCol>
+                            <FieldLabel required>Sexe</FieldLabel>
+                            <div className="grid grid-cols-2 gap-3">
+                                {['Féminin', 'Masculin'].map(val => (
+                                    <label key={val} className={`flex items-center gap-3 p-3.5 rounded-[4px] border-2 cursor-pointer transition-all ${
+                                        selectedSexe === val ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]' : 'border-slate-200 text-slate-500 hover:border-[#6B3CD2]/30'
+                                    }`}>
+                                        <input type="radio" value={val} className="hidden" {...register('sexe')} />
+                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedSexe === val ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
+                                            {selectedSexe === val && <div className="w-2 h-2 rounded-full bg-[#6B3CD2]" />}
                                         </div>
+                                        <span className="text-[12px] font-bold">{val}</span>
                                     </label>
                                 ))}
                             </div>
-                            {errors.sexe && <p className="mt-1.5 text-rose-500 text-[11px] font-black uppercase tracking-wider">{errors.sexe.message}</p>}
-                        </div>
-                        <div className="col-span-12 md:col-span-6">
-                            <Input label="Date de naissance" required type="date" error={errors.date_naissance?.message} {...register('date_naissance')} />
-                        </div>
-                        <div className="col-span-12 md:col-span-6">
-                            <Select
-                                label="Nationalité"
-                                required
-                                error={errors.nationalite?.message}
-                                {...register('nationalite')}
-                                options={NATIONALITY_OPTIONS}
-                                placeholder="Sélectionnez"
+                            {errors.sexe && <p className="mt-1.5 text-rose-500 text-[10px] font-bold">{errors.sexe.message}</p>}
+                        </FullCol>
 
-                            />
-                        </div>
-                        <div className="col-span-12 md:col-span-6">
-                            <Input label="Commune de naissance" required placeholder="Ville de naissance" error={errors.commune_naissance?.message} {...register('commune_naissance')} />
-                        </div>
-                        <div className="col-span-12 md:col-span-6">
-                            <Select
-                                label="Département de naissance"
-                                required
-                                error={errors.departement?.message}
-                                {...register('departement')}
-                                options={DEPARTMENT_OPTIONS}
-                                placeholder="Sélectionnez"
-                            />
-                        </div>
-                    </div>
-                </Card>
+                        <div><Input label="Date de naissance" required type="date" error={errors.date_naissance?.message} {...register('date_naissance')} /></div>
+                        <div><Select label="Nationalité" required error={errors.nationalite?.message} {...register('nationalite')} options={NATIONALITY_OPTIONS} /></div>
+                        <div><Input label="Commune de naissance" required placeholder="Ville de naissance" error={errors.commune_naissance?.message} {...register('commune_naissance')} /></div>
+                        <div><Select label="Département de naissance" required error={errors.departement?.message} {...register('departement')} options={DEPARTMENT_OPTIONS} /></div>
+                    </FormGrid>
+                </SectionAccordion>
 
-                <Card
-                    step={2}
-                    title="Coordonnées"
-                    collapsible
-                    isOpen={activeSection === 'contact'}
-                    onToggle={() => toggleSection('contact')}
-                    hasError={hasSectionError(['num_residence', 'rue_residence', 'complement_residence', 'code_postal', 'ville', 'email', 'telephone', 'nir'])}
+                {/* ─── SECTION 2 – Coordonnées ─── */}
+                <SectionAccordion
+                    num={2} title="Coordonnées & Contact" icon={MapPin}
+                    isOpen={openSections.has('contact')} onToggle={() => toggleSection('contact')}
+                    isComplete={isSectionComplete(sectionDefs[1].fields)}
+                    hasError={hasSectionError(sectionDefs[1].fields)}
                 >
-                    <div className="grid grid-cols-12 gap-5">
-                        <div className="col-span-12 md:col-span-3">
-                            <Input label="Numéro" placeholder="N°" {...register('num_residence')} />
-                        </div>
-                        <div className="col-span-12 md:col-span-9">
-                            <Input label="Rue" required placeholder="Nom de la rue, avenue..." error={errors.rue_residence?.message} {...register('rue_residence')} />
-                        </div>
-                        <div className="col-span-12">
-                            <Input label="Complément d'adresse" placeholder="Bâtiment, escalier, appartement..." {...register('complement_residence')} />
-                        </div>
-                        <div className="col-span-12 md:col-span-4">
-                            <Input label="Code postal" required placeholder="Ex: 75001" error={errors.code_postal?.message} {...register('code_postal')} />
-                        </div>
-                        <div className="col-span-12 md:col-span-8">
-                            <Input label="Ville" required placeholder="Ville de résidence" error={errors.ville?.message} {...register('ville')} />
-                        </div>
-                        <div className="col-span-12 md:col-span-6">
-                            <Input label="E-mail" required type="email" placeholder="votre@email.com" error={errors.email?.message} {...register('email')} />
-                        </div>
-                        <div className="col-span-12 md:col-span-6">
-                            <Input label="Téléphone" required type="tel" placeholder="06 12 34 56 78" error={errors.telephone?.message} {...register('telephone', {
-                                onChange: (e) => {
-                                    e.target.value = formatPhone(e.target.value);
-                                }
-                            })} />
-                        </div>
-                        <div className="col-span-12">
-                            <Input label="NIR (Numéro de Sécurité Sociale)" placeholder="1 85 12 75 108 123 45" error={errors.nir?.message} {...register('nir', {
-                                onChange: (e) => {
-                                    e.target.value = formatNIR(e.target.value);
-                                }
-                            })} />
-                        </div>
-                    </div>
-                </Card>
+                    <FormGrid>
+                        <FullCol><Input label="Adresse de résidence" required placeholder="Numéro et rue" error={errors.rue_residence?.message} {...register('rue_residence')} /></FullCol>
+                        <FullCol><Input label="Complément d'adresse" placeholder="Bâtiment, appartement…" {...register('complement_residence')} /></FullCol>
+                        <div><Input label="Code postal" required placeholder="75001" error={errors.code_postal?.message} {...register('code_postal')} /></div>
+                        <div><Input label="Ville" required placeholder="Paris" error={errors.ville?.message} {...register('ville')} /></div>
+                        <div><Input label="E-mail" required type="email" placeholder="votre@email.com" error={errors.email?.message} {...register('email')} /></div>
+                        <div><Input label="Téléphone" required placeholder="06 00 00 00 00" error={errors.telephone?.message} {...register('telephone', { onChange: (e) => e.target.value = formatPhone(e.target.value) })} /></div>
+                        <FullCol>
+                            <Input
+                                label="NIR (Numéro de Sécurité Sociale)"
+                                placeholder="1 85 12 75 108 123 45"
+                                error={errors.nir?.message}
+                                {...register('nir', { onChange: (e) => e.target.value = formatNIR(e.target.value) })}
+                            />
+                            <div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-[#6B3CD2]">
+                                <Info size={11} /><span>15 chiffres – Consultez votre carte Vitale</span>
+                            </div>
+                        </FullCol>
+                    </FormGrid>
+                </SectionAccordion>
 
+                {/* ─── SECTION LÉGALE (mineur) ─── */}
                 {isMinor && (
-                    <Card
-                        step={3}
-                        title="Représentants Légaux"
-                        collapsible
-                        isOpen={activeSection === 'legal'}
-                        onToggle={() => toggleSection('legal')}
-                        hasError={hasSectionError(['representant_legal_1', 'representant_legal_2'])}
+                    <SectionAccordion
+                        num="2b" title="Représentants Légaux" icon={Users}
+                        isOpen={openSections.has('legal')} onToggle={() => toggleSection('legal')}
+                        isComplete={false} hasError={hasSectionError(['representant_legal_1'])}
                     >
-                        <div className="space-y-8">
-                            <div className="bg-slate-50 p-8 rounded-3xl border border-slate-100">
-                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Représentant légal 1</h3>
-                                <div className="grid grid-cols-12 gap-5">
-                                    <div className="col-span-12 md:col-span-6">
-                                        <Input label="Nom" required={isMinor} {...register('representant_legal_1.nom')} />
-                                    </div>
-                                    <div className="col-span-12 md:col-span-6">
-                                        <Input label="Prénom" required={isMinor} {...register('representant_legal_1.prenom')} />
-                                    </div>
-                                    <div className="col-span-12 md:col-span-6">
-                                        <Input label="Lien de parenté" placeholder="Père, Mère, Tuteur..." required={isMinor} {...register('representant_legal_1.lien_parente')} />
-                                    </div>
-                                    <div className="col-span-12 md:col-span-6">
-                                        <Input label="Téléphone" required={isMinor} type="tel" {...register('representant_legal_1.telephone', {
-                                            onChange: (e) => {
-                                                e.target.value = formatPhone(e.target.value);
-                                            }
-                                        })} />
-                                    </div>
-                                    <div className="col-span-12 md:col-span-4">
-                                        <Input label="Numéro" required={isMinor} {...register('representant_legal_1.numero')} />
-                                    </div>
-                                    <div className="col-span-12 md:col-span-8">
-                                        <Input label="Voie" required={isMinor} {...register('representant_legal_1.voie')} />
-                                    </div>
-                                    <div className="col-span-12">
-                                        <Input label="Complément d'adresse" {...register('representant_legal_1.complement')} />
-                                    </div>
-                                    <div className="col-span-12 md:col-span-4">
-                                        <Input label="Code postal" required={isMinor} {...register('representant_legal_1.code_postal')} />
-                                    </div>
-                                    <div className="col-span-12 md:col-span-8">
-                                        <Input label="Ville" required={isMinor} {...register('representant_legal_1.ville')} />
-                                    </div>
-                                    <div className="col-span-12">
-                                        <Input label="Email" required={isMinor} type="email" {...register('representant_legal_1.email')} />
-                                    </div>
-                                </div>
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-2 mb-1 px-1 py-2 bg-amber-50 border border-amber-200 rounded-[4px]">
+                                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" className="text-amber-500 flex-shrink-0"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/></svg>
+                                <span className="text-[11px] font-bold text-amber-700">Cette section apparaît car le candidat est mineur — renseignez au moins un représentant légal.</span>
+                            </div>
+                            <div className="bg-slate-50/60 border border-slate-200 rounded-[4px] p-4">
+                                <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-4">Représentant légal 1</p>
+                                <FormGrid>
+                                    <div><Input label="Nom" {...register('representant_legal_1.nom')} /></div>
+                                    <div><Input label="Prénom" {...register('representant_legal_1.prenom')} /></div>
+                                    <FullCol><Input label="Lien de parenté" required placeholder="Père, Mère, Tuteur…" {...register('representant_legal_1.lien_parente')} /></FullCol>
+                                    <FullCol><Input label="Adresse" required placeholder="Numéro et rue" {...register('representant_legal_1.voie')} /></FullCol>
+                                    <div><Input label="Code postal" required {...register('representant_legal_1.code_postal')} /></div>
+                                    <div><Input label="Ville" required {...register('representant_legal_1.ville')} /></div>
+                                    <div><Input label="Email" required type="email" {...register('representant_legal_1.email')} /></div>
+                                    <div><Input label="Téléphone" required type="tel" {...register('representant_legal_1.telephone')} /></div>
+                                </FormGrid>
                             </div>
 
-                            <div className="flex items-center gap-3 px-4">
-                                <input
-                                    type="checkbox"
-                                    id="add_second_rep"
-                                    className="w-5 h-5 rounded-lg border-slate-300 text-primary focus:ring-primary"
-                                    {...register('add_second_representative')}
-                                />
-                                <label htmlFor="add_second_rep" className="text-slate-700 font-bold text-sm cursor-pointer select-none">
-                                    Ajouter un second représentant légal
-                                </label>
-                            </div>
+                            <label className="flex items-center gap-3 cursor-pointer group">
+                                <div
+                                    onClick={() => setValue('add_second_representative', !addSecondRep)}
+                                    className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 transition-all ${addSecondRep ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/40'}`}
+                                >
+                                    {addSecondRep && <svg viewBox="0 0 10 10" fill="none" width="8" height="8"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                </div>
+                                <input type="checkbox" className="hidden" {...register('add_second_representative')} />
+                                <span className="text-[11px] font-bold text-slate-500">Ajouter un second représentant légal</span>
+                            </label>
 
                             {addSecondRep && (
-                                <div className="animate-fade-in bg-slate-50/50 p-8 rounded-3xl border border-slate-100">
-                                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Représentant légal 2</h3>
-                                    <div className="grid grid-cols-12 gap-5">
-                                        <div className="col-span-12 md:col-span-6">
-                                            <Input label="Nom" {...register('representant_legal_2.nom')} />
-                                        </div>
-                                        <div className="col-span-12 md:col-span-6">
-                                            <Input label="Prénom" {...register('representant_legal_2.prenom')} />
-                                        </div>
-                                        <div className="col-span-12 md:col-span-6">
-                                            <Input label="Lien de parenté" placeholder="Père, Mère, Tuteur..." {...register('representant_legal_2.lien_parente')} />
-                                        </div>
-                                        <div className="col-span-12 md:col-span-6">
-                                            <Input label="Téléphone" type="tel" {...register('representant_legal_2.telephone', {
-                                                onChange: (e) => {
-                                                    e.target.value = formatPhone(e.target.value);
-                                                }
-                                            })} />
-                                        </div>
-                                        <div className="col-span-12 md:col-span-4">
-                                            <Input label="Numéro" {...register('representant_legal_2.numero')} />
-                                        </div>
-                                        <div className="col-span-12 md:col-span-8">
-                                            <Input label="Voie" {...register('representant_legal_2.voie')} />
-                                        </div>
-                                        <div className="col-span-12">
-                                            <Input label="Complément d'adresse" {...register('representant_legal_2.complement')} />
-                                        </div>
-                                        <div className="col-span-12 md:col-span-4">
-                                            <Input label="Code postal" {...register('representant_legal_2.code_postal')} />
-                                        </div>
-                                        <div className="col-span-12 md:col-span-8">
-                                            <Input label="Ville" {...register('representant_legal_2.ville')} />
-                                        </div>
-                                        <div className="col-span-12">
-                                            <Input label="Email" type="email" {...register('representant_legal_2.email')} />
-                                        </div>
-                                    </div>
+                                <div className="bg-slate-50/60 border border-slate-200 rounded-[4px] p-4">
+                                    <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-4">Représentant légal 2</p>
+                                    <FormGrid>
+                                        <div><Input label="Nom" {...register('representant_legal_2.nom')} /></div>
+                                        <div><Input label="Prénom" {...register('representant_legal_2.prenom')} /></div>
+                                        <FullCol><Input label="Lien de parenté" {...register('representant_legal_2.lien_parente')} /></FullCol>
+                                        <FullCol><Input label="Adresse" {...register('representant_legal_2.voie')} /></FullCol>
+                                        <div><Input label="Code postal" {...register('representant_legal_2.code_postal')} /></div>
+                                        <div><Input label="Ville" {...register('representant_legal_2.ville')} /></div>
+                                        <div><Input label="Email" type="email" {...register('representant_legal_2.email')} /></div>
+                                        <div><Input label="Téléphone" type="tel" {...register('representant_legal_2.telephone')} /></div>
+                                    </FormGrid>
                                 </div>
                             )}
                         </div>
-                    </Card>
+                    </SectionAccordion>
                 )}
 
-                <Card
-                    step={isMinor ? 4 : 3}
-                    title="Situation & Déclarations"
-                    collapsible
-                    isOpen={activeSection === 'situation'}
-                    onToggle={() => toggleSection('situation')}
-                    hasError={hasSectionError(['situation', 'regime_social', 'declare_inscription_sportif_haut_niveau', 'declare_avoir_projet_creation_reprise_entreprise', 'declare_travailleur_handicape', 'alternance'])}
+                {/* ─── SECTION 3 – Situation & Déclarations ─── */}
+                <SectionAccordion
+                    num={3} title="Situation & Déclarations" icon={Briefcase}
+                    isOpen={openSections.has('situation')} onToggle={() => toggleSection('situation')}
+                    isComplete={isSectionComplete(sectionDefs[2].fields)}
+                    hasError={hasSectionError(sectionDefs[2].fields)}
                 >
-                    <div className="grid grid-cols-12 gap-5">
-                        <div className="col-span-12">
-                            <Select
-                                label="Situation avant le contrat"
-                                required
-                                error={errors.situation?.message}
-                                {...register('situation')}
-                                options={SITUATION_BEFORE_CONTRACT_OPTIONS}
-                                placeholder="Sélectionnez votre situation"
+                    <div className="space-y-4">
+                        <Select label="Situation avant le contrat" required placeholder="— Sélectionner —" error={errors.situation?.message} {...register('situation')} options={SITUATION_BEFORE_CONTRACT_OPTIONS} />
+                        <Select label="Régime social" placeholder="— Sélectionner —" {...register('regime_social')} options={REGIME_SOCIAL_OPTIONS} />
 
-                            />
-                        </div>
-                        <div className="col-span-12">
-                            <Select
-                                label="Régime social"
-                                {...register('regime_social')}
-                                options={REGIME_SOCIAL_OPTIONS}
-                                placeholder="Sélectionnez"
-
-                            />
-                        </div>
-                        {[{ "label": "Déclare être inscrit(e) sur la liste des sportifs de haut niveau", "name": "declare_inscription_sportif_haut_niveau" },
-                        { "label": "Déclare avoir un projet de création ou de reprise d'entreprise", "name": "declare_avoir_projet_creation_reprise_entreprise" },
-                        { "label": "Déclare bénéficier de la reconnaissance travailleur handicapé (RQTH)", "name": "declare_travailleur_handicape" },
-                        { "label": "Alternance", "name": "alternance" }
-                        ].map((item) => (
-                            <div key={item.name} className="col-span-12 space-y-4 pt-2">
-                                <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
-                                    <label className="block text-sm font-bold text-slate-800 mb-4">{item.label}</label>
-                                    <div className="flex gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={() => setValue(item.name as any, true)}
-                                            className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all ${declarations[item.name as keyof StudentFormValues] === true ? 'bg-brand/10 border-brand shadow-brand/10' : 'bg-white border-transparent hover:border-slate-200'}`}
-                                        >
-                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${declarations[item.name as keyof StudentFormValues] === true ? 'bg-brand text-white' : 'bg-slate-100 text-slate-400'}`}>A</span>
-                                            <span className="font-bold text-slate-700">Oui</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setValue(item.name as any, false)}
-                                            className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all ${declarations[item.name as keyof StudentFormValues] === false ? 'bg-brand/10 border-brand shadow-brand/10' : 'bg-white border-transparent hover:border-slate-200'}`}
-                                        >
-                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${declarations[item.name as keyof StudentFormValues] === false ? 'bg-brand text-white' : 'bg-slate-100 text-slate-400'}`}>B</span>
-                                            <span className="font-bold text-slate-700">Non</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </Card>
-
-                <Card
-                    step={isMinor ? 5 : 4}
-                    title="Parcours scolaire"
-                    collapsible
-                    isOpen={activeSection === 'school'}
-                    onToggle={() => toggleSection('school')}
-                    hasError={hasSectionError(['dernier_diplome_prepare', 'derniere_classe', 'intitulePrecisDernierDiplome', 'bac'])}
-                >
-                    <div className="grid grid-cols-12 gap-5">
-
-                        <div className="col-span-12">
-                            <Select
-                                label="Dernière année ou classe suivie"
-                                required
-                                error={errors.derniere_classe?.message}
-                                {...register('derniere_classe')}
-                                options={LAST_CLASS_OPTIONS}
-                                placeholder="Sélectionnez"
-
-                            />
-                        </div>
-                        <div className="col-span-12">
-                            <Select
-                                label="Intitulé précis du dernier diplôme ou titre préparé"
-                                {...register('intitulePrecisDernierDiplome')}
-                                options={DETAILED_DIPLOMA_OPTIONS}
-                                placeholder="Sélectionnez"
-
-                            />
-                        </div>
-                        <div className="col-span-12">
-                            <Select
-                                label="Diplôme ou titre le plus élevé obtenu"
-                                required
-                                error={errors.bac?.message}
-                                {...register('bac')}
-                                options={HIGHEST_DIPLOMA_OPTIONS}
-                                placeholder="Sélectionnez votre diplôme"
-
-                            />
+                        <div className="space-y-2 pt-1">
+                            {[
+                                { label: "Sportif de haut niveau", name: "declare_inscription_sportif_haut_niveau" as const },
+                                { label: "Projet création / reprise d'entreprise", name: "declare_avoir_projet_creation_reprise_entreprise" as const },
+                                { label: "Travailleur handicapé (RQTH)", name: "declare_travailleur_handicape" as const },
+                                { label: "Déjà fait de l'alternance", name: "alternance" as const },
+                            ].map(item => (
+                                <YesNo
+                                    key={item.name}
+                                    label={item.label}
+                                    value={!!formValues[item.name]}
+                                    onChange={v => setValue(item.name, v)}
+                                />
+                            ))}
                         </div>
                     </div>
-                </Card>
+                </SectionAccordion>
 
-                <Card
-                    step={isMinor ? 6 : 5}
-                    title="Formation souhaitée"
-                    collapsible
-                    isOpen={activeSection === 'desire'}
-                    onToggle={() => toggleSection('desire')}
-                    hasError={hasSectionError(['formation_souhaitee', 'date_de_visite', 'date_de_reglement', 'entreprise_d_accueil'])}
+                {/* ─── SECTION 4 – Parcours scolaire ─── */}
+                <SectionAccordion
+                    num={4} title="Parcours scolaire" icon={BookOpen}
+                    isOpen={openSections.has('school')} onToggle={() => toggleSection('school')}
+                    isComplete={isSectionComplete(sectionDefs[3].fields)}
+                    hasError={hasSectionError(sectionDefs[3].fields)}
                 >
-                    <div className="grid grid-cols-12 gap-5">
-                        <div className="col-span-12">
-                            <Select
-                                label="Formation"
-                                required
-                                error={errors.formation_souhaitee?.message}
-                                {...register('formation_souhaitee')}
-                                options={FORMATION_SOUHAITEE_OPTIONS}
-                                placeholder="Sélectionnez une formation"
+                    <div className="space-y-4">
+                        <Select label="Dernière année ou classe suivie" required error={errors.derniere_classe?.message} {...register('derniere_classe')} options={LAST_CLASS_OPTIONS} />
+                        <Input label="Intitulé précis du dernier diplôme préparé" placeholder="Ex : BTS Management Commercial Opérationnel" {...register('intitulePrecisDernierDiplome')} />
 
-                            />
-                        </div>
-                        <div className="col-span-12 md:col-span-6">
-                            <Input label="Date de visite / JPO" type="date" {...register('date_de_visite')} />
-                        </div>
-                        <div className="col-span-12 md:col-span-6">
-                            <Input label="Date d'envoi du règlement" type="date" {...register('date_de_reglement')} />
-                        </div>
-                        <div className="col-span-12">
-                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Avez-vous déjà une entreprise d'accueil ?</label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {['Oui', 'En recherche', 'Non'].map((val, idx) => (
-                                    <label key={val} className="relative cursor-pointer group">
-                                        <input className="peer sr-only" type="radio" value={val} {...register('entreprise_d_accueil')} />
-                                        <div className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl border-2 transition-all ${selectedEntreprise === val ? 'bg-brand/10 border-brand shadow-brand/10' : 'bg-slate-50/50 border-transparent hover:border-slate-200'}`}>
-                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${selectedEntreprise === val ? 'bg-brand text-white' : 'bg-slate-200 text-slate-400'}`}>{String.fromCharCode(65 + idx)}</span>
-                                            <span className="font-bold text-slate-700">{val}</span>
+                        <div>
+                            <FieldLabel required>Niveau d'études le plus élevé obtenu</FieldLabel>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+                                {[
+                                    { t: 'Aucun', v: 'aucun' },
+                                    { t: 'CAP / BEP', v: 'cap-bep' },
+                                    { t: 'BAC', v: 'bac' },
+                                    { t: 'BAC + 2', v: 'bac2' },
+                                    { t: 'BAC + 3 / 4', v: 'bac34' },
+                                    { t: 'BAC + 5 et +', v: 'bac5' }
+                                ].map(opt => (
+                                    <label key={opt.v} className={`flex items-center gap-2.5 p-3 rounded-[4px] border-2 cursor-pointer transition-all ${
+                                        formValues.bac === opt.v
+                                            ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]'
+                                            : 'border-slate-200 text-slate-500 hover:border-[#6B3CD2]/30'
+                                    }`}>
+                                        <input type="radio" value={opt.v} className="hidden" {...register('bac')} />
+                                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${formValues.bac === opt.v ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
+                                            {formValues.bac === opt.v && <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]" />}
                                         </div>
+                                        <span className="text-[11px] font-bold">{opt.t}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            {errors.bac && <p className="mt-1.5 text-rose-500 text-[10px] font-bold">{errors.bac.message}</p>}
+                        </div>
+                    </div>
+                </SectionAccordion>
+
+                {/* ─── SECTION 5 – Projet de formation ─── */}
+                <SectionAccordion
+                    num={5} title="Projet de formation" icon={Target}
+                    isOpen={openSections.has('formation')} onToggle={() => toggleSection('formation')}
+                    isComplete={isSectionComplete(sectionDefs[4].fields)}
+                    hasError={hasSectionError(sectionDefs[4].fields)}
+                >
+                    <div className="space-y-4">
+                        <Select label="Formation souhaitée" required error={errors.formation_souhaitee?.message} {...register('formation_souhaitee')} options={FORMATION_SOUHAITEE_OPTIONS} />
+
+                        <FormGrid>
+                            <div><Input label="Date visite / JPO" type="date" {...register('date_de_visite')} /></div>
+                            <div><Input label="Date règlement" type="date" {...register('date_de_reglement')} /></div>
+                        </FormGrid>
+
+                        <div>
+                            <FieldLabel>Avez-vous déjà une entreprise d'accueil ?</FieldLabel>
+                            <div className="grid grid-cols-3 gap-2.5">
+                                {['Oui', 'En recherche', 'Non'].map(val => (
+                                    <label key={val} className={`flex items-center gap-2.5 p-3 rounded-[4px] border-2 cursor-pointer transition-all ${
+                                        selectedEntreprise === val
+                                            ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]'
+                                            : 'border-slate-200 text-slate-500 hover:border-[#6B3CD2]/30'
+                                    }`}>
+                                        <input type="radio" value={val} className="hidden" {...register('entreprise_d_accueil')} />
+                                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${selectedEntreprise === val ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
+                                            {selectedEntreprise === val && <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]" />}
+                                        </div>
+                                        <span className="text-[11px] font-bold">{val}</span>
                                     </label>
                                 ))}
                             </div>
                         </div>
-                    </div>
-                </Card>
 
-                <Card
-                    step={isMinor ? 7 : 6}
-                    title="Informations complémentaires"
-                    collapsible
-                    isOpen={activeSection === 'extra'}
-                    onToggle={() => toggleSection('extra')}
-                    hasError={hasSectionError(['connaissance_rush_how', 'motivation_projet_professionnel'])}
-                >
-                    <div className="grid grid-cols-12 gap-5">
-                        <div className="col-span-12">
-                            <Select
-                                label="Comment avez-vous connu Rush School ?"
-                                {...register('connaissance_rush_how')}
-                                options={KNOW_RUSH_SCHOOL_OPTIONS}
-                                placeholder="Sélectionnez"
+                        <Select label="Comment nous avez-vous connu ?" {...register('connaissance_rush_how')} options={KNOW_RUSH_SCHOOL_OPTIONS} />
 
+                        <div>
+                            <FieldLabel>Motivations et projet professionnel</FieldLabel>
+                            <textarea
+                                placeholder="Décrivez brièvement vos motivations et votre projet professionnel…"
+                                rows={4}
+                                className={inputClass}
+                                {...register('motivation_projet_professionnel')}
                             />
                         </div>
-                        <div className="col-span-12">
-                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Motivations et projet professionnel </label>
-                            <textarea placeholder="Décrivez brièvement vos motivations et votre projet professionnel..." rows={4} className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-[15px] font-bold text-slate-700 placeholder:text-slate-300 transition-all duration-300 outline-none focus:bg-white focus:border-brand focus:shadow-brand/10 resize-none" {...register('motivation_projet_professionnel')}></textarea>
-                        </div>
                     </div>
-                </Card>
-            </div>
+                </SectionAccordion>
 
-            <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col items-center gap-6">
-                <div className="flex flex-col items-center gap-2">
-                    <label className="flex items-center gap-3 cursor-pointer select-none">
-                        <input className="w-5 h-5 accent-brand rounded cursor-pointer" type="checkbox" {...register('agreement')} />
-                        <span className="font-medium text-slate-700">J'atteste sur l'honneur l'exactitude des informations fournies <span className="text-red-500">*</span></span>
+                {/* ─── VALIDATION FOOTER ─── */}
+                <div className="bg-white border-2 border-slate-200 rounded-[4px] p-6 mt-2">
+                    <label className="flex items-start gap-3 cursor-pointer group mb-6">
+                        <div
+                            onClick={() => setValue('agreement', !formValues.agreement)}
+                            className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
+                                formValues.agreement ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/40'
+                            }`}
+                        >
+                            {formValues.agreement && <svg viewBox="0 0 10 10" fill="none" width="8" height="8"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                        </div>
+                        <input type="checkbox" className="hidden" {...register('agreement')} />
+                        <span className="text-[12px] font-medium text-slate-600 leading-relaxed">
+                            J'atteste sur l'honneur l'exactitude des informations fournies ci-dessus. <span className="text-rose-400">*</span>
+                        </span>
                     </label>
-                    {errors.agreement && <p className="mt-1.5 text-rose-500 text-xs font-bold animate-slide-in">{errors.agreement.message}</p>}
-                </div>
+                    {errors.agreement && <p className="mb-4 text-rose-500 text-[10px] font-bold uppercase">{errors.agreement.message}</p>}
 
-                <Button
-                    type="submit"
-                    size="lg"
-                    isLoading={isSubmitting}
-                    rightIcon={<ArrowRight size={20} />}
-                >
-                    Enregistrer et continuer
-                </Button>
+                    <div className="flex items-center justify-end gap-3">
+                        <button
+                            type="button"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-[4px] border-2 border-slate-200 text-slate-600 font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95"
+                            onClick={() => showToast("Brouillon enregistré", "info")}
+                        >
+                            <Save size={13} /> Brouillon
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting || !formValues.agreement}
+                            className="flex items-center gap-2 px-7 py-2.5 rounded-[4px] bg-[#6B3CD2] text-white font-black text-[11px] uppercase tracking-widest hover:bg-[#5a2eb8] transition-all shadow-md shadow-[#6B3CD2]/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                        >
+                            {isSubmitting ? <><Loader2 size={13} className="animate-spin" /> Envoi…</> : <>Valider et continuer <ArrowRight size={13} /></>}
+                        </button>
+                    </div>
+                </div>
             </div>
         </form>
     );

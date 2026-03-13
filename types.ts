@@ -32,7 +32,8 @@ export enum AdmissionTab {
   DOCUMENTS = 'documents-etudiant',
   ENTREPRISE = 'questionnaire-entreprise', // Fiche Entreprise
   ADMINISTRATIF = 'documents-generes', // Documents générés
-  ENTRETIEN = 'entretien'
+  ENTRETIEN = 'entretien',
+  PROJET_PROFESSIONNEL = 'projet-professionnel'
 }
 
 export interface StatCardProps {

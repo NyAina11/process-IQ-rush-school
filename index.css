@@ -364,6 +364,33 @@ body {
     }
 }
 
+@keyframes tab-slide-from-right {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes tab-slide-from-left {
+    from { opacity: 0; transform: translateX(-16px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.tab-slide-right {
+    animation: tab-slide-from-right 200ms ease-out both;
+}
+
+.tab-slide-left {
+    animation: tab-slide-from-left 200ms ease-out both;
+}
+
+@keyframes admission-rise {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.admission-rise {
+    animation: admission-rise 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 .animate-float {
     animation: float 20s ease-in-out infinite;
 }
@@ -429,6 +456,224 @@ body {
     .admission-hero,
     .step-indicator-container {
         display: none !important;
+    }
+}
+
+/* ── FICHE DESIGN SYSTEM ── */
+/* Used by QuestionnaireForm, EntrepriseForm, and AdmissionView sections */
+
+.formation-section {
+    padding: 0 28px 28px;
+}
+
+/* Stepper */
+.fiche-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 24px 0 20px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 24px;
+}
+
+.fiche-stepper-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 6px 12px;
+    transition: color 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+.fiche-stepper-step:hover {
+    color: #475569;
+}
+
+.fiche-stepper-step.active {
+    color: #6B3CD2;
+}
+
+.fiche-stepper-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: inline-block;
+    flex-shrink: 0;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.fiche-stepper-step.active .fiche-stepper-dot {
+    background: #6B3CD2;
+    box-shadow: 0 0 0 4px rgba(107, 60, 210, 0.15);
+}
+
+.fiche-stepper-line {
+    width: 40px;
+    height: 1px;
+    background: #e2e8f0;
+    flex-shrink: 0;
+}
+
+/* Header */
+.fiche-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0 16px;
+}
+
+.fiche-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #64748b;
+}
+
+.fiche-header-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5;
+}
+
+.fiche-header-text h2 {
+    font-size: 18.4px;
+    font-weight: 800;
+    color: #18162A;
+    margin: 0 0 2px;
+    line-height: 1.2;
+}
+
+.fiche-header-text p {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Divider */
+.fiche-divider {
+    height: 3px;
+    width: 48px;
+    background: #6B3CD2;
+    margin-bottom: 20px;
+}
+
+/* Section */
+.fiche-section {
+    margin-bottom: 24px;
+    padding: 20px 24px;
+    background: #fafbfc;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    transition: border-color 0.2s;
+}
+
+.fiche-section:hover {
+    border-color: #e2e8f0;
+}
+
+.fiche-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.fiche-section-num {
+    width: 28px;
+    height: 28px;
+    background: #6B3CD2;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.fiche-section-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: 0.01em;
+}
+
+/* Form Grid */
+.fiche-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+}
+
+.fiche-form-grid .full-width {
+    grid-column: 1 / -1;
+}
+
+.fiche-field {
+    min-width: 0;
+}
+
+/* Field Label */
+.fiche-field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+}
+
+.req {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+/* Highlight Box */
+.fiche-highlight-box {
+    padding: 20px;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    background: #fafbfc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.fiche-highlight-box:hover {
+    border-color: #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Responsive: Stack form grid on small screens */
+@media (max-width: 640px) {
+    .fiche-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fiche-stepper {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .fiche-stepper-line {
+        width: 20px;
     }
 }
 

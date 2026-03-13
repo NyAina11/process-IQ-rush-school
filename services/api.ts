@@ -141,6 +141,10 @@ const mapBackendToStudent = (backendData: any): any => {
     lettre_motivation_url: fields["lettre de motivation"]?.[0]?.url || fields["lettre"]?.[0]?.url || "",
     lettre_motivation_name: fields["lettre de motivation"]?.[0]?.filename || fields["lettre"]?.[0]?.filename || "",
     has_lettre_motivation: !!((fields["lettre de motivation"] && fields["lettre de motivation"].length > 0) || (fields["lettre"] && fields["lettre"].length > 0)),
+
+    vitale_url: fields["Carte Vitale"]?.[0]?.url || fields["vitale"]?.[0]?.url || "",
+    vitale_name: fields["Carte Vitale"]?.[0]?.filename || fields["vitale"]?.[0]?.filename || "",
+    has_vitale: !!((fields["Carte Vitale"] && fields["Carte Vitale"].length > 0) || (fields["vitale"] && fields["vitale"].length > 0)),
   };
 };
 
@@ -254,7 +258,7 @@ const mapBackendToCompany = (backendData: any): any => {
     },
     missions: {
       formation_alternant: fields["Formation de lalternant(e) (pour les missions)"] || "",
-      selectionnees: [] //TODO: Split if string
+      selectionnees: fields["Missions principales"] ? fields["Missions principales"].split(', ') : []
     },
     record_id_etudiant: fields["recordIdetudiant"] || ""
   };
