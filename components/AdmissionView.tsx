@@ -1858,7 +1858,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                                     {/* Footer */}
                                     <div className="mt-10 pt-8 border-t border-slate-100 flex justify-center">
                                         <button
-                                            onClick={() => navigate('/admin-dashboard')}
+                                            onClick={() => navigate('/admission')}
                                             className="px-16 py-3.5 bg-[#18162A] text-white rounded-[4px] font-black text-[11px] uppercase tracking-widest hover:bg-black transition-all flex items-center gap-3 shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
                                         >
                                             <CheckCircle2 size={18} className="text-emerald-400" />
