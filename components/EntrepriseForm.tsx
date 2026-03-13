@@ -671,39 +671,39 @@ const FICHE_STEPS = ['Entreprise', 'Contact', 'Formation', 'Contrat', 'Validatio
                             <span className="fiche-section-num">6</span>
                             <span className="fiche-section-label">Contrat & Salaire</span>
                         </div>
-                        <div className="fiche-form-grid">
-                            <div className="fiche-field">
+                        <div className="grid grid-cols-12 gap-5">
+                            <div className="col-span-12 md:col-span-6">
                                 <Select label="Type de contrat" required error={errors.contrat?.type_contrat?.message} {...register('contrat.type_contrat')} options={CONTRAT_TYPE_OPTIONS} />
                             </div>
-                            <div className="fiche-field">
-                                <Select label="Type de dérogation" {...register('contrat.type_derogation')} placeholder="Aucune" options={DEROGATION_TYPE_OPTIONS} />
+                            <div className="col-span-12 md:col-span-6">
+                                <Select label="Type de dérogation" {...register('contrat.type_derogation')} placeholder="Sélectionnez si applicable" options={DEROGATION_TYPE_OPTIONS} />
                             </div>
-                            <div className="fiche-field">
+                            <div className="col-span-12 md:col-span-6">
                                 <Input label="Durée hebdomadaire" required placeholder="Ex: 35h" error={errors.contrat?.duree_hebdomadaire?.message} {...register('contrat.duree_hebdomadaire')} />
                             </div>
-                            <div className="fiche-field">
-                                <Input label="Poste occupé" placeholder="Intitulé exact" error={errors.contrat?.poste_occupe?.message} {...register('contrat.poste_occupe')} />
+                            <div className="col-span-12">
+                                <Input label="Poste occupé" placeholder="Intitulé exact du poste" error={errors.contrat?.poste_occupe?.message} {...register('contrat.poste_occupe')} />
                             </div>
-                            <div className="full-width">
-                                <Input label="Lieu d'exécution (si différent)" placeholder="Adresse complète" {...register('contrat.lieu_execution')} />
+                            <div className="col-span-12">
+                                <Input label="Lieu d'exécution" placeholder="Adresse si différente" {...register('contrat.lieu_execution')} />
                             </div>
-                            <div className="fiche-field">
+                            <div className="col-span-12 md:col-span-6">
                                 <Input label="N° DECA ancien contrat" placeholder="Si applicable" {...register('contrat.numero_deca_ancien_contrat')} />
                             </div>
-                            <div className="fiche-field">
+                            <div className="col-span-12 md:col-span-6">
                                 <Input label="Date début exécution" type="date" error={errors.contrat?.date_debut_execution?.message} {...register('contrat.date_debut_execution')} />
                             </div>
-                            <div className="fiche-field">
+                            <div className="col-span-12 md:col-span-6">
                                 <Input label="Date de conclusion" type="date" error={errors.contrat?.date_conclusion?.message} {...register('contrat.date_conclusion')} />
                             </div>
-                            <div className="fiche-field">
+                            <div className="col-span-12 md:col-span-6">
                                 <Input label="Date avenant" type="date" {...register('contrat.date_avenant')} />
                             </div>
-                            <div className="fiche-field">
+                            <div className="col-span-12 md:col-span-6">
                                 <Input label="Caisse de retraite" placeholder="Nom de la caisse" {...register('contrat.caisse_retraite')} />
                             </div>
-                            <div className="fiche-field">
-                                <Select label="Machines dangereuses" required {...register('contrat.machines_dangereuses')} options={YES_NO_OPTIONS} />
+                            <div className="col-span-12 md:col-span-6">
+                                <Select label="Travail sur machines dangereuses" required {...register('contrat.machines_dangereuses')} options={YES_NO_OPTIONS} />
                             </div>
 
                             {/* Simulateur de salaire multi-années indépendant */}
