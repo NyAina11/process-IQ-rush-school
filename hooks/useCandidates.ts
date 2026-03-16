@@ -62,7 +62,11 @@ export const getC = (c: any) => {
         lettre_motivation_url: c.lettre_motivation_url || d.lettre_motivation_url || (d['lettre de motivation'] || d['lettre'])?.[0]?.url || "",
         lettre_motivation_name: c.lettre_motivation_name || d.lettre_motivation_name || (d['lettre de motivation'] || d['lettre'])?.[0]?.filename || "",
         convention: c.convention || d.convention || (d['Convention Apprentissage'] || d['Convention'])?.[0] || null,
-        cerfa: c.cerfa || d.cerfa || d['cerfa']?.[0] || null
+        cerfa: c.cerfa || d.cerfa || d['cerfa']?.[0] || null,
+        has_interview_tracking: c.has_interview_tracking || false,
+        interview_pdf_url: c.interview_pdf_url || "",
+        interview_pdf_name: c.interview_pdf_name || "",
+        all_interview_pdfs: c.all_interview_pdfs || []
     };
 };
 
@@ -77,7 +81,7 @@ export const useCandidates = () => {
     const { candidates: cachedCandidates, setCandidates, lastCandidatesFetch } = useAppStore();
 
     const fetchApi = useCallback(() => Promise.all([
-        api.getAllCandidates(),
+        api.getCandidatsWithDocuments(),
         api.getStudentsList(),
         api.getAllCompanies()
     ]), []);
@@ -142,7 +146,12 @@ export const useCandidates = () => {
                 lettre_motivation_name: c.lettre_motivation_name || (d['Lettre de motivation'] || d['lettre'])?.[0]?.filename || "",
                 convention: fiche?.convention || c.convention || (d['Convention Apprentissage'] || d['Convention'])?.[0] || null,
                 cerfa: fiche?.cerfa || c.cerfa || d['cerfa']?.[0] || null,
-                dossier_complet: fiche?.dossier_complet || false
+                dossier_complet: fiche?.dossier_complet || false,
+                // Interview tracking (from candidats-with-documents)
+                has_interview_tracking: !!(c.suivie_entretien && c.suivie_entretien.length > 0),
+                interview_pdf_url: c.suivie_entretien?.[c.suivie_entretien.length - 1]?.fields?.['Suivie entretien']?.[0]?.url || "",
+                interview_pdf_name: c.suivie_entretien?.[c.suivie_entretien.length - 1]?.fields?.['Suivie entretien']?.[0]?.filename || "",
+                all_interview_pdfs: (c.suivie_entretien || []).flatMap((s: any) => s.fields?.['Suivie entretien'] || [])
             };
         }) : [];
         setCandidates(mergedData);

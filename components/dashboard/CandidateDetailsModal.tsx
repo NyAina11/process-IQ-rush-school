@@ -378,27 +378,126 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                             )}
 
                             {activeTab === 'documents' && (
-                                <div className="space-y-4">
-                                    {candidate.documents && Object.entries(candidate.documents).filter(([key]) => key !== 'record_id').map(([key, doc]: [string, any]) => (
-                                        <div key={key} className="flex items-center justify-between p-5 bg-white border border-slate-100 rounded-[4px] hover:border-rose-200 transition-all group">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-10 h-10 rounded-[4px] flex items-center justify-center ${doc.uploaded ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-300'}`}>
-                                                    {doc.uploaded ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-                                                </div>
-                                                <div>
-                                                    <div className="text-xs font-black text-slate-700 uppercase tracking-tight">{doc.document_type || key.replace(/_/g, ' ')}</div>
-                                                    <div className={`text-[9px] font-bold uppercase tracking-widest ${doc.uploaded ? 'text-emerald-500' : 'text-slate-400'}`}>
-                                                        {doc.uploaded ? 'Validé' : 'Manquant'}
+                                <div className="space-y-6">
+                                    {/* Documents étudiants */}
+                                    <div>
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Documents candidat</h4>
+                                        <div className="space-y-2">
+                                            {[
+                                                { key: 'cv', label: 'Curriculum Vitae', hasKey: 'has_cv', urlKey: 'cv_url', nameKey: 'cv_name' },
+                                                { key: 'cni', label: "Carte d'Identité (CNI)", hasKey: 'has_cni', urlKey: 'cni_url', nameKey: 'cni_name' },
+                                                { key: 'lettre', label: 'Lettre de motivation', hasKey: 'has_lettre_motivation', urlKey: 'lettre_motivation_url', nameKey: 'lettre_motivation_name' },
+                                                { key: 'vitale', label: 'Carte Vitale', hasKey: 'has_vitale', urlKey: 'vitale_url', nameKey: 'vitale_name' },
+                                                { key: 'diplome', label: 'Dernier diplôme', hasKey: 'has_diplome', urlKey: 'diplome_url', nameKey: 'diplome_name' },
+                                            ].map(({ key, label, hasKey, urlKey, nameKey }) => {
+                                                const uploaded = !!(candidate as any)[hasKey];
+                                                const url = (candidate as any)[urlKey];
+                                                const name = (candidate as any)[nameKey];
+                                                return (
+                                                    <div key={key} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-[4px] hover:border-rose-200 transition-all group">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-9 h-9 rounded-[4px] flex items-center justify-center flex-shrink-0 ${uploaded ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-300'}`}>
+                                                                {uploaded ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-[12px] font-bold text-slate-700">{label}</div>
+                                                                {uploaded && name ? (
+                                                                    <div className="text-[10px] text-slate-400 font-medium truncate max-w-[220px]">{name}</div>
+                                                                ) : (
+                                                                    <div className={`text-[9px] font-bold uppercase tracking-widest ${uploaded ? 'text-emerald-500' : 'text-rose-400'}`}>
+                                                                        {uploaded ? 'Fourni' : 'Manquant'}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        {uploaded && url && (
+                                                            <a
+                                                                href={url}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-400 hover:bg-rose-500 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100"
+                                                            >
+                                                                <Download size={13} /> Voir
+                                                            </a>
+                                                        )}
                                                     </div>
-                                                </div>
-                                            </div>
-                                            {doc.uploaded && (
-                                                <button className="p-2 rounded-[4px] bg-slate-50 text-slate-400 hover:bg-rose-500 hover:text-white transition-all opacity-0 group-hover:opacity-100">
-                                                    <Download size={16} />
-                                                </button>
-                                            )}
+                                                );
+                                            })}
                                         </div>
-                                    ))}
+                                    </div>
+
+                                    {/* Documents générés */}
+                                    <div>
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Documents générés</h4>
+                                        <div className="space-y-2">
+                                            {[
+                                                { key: 'cerfa', label: 'CERFA FA13', uploaded: !!(candidate as any).has_cerfa, url: (candidate as any).cerfa?.url, name: (candidate as any).cerfa?.filename },
+                                                { key: 'atre', label: 'Fiche ATRE', uploaded: !!(candidate as any).has_atre, url: (candidate as any).atre_url, name: (candidate as any).atre_name },
+                                                { key: 'convention', label: 'Convention apprentissage', uploaded: !!(candidate as any).has_convention, url: (candidate as any).convention_url, name: (candidate as any).convention_name },
+                                                { key: 'livret', label: "Livret d'apprentissage", uploaded: !!(candidate as any).has_livret_apprentissage, url: (candidate as any).livret_apprentissage_url, name: (candidate as any).livret_apprentissage_name },
+                                                { key: 'compte_rendu', label: 'Compte rendu entretien', uploaded: !!(candidate as any).has_compte_rendu, url: (candidate as any).compte_rendu_url, name: (candidate as any).compte_rendu_name },
+                                                { key: 'certificat', label: 'Certificat de scolarité', uploaded: !!(candidate as any).has_certificat_scolarite, url: (candidate as any).certificat_scolarite_url, name: (candidate as any).certificat_scolarite_name },
+                                            ].map(({ key, label, uploaded, url, name }) => (
+                                                <div key={key} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-[4px] hover:border-rose-200 transition-all group">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-9 h-9 rounded-[4px] flex items-center justify-center flex-shrink-0 ${uploaded ? 'bg-blue-50 text-blue-500' : 'bg-slate-50 text-slate-300'}`}>
+                                                            {uploaded ? <FileCheck size={18} /> : <FileText size={18} />}
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-[12px] font-bold text-slate-700">{label}</div>
+                                                            {uploaded && name ? (
+                                                                <div className="text-[10px] text-slate-400 font-medium truncate max-w-[220px]">{name}</div>
+                                                            ) : (
+                                                                <div className={`text-[9px] font-bold uppercase tracking-widest ${uploaded ? 'text-blue-500' : 'text-slate-300'}`}>
+                                                                    {uploaded ? 'Généré' : 'Non généré'}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {uploaded && url && (
+                                                        <a
+                                                            href={url}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-400 hover:bg-blue-500 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100"
+                                                        >
+                                                            <Download size={13} /> Voir
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Suivi entretien */}
+                                    {(candidate as any).all_interview_pdfs?.length > 0 && (
+                                        <div>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Suivi entretien ({(candidate as any).all_interview_pdfs.length})</h4>
+                                            <div className="space-y-2">
+                                                {(candidate as any).all_interview_pdfs.map((pdf: any, i: number) => (
+                                                    <div key={pdf.id || i} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-[4px] hover:border-rose-200 transition-all group">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-9 h-9 rounded-[4px] flex items-center justify-center flex-shrink-0 bg-violet-50 text-violet-500">
+                                                                <FileCheck size={18} />
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-[12px] font-bold text-slate-700">Compte rendu #{i + 1}</div>
+                                                                <div className="text-[10px] text-slate-400 font-medium truncate max-w-[220px]">{pdf.filename}</div>
+                                                            </div>
+                                                        </div>
+                                                        <a
+                                                            href={pdf.url}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-400 hover:bg-violet-500 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100"
+                                                        >
+                                                            <Download size={13} /> Voir
+                                                        </a>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 

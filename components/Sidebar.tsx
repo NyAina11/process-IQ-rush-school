@@ -62,8 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   };
 
   const parentCls = (active: boolean) =>
-    `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] ${
-      active ? 'bg-violet-600/20 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-slate-200'
+    `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] ${active ? 'bg-violet-600/20 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-slate-200'
     }`;
 
   return (
@@ -103,7 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
                 <LayoutDashboard size={15} />
-                <span>Tableau de bord</span>
+                <span>Inscription des eleves</span>
               </NavLink>
               <NavLink
                 to="/classe-ntc"
@@ -111,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
                 <Users size={15} />
-                <span className="flex-1">Classe NTC</span>
+                <span className="flex-1">Tableau de bord</span>
                 {candidates.length > 0 && (
                   <span className="ml-auto bg-violet-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px]">
                     {candidates.length}

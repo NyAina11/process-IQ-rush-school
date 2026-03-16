@@ -13,7 +13,6 @@ import {
     ArrowRight,
     Users,
     FileCheck,
-    Star,
     Save,
     X,
     GraduationCap,
@@ -629,16 +628,18 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
     const { candidates, loading: isLoading } = useCandidates();
     const [searchQuery, setSearchQuery] = useState('');
 
-    const filtered = (candidates || []).map((raw, index) => {
+    const filtered = (candidates || []).map((raw, _index) => {
         const c = getC(raw);
-        const studentId = raw.id;
+        const hasTracking = c.has_interview_tracking || !!(raw.has_interview_tracking);
 
         return {
             raw,
             c,
-            interviewStatus: index % 3 === 0 ? 'Completed' : 'Pending',
-            score: index % 3 === 0 ? (14 + (index % 6)) : null,
-            interviewDate: index % 3 === 0 ? '2024-05-15' : 'A définir'
+            interviewStatus: hasTracking ? 'Completed' : 'Pending',
+            interviewPdfUrl: c.interview_pdf_url || raw.interview_pdf_url || "",
+            interviewPdfName: c.interview_pdf_name || raw.interview_pdf_name || "",
+            allInterviewPdfs: c.all_interview_pdfs || raw.all_interview_pdfs || [],
+            interviewDate: hasTracking ? '—' : 'À définir'
         };
     }).filter(item => {
         const searchLower = (searchQuery || '').toLowerCase();
@@ -763,17 +764,10 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                                     <td className="px-8 py-6">
                                         <div className="flex flex-col items-center">
                                             {item.interviewStatus === 'Completed' ? (
-                                                <>
-                                                    <div className="flex items-baseline gap-0.5">
-                                                        <span className="text-xl font-black text-slate-900">{item.score}</span>
-                                                        <span className="text-[10px] font-bold text-slate-400">/20</span>
-                                                    </div>
-                                                    <div className="flex gap-0.5 mt-1">
-                                                        {[1, 2, 3, 4, 5].map((s) => (
-                                                            <Star key={s} size={8} className={s <= Math.round(item.score / 4) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'} />
-                                                        ))}
-                                                    </div>
-                                                </>
+                                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                                    <CheckCircle2 size={13} />
+                                                    <span className="text-[10px] font-black uppercase tracking-wide">Évalué</span>
+                                                </div>
                                             ) : (
                                                 <span className="text-slate-300 font-bold">—</span>
                                             )}
@@ -781,9 +775,22 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                                     </td>
                                     <td className="px-8 py-6 text-right">
                                         {item.interviewStatus === 'Completed' ? (
-                                            <button className="p-2.5 rounded-[4px] text-slate-400 hover:text-[#3b7cf4] hover:bg-[#ede9fe] transition-all border border-transparent hover:border-[#ddd6fe]">
-                                                <ExternalLink size={20} />
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                {item.interviewPdfUrl && (
+                                                    <a
+                                                        href={item.interviewPdfUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-[#ede9fe] text-[#3b7cf4] hover:bg-[#3b7cf4] hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide border border-[#ddd6fe] hover:border-[#3b7cf4]"
+                                                        title={item.interviewPdfName || 'Voir le compte rendu'}
+                                                    >
+                                                        <Download size={13} /> CR
+                                                    </a>
+                                                )}
+                                                {item.allInterviewPdfs.length > 1 && (
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase">{item.allInterviewPdfs.length} docs</span>
+                                                )}
+                                            </div>
                                         ) : (
                                             <Button
                                                 variant="primary"

@@ -743,6 +743,22 @@ export const api = {
     } catch (error) { return []; }
   },
 
+  async getCandidatsWithDocuments(): Promise<any[]> {
+    try {
+      const response = await fetch(`${BASE_URL}/candidats-with-documents`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Failed to fetch candidates with documents');
+      const json = await response.json();
+      console.log('API getCandidatsWithDocuments RAW:', json);
+      return Array.isArray(json) ? json : (json.data || []);
+    } catch (error) {
+      console.error('❌ API Error (getCandidatsWithDocuments):', error);
+      return [];
+    }
+  },
+
   async getCandidateById(id: string): Promise<any> {
     try {
       console.log('📤 Fetching Candidate:', id);
