@@ -574,7 +574,26 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                     hasError={hasSectionError(sectionDefs[4].fields)}
                 >
                     <div className="space-y-4">
-                        <Select label="Formation souhaitée" required error={errors.formation_souhaitee?.message} {...register('formation_souhaitee')} options={FORMATION_SOUHAITEE_OPTIONS} />
+                        <div>
+                            <FieldLabel>Formation souhaitée <span className="text-rose-400">*</span></FieldLabel>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                                {FORMATION_SOUHAITEE_OPTIONS.map(opt => {
+                                    const selected = formValues.formation_souhaitee === opt.value;
+                                    return (
+                                        <label key={opt.value} className={`flex items-center gap-2 px-3 py-2.5 rounded-[4px] border-2 cursor-pointer transition-all text-[12px] font-bold leading-tight ${
+                                            selected ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]' : 'border-slate-200 text-slate-600 hover:border-[#6B3CD2]/30'
+                                        }`}>
+                                            <div className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${selected ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
+                                                {selected && <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]" />}
+                                            </div>
+                                            <input type="radio" className="hidden" value={opt.value} {...register('formation_souhaitee')} />
+                                            {opt.label}
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                            {errors.formation_souhaitee && <p className="mt-1 text-rose-500 text-[10px] font-bold">{errors.formation_souhaitee.message}</p>}
+                        </div>
 
                         <FormGrid>
                             <div><Input label="Date visite / JPO" type="date" {...register('date_de_visite')} /></div>
