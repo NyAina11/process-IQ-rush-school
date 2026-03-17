@@ -349,8 +349,6 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         });
     };
 
-    const [isSaving, setIsSaving] = useState(false);
-
     const { execute: submitCompany, loading: isSubmitting } = useApi(api.submitCompany, {
         successMessage: "Informations entreprise enregistrées avec succès !",
         onSuccess: (response) => {
@@ -361,22 +359,9 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         errorMessage: "Une erreur est survenue lors de l'enregistrement. Vérifiez les données et réessayez."
     });
 
-    const handleSaveDraft = async () => {
-        if (!studentRecordId) {
-            showToast("ID étudiant manquant, impossible de sauvegarder.", "error");
-            return;
-        }
-        const values = watch();
-        setIsSaving(true);
-        try {
-            await api.updateCompany(studentRecordId, values);
-            setDraftCompany(values);
-            showToast("Informations entreprise enregistrées !", "success");
-        } catch {
-            showToast("Erreur lors de la sauvegarde. Réessayez.", "error");
-        } finally {
-            setIsSaving(false);
-        }
+    const handleSaveDraft = () => {
+        setDraftCompany(watch());
+        showToast("Brouillon sauvegardé — vos données sont conservées.", "success");
     };
 
     const onSubmit = async (data: CompanyFormValues) => {
@@ -961,12 +946,11 @@ const FICHE_STEPS = ['Entreprise', 'Contact', 'Formation', 'Contrat', 'Validatio
                     <div className="flex gap-4">
                         <button
                             type="button"
-                            disabled={isSaving}
-                            className="flex items-center gap-2 px-10 py-3 bg-white border border-slate-200 text-slate-400 text-[11px] font-black uppercase tracking-widest rounded-[4px] hover:border-brand/40 hover:text-brand transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 px-10 py-3 bg-white border border-slate-200 text-slate-400 text-[11px] font-black uppercase tracking-widest rounded-[4px] hover:border-brand/40 hover:text-brand transition-all shadow-sm"
                             onClick={handleSaveDraft}
                         >
-                            {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                            {isSaving ? "Sauvegarde…" : "Enregistrer"}
+                            <Save size={16} />
+                            Enregistrer
                         </button>
                         <button
                             type="submit"
