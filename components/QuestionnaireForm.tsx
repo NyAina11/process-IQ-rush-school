@@ -286,21 +286,22 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
 
     const handleSaveDraft = async () => {
         const values = watch();
+        // Always save locally first — this never fails
+        setDraftStudent(values);
         const existingId = localStorage.getItem('candidateRecordId');
+        if (!existingId) {
+            // No record yet → local save only, no backend call
+            showToast("Brouillon sauvegardé localement.", "info");
+            return;
+        }
+        // Record exists → try to sync with backend
         setIsSaving(true);
         try {
-            if (existingId) {
-                await api.updateCandidate(existingId, values as any);
-                showToast("Informations enregistrées !", "success");
-            } else {
-                const response = await api.submitStudent(values as any);
-                const recordId = response?.record_id || response?.id;
-                if (recordId) localStorage.setItem('candidateRecordId', recordId);
-                showToast("Brouillon sauvegardé !", "success");
-            }
-            setDraftStudent(values);
+            await api.updateCandidate(existingId, values as any);
+            showToast("Informations enregistrées !", "success");
         } catch {
-            showToast("Erreur lors de la sauvegarde. Réessayez.", "error");
+            // Backend failed but local draft is already saved
+            showToast("Sauvegarde locale ok. Sync backend échouée.", "info");
         } finally {
             setIsSaving(false);
         }
