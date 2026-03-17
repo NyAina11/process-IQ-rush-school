@@ -639,6 +639,10 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
             interviewPdfUrl: c.interview_pdf_url || raw.interview_pdf_url || "",
             interviewPdfName: c.interview_pdf_name || raw.interview_pdf_name || "",
             allInterviewPdfs: c.all_interview_pdfs || raw.all_interview_pdfs || [],
+            hasTestResults: c.has_test_results || !!(raw.has_test_results),
+            testResultsUrl: c.test_results_url || raw.test_results_url || "",
+            testResultsName: c.test_results_name || raw.test_results_name || "",
+            allTestResultsPdfs: c.all_test_results_pdfs || raw.all_test_results_pdfs || [],
             interviewDate: hasTracking ? '—' : 'À définir'
         };
     }).filter(item => {
@@ -715,6 +719,7 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                             <tr className="bg-slate-50/50 border-b border-slate-100">
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Candidat</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Formation</th>
+                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Test</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Date Session</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
                                 <th className="px-8 py-5 text-center text-[11px] font-black text-slate-400 uppercase tracking-widest">Évaluation</th>
@@ -741,6 +746,25 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                                             <Briefcase size={14} />
                                             <span className="text-[11px] font-bold uppercase tracking-tight">{item.c.formation || 'Non spécifiée'}</span>
                                         </div>
+                                    </td>
+                                    <td className="px-8 py-6">
+                                        {item.hasTestResults ? (
+                                            <a
+                                                href={item.testResultsUrl}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 transition-all"
+                                                title={item.testResultsName || 'Voir les résultats du test'}
+                                            >
+                                                <Target size={14} />
+                                                <span className="text-[10px] font-black uppercase tracking-wider">Résultats</span>
+                                            </a>
+                                        ) : (
+                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-400 border border-slate-100">
+                                                <Target size={14} className="opacity-40" />
+                                                <span className="text-[10px] font-bold uppercase tracking-tight opacity-60">Non effectué</span>
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="flex flex-col">
@@ -1362,15 +1386,18 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
     // Sync uploaded documents status when student data changes
     useEffect(() => {
         if (studentData) {
+            const data = getC(studentData);
             setUploadedFiles({
-                cv: studentData.has_cv || !!studentData.fields?.['CV'],
-                cni: studentData.has_cni || !!studentData.fields?.['CIN'] || !!studentData.fields?.['cin'],
-                lettre: studentData.has_lettre_motivation || !!studentData.fields?.['lettre de motivation'] || !!studentData.fields?.['lettre'],
-                vitale: studentData.has_vitale || !!studentData.fields?.['Photocopie carte vitale'] || !!studentData.fields?.['Carte Vitale'] || !!studentData.fields?.['vitale'],
-                diplome: studentData.has_diplome || !!studentData.fields?.['dernier diplome'] || !!studentData.fields?.['diplome'],
+                cv: data.has_cv || !!data.cv_url,
+                cni: data.has_cni || !!data.cni_url,
+                lettre: data.has_lettre_motivation || !!data.lettre_motivation_url,
+                vitale: data.has_vitale || !!data.vitale_url,
+                diplome: data.has_diplome || !!data.diplome_url,
             });
+            setTestCompleted(data.has_test_results || false);
         } else {
             setUploadedFiles({});
+            setTestCompleted(false);
         }
     }, [studentData]);
 
@@ -1572,6 +1599,31 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
 
                         {activeTab === AdmissionTab.TESTS && (
                             <div className="space-y-6 animate-slide-in">
+                                {studentData && getC(studentData).has_test_results && (
+                                    <div className="bg-emerald-50 border border-emerald-200 rounded-[4px] p-8">
+                                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                                            <div className="flex items-center gap-5">
+                                                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-[4px] flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/10">
+                                                    <Target size={32} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-black text-slate-800 mb-1">Tes résultats sont disponibles !</h3>
+                                                    <p className="text-emerald-700/70 text-sm font-medium leading-relaxed">Félicitations, tu as terminé ton test d'admission. Tu peux consulter ton compte-rendu ci-dessous.</p>
+                                                </div>
+                                            </div>
+                                            <a
+                                                href={getC(studentData).test_results_url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="w-full md:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-emerald-600 text-white rounded-[4px] font-black text-sm uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                                            >
+                                                <Download size={18} />
+                                                Voir mes résultats
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="bg-white border border-slate-300 rounded-[4px] p-8">
                                     <h3 className="text-xl font-black text-slate-800 mb-2 flex items-center gap-3">
                                         <GraduationCap className="text-[#4c1d95]" /> Sélectionnez votre formation

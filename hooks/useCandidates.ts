@@ -66,7 +66,11 @@ export const getC = (c: any) => {
         has_interview_tracking: c.has_interview_tracking || false,
         interview_pdf_url: c.interview_pdf_url || "",
         interview_pdf_name: c.interview_pdf_name || "",
-        all_interview_pdfs: c.all_interview_pdfs || []
+        all_interview_pdfs: c.all_interview_pdfs || [],
+        has_test_results: c.has_test_results || !!(c.resultat_pdf && c.resultat_pdf.length > 0),
+        test_results_url: c.test_results_url || c.resultat_pdf?.[c.resultat_pdf.length - 1]?.fields?.['PDF Résultat']?.[0]?.url || "",
+        test_results_name: c.test_results_name || c.resultat_pdf?.[c.resultat_pdf.length - 1]?.fields?.['PDF Résultat']?.[0]?.filename || "",
+        all_test_results_pdfs: c.all_test_results_pdfs || (c.resultat_pdf || []).flatMap((s: any) => s.fields?.['PDF Résultat'] || [])
     };
 };
 
@@ -151,7 +155,12 @@ export const useCandidates = () => {
                 has_interview_tracking: !!(c.suivie_entretien && c.suivie_entretien.length > 0),
                 interview_pdf_url: c.suivie_entretien?.[c.suivie_entretien.length - 1]?.fields?.['Suivie entretien']?.[0]?.url || "",
                 interview_pdf_name: c.suivie_entretien?.[c.suivie_entretien.length - 1]?.fields?.['Suivie entretien']?.[0]?.filename || "",
-                all_interview_pdfs: (c.suivie_entretien || []).flatMap((s: any) => s.fields?.['Suivie entretien'] || [])
+                all_interview_pdfs: (c.suivie_entretien || []).flatMap((s: any) => s.fields?.['Suivie entretien'] || []),
+                // Test results tracking (from candidats-with-documents)
+                has_test_results: !!(c.resultat_pdf && c.resultat_pdf.length > 0),
+                test_results_url: c.resultat_pdf?.[c.resultat_pdf.length - 1]?.fields?.['PDF Résultat']?.[0]?.url || "",
+                test_results_name: c.resultat_pdf?.[c.resultat_pdf.length - 1]?.fields?.['PDF Résultat']?.[0]?.filename || "",
+                all_test_results_pdfs: (c.resultat_pdf || []).flatMap((s: any) => s.fields?.['PDF Résultat'] || [])
             };
         }) : [];
         setCandidates(mergedData);

@@ -437,6 +437,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                                 { key: 'livret', label: "Livret d'apprentissage", uploaded: !!(candidate as any).has_livret_apprentissage, url: (candidate as any).livret_apprentissage_url, name: (candidate as any).livret_apprentissage_name },
                                                 { key: 'compte_rendu', label: 'Compte rendu entretien', uploaded: !!(candidate as any).has_compte_rendu, url: (candidate as any).compte_rendu_url, name: (candidate as any).compte_rendu_name },
                                                 { key: 'certificat', label: 'Certificat de scolarité', uploaded: !!(candidate as any).has_certificat_scolarite, url: (candidate as any).certificat_scolarite_url, name: (candidate as any).certificat_scolarite_name },
+                                                { key: 'test_results', label: 'Résultats test admission', uploaded: !!(candidate as any).has_test_results, url: (candidate as any).test_results_url, name: (candidate as any).test_results_name },
                                             ].map(({ key, label, uploaded, url, name }) => (
                                                 <div key={key} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-[4px] hover:border-rose-200 transition-all group">
                                                     <div className="flex items-center gap-3">
