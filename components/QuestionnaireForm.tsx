@@ -265,6 +265,8 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
         return () => subscription.unsubscribe();
     }, [watch, setDraftStudent]);
 
+    const [isSaving, setIsSaving] = React.useState(false);
+
     const { execute: submitStudent, loading: isSubmitting } = useApi(api.submitStudent, {
         successMessage: "Inscription enregistrée avec succès !",
         onSuccess: async (response) => {
@@ -281,6 +283,28 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
         },
         errorMessage: "Erreur lors de l'enregistrement. Veuillez réessayer."
     });
+
+    const handleSaveDraft = async () => {
+        const values = watch();
+        const existingId = localStorage.getItem('candidateRecordId');
+        setIsSaving(true);
+        try {
+            if (existingId) {
+                await api.updateCandidate(existingId, values as any);
+                showToast("Informations enregistrées !", "success");
+            } else {
+                const response = await api.submitStudent(values as any);
+                const recordId = response?.record_id || response?.id;
+                if (recordId) localStorage.setItem('candidateRecordId', recordId);
+                showToast("Brouillon sauvegardé !", "success");
+            }
+            setDraftStudent(values);
+        } catch {
+            showToast("Erreur lors de la sauvegarde. Réessayez.", "error");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const onSubmit = async (data: StudentFormValues) => { await submitStudent(data as any); };
 
@@ -611,10 +635,12 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                     <div className="flex items-center justify-end gap-3">
                         <button
                             type="button"
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-[4px] border-2 border-slate-200 text-slate-600 font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95"
-                            onClick={() => showToast("Brouillon enregistré", "info")}
+                            disabled={isSaving}
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-[4px] border-2 border-slate-200 text-slate-600 font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={handleSaveDraft}
                         >
-                            <Save size={13} /> Brouillon
+                            {isSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+                            {isSaving ? "Sauvegarde…" : "Enregistrer"}
                         </button>
                         <button
                             type="submit"
