@@ -1165,7 +1165,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                         </button>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#f4f6fb] text-[#475569] border border-[#e2e8f0] font-bold text-xs">
+                                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#f4f6fb] text-[#475569] border border-[#e2e8f0] font-bold text-xs whitespace-nowrap">
                                                             <Briefcase size={11} />
                                                             {formatFormation(student.formation)}
                                                         </div>
@@ -1436,7 +1436,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                             </div>
 
                                             <div className="flex items-center gap-3 mb-4">
-                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#dbeafe] text-[#1d4ed8] border border-[#93c5fd] font-bold text-[9px] uppercase tracking-widest">
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#dbeafe] text-[#1d4ed8] border border-[#93c5fd] font-bold text-[9px] uppercase tracking-widest whitespace-nowrap">
                                                     <Briefcase size={11} />
                                                     {formatFormation(student.formation)}
                                                 </div>
