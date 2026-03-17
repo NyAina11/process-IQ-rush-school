@@ -29,6 +29,7 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import HistoryTimeline from './HistoryTimeline';
 import { api } from '../../services/api';
+import { formatFormation } from '../../utils/formatters';
 
 import {
     NATIONALITY_OPTIONS,
@@ -139,7 +140,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                         <div>
                             <h2 className="text-2xl font-black text-slate-800 tracking-tight">Formulaire Étudiant</h2>
                             <p className="text-slate-400 font-bold text-sm">
-                                {info.prenom} {info.nom_naissance}
+                                {info.nom_naissance?.toUpperCase()} {info.prenom}
                             </p>
                         </div>
                     </div>
@@ -346,7 +347,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                             {activeTab === 'personal' && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {renderInfoRow("Prénom", info.prenom, User)}
-                                    {renderInfoRow("Nom", info.nom_naissance, User)}
+                                    {renderInfoRow("Nom", info.nom_naissance?.toUpperCase(), User)}
                                     {renderInfoRow("Email", info.email, Mail)}
                                     {renderInfoRow("Téléphone", info.telephone, Phone)}
                                     {renderInfoRow("Sexe", info.sexe, User)}
@@ -364,7 +365,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
 
                             {activeTab === 'school' && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {renderInfoRow("Formation souhaitée", info.formation_souhaitee, GraduationCap)}
+                                    {renderInfoRow("Formation souhaitée", formatFormation(info.formation_souhaitee), GraduationCap)}
                                     {renderInfoRow("Dernier diplôme préparé", info.dernier_diplome_prepare, GraduationCap)}
                                     {renderInfoRow("Dernière classe", info.derniere_classe, GraduationCap)}
                                     {renderInfoRow("BAC", info.bac, GraduationCap)}

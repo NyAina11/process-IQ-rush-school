@@ -39,3 +39,8 @@ export const formatSIRET = (value: string) => {
   
   return formatted;
 };
+
+export const formatFormation = (value: string) => {
+  if (!value) return value;
+  return value.replace(/\s*\(rentrée decalée\)/gi, '').trim();
+};

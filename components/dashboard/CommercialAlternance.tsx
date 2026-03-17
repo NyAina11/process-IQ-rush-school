@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle2, Download, Search, List, LayoutGrid, Eye, Edit, Users, FileCheck, Building, GraduationCap, MapPin, ArrowUpRight } from 'lucide-react';
 import Button from '../ui/Button';
 import Pagination from '../ui/Pagination';
+import { formatFormation } from '../../utils/formatters';
 
 interface CommercialAlternanceProps {
     candidates: any[];
@@ -175,14 +176,14 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
                                                     c.formation.includes('NDRC') ? 'bg-emerald-50 text-emerald-600' :
                                                         c.formation.includes('RDC') ? 'bg-purple-50 text-purple-600' : 'bg-orange-50 text-orange-600'
                                                     }`}>
-                                                    {c.formation}
+                                                    {formatFormation(c.formation)}
                                                 </span>
                                             </td>
                                             <td className="px-8 py-6">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-500 text-xs"> {c.nom[0]}{c.prenom[0]} </div>
                                                     <div>
-                                                        <div className="text-sm font-black text-slate-800">{c.nom} {c.prenom}</div>
+                                                        <div className="text-sm font-black text-slate-800">{c.nom?.toUpperCase()} {c.prenom}</div>
                                                         <div className="text-[10px] font-bold text-slate-400">{c.email}</div>
                                                     </div>
                                                 </div>
@@ -216,12 +217,12 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
                                     <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-wider">Contrat Actif</span>
                                 </div>
                                 <div className="mb-6 relative z-10">
-                                    <h3 className="text-xl font-black text-slate-800 mb-1">{c.nom} {c.prenom}</h3>
+                                    <h3 className="text-xl font-black text-slate-800 mb-1">{c.nom?.toUpperCase()} {c.prenom}</h3>
                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${c.formation.includes('MCO') ? 'bg-blue-50 text-blue-600' :
                                         c.formation.includes('NDRC') ? 'bg-emerald-50 text-emerald-600' :
                                             c.formation.includes('RDC') ? 'bg-purple-50 text-purple-600' : 'bg-orange-50 text-orange-600'
                                         }`}>
-                                        {c.formation}
+                                        {formatFormation(c.formation)}
                                     </span>
                                 </div>
                                 <div className="space-y-4 mb-8 relative z-10">

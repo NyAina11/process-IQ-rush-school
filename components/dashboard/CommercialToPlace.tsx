@@ -2,6 +2,7 @@ import React, { useRef, useCallback } from 'react';
 import { Search, List, LayoutGrid, Eye, CheckCircle2, FileUser, FileText, Download, Hash, Phone, Cake, ChevronLeft, ChevronRight, HeartPulse } from 'lucide-react';
 import Button from '../ui/Button';
 import Pagination from '../ui/Pagination';
+import { formatFormation } from '../../utils/formatters';
 
 interface CommercialToPlaceProps {
     candidates: any[];
@@ -230,14 +231,14 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-10 h-10 rounded-[4px] bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-slate-500 text-xs"> {String(c.nom || '?')[0]}{String(c.prenom || '?')[0]} </div>
                                                     <div>
-                                                        <div className="text-sm font-black text-slate-800 tracking-tight">{c.nom} {c.prenom}</div>
+                                                        <div className="text-sm font-black text-slate-800 tracking-tight">{c.nom?.toUpperCase()} {c.prenom}</div>
                                                         <div className="text-[10px] font-bold text-slate-400">{c.email}</div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-8 py-6">
                                                 <div className="inline-flex items-center px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-500 border border-slate-100 text-[10px] font-black uppercase tracking-wider">
-                                                    {c.formation}
+                                                    {formatFormation(c.formation)}
                                                 </div>
                                             </td>
                                             <td className="px-8 py-6">
@@ -344,10 +345,10 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
                                     </div>
                                 </div>
                                 <div className="mb-6 relative z-10">
-                                    <h3 className="text-lg font-black text-slate-800 mb-1 tracking-tight">{c.nom} {c.prenom}</h3>
+                                    <h3 className="text-lg font-black text-slate-800 mb-1 tracking-tight">{c.nom?.toUpperCase()} {c.prenom}</h3>
                                     <p className="text-xs text-slate-400 truncate mb-3">{c.email}</p>
                                     <div className="inline-flex items-center px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-600 border border-slate-200 text-[9px] font-black uppercase tracking-widest">
-                                        {c.formation}
+                                        {formatFormation(c.formation)}
                                     </div>
                                 </div>
                                 <div className="space-y-4 mb-6 relative z-10 flex-grow">

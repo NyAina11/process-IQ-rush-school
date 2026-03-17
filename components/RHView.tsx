@@ -26,6 +26,7 @@ import Select from './ui/Select';
 import { useAppStore } from '../store/useAppStore';
 import Card from './ui/Card';
 import CompanyDetailsModal from './dashboard/CompanyDetailsModal';
+import { formatFormation } from '../utils/formatters';
 
 
 const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
@@ -411,12 +412,12 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                                         <tr key={c.record_id || idx} className="hover:bg-slate-50 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                                                    {c.formation || "N/A"}
+                                                    {formatFormation(c.formation) || "N/A"}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-800 text-sm">{((c.prenom || '') + ' ' + (c.nom || '')).trim().toUpperCase()}</span>
+                                                    <span className="font-bold text-slate-800 text-sm">{c.nom?.toUpperCase()} {c.prenom}</span>
                                                     <span className="text-[10px] text-slate-400 font-medium">{c.email}</span>
                                                 </div>
                                             </td>

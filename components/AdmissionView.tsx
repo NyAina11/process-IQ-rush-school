@@ -40,6 +40,7 @@ import jsPDF from 'jspdf';
 import { useAppStore } from '../store/useAppStore';
 import { useApi } from '../hooks/useApi';
 import { useCandidates, getC } from '../hooks/useCandidates';
+import { formatFormation } from '../utils/formatters';
 
 // --- CONSTANTS ---
 
@@ -315,7 +316,7 @@ const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: ()
         doc.setTextColor(100, 116, 139);
         doc.text('FORMATION VISÉE', 25, 65);
         doc.setTextColor(30, 41, 59);
-        doc.text(evalData.formation || 'Non renseignée', 25, 72);
+        doc.text(formatFormation(evalData.formation) || 'Non renseignée', 25, 72);
 
         doc.setTextColor(100, 116, 139);
         doc.text('CHARGÉ D\'ADMISSION', 110, 65);
@@ -738,13 +739,13 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                                             <div className="w-12 h-12 rounded-[4px] bg-slate-100 flex items-center justify-center text-slate-500 font-black text-sm group-hover:bg-[#3b7cf4] group-hover:text-white transition-all">
                                                 {item.c.prenom?.[0]}{item.c.nom?.[0]}
                                             </div>
-                                            <div className="font-black text-slate-800 text-base">{item.c.nom} {item.c.prenom}</div>
+                                            <div className="font-black text-slate-800 text-base">{item.c.nom?.toUpperCase()} {item.c.prenom}</div>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#ede9fe] text-[#3b7cf4] border border-[#ddd6fe]">
                                             <Briefcase size={14} />
-                                            <span className="text-[11px] font-bold uppercase tracking-tight">{item.c.formation || 'Non spécifiée'}</span>
+                                            <span className="text-[11px] font-bold uppercase tracking-tight">{formatFormation(item.c.formation) || 'Non spécifiée'}</span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6">
@@ -923,7 +924,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
     useEffect(() => {
         if (studentData) {
             const d = studentData.data || studentData;
-            const nom = `${d.prenom || ''} ${d.nom_naissance || ''}`.trim();
+            const nom = `${(d.nom_naissance || d.nom || '').toUpperCase()} ${d.prenom || ''}`.trim();
             setTexts(prev => ({
                 ...prev,
                 nom,

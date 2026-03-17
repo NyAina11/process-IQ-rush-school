@@ -3,6 +3,7 @@ import { Users, ArrowUpRight, CheckCircle2, Plus, FileText, Download, Calendar, 
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import StatCard from './StatCard';
+import { formatFormation } from '../../utils/formatters';
 
 interface CommercialOverviewProps {
     candidates: any[];
@@ -94,8 +95,8 @@ const CommercialOverview: React.FC<CommercialOverviewProps> = ({ candidates, stu
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 font-black text-sm group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors"> {c.nom[0]}{c.prenom[0]} </div>
                                         <div>
-                                            <div className="text-sm font-black text-slate-800">{c.nom} {c.prenom}</div>
-                                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{c.formation}</div>
+                                            <div className="text-sm font-black text-slate-800">{c.nom?.toUpperCase()} {c.prenom}</div>
+                                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{formatFormation(c.formation)}</div>
                                         </div>
                                     </div>
                                     <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest"> {i === 0 ? "À l'instant" : i === 1 ? "Il y a 2h" : "Hier"} </div>

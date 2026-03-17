@@ -43,6 +43,7 @@ import { useApi } from '../hooks/useApi';
 import { useCandidates, getC, isPlaced } from '../hooks/useCandidates';
 import { usePagination } from '../hooks/usePagination';
 import Pagination from './ui/Pagination';
+import { formatFormation } from '../utils/formatters';
 
 interface ClassNTCViewProps {
     onSelectStudent: (student: any, tab: AdmissionTab) => void;
@@ -1138,7 +1139,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-sm">{student.numero_inscription || `${student.prenom?.[0]}${student.nom?.[0]}`}</span>
                                                             </div>
                                                             <div>
-                                                                <div className="font-bold text-[#1e293b] text-sm">{student.nom} {student.prenom}</div>
+                                                                <div className="font-bold text-[#1e293b] text-sm">{student.nom?.toUpperCase()} {student.prenom}</div>
                                                                 <div className="text-xs text-[#8898aa] mt-0.5">{student.email}</div>
                                                             </div>
                                                         </div>
@@ -1166,7 +1167,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                     <td className="px-6 py-4">
                                                         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#f4f6fb] text-[#475569] border border-[#e2e8f0] font-bold text-xs">
                                                             <Briefcase size={11} />
-                                                            {student.formation}
+                                                            {formatFormation(student.formation)}
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
@@ -1430,14 +1431,14 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                             </div>
 
                                             <div className="mb-6">
-                                                <h3 className="text-lg font-bold text-[#1e293b]">{student.nom} {student.prenom}</h3>
+                                                <h3 className="text-lg font-bold text-[#1e293b]">{student.nom?.toUpperCase()} {student.prenom}</h3>
                                                 <p className="text-sm text-[#8898aa] truncate mt-1">{student.email}</p>
                                             </div>
 
                                             <div className="flex items-center gap-3 mb-4">
                                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#dbeafe] text-[#1d4ed8] border border-[#93c5fd] font-bold text-[9px] uppercase tracking-widest">
                                                     <Briefcase size={11} />
-                                                    {student.formation}
+                                                    {formatFormation(student.formation)}
                                                 </div>
                                                 {student.alternance === 'Oui' && student.entreprise && student.entreprise !== 'En recherche' && (
                                                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#1a1f2e] text-white font-bold text-[9px] uppercase tracking-widest">
@@ -1611,10 +1612,11 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                     <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Répartition par formation</div>
                                     <div className="space-y-2.5">
                                         {statsData.formationList.length > 0 ? statsData.formationList.map(([label, count]) => {
+                                            const displayLabel = formatFormation(label);
                                             const pct = statsData.total > 0 ? (count / statsData.total) * 100 : 0;
                                             return (
                                                 <div key={label} className="flex items-center gap-3">
-                                                    <div className="w-40 text-[11px] font-semibold text-slate-500 flex-shrink-0 truncate" title={label}>{label}</div>
+                                                    <div className="w-40 text-[11px] font-semibold text-slate-500 flex-shrink-0 truncate" title={label}>{displayLabel}</div>
                                                     <div className="flex-1 h-4 bg-[#f4f6fb] rounded-[4px] overflow-hidden border border-[#e2e8f0]">
                                                         <div className="h-full rounded-[4px] transition-all duration-700" style={{ width: `${pct}%`, background: 'linear-gradient(to right, #7c3aed, #3b7cf4)' }}></div>
                                                     </div>
