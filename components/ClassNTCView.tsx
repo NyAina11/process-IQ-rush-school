@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
     Download,
     CheckCircle2,
@@ -570,174 +571,234 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
         const isOpen = activeMenuId === student.id;
         const studentInfo = getC(student);
         const fullName = `${studentInfo.nom} ${studentInfo.prenom}`;
+        const buttonRef = useRef<HTMLButtonElement>(null);
+        const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, placement: 'bottom' as 'top' | 'bottom' });
+
+        useEffect(() => {
+            if (isOpen && buttonRef.current) {
+                const rect = buttonRef.current.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+                const menuHeight = Math.min(viewportHeight * 0.7, 450); // Estimated max height based on items
+                
+                // If there's not enough space below (leaving some margin), open upwards
+                const shouldOpenUp = rect.bottom + menuHeight > viewportHeight - 20;
+                
+                setMenuPosition({
+                    top: shouldOpenUp ? rect.top - 8 : rect.bottom + 4,
+                    left: rect.right - 224,
+                    placement: shouldOpenUp ? 'top' : 'bottom'
+                });
+            }
+        }, [isOpen]);
+
+        // Re-calculate position on scroll to keep it pinned to the button
+        useEffect(() => {
+            if (!isOpen) return;
+
+            const updatePosition = () => {
+                if (buttonRef.current) {
+                    const rect = buttonRef.current.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+                    const menuHeight = Math.min(viewportHeight * 0.7, 450);
+                    const shouldOpenUp = rect.bottom + menuHeight > viewportHeight - 20;
+
+                    setMenuPosition({
+                        top: shouldOpenUp ? rect.top - 8 : rect.bottom + 4,
+                        left: rect.right - 224,
+                        placement: shouldOpenUp ? 'top' : 'bottom'
+                    });
+                }
+            };
+
+            window.addEventListener('scroll', updatePosition, true);
+            window.addEventListener('resize', updatePosition);
+            return () => {
+                window.removeEventListener('scroll', updatePosition, true);
+                window.removeEventListener('resize', updatePosition);
+            };
+        }, [isOpen]);
+
+        const menuContent = (
+            <div 
+                style={{ 
+                    position: 'fixed',
+                    top: `${menuPosition.top}px`,
+                    left: `${menuPosition.left}px`,
+                    transform: menuPosition.placement === 'top' ? 'translateY(-100%)' : 'none',
+                    zIndex: 9999,
+                    width: '14rem' // w-56
+                }}
+                className="bg-white shadow-xl border border-[#e2e8f0] overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="px-3 py-2 border-b border-[#e2e8f0] bg-[#f4f6fb]">
+                    <span className="text-[10px] font-bold text-[#8898aa] uppercase tracking-widest block">Actions pour {studentInfo.prenom}</span>
+                </div>
+
+                <div className="py-1 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                    <button
+                        onClick={() => handleCopyEmail(studentInfo.email)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors"
+                    >
+                        <Copy size={15} className="text-slate-400" />
+                        <span>Copier l'email</span>
+                    </button>
+
+                    <button
+                        onClick={() => handleViewDetails(student.id)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors"
+                    >
+                        <FileText size={15} className="text-blue-400" />
+                        <span>Voir les détails</span>
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            handleViewDetails(student.id);
+                            setTimeout(() => setIsEditing(true), 100);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors"
+                    >
+                        <RefreshCw size={15} className="text-indigo-400" />
+                        <span>Modifier l'étudiant</span>
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            onSelectStudent(student, AdmissionTab.ADMINISTRATIF);
+                            navigate('/admission');
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors"
+                    >
+                        <HistoryIcon size={15} className="text-rose-400" />
+                        <span>Voir l'historique</span>
+                    </button>
+
+                    <div className="h-px bg-slate-50 my-1 mx-2" />
+
+                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter pl-3 py-1 block">Documents</span>
+
+                    <button
+                        onClick={() => handleRegenerateDoc(student.id, 'fiche')}
+                        disabled={isRegenerating === `${student.id}-fiche`}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw size={15} className={`text-slate-400 ${isRegenerating === `${student.id}-fiche` ? 'animate-spin' : ''}`} />
+                        <span>Régénérer Fiche Rens.</span>
+                    </button>
+
+                    <button
+                        onClick={() => handleRegenerateDoc(student.id, 'cerfa')}
+                        disabled={isRegenerating === `${student.id}-cerfa`}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw size={15} className={`text-blue-400 ${isRegenerating === `${student.id}-cerfa` ? 'animate-spin' : ''}`} />
+                        <span>Régénérer CERFA</span>
+                    </button>
+
+                    <button
+                        onClick={() => handleRegenerateDoc(student.id, 'convention')}
+                        disabled={isRegenerating === `${student.id}-convention`}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw size={15} className={`text-emerald-400 ${isRegenerating === `${student.id}-convention` ? 'animate-spin' : ''}`} />
+                        <span>Régénérer Convention</span>
+                    </button>
+
+                    <button
+                        onClick={() => handleRegenerateDoc(student.id, 'atre')}
+                        disabled={isRegenerating === `${student.id}-atre`}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw size={15} className={`text-orange-400 ${isRegenerating === `${student.id}-atre` ? 'animate-spin' : ''}`} />
+                        <span>Régénérer ATRE</span>
+                    </button>
+
+                    <button
+                        onClick={() => handleRegenerateDoc(student.id, 'cr')}
+                        disabled={isRegenerating === `${student.id}-cr`}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw size={15} className={`text-pink-400 ${isRegenerating === `${student.id}-cr` ? 'animate-spin' : ''}`} />
+                        <span>Régénérer Compte Rendu</span>
+                    </button>
+
+                    <button
+                        onClick={() => handleRegenerateDoc(student.id, 'livret')}
+                        disabled={isRegenerating === `${student.id}-livret`}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw size={15} className={`text-purple-400 ${isRegenerating === `${student.id}-livret` ? 'animate-spin' : ''}`} />
+                        <span>Régénérer Livret Appr.</span>
+                    </button>
+
+                    <button
+                        onClick={() => handleRegenerateDoc(student.id, 'certificat')}
+                        disabled={isRegenerating === `${student.id}-certificat`}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw size={15} className={`text-cyan-400 ${isRegenerating === `${student.id}-certificat` ? 'animate-spin' : ''}`} />
+                        <span>Régénérer Certificat Scolarité</span>
+                    </button>
+
+                    <div className="h-px bg-slate-50 my-1 mx-2" />
+
+                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter pl-3 py-1 block">Signatures</span>
+
+                    {studentInfo.cerfa?.id && (
+                        <button
+                            onClick={() => handleGenerateSigningLink(studentInfo.cerfa.id)}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#7c3aed] hover:bg-[#ede9fe] transition-colors"
+                        >
+                            <FileSignature size={15} className="text-indigo-400" />
+                            <span>Signer CERFA</span>
+                        </button>
+                    )}
+
+                    {studentInfo.convention?.id && (
+                        <button
+                            onClick={() => handleGenerateSigningLink(studentInfo.convention.id)}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#065f46] hover:bg-[#d1fae5] transition-colors"
+                        >
+                            <FileSignature size={15} className="text-emerald-400" />
+                            <span>Signer Convention</span>
+                        </button>
+                    )}
+
+                    <div className="h-px bg-slate-50 my-1 mx-2" />
+
+                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter pl-3 py-1 block">Administration</span>
+
+                    <button
+                        onClick={() => handleDeleteCompany(student.id, student.entreprise_raison_sociale || 'Entreprise')}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#b91c1c] hover:bg-[#fee2e2] transition-colors"
+                    >
+                        <Building2 size={15} className="text-rose-400" />
+                        <span>Supprimer entreprise</span>
+                    </button>
+
+                    <button
+                        onClick={() => handleDeleteStudent(student.id, fullName)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#b91c1c] hover:bg-[#fee2e2] transition-colors"
+                    >
+                        <UserX size={15} className="text-rose-400" />
+                        <span className="font-semibold">Supprimer l'étudiant</span>
+                    </button>
+                </div>
+            </div>
+        );
 
         return (
             <div className="relative">
                 <button
+                    ref={buttonRef}
                     onClick={(e) => toggleMenu(e, student.id)}
-                    className="p-1.5 rounded-[4px] hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                    className={`p-1.5 rounded-[4px] transition-colors ${isOpen ? 'bg-slate-200 text-slate-800' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
                 >
                     <MoreVertical size={18} />
                 </button>
 
-                {isOpen && (
-                    <div className="absolute right-0 mt-1 w-56 bg-white shadow-lg border border-[#e2e8f0] z-[100] overflow-hidden">
-                        <div className="px-3 py-2 border-b border-[#e2e8f0] bg-[#f4f6fb]">
-                            <span className="text-[10px] font-bold text-[#8898aa] uppercase tracking-widest block">Actions pour {studentInfo.prenom}</span>
-                        </div>
-
-                        <div className="py-1">
-                            <button
-                                onClick={() => handleCopyEmail(studentInfo.email)}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors"
-                            >
-                                <Copy size={15} className="text-slate-400" />
-                                <span>Copier l'email</span>
-                            </button>
-
-                            <button
-                                onClick={() => handleViewDetails(student.id)}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors"
-                            >
-                                <FileText size={15} className="text-blue-400" />
-                                <span>Voir les détails</span>
-                            </button>
-
-                            <button
-                                onClick={() => {
-                                    handleViewDetails(student.id);
-                                    setTimeout(() => setIsEditing(true), 100);
-                                }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors"
-                            >
-                                <RefreshCw size={15} className="text-indigo-400" />
-                                <span>Modifier l'étudiant</span>
-                            </button>
-
-                            <button
-                                onClick={() => {
-                                    onSelectStudent(student, AdmissionTab.ADMINISTRATIF);
-                                    navigate('/admission');
-                                }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors"
-                            >
-                                <HistoryIcon size={15} className="text-rose-400" />
-                                <span>Voir l'historique</span>
-                            </button>
-
-                            <div className="h-px bg-slate-50 my-1 mx-2" />
-
-                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter pl-3 py-1 block">Documents</span>
-
-                            <button
-                                onClick={() => handleRegenerateDoc(student.id, 'fiche')}
-                                disabled={isRegenerating === `${student.id}-fiche`}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
-                            >
-                                <RefreshCw size={15} className={`text-slate-400 ${isRegenerating === `${student.id}-fiche` ? 'animate-spin' : ''}`} />
-                                <span>Régénérer Fiche Rens.</span>
-                            </button>
-
-                            <button
-                                onClick={() => handleRegenerateDoc(student.id, 'cerfa')}
-                                disabled={isRegenerating === `${student.id}-cerfa`}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
-                            >
-                                <RefreshCw size={15} className={`text-blue-400 ${isRegenerating === `${student.id}-cerfa` ? 'animate-spin' : ''}`} />
-                                <span>Régénérer CERFA</span>
-                            </button>
-
-                            <button
-                                onClick={() => handleRegenerateDoc(student.id, 'convention')}
-                                disabled={isRegenerating === `${student.id}-convention`}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
-                            >
-                                <RefreshCw size={15} className={`text-emerald-400 ${isRegenerating === `${student.id}-convention` ? 'animate-spin' : ''}`} />
-                                <span>Régénérer Convention</span>
-                            </button>
-
-                            <button
-                                onClick={() => handleRegenerateDoc(student.id, 'atre')}
-                                disabled={isRegenerating === `${student.id}-atre`}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
-                            >
-                                <RefreshCw size={15} className={`text-orange-400 ${isRegenerating === `${student.id}-atre` ? 'animate-spin' : ''}`} />
-                                <span>Régénérer ATRE</span>
-                            </button>
-
-                            <button
-                                onClick={() => handleRegenerateDoc(student.id, 'cr')}
-                                disabled={isRegenerating === `${student.id}-cr`}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
-                            >
-                                <RefreshCw size={15} className={`text-pink-400 ${isRegenerating === `${student.id}-cr` ? 'animate-spin' : ''}`} />
-                                <span>Régénérer Compte Rendu</span>
-                            </button>
-
-                            <button
-                                onClick={() => handleRegenerateDoc(student.id, 'livret')}
-                                disabled={isRegenerating === `${student.id}-livret`}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#475569] hover:bg-[#f4f6fb] transition-colors disabled:opacity-50"
-                            >
-                                <RefreshCw size={15} className={`text-purple-400 ${isRegenerating === `${student.id}-livret` ? 'animate-spin' : ''}`} />
-                                <span>Régénérer Livret Appr.</span>
-                            </button>
-
-                            <button
-                                onClick={() => handleRegenerateDoc(student.id, 'certificat')}
-                                disabled={isRegenerating === `${student.id}-certificat`}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-50"
-                            >
-                                <RefreshCw size={15} className={`text-cyan-400 ${isRegenerating === `${student.id}-certificat` ? 'animate-spin' : ''}`} />
-                                <span>Régénérer Certificat Scolarité</span>
-                            </button>
-
-                            <div className="h-px bg-slate-50 my-1 mx-2" />
-
-                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter pl-3 py-1 block">Signatures</span>
-
-                            {studentInfo.cerfa?.id && (
-                                <button
-                                    onClick={() => handleGenerateSigningLink(studentInfo.cerfa.id)}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#7c3aed] hover:bg-[#ede9fe] transition-colors"
-                                >
-                                    <FileSignature size={15} className="text-indigo-400" />
-                                    <span>Signer CERFA</span>
-                                </button>
-                            )}
-
-                            {studentInfo.convention?.id && (
-                                <button
-                                    onClick={() => handleGenerateSigningLink(studentInfo.convention.id)}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#065f46] hover:bg-[#d1fae5] transition-colors"
-                                >
-                                    <FileSignature size={15} className="text-emerald-400" />
-                                    <span>Signer Convention</span>
-                                </button>
-                            )}
-
-                            <div className="h-px bg-slate-50 my-1 mx-2" />
-
-                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter pl-3 py-1 block">Administration</span>
-
-                            <button
-                                onClick={() => handleDeleteCompany(student.id, student.entreprise_raison_sociale || 'Entreprise')}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#b91c1c] hover:bg-[#fee2e2] transition-colors"
-                            >
-                                <Building2 size={15} className="text-rose-400" />
-                                <span>Supprimer entreprise</span>
-                            </button>
-
-                            <button
-                                onClick={() => handleDeleteStudent(student.id, fullName)}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#b91c1c] hover:bg-[#fee2e2] transition-colors"
-                            >
-                                <UserX size={15} className="text-rose-400" />
-                                <span className="font-semibold">Supprimer l'étudiant</span>
-                            </button>
-                        </div>
-                    </div>
-                )}
+                {isOpen && createPortal(menuContent, document.body)}
             </div>
         );
     };
