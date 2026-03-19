@@ -159,27 +159,26 @@ const NirAccordion = () => {
 };
 
 const StepItem = ({ step, label, isActive, isCompleted }: { step: number, label: string, isActive: boolean, isCompleted: boolean }) => (
-    <div className="flex flex-col items-center gap-2.5 relative z-10">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-[13px] transition-all duration-300 ${isCompleted
-            ? 'bg-emerald-500 border-2 border-emerald-500 text-white shadow-md shadow-emerald-200'
+    <div className="flex flex-col items-center gap-2 relative z-10">
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-[12px] transition-all duration-300 ${isCompleted
+            ? 'bg-[#6d28d9] border-2 border-[#6d28d9] text-white shadow-md shadow-[#6d28d9]/30'
             : isActive
-                ? 'bg-[#4c1d95] border-2 border-[#4c1d95] text-white shadow-lg shadow-[#4c1d95]/25 ring-4 ring-[#4c1d95]/15'
-                : 'bg-white border-2 border-slate-200 text-slate-400'
+                ? 'bg-[#6d28d9] border-2 border-[#6d28d9] text-white shadow-lg shadow-[#6d28d9]/30 ring-4 ring-[#6d28d9]/15'
+                : 'bg-white border-2 border-[#e5e0f5] text-[#9ca3af]'
             }`}>
             {isCompleted ? (
-                <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
+                <svg viewBox="0 0 20 20" fill="none" width="13" height="13">
                     <path d="M4 10l4.5 4.5 8-8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
             ) : step}
         </div>
-        <span className={`text-[9px] font-black uppercase tracking-[0.12em] transition-colors duration-300 ${isActive ? 'text-[#4c1d95]' : isCompleted ? 'text-emerald-600' : 'text-slate-400'
-            }`}>{label}</span>
+        <span style={{ fontFamily: "'DM Sans', sans-serif" }} className={`text-[9px] font-bold uppercase tracking-[0.1em] transition-colors duration-300 ${isActive ? 'text-[#6d28d9]' : isCompleted ? 'text-[#6d28d9]' : 'text-[#9ca3af]'}`}>{label}</span>
     </div>
 );
 
 const StepLine = ({ isCompleted }: { isCompleted: boolean }) => (
-    <div className="relative w-12 h-[2px] mx-1 mb-[34px] rounded-full overflow-hidden bg-slate-200">
-        <div className={`absolute inset-y-0 left-0 rounded-full bg-emerald-400 transition-all duration-500 ${isCompleted ? 'w-full' : 'w-0'}`} />
+    <div className="relative flex-1 h-[2px] mx-2 mb-[34px] rounded-full overflow-hidden bg-[#e5e0f5]">
+        <div className={`absolute inset-y-0 left-0 rounded-full bg-[#6d28d9] transition-all duration-500 ${isCompleted ? 'w-full' : 'w-0'}`} />
     </div>
 );
 
@@ -1807,67 +1806,82 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
     const progressPercent = (uploadedCount / REQUIRED_DOCUMENTS.length) * 100;
 
     return (
-        <div className="animate-fade-in max-w-6xl mx-auto pb-20 relative">
+        <div className="animate-fade-in max-w-6xl mx-auto pb-20 relative" style={{ fontFamily: "'DM Sans', sans-serif" }}>
             <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
 
             {mainTab === 'dashboard' && !isCommercial && (
                 <>
-                    <div className="rounded-[8px] p-10 mb-6 overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #3b0764 0%, #4c1d95 45%, #5b21b6 100%)' }}>
-                        {/* Decorative circles */}
-                        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #a78bfa, transparent)' }}></div>
-                        <div className="absolute right-32 bottom-0 w-40 h-40 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #818cf8, transparent)' }}></div>
+                    {/* ── HERO BANNER ── */}
+                    <div className="rounded-2xl mb-6 overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%)', minHeight: 148 }}>
+                        {/* noise grain overlay */}
+                        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }}></div>
+                        {/* mesh blobs */}
+                        <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #a78bfa, transparent 70%)' }}></div>
+                        <div className="absolute right-40 -bottom-8 w-36 h-36 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #c4b5fd, transparent 70%)' }}></div>
+                        <div className="absolute left-1/2 bottom-0 w-80 h-20 opacity-10" style={{ background: 'radial-gradient(ellipse, #8b5cf6, transparent 80%)' }}></div>
 
-                        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-10 py-9">
                             <div className="flex-1">
-                                <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-1.5 rounded-[4px] text-xs font-black uppercase tracking-widest text-white/80 mb-5">
-                                    <Briefcase size={12} /> Processus d'admission
+                                <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-1 rounded-lg mb-4" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                                    <Briefcase size={11} className="text-white/70" />
+                                    <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/80">Processus d'admission</span>
                                 </div>
-                                <h1 className="text-3xl md:text-4xl font-black mb-3 tracking-tight text-white">Admission Rush School</h1>
-                                <p className="text-white/60 text-base leading-relaxed font-medium">Complétez votre dossier d'admission : tests, documents et formalités administratives.</p>
+                                <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="text-[28px] font-extrabold mb-2 tracking-tight text-white leading-tight">Admission Rush School</h1>
+                                <p style={{ fontFamily: "'DM Sans', sans-serif" }} className="text-white/65 text-[14px] leading-relaxed font-medium">Complétez votre dossier d'admission : tests, documents et formalités administratives.</p>
                             </div>
                             <div className="shrink-0">
-                                <div className="w-16 h-16 rounded-[8px] bg-white/10 border border-white/20 flex items-center justify-center text-white">
-                                    <CheckCircle2 size={32} strokeWidth={1.5} />
+                                <div className="w-14 h-14 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white" style={{ boxShadow: '0 0 24px rgba(167,139,250,0.25)' }}>
+                                    <CheckCircle2 size={28} strokeWidth={1.5} />
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-[8px] px-10 py-7 mb-8 flex items-center justify-center shadow-sm">
-                        <div className="flex items-center w-full justify-between">
-                            <StepItem step={1} label="Tests" isActive={activeTab === AdmissionTab.TESTS} isCompleted={testCompleted} />
-                            <StepLine isCompleted={testCompleted} />
-                            <StepItem step={2} label="Entretien" isActive={activeTab === AdmissionTab.ENTRETIEN} isCompleted={interviewCompleted} />
-                            <StepLine isCompleted={interviewCompleted} />
-                            <StepItem step={3} label="Projet Pro" isActive={activeTab === AdmissionTab.PROJET_PROFESSIONNEL} isCompleted={projetProCompleted} />
-                            <StepLine isCompleted={projetProCompleted} />
-                            <StepItem step={4} label="Étudiant" isActive={activeTab === AdmissionTab.QUESTIONNAIRE} isCompleted={!!studentData} />
-                            <StepLine isCompleted={!!studentData} />
-                            <StepItem step={5} label="Documents" isActive={activeTab === AdmissionTab.DOCUMENTS} isCompleted={uploadedCount >= REQUIRED_DOCUMENTS.length} />
-                            <StepLine isCompleted={uploadedCount >= REQUIRED_DOCUMENTS.length} />
-                            <StepItem step={6} label="Entreprise" isActive={activeTab === AdmissionTab.ENTREPRISE} isCompleted={entrepriseCompleted} />
-                            <StepLine isCompleted={entrepriseCompleted} />
-                            <StepItem step={7} label="Admin" isActive={activeTab === AdmissionTab.ADMINISTRATIF} isCompleted={adminCompleted} />
+                    {/* ── STEPPER ── */}
+                    <div className="bg-white border border-[#e5e0f5] rounded-2xl px-8 py-5 mb-6 shadow-sm">
+                        <div className="flex items-center w-full">
+                            {[
+                                { step: 1, label: 'Tests', tab: AdmissionTab.TESTS, completed: testCompleted },
+                                { step: 2, label: 'Entretien', tab: AdmissionTab.ENTRETIEN, completed: interviewCompleted },
+                                { step: 3, label: 'Projet Pro', tab: AdmissionTab.PROJET_PROFESSIONNEL, completed: projetProCompleted },
+                                { step: 4, label: 'Étudiant', tab: AdmissionTab.QUESTIONNAIRE, completed: !!studentData },
+                                { step: 5, label: 'Documents', tab: AdmissionTab.DOCUMENTS, completed: uploadedCount >= REQUIRED_DOCUMENTS.length },
+                                { step: 6, label: 'Entreprise', tab: AdmissionTab.ENTREPRISE, completed: entrepriseCompleted },
+                                { step: 7, label: 'Admin', tab: AdmissionTab.ADMINISTRATIF, completed: adminCompleted },
+                            ].map((s, i, arr) => (
+                                <React.Fragment key={s.step}>
+                                    <button
+                                        onClick={() => (s.completed || activeTab === s.tab) ? setActiveTab(s.tab) : undefined}
+                                        style={{ cursor: s.completed || activeTab === s.tab ? 'pointer' : 'default' }}
+                                        className="transition-transform duration-200 hover:scale-105"
+                                        title={s.label}
+                                    >
+                                        <StepItem step={s.step} label={s.label} isActive={activeTab === s.tab} isCompleted={s.completed} />
+                                    </button>
+                                    {i < arr.length - 1 && <StepLine isCompleted={s.completed} />}
+                                </React.Fragment>
+                            ))}
                         </div>
                     </div>
                 </>
             )}
 
-            <div ref={pageTopRef} className="flex gap-0 mb-8 border-b border-slate-300 w-fit">
-                <button
-                    onClick={() => handleMainTabChange('dashboard')}
-                    className={`relative flex items-center gap-2 px-5 py-3 text-sm font-black uppercase tracking-widest transition-all ${mainTab === 'dashboard' ? 'text-[#4c1d95]' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                    Tableau de bord
-                    {mainTab === 'dashboard' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4c1d95]"></span>}
-                </button>
-                <button
-                    onClick={() => handleMainTabChange('interviews')}
-                    className={`relative flex items-center gap-2 px-5 py-3 text-sm font-black uppercase tracking-widest transition-all ${mainTab === 'interviews' ? 'text-[#4c1d95]' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                    Suivi Entretiens
-                    {mainTab === 'interviews' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4c1d95]"></span>}
-                </button>
+            {/* ── MAIN TABS ── */}
+            <div ref={pageTopRef} className="flex gap-0 mb-6 border-b border-[#e5e0f5] w-fit">
+                {[
+                    { id: 'dashboard', label: 'Tableau de bord' },
+                    { id: 'interviews', label: 'Suivi Entretiens' },
+                ].map(t => (
+                    <button
+                        key={t.id}
+                        onClick={() => handleMainTabChange(t.id as any)}
+                        style={{ fontFamily: "'DM Sans', sans-serif" }}
+                        className={`relative px-5 py-3 text-[13px] font-semibold transition-all duration-200 ${mainTab === t.id ? 'text-[#6d28d9]' : 'text-[#9ca3af] hover:text-[#6d28d9]'}`}
+                    >
+                        {t.label}
+                        {mainTab === t.id && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6d28d9] rounded-t-full"></span>}
+                    </button>
+                ))}
             </div>
 
             <div key={mainTabAnimKey} className="admission-rise">
@@ -1881,7 +1895,8 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                     />
                 ) : (
                     <>
-                        <div className="grid grid-cols-7 mb-10 border-2 border-slate-300 rounded-[4px] divide-x-2 divide-slate-300">
+                        {/* ── PILLS NAV ── */}
+                        <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-1 scrollbar-hide">
                             {[
                                 { id: AdmissionTab.TESTS, label: 'Tests', icon: PenTool },
                                 { id: AdmissionTab.ENTRETIEN, label: 'Entretien', icon: UserCheck },
@@ -1894,13 +1909,14 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as AdmissionTab)}
-                                    className={`flex flex-col items-center justify-center gap-1.5 py-3.5 px-2 text-[10px] font-black uppercase tracking-wider transition-all ${activeTab === tab.id
-                                        ? 'bg-[#ede9fe] text-[#4c1d95]'
-                                        : 'bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                                    style={{ fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap' }}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 border ${activeTab === tab.id
+                                        ? 'bg-[#f5f3ff] text-[#6d28d9] border-[#6d28d9]/20 shadow-sm'
+                                        : 'bg-transparent text-[#6b7280] border-transparent hover:bg-[#f5f3ff]/60 hover:text-[#6d28d9]'
                                         }`}
                                 >
-                                    <tab.icon size={15} strokeWidth={activeTab === tab.id ? 3 : 2} />
-                                    <span className="leading-tight text-center">{tab.label}</span>
+                                    <tab.icon size={13} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
+                                    {tab.label}
                                 </button>
                             ))}
                         </div>
@@ -1932,25 +1948,32 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                                     </div>
                                 )}
 
-                                <div className="bg-white border border-slate-300 rounded-[4px] p-8">
-                                    <h3 className="text-xl font-black text-slate-800 mb-2 flex items-center gap-3">
-                                        <GraduationCap className="text-[#4c1d95]" /> Sélectionnez votre formation
+                                <div className="bg-white border border-[#e5e0f5] rounded-2xl p-8">
+                                    <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="text-[18px] font-bold text-[#1e1b2e] mb-1 flex items-center gap-3">
+                                        <GraduationCap className="text-[#6d28d9]" /> Sélectionnez votre formation
                                     </h3>
-                                    <p className="text-slate-500 mb-8 ml-9 font-medium">Choisissez la formation pour accéder au test.</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                                    <p className="text-[13px] text-[#6b7280] mb-7 ml-9">Choisissez la formation pour accéder au test.</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         {[
-                                            { id: 'mco', title: 'BTS MCO', subtitle: 'Management Commercial Opérationnel', iconBg: '#dbeafe', iconColor: '#1d4ed8', duration: '~20 min' },
-                                            { id: 'ndrc', title: 'BTS NDRC', subtitle: 'Négociation et Digitalisation de la Relation Client', iconBg: '#d1fae5', iconColor: '#065f46', duration: '~20 min' },
-                                            { id: 'bachelor', title: 'BACHELOR RDC', subtitle: 'Responsable Développement Commercial', iconBg: '#ede9fe', iconColor: '#4c1d95', duration: '~25 min' },
-                                            { id: 'tpntc', title: 'TP NTC', subtitle: 'Titre Pro Négociateur Technico-Commercial', iconBg: '#ffedd5', iconColor: '#9a3412', duration: '~20 min' },
-                                        ].map(f => (
-                                            <div key={f.id} onClick={() => navigate(`/test?formation=${f.id}`)} className="bg-white border border-slate-300 rounded-[4px] p-6 text-center cursor-pointer hover:border-[#4c1d95] hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
-                                                <div className="w-14 h-14 rounded-[4px] mx-auto mb-5 flex items-center justify-center transition-all duration-300 group-hover:scale-105" style={{ background: f.iconBg }}>
-                                                    <GraduationCap size={26} style={{ color: f.iconColor }} />
+                                            { id: 'mco', title: 'BTS MCO', subtitle: 'Management Commercial Opérationnel', iconBg: '#f5f3ff', iconColor: '#6d28d9', duration: '~20 min' },
+                                            { id: 'ndrc', title: 'BTS NDRC', subtitle: 'Négociation et Digitalisation de la Relation Client', iconBg: '#f5f3ff', iconColor: '#6d28d9', duration: '~20 min' },
+                                            { id: 'bachelor', title: 'BACHELOR RDC', subtitle: 'Responsable Développement Commercial', iconBg: '#f5f3ff', iconColor: '#6d28d9', duration: '~25 min' },
+                                            { id: 'tpntc', title: 'TP NTC', subtitle: 'Titre Pro Négociateur Technico-Commercial', iconBg: '#f5f3ff', iconColor: '#6d28d9', duration: '~20 min' },
+                                        ].map((f, idx) => (
+                                            <div
+                                                key={f.id}
+                                                onClick={() => navigate(`/test?formation=${f.id}`)}
+                                                style={{ animationDelay: `${idx * 50}ms`, fontFamily: "'DM Sans', sans-serif" }}
+                                                className="bg-white border border-[#e5e0f5] rounded-xl p-6 text-center cursor-pointer hover:border-[#6d28d9] hover:-translate-y-1 hover:shadow-lg transition-all duration-200 group admission-rise"
+                                                onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 0 0 3px rgba(109,40,217,0.08), 0 8px 24px rgba(109,40,217,0.1)')}
+                                                onMouseLeave={e => (e.currentTarget.style.boxShadow = '')}
+                                            >
+                                                <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center transition-all duration-300 group-hover:scale-110" style={{ background: f.iconBg }}>
+                                                    <GraduationCap size={22} style={{ color: f.iconColor }} />
                                                 </div>
-                                                <h4 className="font-black text-[#1e293b] text-base mb-1 tracking-tight">{f.title}</h4>
-                                                <p className="text-[10px] text-slate-400 font-medium mb-5 italic leading-relaxed h-8 overflow-hidden">{f.subtitle}</p>
-                                                <span className="inline-block px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-widest text-slate-400 border border-slate-200 bg-slate-50 group-hover:border-[#4c1d95] group-hover:text-[#4c1d95] group-hover:bg-[#f5f3ff] transition-colors">{f.duration}</span>
+                                                <h4 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="font-bold text-[#1e1b2e] text-[15px] mb-1">{f.title}</h4>
+                                                <p className="text-[11px] text-[#6b7280] mb-4 leading-relaxed h-8 overflow-hidden">{f.subtitle}</p>
+                                                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6b7280] border border-[#e5e0f5] bg-[#faf9ff] group-hover:border-[#6d28d9]/30 group-hover:text-[#6d28d9] group-hover:bg-[#f5f3ff] transition-colors">{f.duration}</span>
                                             </div>
                                         ))}
                                     </div>
