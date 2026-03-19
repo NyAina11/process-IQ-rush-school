@@ -49,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
             {moduleTitle}
           </h1>
           <span className="text-[11px] font-semibold uppercase tracking-widest text-[#9333ea] mt-0.5" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-            Rush School Portal
+            Rush School
           </span>
         </div>
       </div>
