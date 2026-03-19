@@ -45,10 +45,6 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-500">
             {moduleTitle}
           </h1>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="w-1 h-1 rounded-full bg-brand"></span>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Rush School Portal</p>
-          </div>
         </div>
       </div>
 
