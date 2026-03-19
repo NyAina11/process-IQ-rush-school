@@ -1806,7 +1806,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
     const progressPercent = (uploadedCount / REQUIRED_DOCUMENTS.length) * 100;
 
     return (
-        <div className="animate-fade-in max-w-6xl mx-auto pb-20 relative" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+        <div className="animate-fade-in max-w-6xl mx-auto pb-20 relative" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
 
             {mainTab === 'dashboard' && !isCommercial && (
@@ -1895,7 +1895,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                     />
                 ) : (
                     <>
-                        {/* ── PILLS NAV ── */}
+                        {/* ── TABS NAV ── */}
                         <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-1 scrollbar-hide">
                             {[
                                 { id: AdmissionTab.TESTS, label: 'Tests', icon: PenTool },
@@ -1909,13 +1909,13 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as AdmissionTab)}
-                                    style={{ fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap' }}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 border ${activeTab === tab.id
-                                        ? 'bg-[#f5f3ff] text-[#6d28d9] border-[#6d28d9]/20 shadow-sm'
-                                        : 'bg-transparent text-[#6b7280] border-transparent hover:bg-[#f5f3ff]/60 hover:text-[#6d28d9]'
+                                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", whiteSpace: 'nowrap' }}
+                                    className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-[13px] font-semibold transition-all duration-200 border ${activeTab === tab.id
+                                        ? 'bg-white text-[#6d28d9] border-[#e5e0f5] shadow-md shadow-[#6d28d9]/10'
+                                        : 'bg-transparent text-[#6b7280] border-transparent hover:bg-white hover:text-[#6d28d9] hover:border-[#e5e0f5] hover:shadow-sm'
                                         }`}
                                 >
-                                    <tab.icon size={13} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
+                                    <tab.icon size={15} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
                                     {tab.label}
                                 </button>
                             ))}
