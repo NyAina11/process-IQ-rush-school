@@ -31,70 +31,69 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     return 'Tableau de bord';
   }, [location.pathname]);
 
+  const userRole = localStorage.getItem('userRole') || 'Guest';
+  const initials = userRole.slice(0, 2).toUpperCase();
+
   return (
-    <header className="h-[72px] bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-30 px-8 flex items-center justify-between transition-all duration-300">
-      <div className="flex items-center gap-6">
+    <header className="h-16 bg-white border-b border-[#e5e0f5] sticky top-0 z-30 px-6 flex items-center justify-between">
+      <div className="flex items-center gap-4">
         <button
           onClick={toggleSidebar}
-          className="p-2.5 text-slate-500 hover:bg-slate-100/80 rounded-[4px] transition-all active:scale-95 md:hidden"
+          className="p-2 text-[#6d28d9] hover:bg-[#f5f3ff] rounded-md transition-all active:scale-95 md:hidden"
         >
           <Menu size={20} />
         </button>
 
         <div className="flex flex-col">
-          <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-500">
+          <h1 className="text-2xl font-bold text-[#1e1b2e] leading-none" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             {moduleTitle}
           </h1>
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-[#9333ea] mt-0.5" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+            Rush School Portal
+          </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-5">
-
-
-        <div className="flex items-center gap-2">
-          <div className="relative" ref={notifRef}>
-            <button
-              onClick={() => setNotifOpen(v => !v)}
-              className="relative w-11 h-11 rounded-[4px] flex items-center justify-center text-slate-500 hover:bg-slate-100/80 hover:text-indigo-600 transition-all active:scale-95"
-            >
-              <Bell size={20} />
-            </button>
-            {notifOpen && (
-              <div className="absolute right-0 top-14 w-72 bg-white border border-[#e2e8f0] rounded-[8px] shadow-xl z-50">
-                <div className="px-4 py-3 border-b border-[#e2e8f0]">
-                  <span className="text-xs font-black text-slate-700 uppercase tracking-widest">Notifications</span>
-                </div>
-                <div className="flex flex-col items-center justify-center py-10 gap-3 text-slate-400">
-                  <BellOff size={28} strokeWidth={1.5} />
-                  <span className="text-sm font-bold">Aucune notification</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="h-6 w-px bg-slate-200 mx-1"></div>
-
-          <button className="flex items-center gap-2.5 px-3 py-2 rounded-[4px] text-slate-600 hover:bg-slate-100/80 transition-all active:scale-95 group">
-            <div className="w-6 h-6 rounded-[4px] bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-              <Globe size={14} />
-            </div>
-            <span className="text-xs font-bold tracking-wider">FR</span>
+      <div className="flex items-center gap-2" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+        <div className="relative" ref={notifRef}>
+          <button
+            onClick={() => setNotifOpen(v => !v)}
+            className="relative w-9 h-9 rounded-lg flex items-center justify-center text-[#6d28d9] hover:bg-[#f5f3ff] transition-all active:scale-95"
+          >
+            <Bell size={18} />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#9333ea]"></span>
           </button>
-
-          <div className="flex items-center gap-3 pl-2 cursor-pointer group">
-            <div className="flex flex-col items-end hidden sm:flex">
-              <span className="text-sm font-black text-slate-800 leading-none group-hover:text-indigo-600 transition-colors uppercase italic tracking-tighter">
-                {localStorage.getItem('userRole') || 'Guest'}
-              </span>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Utilisateur</span>
-            </div>
-            <div className="w-11 h-11 rounded-[4px] bg-gradient-to-br from-indigo-500 to-violet-600 p-0.5 shadow-lg shadow-indigo-200 group-hover:shadow-indigo-300 transition-all active:scale-95">
-              <div className="w-full h-full rounded-[4px] bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22" aria-hidden="true">
-                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-                </svg>
+          {notifOpen && (
+            <div className="absolute right-0 top-12 w-72 bg-white border border-[#e5e0f5] rounded-xl shadow-xl z-50">
+              <div className="px-4 py-3 border-b border-[#e5e0f5]">
+                <span className="text-xs font-semibold text-[#1e1b2e] uppercase tracking-widest">Notifications</span>
+              </div>
+              <div className="flex flex-col items-center justify-center py-10 gap-3 text-[#9ca3af]">
+                <BellOff size={28} strokeWidth={1.5} />
+                <span className="text-sm font-medium">Aucune notification</span>
               </div>
             </div>
+          )}
+        </div>
+
+        <div className="h-5 w-px bg-[#e5e0f5] mx-1"></div>
+
+        <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[#4b5563] hover:bg-[#f5f3ff] hover:text-[#6d28d9] transition-all active:scale-95">
+          <Globe size={14} />
+          <span className="text-xs font-semibold tracking-wider">FR</span>
+        </button>
+
+        <div className="h-5 w-px bg-[#e5e0f5] mx-1"></div>
+
+        <div className="flex items-center gap-2.5 pl-1 cursor-pointer group">
+          <div className="hidden sm:flex flex-col items-end">
+            <span className="text-sm font-semibold text-[#1e1b2e] leading-none group-hover:text-[#6d28d9] transition-colors">
+              {userRole}
+            </span>
+            <span className="text-[10px] text-[#9ca3af] font-medium uppercase tracking-wider mt-0.5">Utilisateur</span>
+          </div>
+          <div className="w-9 h-9 rounded-lg bg-[#6d28d9] flex items-center justify-center text-white font-bold text-sm shadow-md shadow-[#6d28d9]/20 group-hover:shadow-[#6d28d9]/40 transition-all active:scale-95">
+            {initials}
           </div>
         </div>
       </div>
