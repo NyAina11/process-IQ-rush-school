@@ -1955,25 +1955,27 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                                     <p className="text-[13px] text-[#6b7280] mb-7 ml-9">Choisissez la formation pour accéder au test.</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         {[
-                                            { id: 'mco', title: 'BTS MCO', subtitle: 'Management Commercial Opérationnel', iconBg: '#f5f3ff', iconColor: '#6d28d9', duration: '~20 min' },
-                                            { id: 'ndrc', title: 'BTS NDRC', subtitle: 'Négociation et Digitalisation de la Relation Client', iconBg: '#f5f3ff', iconColor: '#6d28d9', duration: '~20 min' },
-                                            { id: 'bachelor', title: 'BACHELOR RDC', subtitle: 'Responsable Développement Commercial', iconBg: '#f5f3ff', iconColor: '#6d28d9', duration: '~25 min' },
-                                            { id: 'tpntc', title: 'TP NTC', subtitle: 'Titre Pro Négociateur Technico-Commercial', iconBg: '#f5f3ff', iconColor: '#6d28d9', duration: '~20 min' },
+                                            { id: 'mco',     title: 'BTS MCO',      subtitle: 'Management Commercial Opérationnel',               duration: '~20 min', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)', shadow: 'rgba(37,99,235,0.25)' },
+                                            { id: 'ndrc',    title: 'BTS NDRC',     subtitle: 'Négociation et Digitalisation de la Relation Client', duration: '~20 min', gradient: 'linear-gradient(135deg, #10b981, #059669)', shadow: 'rgba(5,150,105,0.25)' },
+                                            { id: 'bachelor',title: 'BACHELOR RDC', subtitle: 'Responsable Développement Commercial',                duration: '~25 min', gradient: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', shadow: 'rgba(109,40,217,0.25)' },
+                                            { id: 'tpntc',   title: 'TP NTC',       subtitle: 'Titre Pro Négociateur Technico-Commercial',           duration: '~20 min', gradient: 'linear-gradient(135deg, #f97316, #ea580c)', shadow: 'rgba(234,88,12,0.25)' },
                                         ].map((f, idx) => (
                                             <div
                                                 key={f.id}
                                                 onClick={() => navigate(`/test?formation=${f.id}`)}
-                                                style={{ animationDelay: `${idx * 50}ms`, fontFamily: "'DM Sans', sans-serif" }}
-                                                className="bg-white border border-[#e5e0f5] rounded-xl p-6 text-center cursor-pointer hover:border-[#6d28d9] hover:-translate-y-1 hover:shadow-lg transition-all duration-200 group admission-rise"
-                                                onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 0 0 3px rgba(109,40,217,0.08), 0 8px 24px rgba(109,40,217,0.1)')}
-                                                onMouseLeave={e => (e.currentTarget.style.boxShadow = '')}
+                                                style={{ animationDelay: `${idx * 60}ms`, fontFamily: "'DM Sans', sans-serif" }}
+                                                className="bg-white border border-[#e5e0f5] rounded-2xl p-6 text-center cursor-pointer hover:-translate-y-1 transition-all duration-200 group admission-rise overflow-hidden relative"
+                                                onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 32px ${f.shadow}, 0 0 0 2px rgba(0,0,0,0.04)`; e.currentTarget.style.borderColor = 'transparent'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.borderColor = ''; }}
                                             >
-                                                <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center transition-all duration-300 group-hover:scale-110" style={{ background: f.iconBg }}>
-                                                    <GraduationCap size={22} style={{ color: f.iconColor }} />
+                                                {/* top color bar */}
+                                                <div className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl" style={{ background: f.gradient }} />
+                                                <div className="w-14 h-14 rounded-2xl mx-auto mt-3 mb-4 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" style={{ background: f.gradient, boxShadow: `0 8px 20px ${f.shadow}` }}>
+                                                    <GraduationCap size={24} color="white" strokeWidth={2} />
                                                 </div>
-                                                <h4 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="font-bold text-[#1e1b2e] text-[15px] mb-1">{f.title}</h4>
-                                                <p className="text-[11px] text-[#6b7280] mb-4 leading-relaxed h-8 overflow-hidden">{f.subtitle}</p>
-                                                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6b7280] border border-[#e5e0f5] bg-[#faf9ff] group-hover:border-[#6d28d9]/30 group-hover:text-[#6d28d9] group-hover:bg-[#f5f3ff] transition-colors">{f.duration}</span>
+                                                <h4 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="font-extrabold text-[#1e1b2e] text-[15px] mb-1 tracking-tight">{f.title}</h4>
+                                                <p className="text-[11px] text-[#6b7280] mb-5 leading-relaxed">{f.subtitle}</p>
+                                                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6b7280] border border-[#e5e0f5] bg-[#f8f7ff] group-hover:bg-white transition-colors">{f.duration}</span>
                                             </div>
                                         ))}
                                     </div>
