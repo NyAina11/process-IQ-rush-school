@@ -161,10 +161,10 @@ const NirAccordion = () => {
 const StepItem = ({ step, label, isActive, isCompleted }: { step: number, label: string, isActive: boolean, isCompleted: boolean }) => (
     <div className="flex flex-col items-center gap-2.5 relative z-10">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-[13px] transition-all duration-300 ${isCompleted
-                ? 'bg-emerald-500 border-2 border-emerald-500 text-white shadow-md shadow-emerald-200'
-                : isActive
-                    ? 'bg-[#4c1d95] border-2 border-[#4c1d95] text-white shadow-lg shadow-[#4c1d95]/25 ring-4 ring-[#4c1d95]/15'
-                    : 'bg-white border-2 border-slate-200 text-slate-400'
+            ? 'bg-emerald-500 border-2 border-emerald-500 text-white shadow-md shadow-emerald-200'
+            : isActive
+                ? 'bg-[#4c1d95] border-2 border-[#4c1d95] text-white shadow-lg shadow-[#4c1d95]/25 ring-4 ring-[#4c1d95]/15'
+                : 'bg-white border-2 border-slate-200 text-slate-400'
             }`}>
             {isCompleted ? (
                 <svg viewBox="0 0 20 20" fill="none" width="14" height="14">
@@ -907,15 +907,97 @@ const _FaceExcellent = () => (
     </svg>
 );
 
+// --- PROJET PROFESSIONNEL HELPER COMPONENTS ---
+
+const SectionHeader = ({ icon, num, title }: { icon: React.ReactNode; num: number; title: string }) => (
+    <div className="flex items-center gap-3 mb-7 pb-5 border-b-2 border-[#6B3CD2]/10">
+        <div className="w-10 h-10 rounded-[4px] bg-[#6B3CD2]/10 text-[#6B3CD2] flex items-center justify-center flex-shrink-0">{icon}</div>
+        <div>
+            <span className="text-[10px] font-black text-[#6B3CD2] uppercase tracking-widest">Partie {num}</span>
+            <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-tight mt-0.5">{title}</h3>
+        </div>
+    </div>
+);
+
+const CheckItem = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) => (
+    <label className="flex items-start gap-2.5 cursor-pointer group select-none">
+        <div
+            onClick={(e) => {
+                e.preventDefault();
+                onChange();
+            }}
+            className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${checked ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/50'
+                }`}
+        >
+            {checked && (
+                <svg viewBox="0 0 10 10" fill="none" width="8" height="8">
+                    <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            )}
+        </div>
+        <span className="text-[12px] font-medium text-slate-700 group-hover:text-slate-900 transition-colors leading-relaxed">{label}</span>
+    </label>
+);
+
+const RatingRow = ({ label, id, currentRating, onRate }: { label: string; id: string; currentRating: number; onRate: (id: string, val: number) => void }) => (
+    <tr className="border-b border-slate-100 hover:bg-slate-50/60 transition-colors">
+        <td className="py-3 pr-4 text-[12px] font-medium text-slate-700">{label}</td>
+        {[1, 2, 3, 4, 5].map(v => (
+            <td key={v} className="text-center py-3 px-1.5">
+                <button
+                    onClick={() => onRate(id, v)}
+                    className={`w-7 h-7 rounded-full border-2 text-[11px] font-black mx-auto flex items-center justify-center transition-all ${currentRating === v
+                        ? 'bg-[#6B3CD2] border-[#6B3CD2] text-white shadow-md shadow-[#6B3CD2]/20'
+                        : 'border-slate-200 text-slate-400 hover:border-[#6B3CD2]/40 hover:text-[#6B3CD2]'
+                        }`}
+                >{v}</button>
+            </td>
+        ))}
+    </tr>
+);
+
+const RatingTable = ({ title, items, ratings, onRate }: { title: string; items: { label: string; id: string }[]; ratings: Record<string, number>; onRate: (id: string, val: number) => void }) => (
+    <div className="mb-6">
+        <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3">{title}</p>
+        <div className="border border-slate-200 rounded-[4px] overflow-hidden">
+            <table className="w-full">
+                <thead>
+                    <tr className="bg-[#6B3CD2]/10 border-b border-[#6B3CD2]/20">
+                        <th className="text-left py-2.5 px-3 text-[10px] font-black text-[#6B3CD2] uppercase tracking-widest"></th>
+                        {[1, 2, 3, 4, 5].map(v => (
+                            <th key={v} className="text-center py-2.5 px-1.5 text-[11px] font-black text-[#6B3CD2] w-12">{v}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                    {items.map(item => <RatingRow key={item.id} label={item.label} id={item.id} currentRating={ratings[item.id] || 0} onRate={onRate} />)}
+                </tbody>
+            </table>
+        </div>
+    </div>
+);
+
+const TextareaField = ({ id, value, onChange, placeholder, rows = 3 }: { id: string; value: string; onChange: (id: string, val: string) => void; placeholder?: string; rows?: number }) => (
+    <textarea
+        value={value}
+        onChange={e => onChange(id, e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        className="w-full border border-slate-200 rounded-[4px] px-3 py-2.5 text-[12px] font-medium text-slate-800 placeholder-slate-300 focus:outline-none focus:border-[#6B3CD2]/50 focus:ring-2 focus:ring-[#6B3CD2]/10 resize-none transition-all"
+    />
+);
+
 const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNext?: () => void }) => {
+    const { showToast } = useAppStore();
     const [qualites, setQualites] = useState<Set<string>>(new Set());
     const [axes, setAxes] = useState<Set<string>>(new Set());
     const [structures, setStructures] = useState<Set<string>>(new Set());
     const [timeline, setTimeline] = useState('');
     const [ratings, setRatings] = useState<Record<string, number>>({});
     const [motivation, setMotivation] = useState<number | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [texts, setTexts] = useState<Record<string, string>>({
-        nom: '', formation: '', entreprise: '', date: '', annee: '',
+        nom: '', email: '', formation: '', entreprise: '', date: '', annee: '',
         autresQualites: '', metier: '', pourquoi: '', specsAlternance: '',
         obj1: '', obj2: '', obj3: '', obstacles: '', actions: '',
         apport: '', succes: '', envie: '',
@@ -925,10 +1007,12 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
         if (studentData) {
             const d = studentData.data || studentData;
             const nom = `${(d.nom_naissance || d.nom || '').toUpperCase()} ${d.prenom || ''}`.trim();
+            const email = d.email || d.fields?.email || d.fields?.['E-mail'] || d.informations_personnelles?.email || '';
             setTexts(prev => ({
                 ...prev,
                 nom,
-                formation: d.formation_souhaitee || '',
+                email,
+                formation: d.formation_souhaitee || d.formation || '',
                 date: new Date().toLocaleDateString('fr-FR'),
             }));
         }
@@ -939,83 +1023,8 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
         n.has(val) ? n.delete(val) : n.add(val);
         setFn(n);
     };
-    const setRating = (key: string, val: number) => setRatings(prev => ({ ...prev, [key]: val }));
-    const setText = (key: string, val: string) => setTexts(prev => ({ ...prev, [key]: val }));
-
-    const SectionHeader = ({ icon, num, title }: { icon: React.ReactNode; num: number; title: string }) => (
-        <div className="flex items-center gap-3 mb-7 pb-5 border-b-2 border-[#6B3CD2]/10">
-            <div className="w-10 h-10 rounded-[4px] bg-[#6B3CD2]/10 text-[#6B3CD2] flex items-center justify-center flex-shrink-0">{icon}</div>
-            <div>
-                <span className="text-[10px] font-black text-[#6B3CD2] uppercase tracking-widest">Partie {num}</span>
-                <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-tight mt-0.5">{title}</h3>
-            </div>
-        </div>
-    );
-
-    const CheckItem = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) => (
-        <label className="flex items-start gap-2.5 cursor-pointer group select-none">
-            <div
-                onClick={onChange}
-                className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${checked ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/50'
-                    }`}
-            >
-                {checked && (
-                    <svg viewBox="0 0 10 10" fill="none" width="8" height="8">
-                        <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                )}
-            </div>
-            <span className="text-[12px] font-medium text-slate-700 group-hover:text-slate-900 transition-colors leading-relaxed">{label}</span>
-        </label>
-    );
-
-    const RatingRow = ({ label, id }: { label: string; id: string; key?: string | number }) => (
-        <tr className="border-b border-slate-100 hover:bg-slate-50/60 transition-colors">
-            <td className="py-3 pr-4 text-[12px] font-medium text-slate-700">{label}</td>
-            {[1, 2, 3, 4, 5].map(v => (
-                <td key={v} className="text-center py-3 px-1.5">
-                    <button
-                        onClick={() => setRating(id, v)}
-                        className={`w-7 h-7 rounded-full border-2 text-[11px] font-black mx-auto flex items-center justify-center transition-all ${ratings[id] === v
-                                ? 'bg-[#6B3CD2] border-[#6B3CD2] text-white shadow-md shadow-[#6B3CD2]/20'
-                                : 'border-slate-200 text-slate-400 hover:border-[#6B3CD2]/40 hover:text-[#6B3CD2]'
-                            }`}
-                    >{v}</button>
-                </td>
-            ))}
-        </tr>
-    );
-
-    const RatingTable = ({ title, items }: { title: string; items: { label: string; id: string }[] }) => (
-        <div className="mb-6">
-            <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3">{title}</p>
-            <div className="border border-slate-200 rounded-[4px] overflow-hidden">
-                <table className="w-full">
-                    <thead>
-                        <tr className="bg-[#6B3CD2]/10 border-b border-[#6B3CD2]/20">
-                            <th className="text-left py-2.5 px-3 text-[10px] font-black text-[#6B3CD2] uppercase tracking-widest"></th>
-                            {[1, 2, 3, 4, 5].map(v => (
-                                <th key={v} className="text-center py-2.5 px-1.5 text-[11px] font-black text-[#6B3CD2] w-12">{v}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {items.map(item => <RatingRow key={item.id} label={item.label} id={item.id} />)}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
-
-    const TextareaField = ({ id, placeholder, rows = 3 }: { id: string; placeholder?: string; rows?: number }) => (
-        <textarea
-            value={texts[id] || ''}
-            onChange={e => setText(id, e.target.value)}
-            placeholder={placeholder}
-            rows={rows}
-            className="w-full border border-slate-200 rounded-[4px] px-3 py-2.5 text-[12px] font-medium text-slate-800 placeholder-slate-300 focus:outline-none focus:border-[#6B3CD2]/50 focus:ring-2 focus:ring-[#6B3CD2]/10 resize-none transition-all"
-        />
-    );
+    const setRating = (id: string, val: number) => setRatings(prev => ({ ...prev, [id]: val }));
+    const setText = (id: string, val: string) => setTexts(prev => ({ ...prev, [id]: val }));
 
     const qualitesList: [string, string][] = [
         ['Rigoureux(se)', 'Leader naturel(le)'],
@@ -1062,9 +1071,268 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
             setTimeline('');
             setRatings({});
             setMotivation(null);
-            setTexts({ nom: '', formation: '', entreprise: '', date: '', annee: '', autresQualites: '', metier: '', pourquoi: '', specsAlternance: '', obj1: '', obj2: '', obj3: '', obstacles: '', actions: '', apport: '', succes: '', envie: '' });
+            setTexts({ nom: '', email: '', formation: '', entreprise: '', date: '', annee: '', autresQualites: '', metier: '', pourquoi: '', specsAlternance: '', obj1: '', obj2: '', obj3: '', obstacles: '', actions: '', apport: '', succes: '', envie: '' });
         }
     };
+
+    const generatePDF = (returnBlob = false): any => {
+        const doc = new jsPDF();
+
+        // ── Palette CV minimaliste ─────────────────────────
+        const INK: [number,number,number]    = [26, 32, 44];
+        const ACCENT: [number,number,number] = [107, 60, 210];
+        const SUB: [number,number,number]    = [80, 96, 124];
+        const MUTED: [number,number,number]  = [156, 163, 175];
+        const RULE: [number,number,number]   = [210, 214, 220];
+        const BG: [number,number,number]     = [248, 249, 251];
+
+        // ── Layout ─────────────────────────────────────────
+        const W = 210, H = 297, ML = 20, MR = 20;
+        const CW = W - ML - MR;
+        const HEADER_H = 42;
+        const CONTENT_Y = HEADER_H + 9;
+        let y = CONTENT_Y, pageNum = 1;
+
+        // ── CHROME ─────────────────────────────────────────
+        const drawChrome = () => {
+            doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+            doc.rect(0, 0, W, 1.5, 'F');
+            doc.setFillColor(255, 255, 255);
+            doc.rect(0, 1.5, W, HEADER_H - 1.5, 'F');
+            // École — gauche
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
+            doc.setTextColor(INK[0], INK[1], INK[2]);
+            doc.text('RUSH SCHOOL', ML, 18);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+            doc.setTextColor(SUB[0], SUB[1], SUB[2]);
+            doc.text('CFA Île-de-France  ·  École supérieure de commerce', ML, 25);
+            // Titre — droite
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+            doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+            doc.text('Bilan de Compétences & Projet Professionnel', W - MR, 18, { align: 'right' });
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
+            doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+            doc.text(new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }), W - MR, 25, { align: 'right' });
+            // Filet sous header
+            doc.setDrawColor(RULE[0], RULE[1], RULE[2]); doc.setLineWidth(0.4);
+            doc.line(ML, HEADER_H, W - MR, HEADER_H);
+            // Footer
+            doc.setDrawColor(RULE[0], RULE[1], RULE[2]); doc.setLineWidth(0.3);
+            doc.line(ML, H - 13, W - MR, H - 13);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
+            doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+            doc.text('Rush School  —  Document confidentiel', ML, H - 8);
+            doc.text(`Page ${pageNum}`, W - MR, H - 8, { align: 'right' });
+        };
+
+        const newPage = () => { doc.addPage(); pageNum++; drawChrome(); y = CONTENT_Y; };
+        const pb = (n: number) => { if (y + n > H - 18) newPage(); };
+
+        // ── SECTION HEADER ──────────────────────────────────
+        const section = (title: string) => {
+            pb(18); y += 4;
+            doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+            doc.rect(ML, y - 1, 2.5, 9, 'F');
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+            doc.setTextColor(INK[0], INK[1], INK[2]);
+            doc.text(title.toUpperCase(), ML + 6, y + 6);
+            doc.setDrawColor(RULE[0], RULE[1], RULE[2]); doc.setLineWidth(0.3);
+            doc.line(ML + 6 + doc.getTextWidth(title.toUpperCase()) + 3, y + 3.5, W - MR, y + 3.5);
+            y += 14;
+        };
+
+        const sublabel = (text: string) => {
+            pb(8);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
+            doc.setTextColor(SUB[0], SUB[1], SUB[2]);
+            doc.text(text.toUpperCase(), ML, y);
+            y += 5;
+        };
+
+        const para = (val: string) => {
+            const text = val?.trim() || '—';
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+            doc.setTextColor(INK[0], INK[1], INK[2]);
+            const lines = doc.splitTextToSize(text, CW);
+            pb(lines.length * 4.8 + 6);
+            doc.text(lines, ML, y);
+            y += lines.length * 4.8 + 6;
+        };
+
+        const tags = (items: string[]) => {
+            if (items.length === 0) { para('—'); return; }
+            pb(12);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+            const line = items.length > 0 ? items.join('  ·  ') : '—';
+            const lines = doc.splitTextToSize(line, CW - 4);
+            const bh = lines.length * 5 + 7;
+            doc.setFillColor(BG[0], BG[1], BG[2]);
+            doc.roundedRect(ML, y - 3, CW, bh, 1, 1, 'F');
+            doc.setTextColor(INK[0], INK[1], INK[2]);
+            doc.text(lines, ML + 3, y + 1.5);
+            y += bh + 5;
+        };
+
+        // Chaque colonne = LBAR + gap(3) + BAR + score(~8) doit tenir dans CW/2 = 85
+        // LBAR(42) + 3 + BAR(24) + 8 = 77 < 85 ✓
+        const LBAR = 42, BAR = 24;
+        const ratingBar = (label: string, val: number, xL: number, yPos: number) => {
+            const barX = xL + LBAR + 3;
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+            doc.setTextColor(INK[0], INK[1], INK[2]);
+            let lbl = label;
+            while (doc.getTextWidth(lbl) > LBAR && lbl.length > 5) lbl = lbl.slice(0, -4) + '…';
+            doc.text(lbl, xL, yPos);
+            doc.setFillColor(RULE[0], RULE[1], RULE[2]);
+            doc.roundedRect(barX, yPos - 2.5, BAR, 2.5, 0.5, 0.5, 'F');
+            if (val > 0) {
+                doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+                doc.roundedRect(barX, yPos - 2.5, (BAR * val) / 5, 2.5, 0.5, 0.5, 'F');
+            }
+            doc.setFontSize(6.5); doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+            doc.text(`${val}/5`, barX + BAR + 2, yPos - 0.3);
+        };
+
+        const ratingGroup = (title: string, items: { label: string; id: string }[]) => {
+            const rows = Math.ceil(items.length / 2);
+            pb(10 + rows * 10);
+            sublabel(title);
+            const colX: [number, number] = [ML, ML + CW / 2 + 3];
+            for (let i = 0; i < items.length; i += 2) {
+                pb(10);
+                ratingBar(items[i].label, ratings[items[i].id] || 0, colX[0], y);
+                if (i + 1 < items.length)
+                    ratingBar(items[i + 1].label, ratings[items[i + 1].id] || 0, colX[1], y);
+                y += 10;
+            }
+            y += 4;
+        };
+
+        // ══════════════════════════════════════════════
+        // CONTENU
+        // ══════════════════════════════════════════════
+        drawChrome();
+
+        // ── BLOC IDENTITÉ (grille 2 colonnes) ───────────────
+        pb(30);
+        const colW = CW / 2;
+        const idFields = [
+            { lbl: 'Nom & Prénom',   val: texts.nom || '—'                         },
+            { lbl: 'E-mail',         val: texts.email || '—'                       },
+            { lbl: 'Formation',      val: formatFormation(texts.formation) || '—'  },
+            { lbl: 'Entreprise',     val: texts.entreprise || '—'                  },
+            { lbl: 'Année scolaire', val: texts.annee || '—'                       },
+            { lbl: 'Date',           val: texts.date || '—'                        },
+        ];
+        idFields.forEach((f, i) => {
+            const col = i % 2, row = Math.floor(i / 2);
+            const fx = ML + col * colW, fy = y + row * 12;
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5);
+            doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+            doc.text(f.lbl.toUpperCase(), fx, fy);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+            doc.setTextColor(INK[0], INK[1], INK[2]);
+            let val = f.val;
+            while (doc.getTextWidth(val) > colW - 6 && val.length > 5) val = val.slice(0, -4) + '…';
+            doc.text(val, fx, fy + 5.5);
+        });
+        y += Math.ceil(idFields.length / 2) * 12 + 6;
+        doc.setDrawColor(RULE[0], RULE[1], RULE[2]); doc.setLineWidth(0.3);
+        doc.line(ML, y, W - MR, y);
+        y += 8;
+
+        // ── I. PORTRAIT ────────────────────────────────────
+        section('I. Portrait & Personnalité');
+        sublabel('Qualités et forces');
+        tags(Array.from(qualites));
+        if (texts.autresQualites?.trim()) { sublabel('Autres qualités'); para(texts.autresQualites); }
+        sublabel('Axes d\'amélioration');
+        tags(Array.from(axes));
+        y += 2;
+
+        // ── II. COMPÉTENCES ─────────────────────────────────
+        section('II. Bilan des Compétences');
+        ratingGroup('Commerce & Relationnel', [
+            { label: 'Accueil client',       id: 'c1' }, { label: 'Argumentation / Vente', id: 'c2' },
+            { label: 'Négociation',          id: 'c3' }, { label: 'Gestion réclamations',  id: 'c4' },
+            { label: 'Animation d\'équipe',  id: 'c5' }, { label: 'Communication orale',   id: 'c6' },
+        ]);
+        ratingGroup('Digital & Marketing', [
+            { label: 'Réseaux sociaux', id: 'd1' }, { label: 'Création de contenu', id: 'd2' },
+            { label: 'Bureautique',     id: 'd3' }, { label: 'CRM',                 id: 'd4' },
+            { label: 'Prospection',     id: 'd5' },
+        ]);
+        ratingGroup('Gestion & Organisation', [
+            { label: 'Gestion du temps',    id: 'g1' }, { label: 'Tableaux de bord',   id: 'g2' },
+            { label: 'Prise d\'initiative', id: 'g3' }, { label: 'Gestion de projets', id: 'g4' },
+            { label: 'Adaptabilité',        id: 'g5' },
+        ]);
+        if (texts.specsAlternance?.trim()) { sublabel('Compétences spécifiques'); para(texts.specsAlternance); }
+
+        // ── III. PROJET PRO ─────────────────────────────────
+        section('III. Projet Professionnel & Objectifs');
+        sublabel('Métier / Secteur visé');
+        para(texts.metier);
+        sublabel('Motivations');
+        para(texts.pourquoi);
+        if (structures.size > 0) { sublabel('Type de structure'); tags(Array.from(structures)); }
+        if (timeline) {
+            sublabel('Horizon d\'atteinte de l\'objectif');
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+            doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+            doc.text(timeline, ML, y); y += 10;
+        }
+
+        const objectives = [
+            { lbl: 'Objectif court terme  (6 mois)', val: texts.obj1 },
+            { lbl: 'Objectif moyen terme (1-2 ans)', val: texts.obj2 },
+            { lbl: 'Objectif long terme  (3-5 ans)', val: texts.obj3 },
+        ];
+        objectives.forEach((obj, idx) => {
+            const lines = doc.splitTextToSize(obj.val?.trim() || '—', CW - 8);
+            const bh = lines.length * 5 + 14;
+            pb(bh + 5);
+            doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+            doc.circle(ML + 2.5, y + 4, 2.5, 'F');
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(255, 255, 255);
+            doc.text(`${idx + 1}`, ML + 1.1, y + 5.3);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(SUB[0], SUB[1], SUB[2]);
+            doc.text(obj.lbl.toUpperCase(), ML + 7, y + 5);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(INK[0], INK[1], INK[2]);
+            doc.text(lines, ML + 7, y + 12);
+            y += bh;
+        });
+        y += 4;
+
+        // ── IV. BILAN & MOTIVATION ──────────────────────────
+        section('IV. Bilan & Motivation');
+        sublabel('Ce que la formation m\'a apporté');
+        para(texts.apport);
+        sublabel('Plus grand succès');
+        para(texts.succes);
+        if (texts.envie?.trim()) { sublabel('Ce qui donne envie de travailler'); para(texts.envie); }
+
+        // Indicateur sobre
+        pb(22);
+        const mLabel = motivation !== null ? motivationLevels[motivation].label : '—';
+        const mColMap: [number,number,number][] = [
+            [220,38,38],[234,88,12],[202,138,4],[101,163,13],[16,185,129],
+        ];
+        const mCol = motivation !== null ? mColMap[motivation] : MUTED;
+        doc.setDrawColor(RULE[0], RULE[1], RULE[2]); doc.setLineWidth(0.3);
+        doc.roundedRect(ML, y, CW, 16, 1, 1, 'D');
+        doc.setFillColor(mCol[0], mCol[1], mCol[2]);
+        doc.roundedRect(ML, y, 2.5, 16, 0.5, 0.5, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+        doc.text('MOTIVATION GLOBALE', ML + 7, y + 10);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(mCol[0], mCol[1], mCol[2]);
+        doc.text(mLabel.toUpperCase(), W - MR - 4, y + 10, { align: 'right' });
+
+        if (returnBlob) return doc.output('blob');
+        doc.save(`PROJET_PRO_${(texts.nom || 'CANDIDAT').replace(/\s+/g, '_')}.pdf`);
+    };
+
+
 
     return (
         <div className="mt-12 pt-10 border-t-2 border-slate-200">
@@ -1091,6 +1359,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                 <div className="grid grid-cols-2 gap-x-10 gap-y-4 border-t border-slate-100 pt-5">
                     {[
                         { label: 'Nom & Prénom', id: 'nom', placeholder: '............................................' },
+                        { label: 'E-mail', id: 'email', placeholder: '............................................' },
                         { label: 'Formation', id: 'formation', placeholder: '............................................' },
                         { label: 'Entreprise', id: 'entreprise', placeholder: '............................................' },
                         { label: 'Date', id: 'date', placeholder: '............................................' },
@@ -1124,7 +1393,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                 </div>
                 <div className="mb-8">
                     <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Autres qualités que tu t'attribues</p>
-                    <TextareaField id="autresQualites" rows={2} />
+                    <TextareaField id="autresQualites" value={texts.autresQualites} onChange={setText} rows={2} />
                 </div>
 
                 <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-4">Mes axes d'amélioration – Coche ceux sur lesquels tu travailles</p>
@@ -1151,6 +1420,8 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
 
                 <RatingTable
                     title="Compétences commerciales & relationnelles"
+                    ratings={ratings}
+                    onRate={setRating}
                     items={[
                         { label: 'Accueil et relation client', id: 'c1' },
                         { label: 'Argumentation et vente', id: 'c2' },
@@ -1162,6 +1433,8 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                 />
                 <RatingTable
                     title="Compétences digitales & marketing"
+                    ratings={ratings}
+                    onRate={setRating}
                     items={[
                         { label: 'Réseaux sociaux (Instagram, LinkedIn…)', id: 'd1' },
                         { label: 'Création de contenu (visuels, vidéos)', id: 'd2' },
@@ -1172,6 +1445,8 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                 />
                 <RatingTable
                     title="Compétences en gestion & organisation"
+                    ratings={ratings}
+                    onRate={setRating}
                     items={[
                         { label: 'Gestion du temps et des priorités', id: 'g1' },
                         { label: 'Suivi d\'indicateurs et tableaux de bord', id: 'g2' },
@@ -1182,7 +1457,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                 />
                 <div>
                     <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Compétences spécifiques acquises en alternance</p>
-                    <TextareaField id="specsAlternance" placeholder="Décris en 2-3 lignes les compétences spécifiques acquises…" rows={3} />
+                    <TextareaField id="specsAlternance" value={texts.specsAlternance} onChange={setText} placeholder="Décris en 2-3 lignes les compétences spécifiques acquises…" rows={3} />
                 </div>
             </div>
 
@@ -1193,11 +1468,11 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
 
                 <div className="mb-6">
                     <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Quel métier ou secteur t'attire après ta formation ?</p>
-                    <TextareaField id="metier" rows={2} />
+                    <TextareaField id="metier" value={texts.metier} onChange={setText} rows={2} />
                 </div>
                 <div className="mb-7">
                     <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Pourquoi ce choix ? Qu'est-ce qui te motive dans ce domaine ?</p>
-                    <TextareaField id="pourquoi" rows={3} />
+                    <TextareaField id="pourquoi" value={texts.pourquoi} onChange={setText} rows={3} />
                 </div>
 
                 <div className="mb-7">
@@ -1255,11 +1530,11 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
 
                 <div className="mb-6">
                     <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Quels obstacles peux-tu anticiper ? Comment les surmonter ?</p>
-                    <TextareaField id="obstacles" rows={3} />
+                    <TextareaField id="obstacles" value={texts.obstacles} onChange={setText} rows={3} />
                 </div>
                 <div>
                     <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Quelles actions concrètes vas-tu mettre en place dès maintenant ?</p>
-                    <TextareaField id="actions" rows={3} />
+                    <TextareaField id="actions" value={texts.actions} onChange={setText} rows={3} />
                 </div>
             </div>
 
@@ -1270,17 +1545,16 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
 
                 <div className="mb-6">
                     <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Qu'est-ce que cette formation t'a apporté jusqu'ici ?</p>
-                    <TextareaField id="apport" rows={3} />
+                    <TextareaField id="apport" value={texts.apport} onChange={setText} rows={3} />
                 </div>
                 <div className="mb-6">
                     <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Quel est ton plus grand succès depuis le début de ton alternance ?</p>
-                    <TextareaField id="succes" rows={2} />
+                    <TextareaField id="succes" value={texts.succes} onChange={setText} rows={2} />
                 </div>
                 <div className="mb-8">
                     <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-2">Qu'est-ce qui te donne envie de te lever le matin pour aller travailler ?</p>
-                    <TextareaField id="envie" rows={2} />
+                    <TextareaField id="envie" value={texts.envie} onChange={setText} rows={2} />
                 </div>
-
                 <div className="border border-slate-200 rounded-[4px] p-6">
                     <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest mb-5 text-center">Mon niveau de motivation global aujourd'hui</p>
                     <div className="flex items-end justify-center gap-4">
@@ -1289,8 +1563,8 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                                 key={i}
                                 onClick={() => setMotivation(motivation === i ? null : i)}
                                 className={`flex flex-col items-center gap-2 px-4 py-3 rounded-[4px] border-2 transition-all ${motivation === i
-                                        ? motivationActive[i]
-                                        : 'border-slate-100 text-slate-300 hover:border-slate-200 hover:text-slate-400'
+                                    ? motivationActive[i]
+                                    : 'border-slate-100 text-slate-300 hover:border-slate-200 hover:text-slate-400'
                                     }`}
                             >
                                 <span className={motivation === i ? motivationColors[i] : ''}>{m.face}</span>
@@ -1311,22 +1585,55 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                     Réinitialiser
                 </button>
                 <button
+                    onClick={generatePDF}
                     className="flex items-center gap-2 px-6 py-2.5 rounded-[4px] bg-emerald-600 text-white font-black text-[11px] uppercase tracking-widest hover:bg-emerald-700 transition-all active:scale-95 shadow-md shadow-emerald-200"
                 >
                     <Save size={14} />
                     Enregistrer
                 </button>
                 <button
-                    onClick={onNext}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-[4px] bg-[#6B3CD2] text-white font-black text-[11px] uppercase tracking-widest hover:bg-[#5a2eb8] transition-all active:scale-95 shadow-md shadow-[#6B3CD2]/20"
+                    disabled={isSubmitting}
+                    onClick={async () => {
+                        if (!texts.email) {
+                            showToast("L'email est requis pour envoyer le projet pro.", "error");
+                            return;
+                        }
+                        setIsSubmitting(true);
+                        try {
+                            const pdfBlob = generatePDF(true);
+                            await api.submitProjetPro(texts.email, pdfBlob);
+                            showToast("Projet professionnel envoyé avec succès !", "success");
+                            onNext?.();
+                        } catch (error) {
+                            console.error("Erreur lors de l'envoi du Projet Pro:", error);
+                            showToast("Erreur lors de l'envoi du dossier.", "error");
+                        } finally {
+                            setIsSubmitting(false);
+                        }
+                    }}
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-[4px] font-black text-[11px] uppercase tracking-widest transition-all shadow-md ${
+                        isSubmitting
+                            ? 'bg-[#6B3CD2]/60 text-white/70 cursor-not-allowed shadow-none'
+                            : 'bg-[#6B3CD2] text-white hover:bg-[#5a2eb8] active:scale-95 shadow-[#6B3CD2]/20'
+                    }`}
                 >
-                    Continuer
-                    <ArrowRight size={14} />
+                    {isSubmitting ? (
+                        <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Envoi en cours…
+                        </>
+                    ) : (
+                        <>
+                            Continuer
+                            <ArrowRight size={14} />
+                        </>
+                    )}
                 </button>
             </div>
         </div>
     );
 };
+
 
 // --- MAIN ADMISSION VIEW ---
 
@@ -1588,8 +1895,8 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as AdmissionTab)}
                                     className={`flex flex-col items-center justify-center gap-1.5 py-3.5 px-2 text-[10px] font-black uppercase tracking-wider transition-all ${activeTab === tab.id
-                                            ? 'bg-[#ede9fe] text-[#4c1d95]'
-                                            : 'bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                                        ? 'bg-[#ede9fe] text-[#4c1d95]'
+                                        : 'bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                                         }`}
                                 >
                                     <tab.icon size={15} strokeWidth={activeTab === tab.id ? 3 : 2} />
@@ -1696,8 +2003,8 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                                             <div
                                                 key={doc.id}
                                                 className={`relative flex flex-col bg-white border rounded-[4px] p-5 transition-all duration-200 ${isUploaded
-                                                        ? 'border-emerald-200 shadow-sm'
-                                                        : 'border-slate-200 hover:border-[#6B3CD2]/30 hover:shadow-md'
+                                                    ? 'border-emerald-200 shadow-sm'
+                                                    : 'border-slate-200 hover:border-[#6B3CD2]/30 hover:shadow-md'
                                                     }`}
                                             >
                                                 <input
@@ -1710,8 +2017,8 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
 
                                                 {/* Icon */}
                                                 <div className={`w-10 h-10 rounded-[4px] flex items-center justify-center mb-4 border-2 transition-all ${isUploaded
-                                                        ? 'bg-emerald-100 border-emerald-200 text-emerald-600'
-                                                        : 'bg-slate-100 border-slate-200 text-slate-500'
+                                                    ? 'bg-emerald-100 border-emerald-200 text-emerald-600'
+                                                    : 'bg-slate-100 border-slate-200 text-slate-500'
                                                     }`}>
                                                     <Icon size={18} />
                                                 </div>
@@ -1722,8 +2029,8 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
 
                                                 {/* Status badge */}
                                                 <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-[4px] text-[10px] font-bold uppercase tracking-wide mb-3 self-start ${isUploaded
-                                                        ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                                                        : 'bg-rose-50 border border-rose-200 text-rose-600'
+                                                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                                                    : 'bg-rose-50 border border-rose-200 text-rose-600'
                                                     }`}>
                                                     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isUploaded ? 'bg-emerald-500' : 'bg-rose-400'}`}></span>
                                                     {isUploaded ? 'Téléversé' : 'À fournir'}
@@ -1731,10 +2038,10 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
 
                                                 {/* Upload button */}
                                                 <button className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-[4px] font-black text-[11px] uppercase tracking-widest transition-all ${isUploadingDoc
-                                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                                        : isUploaded
-                                                            ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white'
-                                                            : 'bg-[#6B3CD2]/10 text-[#6B3CD2] hover:bg-[#6B3CD2] hover:text-white'
+                                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                    : isUploaded
+                                                        ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white'
+                                                        : 'bg-[#6B3CD2]/10 text-[#6B3CD2] hover:bg-[#6B3CD2] hover:text-white'
                                                     }`}>
                                                     {isUploadingDoc
                                                         ? <><Loader2 size={13} className="animate-spin" /> Envoi…</>

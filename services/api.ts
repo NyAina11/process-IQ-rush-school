@@ -1264,6 +1264,30 @@ export const api = {
       console.error('❌ Error submitting interview result:', error);
       throw error;
     }
+  },
+
+  async submitProjetPro(email: string, file: Blob): Promise<any> {
+    try {
+      console.log('📤 Submitting Projet Pro PDF for:', email);
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('file', file, `Projet_Pro_${email.replace(/@/g, '_at_')}.pdf`);
+
+      const response = await fetch(`${BASE_API_URL}/admission/projet-pro`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || errorData.message || `Upload failed: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('❌ Error submitting projet pro:', error);
+      throw error;
+    }
   }
 };
 
