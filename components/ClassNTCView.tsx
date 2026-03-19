@@ -539,16 +539,22 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
     const handleDownload = async (url: string, filename: string) => {
         if (!url) return;
         try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('fetch failed');
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            link.target = '_blank';
+            link.href = objectUrl;
+            link.download = filename || 'document';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            URL.revokeObjectURL(objectUrl);
             showToast('Téléchargement démarré', 'success');
-        } catch (error) {
-            showToast('Erreur lors du téléchargement', 'error');
+        } catch {
+            // Fallback: open in new tab if fetch blocked by CORS
+            window.open(url, '_blank');
+            showToast('Fichier ouvert dans un nouvel onglet', 'success');
         }
     };
 
