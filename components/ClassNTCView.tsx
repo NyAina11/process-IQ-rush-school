@@ -536,6 +536,13 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
         }
     };
 
+    const docFileName = (student: any, docType: string, originalUrl?: string) => {
+        const nom = (student.nom || '').toUpperCase().replace(/\s+/g, '-');
+        const prenom = (student.prenom || '').replace(/\s+/g, '-');
+        const ext = originalUrl ? (originalUrl.split('?')[0].split('.').pop() || 'pdf') : 'pdf';
+        return `${nom}_${prenom}_${docType}.${ext}`;
+    };
+
     const handleDownload = async (url: string, filename: string) => {
         if (!url) return;
         try {
@@ -1263,7 +1270,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">Fiche</span>
                                                                 {student.has_fiche_renseignement ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(rawStudent.fiche_entreprise?.url || rawStudent.fields?.["Fiche entreprise"]?.[0]?.url, rawStudent.fiche_entreprise?.filename || rawStudent.fields?.["Fiche entreprise"]?.[0]?.filename)}
+                                                                        onClick={() => { const u = rawStudent.fiche_entreprise?.url || rawStudent.fields?.["Fiche entreprise"]?.[0]?.url; handleDownload(u, docFileName(student, 'FICHE', u)); }}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#d1fae5] text-[#10c98f] flex items-center justify-center hover:bg-[#10c98f] hover:text-white transition-all border border-[#6ee7b7]"
                                                                         title="Télécharger Fiche Renseignement"
                                                                     >
@@ -1279,7 +1286,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">CERFA</span>
                                                                 {student.has_cerfa ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(rawStudent.cerfa?.url || rawStudent.fields?.["cerfa"]?.[0]?.url, rawStudent.cerfa?.filename || rawStudent.fields?.["cerfa"]?.[0]?.filename)}
+                                                                        onClick={() => { const u = rawStudent.cerfa?.url || rawStudent.fields?.["cerfa"]?.[0]?.url; handleDownload(u, docFileName(student, 'CERFA', u)); }}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#ede9fe] text-[#7c3aed] flex items-center justify-center hover:bg-[#7c3aed] hover:text-white transition-all border border-[#c4b5fd]"
                                                                         title="Télécharger CERFA"
                                                                     >
@@ -1295,7 +1302,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">ATRE</span>
                                                                 {student.has_atre ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(rawStudent.atre_url || rawStudent.fields?.["Atre"]?.[0]?.url, rawStudent.atre_name || rawStudent.fields?.["Atre"]?.[0]?.filename)}
+                                                                        onClick={() => { const u = rawStudent.atre_url || rawStudent.fields?.["Atre"]?.[0]?.url; handleDownload(u, docFileName(student, 'ATRE', u)); }}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#ffedd5] text-[#c2410c] flex items-center justify-center hover:bg-[#c2410c] hover:text-white transition-all border border-[#fdba74]"
                                                                         title="Télécharger ATRE"
                                                                     >
@@ -1311,7 +1318,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">CR</span>
                                                                 {student.has_compte_rendu ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(rawStudent.compte_rendu_url || rawStudent.fields?.["compte rendu de visite"]?.[0]?.url, rawStudent.compte_rendu_name || rawStudent.fields?.["compte rendu de visite"]?.[0]?.filename)}
+                                                                        onClick={() => { const u = rawStudent.compte_rendu_url || rawStudent.fields?.["compte rendu de visite"]?.[0]?.url; handleDownload(u, docFileName(student, 'COMPTE-RENDU', u)); }}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#fce7f3] text-[#be185d] flex items-center justify-center hover:bg-[#be185d] hover:text-white transition-all border border-[#f9a8d4]"
                                                                         title="Télécharger Compte Rendu"
                                                                     >
@@ -1327,7 +1334,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">Conv.</span>
                                                                 {student.has_convention ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(student.convention_url || (rawStudent.fields || rawStudent)?.["Convention Apprentissage"]?.[0]?.url, student.convention_name || (rawStudent.fields || rawStudent)?.["Convention Apprentissage"]?.[0]?.filename)}
+                                                                        onClick={() => { const u = student.convention_url || (rawStudent.fields || rawStudent)?.["Convention Apprentissage"]?.[0]?.url; handleDownload(u, docFileName(student, 'CONVENTION', u)); }}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#d1fae5] text-[#065f46] flex items-center justify-center hover:bg-[#065f46] hover:text-white transition-all border border-[#6ee7b7]"
                                                                         title="Télécharger Convention"
                                                                     >
@@ -1343,7 +1350,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">Livret</span>
                                                                 {student.has_livret_apprentissage ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(student.livret_apprentissage_url || (rawStudent.fields || rawStudent)?.["Livret Apprentissage"]?.[0]?.url, student.livret_apprentissage_name || (rawStudent.fields || rawStudent)?.["Livret Apprentissage"]?.[0]?.filename)}
+                                                                        onClick={() => { const u = student.livret_apprentissage_url || (rawStudent.fields || rawStudent)?.["Livret Apprentissage"]?.[0]?.url; handleDownload(u, docFileName(student, 'LIVRET-APPRENTISSAGE', u)); }}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#ede9fe] text-[#6d28d9] flex items-center justify-center hover:bg-[#6d28d9] hover:text-white transition-all border border-[#c4b5fd]"
                                                                         title="Télécharger Livret d'Apprentissage"
                                                                     >
@@ -1359,7 +1366,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">Cert.</span>
                                                                 {student.has_certificat_scolarite ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(student.certificat_scolarite_url || rawStudent.fields?.["certificat de scolarité"]?.[0]?.url, student.certificat_scolarite_name || rawStudent.fields?.["certificat de scolarité"]?.[0]?.filename)}
+                                                                        onClick={() => { const u = student.certificat_scolarite_url || rawStudent.fields?.["certificat de scolarité"]?.[0]?.url; handleDownload(u, docFileName(student, 'CERTIFICAT-SCOLARITE', u)); }}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#fef3c7] text-[#b45309] flex items-center justify-center hover:bg-[#b45309] hover:text-white transition-all border border-[#fcd34d]"
                                                                         title="Télécharger Certificat de Scolarité"
                                                                     >
@@ -1379,7 +1386,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">CIN</span>
                                                                 {student.has_cni ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(student.cni_url, student.cni_name)}
+                                                                        onClick={() => handleDownload(student.cni_url, docFileName(student, 'CIN', student.cni_url))}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#dbeafe] text-[#1d4ed8] flex items-center justify-center hover:bg-[#1d4ed8] hover:text-white transition-all border border-[#93c5fd]"
                                                                         title="Télécharger CIN"
                                                                     >
@@ -1395,7 +1402,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">CV</span>
                                                                 {student.has_cv ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(student.cv_url, student.cv_name)}
+                                                                        onClick={() => handleDownload(student.cv_url, docFileName(student, 'CV', student.cv_url))}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#cffafe] text-[#0891b2] flex items-center justify-center hover:bg-[#0891b2] hover:text-white transition-all border border-[#67e8f9]"
                                                                         title="Télécharger CV"
                                                                     >
@@ -1411,7 +1418,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">Diplôme</span>
                                                                 {student.has_diplome ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(student.diplome_url, student.diplome_name)}
+                                                                        onClick={() => handleDownload(student.diplome_url, docFileName(student, 'DIPLOME', student.diplome_url))}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#fef3c7] text-[#d97706] flex items-center justify-center hover:bg-[#d97706] hover:text-white transition-all border border-[#fcd34d]"
                                                                         title="Télécharger Diplôme"
                                                                     >
@@ -1427,7 +1434,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">Lettre</span>
                                                                 {student.has_lettre_motivation ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(student.lettre_motivation_url, student.lettre_motivation_name)}
+                                                                        onClick={() => handleDownload(student.lettre_motivation_url, docFileName(student, 'LETTRE-MOTIVATION', student.lettre_motivation_url))}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#ccfbf1] text-[#0d9488] flex items-center justify-center hover:bg-[#0d9488] hover:text-white transition-all border border-[#5eead4]"
                                                                         title="Télécharger Lettre de motivation"
                                                                     >
@@ -1443,7 +1450,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                                 <span className="text-[9px] font-bold text-[#8898aa] uppercase tracking-tighter">Vitale</span>
                                                                 {student.has_vitale ? (
                                                                     <button
-                                                                        onClick={() => handleDownload(student.vitale_url, student.vitale_name)}
+                                                                        onClick={() => handleDownload(student.vitale_url, docFileName(student, 'CARTE-VITALE', student.vitale_url))}
                                                                         className="w-8 h-8 rounded-[4px] bg-[#d1fae5] text-[#065f46] flex items-center justify-center hover:bg-[#065f46] hover:text-white transition-all border border-[#6ee7b7]"
                                                                         title="Télécharger Carte Vitale"
                                                                     >
