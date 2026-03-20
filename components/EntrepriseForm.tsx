@@ -224,7 +224,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                 siret: "918 707 704 00014", adresse: "6 rue des Bateliers", complement: "", code_postal: "92110", commune: "CLICHY"
             },
             contrat: draftCompany?.contrat || {
-                type_contrat: "", type_derogation: "", date_debut: "", date_fin: "", duree_hebdomadaire: "35h", poste_occupe: "",
+                type_contrat: "", type_derogation: "", date_debut: "", date_fin: "", duree_hebdomadaire: "35", poste_occupe: "",
                 lieu_execution: "",
                 pourcentage_smic1: 0, smic1: "smic", montant_salaire_brut1: 0,
                 pourcentage_smic2: 0, smic2: "smic", montant_salaire_brut2: 0,
@@ -684,7 +684,7 @@ const FICHE_STEPS = ['Entreprise', 'Contact', 'Formation', 'Contrat', 'Validatio
                                 <Select label="Type de dérogation" {...register('contrat.type_derogation')} placeholder="Sélectionnez si applicable" options={DEROGATION_TYPE_OPTIONS} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
-                                <Input label="Durée hebdomadaire" required placeholder="Ex: 35h" error={errors.contrat?.duree_hebdomadaire?.message} {...register('contrat.duree_hebdomadaire')} />
+                                <Input label="Durée hebdomadaire" required placeholder="Ex: 35" error={errors.contrat?.duree_hebdomadaire?.message} {...register('contrat.duree_hebdomadaire')} />
                             </div>
                             <div className="col-span-12">
                                 <Input label="Poste occupé" placeholder="Intitulé exact du poste" error={errors.contrat?.poste_occupe?.message} {...register('contrat.poste_occupe')} />
