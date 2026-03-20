@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
+import { decodeJwtPayload, setAuthToken } from '../services/session';
 import './LoginPage.css';
 
 const LoginPage: React.FC = () => {
@@ -74,10 +75,9 @@ const LoginPage: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        // Clear field error when user types
+        setFormData((prev) => ({ ...prev, [name]: value }));
         if (fieldErrors[name as keyof typeof fieldErrors]) {
-            setFieldErrors(prev => ({ ...prev, [name]: undefined }));
+            setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
         }
         if (error) setError(null);
     };
@@ -85,12 +85,12 @@ const LoginPage: React.FC = () => {
     const validate = () => {
         const errors: { email?: string; password?: string } = {};
         if (!formData.email) {
-            errors.email = "Adresse e-mail requise.";
+            errors.email = 'Adresse e-mail requise.';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            errors.email = "Adresse e-mail invalide.";
+            errors.email = 'Adresse e-mail invalide.';
         }
         if (!formData.password) {
-            errors.password = "Mot de passe requis.";
+            errors.password = 'Mot de passe requis.';
         }
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
@@ -105,20 +105,25 @@ const LoginPage: React.FC = () => {
 
         try {
             const data = await api.login(formData.email, formData.password);
-            localStorage.setItem('token', data.access_token);
-            localStorage.setItem('userRole', data.role);
-            localStorage.setItem('userEmail', data.email);
-            localStorage.setItem('userName', data.name);
+            setAuthToken(data.access_token);
+            localStorage.removeItem('token');
 
-            // Redirect to appropriate dashboard based on role
-            if (data.role === 'super_admin') navigate('/admission');
-            else if (data.role === 'commercial') navigate('/commercial/dashboard');
-            else if (data.role === 'admission') navigate('/admission');
-            else if (data.role === 'rh') navigate('/rh/dashboard');
-            else if (data.role === 'eleve') navigate('/etudiant');
+            const payload = decodeJwtPayload(data.access_token);
+            const tokenRole = payload?.role === 'student' ? 'eleve' : payload?.role;
+            const finalRole = (data.role || tokenRole || activeRole) as string;
+
+            localStorage.setItem('userRole', finalRole);
+            localStorage.setItem('userEmail', data.email || formData.email);
+            localStorage.setItem('userName', data.name || '');
+
+            if (finalRole === 'super_admin') navigate('/admission');
+            else if (finalRole === 'commercial') navigate('/commercial/dashboard');
+            else if (finalRole === 'admission') navigate('/admission');
+            else if (finalRole === 'rh') navigate('/rh/dashboard');
+            else if (finalRole === 'eleve') navigate('/etudiant/dashboard');
             else navigate('/admission');
         } catch (err: any) {
-            setError(err.message || "Identifiants invalides");
+            setError(err.message || 'Identifiants invalides');
         } finally {
             setLoading(false);
         }
@@ -126,9 +131,7 @@ const LoginPage: React.FC = () => {
 
     return (
         <div className="login-page">
-            {/* ════════════ LEFT — BRAND PANEL ════════════ */}
-            <aside className="panel-brand" aria-label="ProcessIQ — présentation">
-                {/* Decorative shapes */}
+            <aside className="panel-brand" aria-label="ProcessIQ presentation">
                 <div className="brand-glow-btm" aria-hidden="true"></div>
                 <div className="bs bs-1" aria-hidden="true"></div>
                 <div className="bs bs-2" aria-hidden="true"></div>
@@ -136,7 +139,6 @@ const LoginPage: React.FC = () => {
                 <div className="bs bs-4" aria-hidden="true"></div>
 
                 <div className="brand-inner">
-                    {/* Logo */}
                     <Link to="/" className="brand-logo-wrap">
                         <img src="/images/logo-process-iq.png" alt="ProcessIQ" className="brand-logo" />
                         <span className="brand-logo-name">ProcessIQ</span>
@@ -146,96 +148,21 @@ const LoginPage: React.FC = () => {
                     <div className="brand-copy">
                         <p className="brand-eyebrow">Plateforme alternance</p>
                         <h2 className="brand-headline">
-                            La plateforme qui <strong>libère l'alternance</strong> de la paperasse
+                            La plateforme qui <strong>libere l'alternance</strong> de la paperasse
                         </h2>
                         <p className="brand-desc">
                             Gerez vos conventions, suivis pédagogiques et conformités en un seul endroit. Moins d'administratif, plus de résultats.
                         </p>
-
-                        {/* Stats */}
-                        <div className="brand-stats">
-                            <div className="stat-item">
-                                <span className="stat-value">1M+</span>
-                                <span className="stat-label">Alternants en France</span>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-value">15Md€</span>
-                                <span className="stat-label">Marché adressable</span>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-value">85%</span>
-                                <span className="stat-label">Gain de temps admin</span>
-                            </div>
-                        </div>
-
-                        {/* Features */}
-                        <div className="brand-features">
-                            <div className="feat-item">
-                                <div className="feat-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                                        <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" />
-                                        <polyline points="13 2 13 9 20 9" />
-                                    </svg>
-                                </div>
-                                <div className="feat-text">
-                                    <p className="feat-title">Automatisation admin</p>
-                                    <p className="feat-sub">Conventions et livrables générés automatiquement</p>
-                                </div>
-                            </div>
-                            <div className="feat-item">
-                                <div className="feat-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                                    </svg>
-                                </div>
-                                <div className="feat-text">
-                                    <p className="feat-title">Suivi pédagogique</p>
-                                    <p className="feat-sub">Tableau de bord temps réel pour tuteurs et RH</p>
-                                </div>
-                            </div>
-                            <div className="feat-item">
-                                <div className="feat-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                    </svg>
-                                </div>
-                                <div className="feat-text">
-                                    <p className="feat-title">Conformité RGPD</p>
-                                    <p className="feat-sub">Données hébergées en France, certifié ISO 27001</p>
-                                </div>
-                            </div>
-                            <div className="feat-item">
-                                <div className="feat-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                                        <rect x="2" y="3" width="20" height="14" rx="2" />
-                                        <line x1="8" y1="21" x2="16" y2="21" />
-                                        <line x1="12" y1="17" x2="12" y2="21" />
-                                    </svg>
-                                </div>
-                                <div className="feat-text">
-                                    <p className="feat-title">Solution tout-en-un</p>
-                                    <p className="feat-sub">CFA, entreprise et alternant, sur une seule plateforme</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-
-                    {/* Brand footer */}
-                    <nav className="brand-footer-links" aria-label="Liens utiles">
-                        <Link to="/">Accueil</Link>
-                        <a href="#">Politique de confidentialité</a>
-                        <a href="#">Mentions légales</a>
-                    </nav>
                 </div>
             </aside>
 
-            {/* ════════════ RIGHT — FORM PANEL ════════════ */}
             <main className="panel-form" role="main">
-                <Link to="/" className="form-back" aria-label="Retour à l'accueil">
+                <Link to="/" className="form-back" aria-label="Retour a l'accueil">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                         <path d="M15 18l-6-6 6-6" />
                     </svg>
-                    Retour à l'accueil
+                    Retour a l'accueil
                 </Link>
 
                 <div className="form-inner">
@@ -429,14 +356,10 @@ const LoginPage: React.FC = () => {
                     )}
 
                     <div className="form-divider"><span>ou</span></div>
-
-                    {/* Demo CTA */}
-                    <Link to="/register" className="btn-demo">Demander une démo gratuite</Link>
-
-                    {/* Inscription */}
+                    <Link to="/register" className="btn-demo">Demander une demo gratuite</Link>
                     <p className="form-register">
-                        Pas encore de compte&nbsp;?
-                        <Link to="/register"> Créer un compte</Link>
+                        Pas encore de compte ?
+                        <Link to="/register"> Creer un compte</Link>
                     </p>
                 </div>
             </main>

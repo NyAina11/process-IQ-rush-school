@@ -1,49 +1,52 @@
-import React, { lazy, Suspense, useState, useMemo } from 'react';
+import React, { Suspense, useState } from 'react';
 import { Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom';
-import { AppModule, ViewId } from './types';
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import DashboardView from './components/DashboardView';
+import AdmissionView from './components/AdmissionView';
+import RHView from './components/RHView';
+import LoginPage from './components/LoginPage';
+import LandingPage from './components/LandingPage';
+import RegisterPage from './components/RegisterPage';
+import ContactPage from './components/ContactPage';
+import ClassNTCView from './components/ClassNTCView';
 import Toast from './components/ui/Toast';
 import { AdmissionTab } from './types';
+import AdminLoginPage from './components/AdminLoginPage';
+import AdminDashboard from './components/AdminDashboard';
+import TestPage from './components/TestPage';
+import StudentView from './components/StudentView';
+import { decodeJwtPayload, getAuthToken, isAuthenticated } from './services/session';
 
-const Sidebar = lazy(() => import('./components/Sidebar'));
-const Header = lazy(() => import('./components/Header'));
-const DashboardView = lazy(() => import('./components/DashboardView'));
-const AdmissionView = lazy(() => import('./components/AdmissionView'));
-const RHView = lazy(() => import('./components/RHView'));
-const StudentView = lazy(() => import('./components/StudentView'));
-const LoginPage = lazy(() => import('./components/LoginPage'));
-const ClassNTCView = lazy(() => import('./components/ClassNTCView'));
-const AdminLoginPage = lazy(() => import('./components/AdminLoginPage'));
-const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
-const TestPage = lazy(() => import('./components/TestPage'));
-const LandingPage = lazy(() => import('./components/LandingPage'));
-const RegisterPage = lazy(() => import('./components/RegisterPage'));
-const ContactPage = lazy(() => import('./components/ContactPage'));
+const getEffectiveRole = (): string | null => {
+  const storedRole = localStorage.getItem('userRole');
+  if (storedRole) return storedRole;
 
-const PageLoader = () => (
-  <div className="flex items-center justify-center h-screen w-full bg-slate-50">
-    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-  </div>
-);
+  const payload = decodeJwtPayload(getAuthToken());
+  if (payload?.role === 'student') return 'eleve';
+  return payload?.role ?? null;
+};
 
-const RequireAuth = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
-  const isAuthenticated = localStorage.getItem('token'); // Changed from authToken to token
-  const userRole = localStorage.getItem('userRole');
+const RequireAuth = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) => {
   const location = useLocation();
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated()) {
     return <Navigate to="/landing" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && userRole && userRole !== 'super_admin' && !allowedRoles.includes(userRole)) {
-    return <Navigate to="/" replace />;
+  if (allowedRoles) {
+    const role = getEffectiveRole();
+    if (!role || !allowedRoles.includes(role)) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return children;
 };
 
 const RequireAdminAuth = ({ children }: { children: React.ReactNode }) => {
-  const isAdminAuthenticated = localStorage.getItem('adminAuthToken');
   const location = useLocation();
+  const isAdminAuthenticated = localStorage.getItem('adminAuthToken');
 
   if (!isAdminAuthenticated) {
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
@@ -57,28 +60,18 @@ const App = () => {
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [selectedTab, setSelectedTab] = useState<AdmissionTab | null>(null);
   const location = useLocation();
+
   const isStandalonePage = [
     '/',
+    '/landing',
     '/login',
     '/register',
     '/contact',
-    '/landing',
     '/admin/login',
-    '/test'
+    '/test',
   ].includes(location.pathname) || location.pathname.startsWith('/admin');
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
-  // Derive active module from current path
-  const activeModule = useMemo((): AppModule => {
-    const path = location.pathname;
-    if (path.startsWith('/commercial')) return AppModule.COMMERCIAL;
-    if (path.startsWith('/admission')) return AppModule.ADMISSION;
-    if (path.startsWith('/rh')) return AppModule.RH;
-    if (path.startsWith('/etudiant')) return AppModule.STUDENT;
-    if (path.startsWith('/parametres')) return AppModule.PARAMETRES;
-    return AppModule.COMMERCIAL;
-  }, [location.pathname]);
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
@@ -86,127 +79,149 @@ const App = () => {
 
       {!isStandalonePage && (
         <Suspense fallback={null}>
-          {/* Sidebar Overlay for Mobile */}
           {sidebarOpen && (
             <div
-              className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm md:hidden"
               onClick={() => setSidebarOpen(false)}
             />
           )}
-
-          {/* Sidebar */}
-          <Sidebar
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-          />
+          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         </Suspense>
       )}
 
-      {/* Main Content Wrapper */}
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${!isStandalonePage ? 'md:ml-[260px]' : ''}`}>
-        {!isStandalonePage && (
+      <div className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${!isStandalonePage ? 'md:ml-[260px]' : ''}`}>
+        {!isStandalonePage && <Header toggleSidebar={toggleSidebar} />}
+
+        <main className={`${!isStandalonePage ? 'flex-1 overflow-y-auto p-8 md:p-10' : 'h-screen'}`}>
           <Suspense fallback={null}>
-            <Header
-              toggleSidebar={toggleSidebar}
-            />
-          </Suspense>
-        )}
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/landing" element={<Navigate to="/" replace />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/contact" element={<ContactPage />} />
 
-        <main className={`${!isStandalonePage ? 'flex-1 p-8 md:p-10 overflow-y-auto scrollbar-hide' : 'h-screen'}`}>
-          <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/landing" element={<Navigate to="/" replace />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/contact" element={<ContactPage />} />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+              <Route path="/admin" element={<RequireAdminAuth><AdminDashboard /></RequireAdminAuth>} />
 
-            {/* Admin Routes */}
-            <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route path="/admin" element={<RequireAdminAuth><AdminDashboard /></RequireAdminAuth>} />
+              <Route element={<RequireAuth><Outlet /></RequireAuth>}>
+                <Route
+                  path="/home"
+                  element={
+                    (() => {
+                      const role = getEffectiveRole();
+                      if (role === 'commercial') return <Navigate to="/commercial/dashboard" replace />;
+                      if (role === 'admission') return <Navigate to="/admission" replace />;
+                      if (role === 'rh') return <Navigate to="/rh/dashboard" replace />;
+                      if (role === 'eleve') return <Navigate to="/etudiant/dashboard" replace />;
+                      return <Navigate to="/commercial/dashboard" replace />;
+                    })()
+                  }
+                />
 
-            <Route element={<RequireAuth><Outlet /></RequireAuth>}>
-              {/* Role-based dashboard access now handled via LandingPage or specific /login post-auth logic */}
-
-              {/* Commercial Routes */}
-              <Route path="/commercial" element={<RequireAuth allowedRoles={['commercial']}><Outlet /></RequireAuth>}>
-                <Route path="dashboard" element={<DashboardView activeSubView="commercial-dashboard" />} />
-                <Route path="placer" element={
-                  <DashboardView 
-                    activeSubView="commercial-placer" 
-                    onSelectStudent={(student, tab) => {
-                      setSelectedStudent(student);
-                      setSelectedTab(tab);
-                    }}
+                <Route path="/commercial" element={<RequireAuth allowedRoles={['commercial']}><Outlet /></RequireAuth>}>
+                  <Route path="dashboard" element={<DashboardView activeSubView="commercial-dashboard" />} />
+                  <Route
+                    path="placer"
+                    element={
+                      <DashboardView
+                        activeSubView="commercial-placer"
+                        onSelectStudent={(student, tab) => {
+                          setSelectedStudent(student);
+                          setSelectedTab(tab);
+                        }}
+                      />
+                    }
                   />
-                } />
-                <Route path="alternance" element={
-                  <DashboardView 
-                    activeSubView="commercial-alternance" 
-                    onSelectStudent={(student, tab) => {
-                      setSelectedStudent(student);
-                      setSelectedTab(tab);
-                    }}
+                  <Route
+                    path="alternance"
+                    element={
+                      <DashboardView
+                        activeSubView="commercial-alternance"
+                        onSelectStudent={(student, tab) => {
+                          setSelectedStudent(student);
+                          setSelectedTab(tab);
+                        }}
+                      />
+                    }
                   />
-                } />
-                <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                </Route>
+
+                <Route
+                  path="/admission"
+                  element={
+                    <RequireAuth allowedRoles={['admission', 'commercial']}>
+                      <AdmissionView
+                        selectedStudent={selectedStudent}
+                        selectedTab={selectedTab}
+                        onClearSelection={() => {
+                          setSelectedStudent(null);
+                          setSelectedTab(null);
+                        }}
+                      />
+                    </RequireAuth>
+                  }
+                />
+
+                <Route
+                  path="/classe-ntc"
+                  element={
+                    <RequireAuth allowedRoles={['admission', 'commercial']}>
+                      <ClassNTCView
+                        onSelectStudent={(student, tab) => {
+                          setSelectedStudent(student);
+                          setSelectedTab(tab);
+                        }}
+                      />
+                    </RequireAuth>
+                  }
+                />
+
+                <Route
+                  path="/test"
+                  element={
+                    <RequireAuth allowedRoles={['admission']}>
+                      <TestPage />
+                    </RequireAuth>
+                  }
+                />
+
+                <Route path="/rh" element={<RequireAuth allowedRoles={['rh']}><Outlet /></RequireAuth>}>
+                  <Route path="dashboard" element={<RHView activeSubView="rh-dashboard" />} />
+                  <Route path="fiche" element={<RHView activeSubView="rh-fiche" />} />
+                  <Route path="cerfa" element={<RHView activeSubView="rh-cerfa" />} />
+                  <Route path="pec" element={<RHView activeSubView="rh-pec" />} />
+                  <Route path="ruptures" element={<RHView activeSubView="rh-ruptures" />} />
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                </Route>
+
+                <Route path="/etudiant" element={<RequireAuth allowedRoles={['eleve']}><Outlet /></RequireAuth>}>
+                  <Route path="dashboard" element={<StudentView />} />
+                  <Route path="notes" element={<StudentView />} />
+                  <Route path="documents" element={<StudentView />} />
+                  <Route path="planning" element={<StudentView />} />
+                  <Route path="rdv" element={<StudentView />} />
+                  <Route path="presences" element={<StudentView />} />
+                  <Route path="questionnaires" element={<StudentView />} />
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                </Route>
+
+                <Route
+                  path="/parametres"
+                  element={
+                    <div className="p-8">
+                      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                        <h2 className="mb-4 text-xl font-bold">Parametres</h2>
+                        <p className="text-slate-500">Configuration de l'application (Section en construction)</p>
+                      </div>
+                    </div>
+                  }
+                />
               </Route>
 
-              {/* Admission Routes */}
-              <Route path="/admission" element={
-                <RequireAuth allowedRoles={['admission', 'commercial']}>
-                  <AdmissionView
-                    selectedStudent={selectedStudent}
-                    selectedTab={selectedTab}
-                    onClearSelection={() => {
-                      setSelectedStudent(null);
-                      setSelectedTab(null);
-                    }}
-                  />
-                </RequireAuth>
-              } />
-              <Route path="/classe-ntc" element={
-                <RequireAuth allowedRoles={['admission', 'commercial']}>
-                  <ClassNTCView
-                    onSelectStudent={(student, tab) => {
-                      setSelectedStudent(student);
-                      setSelectedTab(tab);
-                    }}
-                  />
-                </RequireAuth>
-              } />
-
-              <Route path="/test" element={
-                <RequireAuth allowedRoles={['admission']}>
-                  <TestPage />
-                </RequireAuth>
-              } />
-
-              {/* RH Routes */}
-              <Route path="/rh" element={<RequireAuth allowedRoles={['rh']}><Outlet /></RequireAuth>}>
-                <Route path="dashboard" element={<RHView activeSubView="rh-dashboard" />} />
-                <Route path="fiche" element={<RHView activeSubView="rh-fiche" />} />
-                <Route path="cerfa" element={<RHView activeSubView="rh-cerfa" />} />
-                <Route path="pec" element={<RHView activeSubView="rh-pec" />} />
-                <Route path="ruptures" element={<RHView activeSubView="rh-ruptures" />} />
-                <Route index element={<Navigate to="dashboard" replace />} />
-              </Route>
-
-              {/* Other Routes */}
-              <Route path="/etudiant" element={<RequireAuth allowedRoles={['eleve']}><StudentView /></RequireAuth>} />
-              <Route path="/parametres" element={
-                <div className="p-8">
-                  <div className="bg-white border border-slate-200 rounded-2xl p-6">
-                    <h2 className="text-xl font-bold mb-4">Paramètres</h2>
-                    <p className="text-slate-500">Configuration de l'application (Section en construction)</p>
-                  </div>
-                </div>
-              } />
-            </Route>
-
-            {/* Catch-all redirect */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
           </Suspense>
         </main>
       </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { GraduationCap, Monitor, Building2, BookOpen, Briefcase } from 'lucide-react';
+import { getAuthToken } from '../services/session';
 import './LandingPage.css';
 
 const LandingPage: React.FC = () => {
@@ -13,7 +14,7 @@ const LandingPage: React.FC = () => {
     const [userRole, setUserRole] = useState<string | null>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = getAuthToken() || localStorage.getItem('token');
         const role = localStorage.getItem('userRole');
         setIsLoggedIn(!!token);
         setUserRole(role);
@@ -24,7 +25,7 @@ const LandingPage: React.FC = () => {
         if (userRole === 'commercial') return "/commercial/dashboard";
         if (userRole === 'admission') return "/admission";
         if (userRole === 'rh') return "/rh/dashboard";
-        if (userRole === 'eleve') return "/etudiant";
+        if (userRole === 'eleve') return "/etudiant/dashboard";
         return "/admission";
     };
 
@@ -627,3 +628,4 @@ const LandingPage: React.FC = () => {
 };
 
 export default LandingPage;
+
