@@ -12,6 +12,11 @@ export const NATIONALITY_OPTIONS: SelectOption[] = [
     { value: 'Etranger hors Union Européenne', label: 'Etranger hors Union Européenne' }
 ];
 
+export const SEXE_OPTIONS: SelectOption[] = [
+    { value: 'Féminin', label: 'Féminin' },
+    { value: 'Masculin', label: 'Masculin' }
+];
+
 export const DEPARTMENT_OPTIONS: SelectOption[] = [
     { value: "976 Mayotte", label: "976 Mayotte" },
     { value: "974 La Réunion", label: "974 La Réunion" },
@@ -242,8 +247,23 @@ export const FORMATION_SOUHAITEE_OPTIONS: SelectOption[] = [
     { value: 'BTS NDRC 1', label: 'BTS NDRC 1' },
     { value: 'BTS COM', label: 'BTS COM' },
     { value: 'Titre Pro NTC', label: 'Titre Pro NTC' },
-    { value: 'Titre Pro NTC B (rentrée decalée)', label: 'Titre Pro NTC B (rentrée decalée)' },
+    { value: 'Titre Pro NTC B', label: 'Titre Pro NTC B' },
     { value: 'Bachelor RDC', label: 'Bachelor RDC' }
+];
+
+export const ENTREPRISE_ACCUEIL_OPTIONS: SelectOption[] = [
+    { value: 'Oui', label: 'Oui' },
+    { value: 'En recherche', label: 'En recherche' },
+    { value: 'Non', label: 'Non' }
+];
+
+export const EVALUATION_FORMATION_OPTIONS: SelectOption[] = [
+    { value: 'TP NTC', label: 'TP NTC' },
+    { value: 'BTS CI', label: 'BTS CI' },
+    { value: 'BTS COM', label: 'BTS COM' },
+    { value: 'BTS MCO', label: 'BTS MCO' },
+    { value: 'BTS NDRC', label: 'BTS NDRC' },
+    { value: 'BACHELOR RDC', label: 'BACHELOR RDC' }
 ];
 
 export const KNOW_RUSH_SCHOOL_OPTIONS: SelectOption[] = [

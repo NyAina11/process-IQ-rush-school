@@ -36,13 +36,16 @@ import {
     DEPARTMENT_OPTIONS,
     SITUATION_BEFORE_CONTRACT_OPTIONS,
     REGIME_SOCIAL_OPTIONS,
-    DIPLOMA_PREPARED_OPTIONS,
     LAST_CLASS_OPTIONS,
     HIGHEST_DIPLOMA_OPTIONS,
+    DETAILED_DIPLOMA_OPTIONS,
     FORMATION_SOUHAITEE_OPTIONS,
     KNOW_RUSH_SCHOOL_OPTIONS,
-    YES_NO_OPTIONS
+    YES_NO_OPTIONS,
+    SEXE_OPTIONS,
+    ENTREPRISE_ACCUEIL_OPTIONS
 } from '../../constants/formOptions';
+
 
 interface CandidateDetailsModalProps {
     isOpen: boolean;
@@ -133,7 +136,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
             <div className="bg-white relative z-[10000] rounded-[8px] w-full max-w-4xl h-[88vh] overflow-hidden shadow-2xl border border-[#e2e8f0] flex flex-col animate-in zoom-in-95 duration-300">
                 {/* Header */}
                 <div className="p-6 border-b border-[#e2e8f0] flex justify-between items-center bg-white">
-                                        <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-6">
                         <div className="w-14 h-14 rounded-[4px] bg-[#fee2e2] text-[#b91c1c] flex items-center justify-center">
                             <UserCircle size={32} />
                         </div>
@@ -183,10 +186,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                             label="Sexe"
                                             value={editForm?.sexe || ""}
                                             onChange={(e) => setEditForm({ ...editForm, sexe: e.target.value })}
-                                            options={[
-                                                { value: "Féminin", label: "Féminin" },
-                                                { value: "Masculin", label: "Masculin" }
-                                            ]}
+                                            options={SEXE_OPTIONS}
                                         />
                                         <Input label="Date de naissance" type="date" value={editForm?.date_naissance || ""} onChange={(e) => setEditForm({ ...editForm, date_naissance: e.target.value })} />
                                         <Select
@@ -286,29 +286,28 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                             options={FORMATION_SOUHAITEE_OPTIONS}
                                         />
                                         <Select
-                                            label="Dernier diplôme préparé"
-                                            value={editForm?.dernier_diplome_prepare || ""}
-                                            onChange={(e) => setEditForm({ ...editForm, dernier_diplome_prepare: e.target.value })}
-                                            options={DIPLOMA_PREPARED_OPTIONS}
-                                        />
-                                        <Select
-                                            label="Dernière classe suivie"
+                                            label="Dernière année ou classe suivie"
                                             value={editForm?.derniere_classe || ""}
                                             onChange={(e) => setEditForm({ ...editForm, derniere_classe: e.target.value })}
                                             options={LAST_CLASS_OPTIONS}
                                         />
                                         <Select
-                                            label="Diplôme le plus élevé obtenu"
+                                            label="Intitulé précis du dernier diplôme ou titre préparé"
+                                            value={editForm?.intitulePrecisDernierDiplome || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, intitulePrecisDernierDiplome: e.target.value })}
+                                            options={DETAILED_DIPLOMA_OPTIONS}
+                                        />
+                                        <Select
+                                            label="Diplôme ou titre le plus élevé obtenu"
                                             value={editForm?.bac || ""}
                                             onChange={(e) => setEditForm({ ...editForm, bac: e.target.value })}
                                             options={HIGHEST_DIPLOMA_OPTIONS}
                                         />
-                                        <Input label="Intitulé précis diplôme" value={editForm?.intitulePrecisDernierDiplome || ""} onChange={(e) => setEditForm({ ...editForm, intitulePrecisDernierDiplome: e.target.value })} />
                                         <Select
                                             label="Entreprise d'accueil ?"
                                             value={editForm?.entreprise_d_accueil || "Non"}
                                             onChange={(e) => setEditForm({ ...editForm, entreprise_d_accueil: e.target.value })}
-                                            options={[{ value: "Oui", label: "Oui" }, { value: "En recherche", label: "En recherche" }, { value: "Non", label: "Non" }]}
+                                            options={ENTREPRISE_ACCUEIL_OPTIONS}
                                         />
                                         <Select
                                             label="Connu Rush School via"
@@ -549,7 +548,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                 </div>
             </div>
         </div>
-    , document.body);
+        , document.body);
 };
 
 export default CandidateDetailsModal;
