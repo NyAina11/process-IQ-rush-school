@@ -76,7 +76,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </span>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-2 space-y-0.5">
+      <nav className="flex-1 overflow-y-auto scrollbar-hide py-2 space-y-0.5">
 
         {/* ── GESTION ── */}
         {(userRole === 'admission' || userRole === 'commercial' || userRole === 'super_admin' || !userRole) && (
