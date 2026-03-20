@@ -23,7 +23,9 @@ import {
     LAST_CLASS_OPTIONS,
     HIGHEST_DIPLOMA_OPTIONS,
     FORMATION_SOUHAITEE_OPTIONS,
-    KNOW_RUSH_SCHOOL_OPTIONS
+    KNOW_RUSH_SCHOOL_OPTIONS,
+    SEXE_OPTIONS,
+    ENTREPRISE_ACCUEIL_OPTIONS
 } from '../constants/formOptions';
 
 const studentSchema = z.object({
@@ -108,25 +110,22 @@ const SectionAccordion = ({
     isOpen: boolean; onToggle: () => void;
     isComplete: boolean; hasError: boolean; children: React.ReactNode;
 }) => (
-    <div className={`border-2 rounded-[4px] transition-all duration-200 overflow-hidden ${
-        hasError ? 'border-rose-300' : isComplete ? 'border-emerald-200' : isOpen ? 'border-[#6B3CD2]/35' : 'border-slate-200'
-    }`}>
+    <div className={`border-2 rounded-[4px] transition-all duration-200 overflow-hidden ${hasError ? 'border-rose-300' : isComplete ? 'border-emerald-200' : isOpen ? 'border-[#6B3CD2]/35' : 'border-slate-200'
+        }`}>
         <button
             type="button"
             onClick={onToggle}
-            className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${
-                isOpen ? 'bg-slate-50/60 border-b-2 border-slate-100' : 'bg-white hover:bg-slate-50/40'
-            }`}
+            className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${isOpen ? 'bg-slate-50/60 border-b-2 border-slate-100' : 'bg-white hover:bg-slate-50/40'
+                }`}
         >
             {/* Icon */}
-            <div className={`w-9 h-9 rounded-[4px] flex items-center justify-center flex-shrink-0 transition-all ${
-                isComplete ? 'bg-emerald-100 text-emerald-600 border border-emerald-200'
-                : hasError ? 'bg-rose-100 text-rose-500 border border-rose-200'
-                : isOpen ? 'bg-[#6B3CD2]/10 text-[#6B3CD2] border border-[#6B3CD2]/20'
-                : 'bg-slate-100 text-slate-400 border border-slate-200'
-            }`}>
+            <div className={`w-9 h-9 rounded-[4px] flex items-center justify-center flex-shrink-0 transition-all ${isComplete ? 'bg-emerald-100 text-emerald-600 border border-emerald-200'
+                    : hasError ? 'bg-rose-100 text-rose-500 border border-rose-200'
+                        : isOpen ? 'bg-[#6B3CD2]/10 text-[#6B3CD2] border border-[#6B3CD2]/20'
+                            : 'bg-slate-100 text-slate-400 border border-slate-200'
+                }`}>
                 {isComplete
-                    ? <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l3.5 3.5 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    ? <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l3.5 3.5 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     : <Icon size={15} />
                 }
             </div>
@@ -169,9 +168,8 @@ const FieldLabel = ({ children, required }: { children: React.ReactNode; require
 
 // ---- Yes/No toggle ----
 const YesNo = ({ value, onChange, label }: { value: boolean | null; onChange: (v: boolean) => void; label: string }) => (
-    <div className={`flex items-center justify-between p-4 border rounded-[4px] transition-colors ${
-        value === null ? 'bg-white border-slate-200' : 'bg-slate-50/60 border-slate-200'
-    }`}>
+    <div className={`flex items-center justify-between p-4 border rounded-[4px] transition-colors ${value === null ? 'bg-white border-slate-200' : 'bg-slate-50/60 border-slate-200'
+        }`}>
         <div className="flex items-center gap-2.5">
             {value === null && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0"></span>}
             <span className="text-[12px] font-bold text-slate-700">{label}</span>
@@ -182,11 +180,10 @@ const YesNo = ({ value, onChange, label }: { value: boolean | null; onChange: (v
                     key={String(v)}
                     type="button"
                     onClick={() => onChange(v)}
-                    className={`px-4 py-1.5 rounded-[4px] text-[10px] font-black uppercase tracking-wider border-2 transition-all ${
-                        value === v
+                    className={`px-4 py-1.5 rounded-[4px] text-[10px] font-black uppercase tracking-wider border-2 transition-all ${value === v
                             ? 'bg-[#6B3CD2] border-[#6B3CD2] text-white shadow-sm shadow-[#6B3CD2]/20'
                             : 'bg-white border-slate-200 text-slate-400 hover:border-[#6B3CD2]/30 hover:text-[#6B3CD2]'
-                    }`}
+                        }`}
                 >{v ? 'Oui' : 'Non'}</button>
             ))}
         </div>
@@ -398,15 +395,14 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                         <FullCol>
                             <FieldLabel required>Sexe</FieldLabel>
                             <div className="grid grid-cols-2 gap-3">
-                                {['Féminin', 'Masculin'].map(val => (
-                                    <label key={val} className={`flex items-center gap-3 p-3.5 rounded-[4px] border-2 cursor-pointer transition-all ${
-                                        selectedSexe === val ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]' : 'border-slate-200 text-slate-500 hover:border-[#6B3CD2]/30'
-                                    }`}>
-                                        <input type="radio" value={val} className="hidden" {...register('sexe')} />
-                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedSexe === val ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
-                                            {selectedSexe === val && <div className="w-2 h-2 rounded-full bg-[#6B3CD2]" />}
+                                {SEXE_OPTIONS.map(opt => (
+                                    <label key={opt.value} className={`flex items-center gap-3 p-3.5 rounded-[4px] border-2 cursor-pointer transition-all ${selectedSexe === opt.value ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]' : 'border-slate-200 text-slate-500 hover:border-[#6B3CD2]/30'
+                                        }`}>
+                                        <input type="radio" value={opt.value} className="hidden" {...register('sexe')} />
+                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedSexe === opt.value ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
+                                            {selectedSexe === opt.value && <div className="w-2 h-2 rounded-full bg-[#6B3CD2]" />}
                                         </div>
-                                        <span className="text-[12px] font-bold">{val}</span>
+                                        <span className="text-[12px] font-bold">{opt.label}</span>
                                     </label>
                                 ))}
                             </div>
@@ -457,7 +453,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                     >
                         <div className="space-y-5">
                             <div className="flex items-center gap-2 mb-1 px-1 py-2 bg-amber-50 border border-amber-200 rounded-[4px]">
-                                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" className="text-amber-500 flex-shrink-0"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/></svg>
+                                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" className="text-amber-500 flex-shrink-0"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>
                                 <span className="text-[11px] font-bold text-amber-700">Cette section apparaît car le candidat est mineur — renseignez au moins un représentant légal.</span>
                             </div>
                             <div className="bg-slate-50/60 border border-slate-200 rounded-[4px] p-4">
@@ -479,7 +475,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                                     onClick={() => setValue('add_second_representative', !addSecondRep)}
                                     className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 transition-all ${addSecondRep ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/40'}`}
                                 >
-                                    {addSecondRep && <svg viewBox="0 0 10 10" fill="none" width="8" height="8"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                    {addSecondRep && <svg viewBox="0 0 10 10" fill="none" width="8" height="8"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                                 </div>
                                 <input type="checkbox" className="hidden" {...register('add_second_representative')} />
                                 <span className="text-[11px] font-bold text-slate-500">Ajouter un second représentant légal</span>
@@ -522,12 +518,13 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                                 { label: "Travailleur handicapé (RQTH)", name: "declare_travailleur_handicape" as const },
                                 { label: "Déjà fait de l'alternance", name: "alternance" as const },
                             ].map(item => (
-                                <YesNo
-                                    key={item.name}
-                                    label={item.label}
-                                    value={!!formValues[item.name]}
-                                    onChange={v => setValue(item.name, v)}
-                                />
+                                <div key={item.name}>
+                                    <YesNo
+                                        label={item.label}
+                                        value={!!formValues[item.name]}
+                                        onChange={v => setValue(item.name, v)}
+                                    />
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -561,9 +558,8 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                                 {FORMATION_SOUHAITEE_OPTIONS.map(opt => {
                                     const selected = formValues.formation_souhaitee === opt.value;
                                     return (
-                                        <label key={opt.value} className={`flex items-center gap-2 px-3 py-2.5 rounded-[4px] border-2 cursor-pointer transition-all text-[12px] font-bold leading-tight ${
-                                            selected ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]' : 'border-slate-200 text-slate-600 hover:border-[#6B3CD2]/30'
-                                        }`}>
+                                        <label key={opt.value} className={`flex items-center gap-2 px-3 py-2.5 rounded-[4px] border-2 cursor-pointer transition-all text-[12px] font-bold leading-tight ${selected ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]' : 'border-slate-200 text-slate-600 hover:border-[#6B3CD2]/30'
+                                            }`}>
                                             <div className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${selected ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
                                                 {selected && <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]" />}
                                             </div>
@@ -584,17 +580,16 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                         <div>
                             <FieldLabel>Avez-vous déjà une entreprise d'accueil ?</FieldLabel>
                             <div className="grid grid-cols-3 gap-2.5">
-                                {['Oui', 'En recherche', 'Non'].map(val => (
-                                    <label key={val} className={`flex items-center gap-2.5 p-3 rounded-[4px] border-2 cursor-pointer transition-all ${
-                                        selectedEntreprise === val
+                                {ENTREPRISE_ACCUEIL_OPTIONS.map(opt => (
+                                    <label key={opt.value} className={`flex items-center gap-2.5 p-3 rounded-[4px] border-2 cursor-pointer transition-all ${selectedEntreprise === opt.value
                                             ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]'
                                             : 'border-slate-200 text-slate-500 hover:border-[#6B3CD2]/30'
-                                    }`}>
-                                        <input type="radio" value={val} className="hidden" {...register('entreprise_d_accueil')} />
-                                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${selectedEntreprise === val ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
-                                            {selectedEntreprise === val && <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]" />}
+                                        }`}>
+                                        <input type="radio" value={opt.value} className="hidden" {...register('entreprise_d_accueil')} />
+                                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${selectedEntreprise === opt.value ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
+                                            {selectedEntreprise === opt.value && <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]" />}
                                         </div>
-                                        <span className="text-[11px] font-bold">{val}</span>
+                                        <span className="text-[11px] font-bold">{opt.label}</span>
                                     </label>
                                 ))}
                             </div>
@@ -619,11 +614,10 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                     <label className="flex items-start gap-3 cursor-pointer group mb-6">
                         <div
                             onClick={() => setValue('agreement', !formValues.agreement)}
-                            className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
-                                formValues.agreement ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/40'
-                            }`}
+                            className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${formValues.agreement ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/40'
+                                }`}
                         >
-                            {formValues.agreement && <svg viewBox="0 0 10 10" fill="none" width="8" height="8"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                            {formValues.agreement && <svg viewBox="0 0 10 10" fill="none" width="8" height="8"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                         </div>
                         <input type="checkbox" className="hidden" {...register('agreement')} />
                         <span className="text-[12px] font-medium text-slate-600 leading-relaxed">

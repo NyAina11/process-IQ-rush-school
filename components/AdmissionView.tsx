@@ -1078,12 +1078,12 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
         const doc = new jsPDF();
 
         // ── Palette CV minimaliste ─────────────────────────
-        const INK: [number,number,number]    = [26, 32, 44];
-        const ACCENT: [number,number,number] = [107, 60, 210];
-        const SUB: [number,number,number]    = [80, 96, 124];
-        const MUTED: [number,number,number]  = [156, 163, 175];
-        const RULE: [number,number,number]   = [210, 214, 220];
-        const BG: [number,number,number]     = [248, 249, 251];
+        const INK: [number, number, number] = [26, 32, 44];
+        const ACCENT: [number, number, number] = [107, 60, 210];
+        const SUB: [number, number, number] = [80, 96, 124];
+        const MUTED: [number, number, number] = [156, 163, 175];
+        const RULE: [number, number, number] = [210, 214, 220];
+        const BG: [number, number, number] = [248, 249, 251];
 
         // ── Layout ─────────────────────────────────────────
         const W = 210, H = 297, ML = 20, MR = 20;
@@ -1216,12 +1216,12 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
         pb(30);
         const colW = CW / 2;
         const idFields = [
-            { lbl: 'Nom & Prénom',   val: texts.nom || '—'                         },
-            { lbl: 'E-mail',         val: texts.email || '—'                       },
-            { lbl: 'Formation',      val: formatFormation(texts.formation) || '—'  },
-            { lbl: 'Entreprise',     val: texts.entreprise || '—'                  },
-            { lbl: 'Année scolaire', val: texts.annee || '—'                       },
-            { lbl: 'Date',           val: texts.date || '—'                        },
+            { lbl: 'Nom & Prénom', val: texts.nom || '—' },
+            { lbl: 'E-mail', val: texts.email || '—' },
+            { lbl: 'Formation', val: formatFormation(texts.formation) || '—' },
+            { lbl: 'Entreprise', val: texts.entreprise || '—' },
+            { lbl: 'Année scolaire', val: texts.annee || '—' },
+            { lbl: 'Date', val: texts.date || '—' },
         ];
         idFields.forEach((f, i) => {
             const col = i % 2, row = Math.floor(i / 2);
@@ -1252,19 +1252,19 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
         // ── II. COMPÉTENCES ─────────────────────────────────
         section('II. Bilan des Compétences');
         ratingGroup('Commerce & Relationnel', [
-            { label: 'Accueil client',       id: 'c1' }, { label: 'Argumentation / Vente', id: 'c2' },
-            { label: 'Négociation',          id: 'c3' }, { label: 'Gestion réclamations',  id: 'c4' },
-            { label: 'Animation d\'équipe',  id: 'c5' }, { label: 'Communication orale',   id: 'c6' },
+            { label: 'Accueil client', id: 'c1' }, { label: 'Argumentation / Vente', id: 'c2' },
+            { label: 'Négociation', id: 'c3' }, { label: 'Gestion réclamations', id: 'c4' },
+            { label: 'Animation d\'équipe', id: 'c5' }, { label: 'Communication orale', id: 'c6' },
         ]);
         ratingGroup('Digital & Marketing', [
             { label: 'Réseaux sociaux', id: 'd1' }, { label: 'Création de contenu', id: 'd2' },
-            { label: 'Bureautique',     id: 'd3' }, { label: 'CRM',                 id: 'd4' },
-            { label: 'Prospection',     id: 'd5' },
+            { label: 'Bureautique', id: 'd3' }, { label: 'CRM', id: 'd4' },
+            { label: 'Prospection', id: 'd5' },
         ]);
         ratingGroup('Gestion & Organisation', [
-            { label: 'Gestion du temps',    id: 'g1' }, { label: 'Tableaux de bord',   id: 'g2' },
+            { label: 'Gestion du temps', id: 'g1' }, { label: 'Tableaux de bord', id: 'g2' },
             { label: 'Prise d\'initiative', id: 'g3' }, { label: 'Gestion de projets', id: 'g4' },
-            { label: 'Adaptabilité',        id: 'g5' },
+            { label: 'Adaptabilité', id: 'g5' },
         ]);
         if (texts.specsAlternance?.trim()) { sublabel('Compétences spécifiques'); para(texts.specsAlternance); }
 
@@ -1314,8 +1314,8 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
         // Indicateur sobre
         pb(22);
         const mLabel = motivation !== null ? motivationLevels[motivation].label : '—';
-        const mColMap: [number,number,number][] = [
-            [220,38,38],[234,88,12],[202,138,4],[101,163,13],[16,185,129],
+        const mColMap: [number, number, number][] = [
+            [220, 38, 38], [234, 88, 12], [202, 138, 4], [101, 163, 13], [16, 185, 129],
         ];
         const mCol = motivation !== null ? mColMap[motivation] : MUTED;
         doc.setDrawColor(RULE[0], RULE[1], RULE[2]); doc.setLineWidth(0.3);
@@ -1610,11 +1610,10 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                             setIsSubmitting(false);
                         }
                     }}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-[4px] font-black text-[11px] uppercase tracking-widest transition-all shadow-md ${
-                        isSubmitting
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-[4px] font-black text-[11px] uppercase tracking-widest transition-all shadow-md ${isSubmitting
                             ? 'bg-[#6B3CD2]/60 text-white/70 cursor-not-allowed shadow-none'
                             : 'bg-[#6B3CD2] text-white hover:bg-[#5a2eb8] active:scale-95 shadow-[#6B3CD2]/20'
-                    }`}
+                        }`}
                 >
                     {isSubmitting ? (
                         <>
@@ -1955,10 +1954,10 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                                     <p className="text-[13px] text-[#6b7280] mb-7 ml-9">Choisissez la formation pour accéder au test.</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         {[
-                                            { id: 'mco',     title: 'BTS MCO',      subtitle: 'Management Commercial Opérationnel',               duration: '~20 min', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)', shadow: 'rgba(37,99,235,0.25)' },
-                                            { id: 'ndrc',    title: 'BTS NDRC',     subtitle: 'Négociation et Digitalisation de la Relation Client', duration: '~20 min', gradient: 'linear-gradient(135deg, #10b981, #059669)', shadow: 'rgba(5,150,105,0.25)' },
-                                            { id: 'bachelor',title: 'BACHELOR RDC', subtitle: 'Responsable Développement Commercial',                duration: '~25 min', gradient: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', shadow: 'rgba(109,40,217,0.25)' },
-                                            { id: 'tpntc',   title: 'TP NTC',       subtitle: 'Titre Pro Négociateur Technico-Commercial',           duration: '~20 min', gradient: 'linear-gradient(135deg, #f97316, #ea580c)', shadow: 'rgba(234,88,12,0.25)' },
+                                            { id: 'mco', title: 'BTS MCO', subtitle: 'Management Commercial Opérationnel', duration: '~20 min', gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)', shadow: 'rgba(37,99,235,0.25)' },
+                                            { id: 'ndrc', title: 'BTS NDRC', subtitle: 'Négociation et Digitalisation de la Relation Client', duration: '~20 min', gradient: 'linear-gradient(135deg, #10b981, #059669)', shadow: 'rgba(5,150,105,0.25)' },
+                                            { id: 'bachelor', title: 'BACHELOR RDC', subtitle: 'Responsable Développement Commercial', duration: '~25 min', gradient: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', shadow: 'rgba(109,40,217,0.25)' },
+                                            { id: 'tpntc', title: 'TP NTC', subtitle: 'Titre Pro Négociateur Technico-Commercial', duration: '~20 min', gradient: 'linear-gradient(135deg, #f97316, #ea580c)', shadow: 'rgba(234,88,12,0.25)' },
                                         ].map((f, idx) => (
                                             <div
                                                 key={f.id}

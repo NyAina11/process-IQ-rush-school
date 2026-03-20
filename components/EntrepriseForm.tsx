@@ -398,7 +398,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         }
     };
 
-const FICHE_STEPS = ['Entreprise', 'Contact', 'Formation', 'Contrat', 'Validation'];
+    const FICHE_STEPS = ['Entreprise', 'Contact', 'Formation', 'Contrat', 'Validation'];
 
     return (
         <form onSubmit={handleSubmit(onSubmit, onError)} className="animate-fade-in bg-white rounded-[4px] border border-slate-100 shadow-sm relative overflow-hidden">
@@ -408,12 +408,12 @@ const FICHE_STEPS = ['Entreprise', 'Contact', 'Formation', 'Contrat', 'Validatio
                     {FICHE_STEPS.map((step, i) => {
                         const activeIdx = ['id', 'address', 'maitre', 'opco', 'training', 'contract'].indexOf(activeSection);
                         // Approximate mapping for the stepper
-                        const isCurrent = (i === 0 && activeSection === 'id') || 
-                                          (i === 1 && activeSection === 'address') ||
-                                          (i === 2 && activeSection === 'maitre') ||
-                                          (i === 3 && activeSection === 'opco') ||
-                                          (i === 4 && (activeSection === 'training' || activeSection === 'contract'));
-                                          
+                        const isCurrent = (i === 0 && activeSection === 'id') ||
+                            (i === 1 && activeSection === 'address') ||
+                            (i === 2 && activeSection === 'maitre') ||
+                            (i === 3 && activeSection === 'opco') ||
+                            (i === 4 && (activeSection === 'training' || activeSection === 'contract'));
+
                         return (
                             <React.Fragment key={step}>
                                 <div
@@ -732,7 +732,7 @@ const FICHE_STEPS = ['Entreprise', 'Contact', 'Formation', 'Contrat', 'Validatio
                                             );
                                         })}
                                         <span className="text-white/40 text-[10px] font-bold ml-2">
-                                            {["1","2","3","4"].filter(y => (formData.salaire as any)[`age${y}`]).length}/4 configurées
+                                            {["1", "2", "3", "4"].filter(y => (formData.salaire as any)[`age${y}`]).length}/4 configurées
                                         </span>
                                     </div>
                                 </div>
