@@ -112,7 +112,7 @@ const App = () => {
           </Suspense>
         )}
 
-        <main className={`${!isStandalonePage ? 'flex-1 p-8 md:p-10 overflow-y-auto' : 'h-screen'}`}>
+        <main className={`${!isStandalonePage ? 'flex-1 p-8 md:p-10 overflow-y-auto scrollbar-hide' : 'h-screen'}`}>
           <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<LandingPage />} />

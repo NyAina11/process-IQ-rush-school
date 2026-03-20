@@ -85,7 +85,7 @@ const AdminDashboard: React.FC = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-12 overflow-y-auto">
+            <main className="flex-1 p-12 overflow-y-auto scrollbar-hide">
                 <div className="max-w-5xl mx-auto">
                     <header className="mb-12 flex justify-between items-end">
                         <div>
