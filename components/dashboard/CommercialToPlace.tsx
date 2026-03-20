@@ -1,6 +1,5 @@
 import React, { useRef, useCallback } from 'react';
-import { Search, List, LayoutGrid, Eye, CheckCircle2, FileUser, FileText, Download, Hash, Phone, Cake, ChevronLeft, ChevronRight, HeartPulse } from 'lucide-react';
-import Button from '../ui/Button';
+import { Search, List, LayoutGrid, Eye, CheckCircle2, FileUser, FileText, ChevronLeft, ChevronRight, HeartPulse, Phone, Cake, Hash } from 'lucide-react';
 import Pagination from '../ui/Pagination';
 import { formatFormation } from '../../utils/formatters';
 
@@ -32,20 +31,9 @@ const calculateAge = (birthDate: string) => {
 };
 
 const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
-    candidates,
-    searchQuery,
-    setSearchQuery,
-    filterFormation,
-    setFilterFormation,
-    viewMode,
-    setViewMode,
-    currentPage,
-    setCurrentPage,
-    itemsPerPage,
-    handleViewDetails,
-    getC,
-    isPlaced,
-    onPlacer
+    candidates, searchQuery, setSearchQuery, filterFormation, setFilterFormation,
+    viewMode, setViewMode, currentPage, setCurrentPage, itemsPerPage,
+    handleViewDetails, getC, isPlaced, onPlacer
 }) => {
     const tableScrollRef = useRef<HTMLDivElement>(null);
     const scrollAnimRef = useRef<number | null>(null);
@@ -53,9 +41,8 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
     const startScroll = useCallback((direction: 'left' | 'right') => {
         const el = tableScrollRef.current;
         if (!el) return;
-        const speed = 6;
         const step = () => {
-            el.scrollLeft += direction === 'right' ? speed : -speed;
+            el.scrollLeft += direction === 'right' ? 6 : -6;
             scrollAnimRef.current = requestAnimationFrame(step);
         };
         scrollAnimRef.current = requestAnimationFrame(step);
@@ -69,324 +56,262 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
     }, []);
 
     const availableFormations = [
-        'BTS MCO A',
-        'BTS MCO 2',
-        'BTS NDRC 1',
-        'BTS COM',
-        'Titre Pro NTC',
-        'Titre Pro NTC B (rentrée decalée)',
-        'Bachelor RDC'
+        'BTS MCO A', 'BTS MCO 2', 'BTS NDRC 1', 'BTS COM',
+        'Titre Pro NTC', 'Titre Pro NTC B (rentrée decalée)', 'Bachelor RDC'
     ];
 
     const filteredStudents = (candidates || []).filter(c => !isPlaced(c)).filter(raw => {
         if (!raw) return false;
-        const studentInfo = getC(raw);
-        if (!studentInfo) return false;
-
-        const searchLower = (searchQuery || '').toLowerCase();
-        const fullName = `${studentInfo.nom || ''} ${studentInfo.prenom || ''}`.toLowerCase();
-        const email = (studentInfo.email || '').toLowerCase();
-        const formation = (studentInfo.formation || '').toLowerCase();
-        const telephone = String(studentInfo.telephone || '').toLowerCase();
-        const numInscription = String(studentInfo.numero_inscription || '').toLowerCase();
-
-        // Search match
-        const matchesSearch = fullName.includes(searchLower) ||
-            email.includes(searchLower) ||
-            formation.includes(searchLower) ||
-            telephone.includes(searchLower) ||
-            numInscription.includes(searchLower);
-
-        if (!matchesSearch) return false;
-
-        // Formation filter match
-        if (filterFormation && filterFormation !== 'all' && studentInfo.formation !== filterFormation) {
-            return false;
-        }
-
+        const s = getC(raw);
+        if (!s) return false;
+        const q = (searchQuery || '').toLowerCase();
+        const match = `${s.nom || ''} ${s.prenom || ''} ${s.email || ''} ${s.formation || ''} ${s.telephone || ''} ${s.numero_inscription || ''}`.toLowerCase();
+        if (!match.includes(q)) return false;
+        if (filterFormation && filterFormation !== 'all' && s.formation !== filterFormation) return false;
         return true;
     }).sort((a, b) => {
-        const numA = parseInt(getC(a).numero_inscription || '0', 10);
-        const numB = parseInt(getC(b).numero_inscription || '0', 10);
-        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        const nA = parseInt(getC(a).numero_inscription || '0', 10);
+        const nB = parseInt(getC(b).numero_inscription || '0', 10);
+        if (!isNaN(nA) && !isNaN(nB)) return nA - nB;
         return (getC(a).numero_inscription || '').localeCompare(getC(b).numero_inscription || '');
     });
 
     const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
-    const paginatedStudents = filteredStudents.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
+    const paginated = filteredStudents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    const DocBtn = ({ has, url, name, icon: Icon, color, hoverBg }: any) => has ? (
+        <button
+            onClick={() => { if (!url) return; const a = document.createElement('a'); a.href = url; a.download = name || 'document'; a.target = '_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center border transition-all hover:scale-105"
+            style={{ background: `${color}15`, color, borderColor: `${color}30` }}
+            title="Télécharger"
+        >
+            <Icon size={14} strokeWidth={2.5} />
+        </button>
+    ) : (
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-[#e5e0f5] bg-[#fafafa] text-[#d1d5db]">
+            <Icon size={14} strokeWidth={2.5} />
+        </div>
     );
 
-    const handleDownload = (element: any, url: string, filename: string) => {
-        if (!url) return;
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename || 'document';
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
-            <div className="bg-gradient-to-br from-rose-500 via-rose-600 to-orange-600 rounded-[2.5rem] p-10 mb-10 text-white shadow-2xl shadow-rose-500/30 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 blur-3xl group-hover:bg-white/20 transition-all duration-1000"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-rose-400/20 rounded-full -ml-32 -mb-32 blur-3xl"></div>
-                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <div className="flex items-center gap-8">
-                        <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/40 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-500">
-                            <Search size={40} className="text-white drop-shadow-md" />
-                        </div>
-                        <div>
-                            <h1 className="text-4xl font-black tracking-tighter mb-2 drop-shadow-sm">Étudiants à placer</h1>
-                            <p className="text-rose-50 font-semibold text-lg opacity-90 max-w-xl leading-relaxed">
-                                {filteredStudents.length} candidats recherchent actuellement une alternance.
-                            </p>
-                        </div>
+        <div className="animate-fade-in pb-10 space-y-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+
+            {/* ── HERO ── */}
+            <div className="relative overflow-hidden rounded-2xl min-h-[148px] flex items-center px-10 py-8"
+                style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%)' }}>
+                <div className="absolute inset-0 opacity-[0.03]"
+                    style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }} />
+                <div className="absolute top-[-40px] right-[-40px] w-56 h-56 rounded-full opacity-20 blur-3xl" style={{ background: '#a78bfa' }} />
+                <div className="absolute bottom-[-30px] left-[30%] w-40 h-40 rounded-full opacity-15 blur-2xl" style={{ background: '#c4b5fd' }} />
+                <div className="relative z-10">
+                    <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-1 rounded-lg mb-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/80">Recherche active • Commercial</span>
                     </div>
+                    <h1 className="text-[28px] font-extrabold text-white leading-tight tracking-tight mb-1">Étudiants à placer</h1>
+                    <p className="text-white/65 text-[14px] font-medium">
+                        {filteredStudents.length} candidats recherchent actuellement une alternance.
+                    </p>
                 </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-6 mb-10 border border-white/20 shadow-xl flex flex-wrap justify-between items-center gap-6">
-                <div className="flex flex-wrap items-center gap-6 flex-1 min-w-[300px]">
-                    <div className="relative flex-1 min-w-[240px] max-w-md group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors duration-300" size={22} />
-                        <input
-                            type="text"
-                            placeholder="Rechercher par nom, email, téléphone ou n° inscription..."
-                            className="w-full pl-14 pr-6 py-4 bg-slate-50/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-rose-500 focus:shadow-lg focus:shadow-rose-500/10 outline-none transition-all duration-300 font-bold text-slate-700 placeholder:text-slate-400"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex flex-wrap items-center gap-4">
-                        <select
-                            className="px-6 py-4 bg-slate-50/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-rose-500 outline-none transition-all duration-300 font-black text-sm text-slate-600 cursor-pointer hover:bg-slate-100"
-                            value={filterFormation}
-                            onChange={(e) => setFilterFormation(e.target.value)}
-                        >
-                            <option value="all">Toutes formations</option>
-                            {availableFormations.map(f => (
-                                <option key={f} value={f}>{f}</option>
-                            ))}
-                        </select>
-                    </div>
+            {/* ── FILTERS ── */}
+            <div className="bg-white border border-[#e5e0f5] rounded-2xl p-4 flex flex-wrap items-center gap-3 shadow-sm">
+                <div className="relative flex-1 min-w-[240px]">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9ca3af]" size={16} />
+                    <input
+                        type="text"
+                        placeholder="Rechercher par nom, email, téléphone ou n° inscription..."
+                        className="w-full pl-10 pr-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[13px] font-medium text-[#374151] placeholder:text-[#9ca3af] outline-none focus:border-[#6d28d9]/40 focus:bg-white transition-all"
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                    />
                 </div>
-                <div className="flex items-center gap-1 p-1.5 bg-slate-100/50 rounded-[1.5rem] border border-slate-200/50 shrink-0">
-                    <button onClick={() => setViewMode('table')} className={`flex items-center gap-2 px-4 py-2.5 rounded-[1.2rem] font-black text-xs md:text-sm transition-all duration-300 ${viewMode === 'table' ? 'bg-white text-rose-600 shadow-lg shadow-rose-500/10' : 'text-slate-500 hover:text-slate-700'}`}>
-                        <List size={18} strokeWidth={3} /> Liste
+                <select
+                    className="px-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[13px] font-medium text-[#374151] outline-none focus:border-[#6d28d9]/40 cursor-pointer transition-all"
+                    value={filterFormation}
+                    onChange={e => setFilterFormation(e.target.value)}
+                >
+                    <option value="all">Toutes formations</option>
+                    {availableFormations.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
+                <div className="flex items-center gap-1 p-1 bg-[#f5f3ff] rounded-xl border border-[#e5e0f5]">
+                    <button
+                        onClick={() => setViewMode('table')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-semibold transition-all ${viewMode === 'table' ? 'bg-white text-[#6d28d9] shadow-sm border border-[#e5e0f5]' : 'text-[#9ca3af] hover:text-[#6d28d9]'}`}
+                    >
+                        <List size={15} /> Liste
                     </button>
-                    <button onClick={() => setViewMode('cards')} className={`flex items-center gap-2 px-4 py-2.5 rounded-[1.2rem] font-black text-xs md:text-sm transition-all duration-300 ${viewMode === 'cards' ? 'bg-white text-rose-600 shadow-lg shadow-rose-500/10' : 'text-slate-500 hover:text-slate-700'}`}>
-                        <LayoutGrid size={18} strokeWidth={3} /> Cartes
+                    <button
+                        onClick={() => setViewMode('cards')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-semibold transition-all ${viewMode === 'cards' ? 'bg-white text-[#6d28d9] shadow-sm border border-[#e5e0f5]' : 'text-[#9ca3af] hover:text-[#6d28d9]'}`}
+                    >
+                        <LayoutGrid size={15} /> Cartes
                     </button>
                 </div>
             </div>
+
+            {/* ── TABLE ── */}
             {viewMode === 'table' ? (
-                <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] border border-white/20 shadow-2xl overflow-hidden relative group/table">
-                    {/* Left scroll zone */}
-                    <div
-                        className="absolute left-0 top-0 bottom-0 w-12 z-10 flex items-center justify-start pl-1 opacity-0 group-hover/table:opacity-100 transition-opacity cursor-w-resize"
-                        style={{ background: 'linear-gradient(to right, rgba(244,63,94,0.1), transparent)' }}
-                        onMouseEnter={() => startScroll('left')}
-                        onMouseLeave={stopScroll}
-                    >
-                        <ChevronLeft size={24} className="text-rose-500" strokeWidth={3} />
+                <div className="bg-white border border-[#e5e0f5] rounded-2xl overflow-hidden shadow-sm relative group/table">
+                    <div className="absolute left-0 top-0 bottom-0 w-10 z-10 opacity-0 group-hover/table:opacity-100 transition-opacity cursor-w-resize flex items-center justify-start pl-1"
+                        style={{ background: 'linear-gradient(to right, rgba(109,40,217,0.08), transparent)' }}
+                        onMouseEnter={() => startScroll('left')} onMouseLeave={stopScroll}>
+                        <ChevronLeft size={20} color="#6d28d9" strokeWidth={2.5} />
                     </div>
-                    {/* Right scroll zone */}
-                    <div
-                        className="absolute right-0 top-0 bottom-0 w-12 z-10 flex items-center justify-end pr-1 opacity-0 group-hover/table:opacity-100 transition-opacity cursor-e-resize"
-                        style={{ background: 'linear-gradient(to left, rgba(244,63,94,0.1), transparent)' }}
-                        onMouseEnter={() => startScroll('right')}
-                        onMouseLeave={stopScroll}
-                    >
-                        <ChevronRight size={24} className="text-rose-500" strokeWidth={3} />
+                    <div className="absolute right-0 top-0 bottom-0 w-10 z-10 opacity-0 group-hover/table:opacity-100 transition-opacity cursor-e-resize flex items-center justify-end pr-1"
+                        style={{ background: 'linear-gradient(to left, rgba(109,40,217,0.08), transparent)' }}
+                        onMouseEnter={() => startScroll('right')} onMouseLeave={stopScroll}>
+                        <ChevronRight size={20} color="#6d28d9" strokeWidth={2.5} />
                     </div>
 
-                    <div className="overflow-x-auto no-scrollbar" ref={tableScrollRef}>
+                    <div className="overflow-x-auto" ref={tableScrollRef}>
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-slate-50/50 border-b border-slate-100">
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">N° Inscription</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Étudiant</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Formation</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400 text-center">Âge / Tél</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400 text-center">Docs</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400">Ville</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.08em] text-slate-400 text-right">Actions</th>
+                                <tr className="border-b border-[#e5e0f5]">
+                                    {['N° Inscription', 'Étudiant', 'Formation', 'Âge / Tél', 'Docs', 'Ville', 'Actions'].map(h => (
+                                        <th key={h} className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#9ca3af]">{h}</th>
+                                    ))}
                                 </tr>
                             </thead>
                             <tbody>
-                                {paginatedStudents.map((raw) => {
+                                {paginated.map(raw => {
                                     const c = getC(raw);
                                     return (
-                                        <tr key={c.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
-                                            <td className="px-8 py-6">
-                                                <div className="w-10 h-10 rounded-[4px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-[10px] uppercase shadow-inner">
-                                                    {c.numero_inscription || "N/A"}
+                                        <tr key={c.id} className="border-b border-[#f5f3ff] hover:bg-[#fafafa] transition-colors group">
+                                            <td className="px-6 py-4">
+                                                <div className="w-9 h-9 rounded-lg bg-[#f5f3ff] border border-[#e5e0f5] flex items-center justify-center text-[#6d28d9] font-bold text-[11px]">
+                                                    {c.numero_inscription || '–'}
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-[4px] bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-slate-500 text-xs"> {String(c.nom || '?')[0]}{String(c.prenom || '?')[0]} </div>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-lg bg-[#f5f3ff] border border-[#e5e0f5] flex items-center justify-center font-bold text-[#6d28d9] text-[11px]">
+                                                        {String(c.nom || '?')[0]}{String(c.prenom || '?')[0]}
+                                                    </div>
                                                     <div>
-                                                        <div className="text-sm font-black text-slate-800 tracking-tight">{c.nom?.toUpperCase()} {c.prenom}</div>
-                                                        <div className="text-[10px] font-bold text-slate-400">{c.email}</div>
+                                                        <div className="text-[13px] font-semibold text-[#1e1b2e]">{c.nom?.toUpperCase()} {c.prenom}</div>
+                                                        <div className="text-[11px] text-[#9ca3af]">{c.email}</div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-6">
-                                                <div className="inline-flex items-center px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-500 border border-slate-100 text-[10px] font-black uppercase tracking-wider">
+                                            <td className="px-6 py-4">
+                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] text-[11px] font-semibold whitespace-nowrap">
                                                     {formatFormation(c.formation)}
-                                                </div>
+                                                </span>
                                             </td>
-                                            <td className="px-8 py-6">
-                                                <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
-                                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                        <Phone size={12} className="text-rose-500" strokeWidth={3} />
-                                                        {c.telephone || "N/A"}
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#374151]">
+                                                        <Phone size={11} color="#6d28d9" strokeWidth={2.5} />
+                                                        {c.telephone || '–'}
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
-                                                        <Cake size={11} className="text-rose-400" />
-                                                        {calculateAge(c.date_naissance) ? `${calculateAge(c.date_naissance)} ans` : "N/A"}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-6">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">CV</span>
-                                                        {c.has_cv ? (
-                                                            <button 
-                                                                onClick={() => handleDownload(raw, c.cv_url, c.cv_name)}
-                                                                className="w-8 h-8 rounded-[4px] bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all border border-rose-100 shadow-sm"
-                                                                title="Télécharger le CV"
-                                                            >
-                                                                <FileUser size={14} strokeWidth={2.5} />
-                                                            </button>
-                                                        ) : (
-                                                            <div className="w-8 h-8 rounded-[4px] bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100" title="CV non disponible">
-                                                                <FileUser size={14} strokeWidth={2.5} />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Lettre</span>
-                                                        {c.has_lettre_motivation ? (
-                                                            <button 
-                                                                onClick={() => handleDownload(raw, c.lettre_motivation_url, c.lettre_motivation_name)}
-                                                                className="w-8 h-8 rounded-[4px] bg-orange-50 text-orange-600 flex items-center justify-center hover:bg-orange-600 hover:text-white transition-all border border-orange-100 shadow-sm"
-                                                                title="Télécharger la lettre de motivation"
-                                                            >
-                                                                <FileText size={14} strokeWidth={2.5} />
-                                                            </button>
-                                                        ) : (
-                                                            <div className="w-8 h-8 rounded-[4px] bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100" title="Lettre non disponible">
-                                                                <FileText size={14} strokeWidth={2.5} />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Vitale</span>
-                                                        {c.has_vitale ? (
-                                                            <button 
-                                                                onClick={() => handleDownload(raw, c.vitale_url, c.vitale_name)}
-                                                                className="w-8 h-8 rounded-[4px] bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100 shadow-sm"
-                                                                title="Télécharger la carte vitale"
-                                                            >
-                                                                <HeartPulse size={14} strokeWidth={2.5} />
-                                                            </button>
-                                                        ) : (
-                                                            <div className="w-8 h-8 rounded-[4px] bg-slate-50 text-slate-200 flex items-center justify-center border border-slate-100" title="Carte vitale non disponible">
-                                                                <HeartPulse size={14} strokeWidth={2.5} />
-                                                            </div>
-                                                        )}
+                                                    <div className="flex items-center gap-1.5 text-[11px] text-[#9ca3af]">
+                                                        <Cake size={11} color="#9ca3af" />
+                                                        {calculateAge(c.date_naissance) ? `${calculateAge(c.date_naissance)} ans` : '–'}
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-6 text-sm font-bold text-slate-600">{c.ville}</td>
-                                            <td className="px-8 py-6 text-right">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-[9px] font-semibold text-[#9ca3af] uppercase tracking-wider">CV</span>
+                                                        <DocBtn has={c.has_cv} url={c.cv_url} name={c.cv_name} icon={FileUser} color="#6d28d9" />
+                                                    </div>
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-[9px] font-semibold text-[#9ca3af] uppercase tracking-wider">Lettre</span>
+                                                        <DocBtn has={c.has_lettre_motivation} url={c.lettre_motivation_url} name={c.lettre_motivation_name} icon={FileText} color="#f97316" />
+                                                    </div>
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-[9px] font-semibold text-[#9ca3af] uppercase tracking-wider">Vitale</span>
+                                                        <DocBtn has={c.has_vitale} url={c.vitale_url} name={c.vitale_name} icon={HeartPulse} color="#22c55e" />
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-[13px] font-medium text-[#374151]">{c.ville}</td>
+                                            <td className="px-6 py-4">
                                                 <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => handleViewDetails(c.id)} className="p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all" title="Détails"> <Eye size={18} /> </button>
-                                                    <button 
-                                                        onClick={() => onPlacer?.(raw)}
-                                                        className="p-2 bg-emerald-500 rounded-xl shadow-lg shadow-emerald-500/20 text-white hover:bg-emerald-600 transition-all scale-110"
-                                                        title="Placer l'étudiant (Fiche Entreprise)"
-                                                    > 
-                                                        <CheckCircle2 size={18} strokeWidth={3} /> 
+                                                    <button onClick={() => handleViewDetails(c.id)}
+                                                        className="p-2 rounded-lg bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] hover:bg-[#6d28d9] hover:text-white transition-all">
+                                                        <Eye size={15} />
+                                                    </button>
+                                                    <button onClick={() => onPlacer?.(raw)}
+                                                        className="p-2 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-sm shadow-emerald-500/20">
+                                                        <CheckCircle2 size={15} strokeWidth={2.5} />
                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
                                     );
                                 })}
+                                {paginated.length === 0 && (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-16 text-center text-[#9ca3af] text-[13px] font-medium">
+                                            Aucun étudiant ne correspond à votre recherche.
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {paginatedStudents.map((raw) => {
+                /* ── CARDS ── */
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {paginated.map(raw => {
                         const c = getC(raw);
                         return (
-                            <div key={c.id} className="bg-white rounded-none p-7 border border-slate-200 hover:shadow-xl transition-all group relative overflow-hidden flex flex-col">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-rose-500/10 transition-colors"></div>
-                                <div className="flex justify-between items-start mb-6 relative z-10">
-                                    <div className="w-12 h-12 rounded-[4px] bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-lg shadow-sm">
-                                        {c.numero_inscription ? c.numero_inscription.slice(-4) : `${String(c.nom || '?')[0]}${String(c.prenom || '?')[0]}`}
+                            <div key={c.id} className="bg-white border border-[#e5e0f5] rounded-2xl p-6 hover:shadow-md hover:border-[#6d28d9]/20 transition-all group flex flex-col">
+                                <div className="flex justify-between items-start mb-5">
+                                    <div className="w-11 h-11 rounded-xl bg-[#f5f3ff] border border-[#e5e0f5] flex items-center justify-center text-[#6d28d9] font-bold text-[13px]">
+                                        {String(c.nom || '?')[0]}{String(c.prenom || '?')[0]}
                                     </div>
                                     <div className="flex flex-col items-end gap-1">
-                                        <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-[4px] text-[9px] font-black uppercase tracking-widest border border-rose-100">Hors poste</span>
-                                        <div className="flex items-center gap-1 font-black text-[9px] text-slate-400 tracking-widest uppercase">
-                                            <Hash size={10} strokeWidth={3} />
-                                            {c.numero_inscription}
+                                        <span className="px-2.5 py-1 bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] rounded-lg text-[9px] font-semibold uppercase tracking-widest">Hors poste</span>
+                                        <div className="flex items-center gap-1 text-[9px] text-[#9ca3af] font-medium uppercase tracking-wider">
+                                            <Hash size={9} /> {c.numero_inscription}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mb-6 relative z-10">
-                                    <h3 className="text-lg font-black text-slate-800 mb-1 tracking-tight">{c.nom?.toUpperCase()} {c.prenom}</h3>
-                                    <p className="text-xs text-slate-400 truncate mb-3">{c.email}</p>
-                                    <div className="inline-flex items-center px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-600 border border-slate-200 text-[9px] font-black uppercase tracking-widest">
+
+                                <div className="mb-4">
+                                    <h3 className="text-[15px] font-semibold text-[#1e1b2e] mb-0.5 tracking-tight">{c.nom?.toUpperCase()} {c.prenom}</h3>
+                                    <p className="text-[11px] text-[#9ca3af] truncate mb-3">{c.email}</p>
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap">
                                         {formatFormation(c.formation)}
-                                    </div>
-                                </div>
-                                <div className="space-y-4 mb-6 relative z-10 flex-grow">
-                                    <div className="flex items-center justify-between text-xs pb-3 border-b border-slate-50">
-                                        <span className="text-slate-400 font-bold uppercase text-[9px] tracking-widest">Localisation</span>
-                                        <span className="text-slate-700 font-bold">{c.ville}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-xs pb-3 border-b border-slate-50">
-                                        <span className="text-slate-400 font-bold uppercase text-[9px] tracking-widest">Âge</span>
-                                        <span className="text-slate-700 font-bold">{calculateAge(c.date_naissance) ? `${calculateAge(c.date_naissance)} ans` : "N/A"}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="text-slate-400 font-bold uppercase text-[9px] tracking-widest">Contact</span>
-                                        <span className="text-slate-700 font-bold truncate max-w-[150px]">{c.telephone}</span>
-                                    </div>
+                                    </span>
                                 </div>
 
-                                <div className="flex items-center gap-2 mb-8 p-3 bg-slate-50 border border-slate-100 rounded-[4px] relative z-10">
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mr-auto">Documents:</span>
-                                    <button 
-                                        disabled={!c.has_cv}
-                                        onClick={() => handleDownload(raw, c.cv_url, c.cv_name)}
-                                        className={`w-9 h-9 rounded-[4px] transition-all flex items-center justify-center ${c.has_cv ? 'bg-rose-50 text-rose-500 border border-rose-100 hover:bg-rose-500 hover:text-white shadow-sm' : 'bg-slate-100 text-slate-300 border border-slate-200'}`}
-                                    >
-                                        <FileUser size={16} strokeWidth={2.5} />
-                                    </button>
-                                    <button 
-                                        disabled={!c.has_lettre_motivation}
-                                        onClick={() => handleDownload(raw, c.lettre_motivation_url, c.lettre_motivation_name)}
-                                        className={`w-9 h-9 rounded-[4px] transition-all flex items-center justify-center ${c.has_lettre_motivation ? 'bg-orange-50 text-orange-600 border border-orange-100 hover:bg-orange-600 hover:text-white shadow-sm' : 'bg-slate-100 text-slate-300 border border-slate-200'}`}
-                                    >
-                                        <FileText size={16} strokeWidth={2.5} />
-                                    </button>
+                                <div className="space-y-2.5 mb-4 flex-grow text-[12px]">
+                                    {[
+                                        { label: 'Localisation', value: c.ville },
+                                        { label: 'Âge', value: calculateAge(c.date_naissance) ? `${calculateAge(c.date_naissance)} ans` : '–' },
+                                        { label: 'Contact', value: c.telephone },
+                                    ].map(({ label, value }) => (
+                                        <div key={label} className="flex justify-between items-center py-2 border-b border-[#f5f3ff]">
+                                            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9ca3af]">{label}</span>
+                                            <span className="font-medium text-[#374151]">{value || '–'}</span>
+                                        </div>
+                                    ))}
                                 </div>
 
-                                <div className="flex gap-0.5 relative z-10">
-                                    <Button variant="secondary" className="flex-1 font-black !rounded-none !py-4" onClick={() => handleViewDetails(c.id)} leftIcon={<Eye size={18} strokeWidth={3} />}> Détails </Button>
-                                    <Button variant="danger" className="flex-1 font-black !bg-rose-500 hover:!bg-rose-600 shadow-lg shadow-rose-500/20 !rounded-none !py-4" onClick={() => onPlacer?.(raw)} leftIcon={<CheckCircle2 size={18} strokeWidth={3} />}> Placer </Button>
+                                <div className="flex items-center gap-2 p-3 bg-[#fafafa] border border-[#e5e0f5] rounded-xl mb-4">
+                                    <span className="text-[9px] font-semibold text-[#9ca3af] uppercase tracking-wider mr-auto">Documents</span>
+                                    <DocBtn has={c.has_cv} url={c.cv_url} name={c.cv_name} icon={FileUser} color="#6d28d9" />
+                                    <DocBtn has={c.has_lettre_motivation} url={c.lettre_motivation_url} name={c.lettre_motivation_name} icon={FileText} color="#f97316" />
+                                    <DocBtn has={c.has_vitale} url={c.vitale_url} name={c.vitale_name} icon={HeartPulse} color="#22c55e" />
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <button onClick={() => handleViewDetails(c.id)}
+                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#e5e0f5] text-[12px] font-semibold text-[#6d28d9] hover:bg-[#f5f3ff] transition-all">
+                                        <Eye size={14} /> Détails
+                                    </button>
+                                    <button onClick={() => onPlacer?.(raw)}
+                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 text-white text-[12px] font-semibold hover:bg-emerald-600 transition-all shadow-sm shadow-emerald-500/20">
+                                        <CheckCircle2 size={14} strokeWidth={2.5} /> Placer
+                                    </button>
                                 </div>
                             </div>
                         );
@@ -394,11 +319,7 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
                 </div>
             )}
 
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
     );
 };
