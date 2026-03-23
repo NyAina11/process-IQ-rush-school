@@ -199,7 +199,42 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                                 <Select label="Type de contrat" options={CONTRAT_TYPE_OPTIONS} value={editForm?.contrat?.type_contrat} onChange={e => updateNestedField('contrat.type_contrat', e.target.value)} />
                                                 <Select label="Type de dérogation" options={DEROGATION_TYPE_OPTIONS} value={editForm?.contrat?.type_derogation} onChange={e => updateNestedField('contrat.type_derogation', e.target.value)} />
                                                 <Input label="Poste occupé" value={editForm?.contrat?.poste_occupe} onChange={e => updateNestedField('contrat.poste_occupe', e.target.value)} />
-                                                <Input label="Durée hebdomadaire" value={editForm?.contrat?.duree_hebdomadaire} onChange={e => updateNestedField('contrat.duree_hebdomadaire', e.target.value)} />
+                                                <div className="flex flex-col gap-1.5">
+                                                    <label className="text-sm font-semibold text-slate-700 ml-1">
+                                                        Durée hebdomadaire <span className="text-red-500">*</span>
+                                                    </label>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex-1">
+                                                            <Input
+                                                                type="number"
+                                                                placeholder="HH"
+                                                                min="0"
+                                                                value={editForm?.contrat?.duree_hebdomadaire?.split(':')[0] || ''}
+                                                                onChange={(e) => {
+                                                                    const h = e.target.value || '0';
+                                                                    const m = editForm?.contrat?.duree_hebdomadaire?.split(':')[1] || '00';
+                                                                    updateNestedField('contrat.duree_hebdomadaire', `${h}:${m}`);
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <span className="font-bold text-slate-400">:</span>
+                                                        <div className="flex-1">
+                                                            <Input
+                                                                type="number"
+                                                                placeholder="mm"
+                                                                min="0"
+                                                                max="59"
+                                                                value={editForm?.contrat?.duree_hebdomadaire?.split(':')[1] || ''}
+                                                                onChange={(e) => {
+                                                                    let m = e.target.value || '0';
+                                                                    if (parseInt(m) > 59) m = '59';
+                                                                    const h = editForm?.contrat?.duree_hebdomadaire?.split(':')[0] || '35';
+                                                                    updateNestedField('contrat.duree_hebdomadaire', `${h}:${m.padStart(2, '0')}`);
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <Input label="Date conclusion" type="date" value={editForm?.contrat?.date_conclusion} onChange={e => updateNestedField('contrat.date_conclusion', e.target.value)} />
                                                 <Input label="Début exécution" type="date" value={editForm?.contrat?.date_debut_execution} onChange={e => updateNestedField('contrat.date_debut_execution', e.target.value)} />
                                                 <Select label="OPCO" options={OPCO_OPTIONS} value={editForm?.opco?.nom} onChange={e => updateNestedField('opco.nom', e.target.value)} />
@@ -298,7 +333,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                                 {renderInfoRow("Début exécution", fields["Date de début exécution"], Clock)}
                                                 {renderInfoRow("Fin contrat", fields["Fin du contrat apprentissage"], Clock)}
                                                 {renderInfoRow("Poste occupé", fields["Poste occupé"], Briefcase)}
-                                                {renderInfoRow("Durée hebdomadaire", fields["Durée hebdomadaire"], Clock)}
+                                                {renderInfoRow("Durée hebdomadaire", company.contrat?.duree_hebdomadaire || "35:00", Clock)}
                                                 {renderInfoRow("Machines dangereuses", fields["Travail sur machines dangereuses ou exposition à des risques particuliers"], ShieldCheck)}
                                             </div>
 

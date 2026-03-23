@@ -86,7 +86,7 @@ const companySchema = z.object({
         type_derogation: z.string().optional().or(z.literal("")),
         date_debut: z.string().optional().or(z.literal("")),
         date_fin: z.string().optional().or(z.literal("")),
-        duree_hebdomadaire: z.string().min(1, "Durée requise"),
+        duree_hebdomadaire: z.string().min(1, "Durée requise").regex(/^\d+:[0-5]\d$/, "Format invalide (HH:mm)"),
         poste_occupe: z.string().optional().or(z.literal("")),
         lieu_execution: z.string().optional().or(z.literal("")),
 
@@ -224,7 +224,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                 siret: "918 707 704 00014", adresse: "6 rue des Bateliers", complement: "", code_postal: "92110", commune: "CLICHY"
             },
             contrat: draftCompany?.contrat || {
-                type_contrat: "", type_derogation: "", date_debut: "", date_fin: "", duree_hebdomadaire: "35", poste_occupe: "",
+                type_contrat: "", type_derogation: "", date_debut: "", date_fin: "", duree_hebdomadaire: "35:00", poste_occupe: "",
                 lieu_execution: "",
                 pourcentage_smic1: 0, smic1: "smic", montant_salaire_brut1: 0,
                 pourcentage_smic2: 0, smic2: "smic", montant_salaire_brut2: 0,
@@ -684,7 +684,43 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                 <Select label="Type de dérogation" {...register('contrat.type_derogation')} placeholder="Sélectionnez si applicable" options={DEROGATION_TYPE_OPTIONS} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
-                                <Input label="Durée hebdomadaire" required placeholder="Ex: 35" error={errors.contrat?.duree_hebdomadaire?.message} {...register('contrat.duree_hebdomadaire')} />
+                                <label className="text-sm font-semibold text-slate-700 ml-1 block mb-2">
+                                    Durée hebdomadaire <span className="text-red-500">*</span>
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <div className="flex-1">
+                                        <Input
+                                            type="number"
+                                            placeholder="HH"
+                                            min="0"
+                                            value={watch('contrat.duree_hebdomadaire')?.split(':')[0] || ''}
+                                            onChange={(e) => {
+                                                const h = e.target.value || '0';
+                                                const m = watch('contrat.duree_hebdomadaire')?.split(':')[1] || '00';
+                                                setValue('contrat.duree_hebdomadaire', `${h}:${m}`, { shouldValidate: true });
+                                            }}
+                                        />
+                                    </div>
+                                    <span className="font-bold text-slate-400">:</span>
+                                    <div className="flex-1">
+                                        <Input
+                                            type="number"
+                                            placeholder="mm"
+                                            min="0"
+                                            max="59"
+                                            value={watch('contrat.duree_hebdomadaire')?.split(':')[1] || ''}
+                                            onChange={(e) => {
+                                                let m = e.target.value || '0';
+                                                if (parseInt(m) > 59) m = '59';
+                                                const h = watch('contrat.duree_hebdomadaire')?.split(':')[0] || '35';
+                                                setValue('contrat.duree_hebdomadaire', `${h}:${m.padStart(2, '0')}`, { shouldValidate: true });
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                {errors.contrat?.duree_hebdomadaire && (
+                                    <p className="mt-1 text-rose-500 text-xs font-bold">{errors.contrat.duree_hebdomadaire.message}</p>
+                                )}
                             </div>
                             <div className="col-span-12">
                                 <Input label="Poste occupé" placeholder="Intitulé exact du poste" error={errors.contrat?.poste_occupe?.message} {...register('contrat.poste_occupe')} />

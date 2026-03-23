@@ -44,3 +44,23 @@ export const formatFormation = (value: string) => {
   if (!value) return value;
   return value.replace(/\s*\(rentrée decalée\)/gi, '').trim();
 };
+
+export const decimalToTime = (decimal: string | number): string => {
+  if (!decimal) return "35:00";
+  const num = parseFloat(String(decimal).replace(',', '.'));
+  if (isNaN(num)) return "35:00";
+  
+  const hours = Math.floor(num);
+  const minutes = Math.round((num - hours) * 60);
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
+export const timeToDecimal = (time: string): string => {
+  if (!time) return "35";
+  if (!time.includes(':')) return time;
+  const [hours, minutes] = time.split(':').map(Number);
+  if (isNaN(hours) || isNaN(minutes)) return time;
+  
+  const decimal = hours + (minutes / 60);
+  return parseFloat(decimal.toFixed(2)).toString();
+};

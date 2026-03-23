@@ -1,4 +1,5 @@
 import { StudentFormData, CompanyFormData, ApiResponse } from '../types';
+import { decimalToTime, timeToDecimal } from '../utils/formatters';
 
 const BASE_API_URL = import.meta.env.VITE_BASE_API_URL || 'https://processiqfilegenerator.onrender.com/api';
 const AUTH_API_URL = `${BASE_API_URL}/auth`;
@@ -10,6 +11,7 @@ const formatString = (str: string) => {
   // Replace underscores with spaces and capitalize first letter
   return str.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
 };
+
 
 // Helper to safely access nested fields from Airtable-style response
 const getField = (data: any, fieldName: string, defaultValue: any = "") => {
@@ -191,7 +193,7 @@ const mapBackendToCompany = (backendData: any): any => {
       type_derogation: fields["Type de dérogation"] || "",
       date_debut: fields["Date de début exécution"] || "",
       date_fin: fields["Fin du contrat apprentissage"] || "",
-      duree_hebdomadaire: fields["Durée hebdomadaire"] || "",
+      duree_hebdomadaire: decimalToTime(fields["Durée hebdomadaire"] || "35"),
       poste_occupe: fields["Poste occupé"] || "",
       lieu_execution: fields["Lieu dexécution du contrat (si différent du siège)"] || "",
 
@@ -409,7 +411,7 @@ const mapCompanyToBackend = (data: any) => {
         type_derogation: ensureString(data.contrat?.type_derogation),
         date_debut: ensureString(data.formation?.date_debut || data.contrat?.date_debut),
         date_fin: ensureString(data.formation?.date_fin || data.contrat?.date_fin),
-        duree_hebdomadaire: ensureString(data.contrat?.duree_hebdomadaire),
+        duree_hebdomadaire: timeToDecimal(ensureString(data.contrat?.duree_hebdomadaire)),
         poste_occupe: ensureString(data.contrat?.poste_occupe),
         lieu_execution: ensureString(data.contrat?.lieu_execution),
         pourcentage_smic1: data.contrat?.pourcentage_smic1 || 0,
@@ -502,7 +504,7 @@ const mapCompanyToBackend = (data: any) => {
       type_derogation: ensureString(data["Type de dérogation"]),
       date_debut: ensureString(data["Date de début exécution"]),
       date_fin: ensureString(data["Fin du contrat apprentissage"]),
-      duree_hebdomadaire: ensureString(data["Durée hebdomadaire"]),
+      duree_hebdomadaire: timeToDecimal(ensureString(data["Durée hebdomadaire"])),
       poste_occupe: ensureString(data["Poste occupé"]),
       lieu_execution: ensureString(data["Lieu dexécution du contrat (si différent du siège)"]),
       pourcentage_smic1: data["Pourcentage du SMIC 1"] || data["Pourcentage smic 1"] || 0,
@@ -1166,7 +1168,7 @@ export const api = {
   async getHistory(studentId: string): Promise<any[]> {
     try {
       console.log('📤 Fetching History for:', studentId);
-      const response = await fetch(`${BASE_URL}/historique/${studentId}`, {
+      const response = await fetch(`${BASE_URL}/historique-utilisateurs`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
@@ -1175,7 +1177,18 @@ export const api = {
         throw new Error('History not found');
       }
       const json = await response.json();
-      return Array.isArray(json) ? json : (json.data || []);
+      
+      // La nouvelle API retourne typiquement { success: true, data: [...] }
+      const allHistory = Array.isArray(json) ? json : (json.data || []);
+      
+      // On filtre l'historique pour ne garder que celui de l'étudiant concerné s'il y a un champ d'identification
+      return allHistory.filter((item: any) => 
+        item.studentId === studentId || 
+        item.candidat_id === studentId || 
+        item.candidatId === studentId ||
+        item.record_id === studentId ||
+        item.eleve_id === studentId
+      );
     } catch (error) {
       console.warn('⚠️ History API error, using mock data');
       return [

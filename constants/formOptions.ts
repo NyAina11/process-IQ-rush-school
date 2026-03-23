@@ -296,11 +296,11 @@ export const EMPLOYER_TYPE_OPTIONS: SelectOption[] = [
 ];
 
 export const EMPLOYER_SPECIFIC_OPTIONS: SelectOption[] = [
-    { value: "Entreprise de travail temporaire", label: "Entreprise de travail temporaire" },
-    { value: "Groupement demployeurs", label: "Groupement d'employeurs" },
-    { value: "Employeur saisonnier", label: "Employeur saisonnier" },
-    { value: "Apprentissage familial", label: "Apprentissage familial" },
-    { value: "Aucun de ces cas", label: "Aucun de ces cas" }
+    { value: "Entreprise de travail temporaire", label: "1 Entreprise de travail temporaire" },
+    { value: "Groupement demployeurs", label: "2 Groupement d’employeurs" },
+    { value: "Employeur saisonnier", label: "3 Employeur saisonnier" },
+    { value: "Apprentissage familial", label: "4 Apprentissage familial : l’employeur est un ascendant de l’apprenti" },
+    { value: "Aucun de ces cas", label: "0 Aucun de ces cas" }
 ];
 
 export const MAITRE_DIPLOMA_OPTIONS: SelectOption[] = [
