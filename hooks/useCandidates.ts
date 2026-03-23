@@ -12,8 +12,9 @@ export const getC = (c: any) => {
     else alt = alt || "Non";
 
     // Normalize enterprise info
-    const id_ent = c.id_entreprise || c.record_id_entreprise || d.id_entreprise || d.record_id_entreprise || d['ID Entreprise'] || d['record_id_entreprise'];
-    const nom_ent = c.entreprise_raison_sociale || d.entreprise_raison_sociale || d['Raison sociale (from Entreprise)'] || d['Entreprise daccueil'] || info.entreprise_d_accueil || d.entreprise;
+    const raw_id_ent = c.id_entreprise || c.record_id_entreprise || d.id_entreprise || d.record_id_entreprise || d['ID Entreprise'] || d['record_id_entreprise'] || d['Entreprise'];
+    const id_ent = Array.isArray(raw_id_ent) ? raw_id_ent[0] : raw_id_ent;
+    const nom_ent = c.entreprise_raison_sociale || d.entreprise_raison_sociale || d['Raison sociale (from Entreprise)'] || d['Entreprise d\'accueil'] || d['Entreprise daccueil'] || info.entreprise_d_accueil || d.entreprise;
 
     return {
         id: c.record_id || c.id || d.id || d.record_id,
@@ -76,9 +77,54 @@ export const getC = (c: any) => {
 
 export const isPlaced = (c: any) => {
     const data = getC(c);
+    if (!data) return false;
+    
+    const idEnt = data.id_entreprise;
     const ent = data.entreprise;
-    const hasEntId = !!data.id_entreprise;
-    return hasEntId || (ent && ent !== 'Non' && ent !== 'En recherche' && ent !== 'En cours' && ent !== 'null' && ent !== 'En recherche');
+
+    const placeholders = [
+        'Non', 'OUI', 'Oui', 'Non', 'En recherche', 'En cours', 'null', 'undefined',
+        'Aucun', 'N/A', '', 'À définir', 'À confirmer', 'en recherche', 'En Recherche', '[]',
+        'En attente', 'A voir', 'Pas d\'entreprise', 'Non renseigné', 'Pas encore', 'A définir (rentrée décalée)',
+        'En cours de recherche', 'En recherche d\'entreprise', 'Pas d\'entreprise', 'cherchant', 'Recherche en cours', 'Yes'
+    ];
+
+    // Helper to check if a string looks like a real Airtable record ID
+    const sId = (data.id || '').toString();
+    const isRealAirtableId = (id: any): boolean => {
+        if (!id || typeof id !== 'string') return false;
+        const trimmed = id.trim();
+        // If the ID matches the student's own ID, it's not a valid enterprise link
+        if (sId && trimmed === sId) return false;
+        // Airtable record IDs always start with 'rec'
+        return trimmed.startsWith('rec') && trimmed.length >= 10 && !placeholders.includes(trimmed);
+    };
+
+    // 1. Check if we have a real record ID link (the most reliable signal)
+    let hasValidId = false;
+    if (Array.isArray(idEnt)) {
+        hasValidId = idEnt.some(id => isRealAirtableId(id));
+    } else {
+        hasValidId = isRealAirtableId(idEnt);
+    }
+
+    if (hasValidId) return true;
+
+    // 2. Fallback to enterprise name check (only if ID is missing or invalid)
+    if (!ent || typeof ent !== 'string' || ent.trim().length === 0) return false;
+
+    const normalizedEnt = ent.trim().toLowerCase();
+    
+    // 3. Special case: if entreprise name is identical to student name, it's likely a data error
+    const sNom = (data.nom || '').trim().toLowerCase();
+    const sPrenom = (data.prenom || '').trim().toLowerCase();
+    if (sNom && sPrenom) {
+        const studentName = `${sNom} ${sPrenom}`;
+        const studentNameRev = `${sPrenom} ${sNom}`;
+        if (normalizedEnt === studentName || normalizedEnt === studentNameRev) return false;
+    }
+
+    return !placeholders.some(p => p.toLowerCase() === normalizedEnt);
 };
 
 export const useCandidates = () => {

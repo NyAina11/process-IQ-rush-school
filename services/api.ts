@@ -1,7 +1,7 @@
 import { StudentFormData, CompanyFormData, ApiResponse } from '../types';
 import { decimalToTime, timeToDecimal } from '../utils/formatters';
 
-const BASE_API_URL = import.meta.env.VITE_BASE_API_URL || 'https://processiqfilegenerator.onrender.com/api';
+const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 const AUTH_API_URL = `${BASE_API_URL}/auth`;
 const BASE_URL = `${BASE_API_URL}/admission`;
 
@@ -1177,14 +1177,14 @@ export const api = {
         throw new Error('History not found');
       }
       const json = await response.json();
-      
+
       // La nouvelle API retourne typiquement { success: true, data: [...] }
       const allHistory = Array.isArray(json) ? json : (json.data || []);
-      
+
       // On filtre l'historique pour ne garder que celui de l'étudiant concerné s'il y a un champ d'identification
-      return allHistory.filter((item: any) => 
-        item.studentId === studentId || 
-        item.candidat_id === studentId || 
+      return allHistory.filter((item: any) =>
+        item.studentId === studentId ||
+        item.candidat_id === studentId ||
         item.candidatId === studentId ||
         item.record_id === studentId ||
         item.eleve_id === studentId
