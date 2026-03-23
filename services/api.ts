@@ -1396,9 +1396,17 @@ export const api = {
 
     const json = await response.json().catch(() => ({}));
     if (!response.ok) {
+      const safeEmpty = { data: [], pagination: { page: 1, limit: 50, total: 0, pages: 0 } };
       if (response.status === 404) {
         console.warn('Support endpoint not available on this backend:', SUPPORT_URL + '/bugs');
-        return { data: [], pagination: { page: 1, limit: 50, total: 0, pages: 0 } };
+        return safeEmpty;
+      }
+      console.error('Support API error (getBugReports):', {
+        status: response.status,
+        body: json
+      });
+      if (response.status >= 500) {
+        return safeEmpty;
       }
       throw new Error(json?.error || `Impossible de charger les tickets (${response.status})`);
     }
