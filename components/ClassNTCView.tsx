@@ -44,7 +44,7 @@ import { useApi } from '../hooks/useApi';
 import { useCandidates, getC, isPlaced } from '../hooks/useCandidates';
 import { usePagination } from '../hooks/usePagination';
 import Pagination from './ui/Pagination';
-import { formatFormation } from '../utils/formatters';
+import { formatFormation, decimalToTime } from '../utils/formatters';
 
 interface ClassNTCViewProps {
     onSelectStudent: (student: any, tab: AdmissionTab) => void;
@@ -165,7 +165,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                 type_derogation: f["Type de dérogation"] || "",
                 date_conclusion: f["Date de conclusion"] || "",
                 date_debut_execution: f["Date de début exécution"] || "",
-                duree_hebdomadaire: f["Durée hebdomadaire"] || "",
+                duree_hebdomadaire: decimalToTime(f["Durée hebdomadaire"] || "35"),
                 poste_occupe: f["Poste occupé"] || "",
                 lieu_execution: f["Lieu dexécution du contrat (si différent du siège)"] || "",
                 machines_dangereuses: f["Travail sur machines dangereuses ou exposition à des risques particuliers"] || "",

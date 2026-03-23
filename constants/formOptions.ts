@@ -183,62 +183,67 @@ export const DETAILED_DIPLOMA_OPTIONS: SelectOption[] = [
     { value: "13 Aucun diplôme ni titre professionnel", label: "13 Aucun diplôme ni titre professionnel" }
 ];
 
-export const LAST_CLASS_OPTIONS: SelectOption[] = toOptions([
-    'Diplôme obtenu',
-    '1ère année suivie et validée',
-    '1ère année validée',
-    '1ère année suivie non validée',
-    '1ère année non validée',
-    '2ème année suivie et validée',
-    '2ème année validée',
-    '2ème année suivie non validée',
-    '2ème année non validée',
-    '3ème année suivie et validée',
-    '3ème année validée',
-    '3ème année suivie non validée',
-    '3ème année non validée',
-    'Fin du collège',
-    'Études interrompues en 3ème',
-    'Études interrompues en 4ème'
-]);
+export const LAST_CLASS_OPTIONS: SelectOption[] = [
+    { value: 'Diplôme obtenu', label: '01 l’apprenti a suivi la dernière année du cycle de formation et a obtenu le diplôme ou titre' },
+    { value: '1ère année suivie et validée', label: '11 l’apprenti a suivi la 1ère année du cycle et l’a validée (examens réussis mais année non diplômante)' },
+    { value: '1ère année suivie non validée', label: '12 l’apprenti a suivi la 1ère année du cycle mais ne l’a pas validée (échec aux examens, interruption ou abandon de formation)' },
+    { value: '2ème année suivie et validée', label: '21 l’apprenti a suivi la 2è année du cycle et l’a validée (examens réussis mais année non diplômante)' },
+    { value: '2ème année suivie non validée', label: '22 l’apprenti a suivi la 2è année du cycle mais ne l’a pas validée (échec aux examens, interruption ou abandon de formation)' },
+    { value: '3ème année suivie et validée', label: '31 l’apprenti a suivi la 3è année du cycle et l’a validée (examens réussis mais année non diplômante, cycle adaptés)' },
+    { value: '3ème année suivie non validée', label: '32 l’apprenti a suivi la 3è année du cycle mais ne l’a pas validée (échec aux examens, interruption ou abandon de formation)' },
+    { value: 'Fin du collège', label: '40 l’apprenti a achevé le 1er cycle de l’enseignement secondaire (collège)' },
+    { value: 'Études interrompues en 3ème', label: '41 l’apprenti a interrompu ses études en classe de 3è' },
+    { value: 'Études interrompues en 4ème', label: '42 l’apprenti a interrompu ses études en classe de 4è' }
+];
 
 export const HIGHEST_DIPLOMA_OPTIONS: SelectOption[] = [
-    { value: "Doctorat", label: "Doctorat" },
-    { value: "Master", label: "Master" },
-    { value: "Diplôme ingénieur", label: "Diplôme ingénieur" },
-    { value: "Diplôme école de commerce", label: "Diplôme école de commerce" },
-    { value: "Autre diplôme ou titre bac +5 ou plus", label: "Autre diplôme ou titre bac +5 ou plus" },
-    { value: "Licence professionnelle", label: "Licence professionnelle" },
-    { value: "Licence générale", label: "Licence générale" },
-    { value: "Bachelor universitaire de technologie (BUT)", label: "Bachelor universitaire de technologie (BUT)" },
-    { value: "Autre diplôme ou titre bac +3 ou 4", label: "Autre diplôme ou titre bac +3 ou 4" },
-    { value: "Brevet de Technicien Supérieur (BTS)", label: "Brevet de Technicien Supérieur (BTS)" },
-    { value: "BTS", label: "BTS" },
-    { value: "BTS MCO", label: "BTS MCO" },
-    { value: "BTS NDRC", label: "BTS NDRC" },
-    { value: "BTS COM", label: "BTS COM" },
-    { value: "TP NTC", label: "TP NTC" },
-    { value: "Bachelor RDC", label: "Bachelor RDC" },
-    { value: "Diplôme Universitaire de Technologie (DUT)", label: "Diplôme Universitaire de Technologie (DUT)" },
-    { value: "DUT", label: "DUT" },
-    { value: "Autre diplôme ou titre bac +2", label: "Autre diplôme ou titre bac +2" },
-    { value: "Baccalauréat professionnel", label: "Baccalauréat professionnel" },
-    { value: "Bac Pro", label: "Bac Pro" },
-    { value: "Baccalauréat général", label: "Baccalauréat général" },
-    { value: "Bac général", label: "Bac général" },
-    { value: "Baccalauréat technologique", label: "Baccalauréat technologique" },
-    { value: "Bac techno", label: "Bac techno" },
-    { value: "Diplôme de spécialisation professionnelle", label: "Diplôme de spécialisation professionnelle" },
-    { value: "Autre diplôme ou titre niveau bac", label: "Autre diplôme ou titre niveau bac" },
-    { value: "CAP", label: "CAP" },
-    { value: "BEP", label: "BEP" },
-    { value: "Certificat de spécialisation", label: "Certificat de spécialisation" },
-    { value: "Autre diplôme ou titre CAP/BEP", label: "Autre diplôme ou titre CAP/BEP" },
-    { value: "Diplôme National du Brevet", label: "Diplôme National du Brevet" },
-    { value: "Brevet", label: "Brevet" },
-    { value: "Certificat de Formation Générale", label: "Certificat de Formation Générale" },
-    { value: "Aucun diplôme ni titre professionnel", label: "Aucun diplôme ni titre professionnel" },
-    { value: "Aucun", label: "Aucun" }
+    { value: "header1", label: "Diplôme ou titre de niveau bac +5 et plus", disabled: true },
+    { value: "Doctorat", label: "80 Doctorat" },
+    { value: "Master", label: "73 Master" },
+    { value: "Diplôme ingénieur", label: "75 Diplôme d'ingénieur" },
+    { value: "Diplôme école de commerce", label: "76 Diplôme d'école de commerce" },
+    { value: "Autre diplôme ou titre bac +5 ou plus", label: "79 Autre diplôme ou titre de niveau bac+5 ou plus" },
+    
+    { value: "header2", label: "Diplôme ou titre de niveau bac +3 et 4", disabled: true },
+    { value: "Licence professionnelle", label: "62 Licence professionnelle" },
+    { value: "Licence générale", label: "63 Licence générale" },
+    { value: "Bachelor universitaire de technologie (BUT)", label: "64 Bachelor universitaire de technologie BUT" },
+    { value: "Bachelor RDC", label: "64 Bachelor universitaire de technologie BUT" },
+    { value: "Autre diplôme ou titre bac +3 ou 4", label: "69 Autre diplôme ou titre de niveau bac +3 ou 4" },
+    
+    { value: "header3", label: "Diplôme ou titre de niveau bac +2", disabled: true },
+    { value: "Brevet de Technicien Supérieur (BTS)", label: "54 Brevet de Technicien Supérieur" },
+    { value: "BTS", label: "54 Brevet de Technicien Supérieur" },
+    { value: "BTS MCO", label: "54 Brevet de Technicien Supérieur" },
+    { value: "BTS NDRC", label: "54 Brevet de Technicien Supérieur" },
+    { value: "BTS COM", label: "54 Brevet de Technicien Supérieur" },
+    { value: "TP NTC", label: "54 Brevet de Technicien Supérieur" },
+    { value: "Diplôme Universitaire de Technologie (DUT)", label: "55 Diplôme Universitaire de technologie" },
+    { value: "DUT", label: "55 Diplôme Universitaire de technologie" },
+    { value: "Autre diplôme ou titre bac +2", label: "58 Autre diplôme ou titre de niveau bac+2" },
+    
+    { value: "header4", label: "Diplôme ou titre de niveau bac", disabled: true },
+    { value: "Baccalauréat professionnel", label: "41 Baccalauréat professionnel" },
+    { value: "Bac Pro", label: "41 Baccalauréat professionnel" },
+    { value: "Baccalauréat général", label: "42 Baccalauréat général" },
+    { value: "Bac général", label: "42 Baccalauréat général" },
+    { value: "Baccalauréat technologique", label: "43 Baccalauréat technologique" },
+    { value: "Bac techno", label: "43 Baccalauréat technologique" },
+    { value: "Diplôme de spécialisation professionnelle", label: "44 Diplôme de spécialisation professionnelle" },
+    { value: "Autre diplôme ou titre niveau bac", label: "49 Autre diplôme ou titre de niveau bac" },
+    
+    { value: "header5", label: "Diplôme ou titre de niveau CAP/BEP", disabled: true },
+    { value: "CAP", label: "33 CAP" },
+    { value: "BEP", label: "34 BEP" },
+    { value: "Certificat de spécialisation", label: "35 Certificat de spécialisation (ex-Mention complémentaire)" },
+    { value: "Autre diplôme ou titre CAP/BEP", label: "38 Autre diplôme ou titre de niveau CAP/BEP" },
+    
+    { value: "header6", label: "Aucun diplôme ni titre", disabled: true },
+    { value: "Diplôme National du Brevet", label: "25 Diplôme national du Brevet" },
+    { value: "Brevet", label: "25 Diplôme national du Brevet" },
+    { value: "Certificat de Formation Générale", label: "26 Certificat de formation générale" },
+    { value: "Aucun diplôme ni titre professionnel", label: "13 Aucun diplôme ni titre" },
+    { value: "Aucun", label: "13 Aucun diplôme ni titre" }
 ];
 
 export const FORMATION_SOUHAITEE_OPTIONS: SelectOption[] = [
@@ -296,11 +301,11 @@ export const EMPLOYER_TYPE_OPTIONS: SelectOption[] = [
 ];
 
 export const EMPLOYER_SPECIFIC_OPTIONS: SelectOption[] = [
-    { value: "Entreprise de travail temporaire", label: "Entreprise de travail temporaire" },
-    { value: "Groupement demployeurs", label: "Groupement d'employeurs" },
-    { value: "Employeur saisonnier", label: "Employeur saisonnier" },
-    { value: "Apprentissage familial", label: "Apprentissage familial" },
-    { value: "Aucun de ces cas", label: "Aucun de ces cas" }
+    { value: "Entreprise de travail temporaire", label: "1 Entreprise de travail temporaire" },
+    { value: "Groupement demployeurs", label: "2 Groupement d’employeurs" },
+    { value: "Employeur saisonnier", label: "3 Employeur saisonnier" },
+    { value: "Apprentissage familial", label: "4 Apprentissage familial : l’employeur est un ascendant de l’apprenti" },
+    { value: "Aucun de ces cas", label: "0 Aucun de ces cas" }
 ];
 
 export const MAITRE_DIPLOMA_OPTIONS: SelectOption[] = [

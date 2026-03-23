@@ -9,7 +9,7 @@ import { api } from '../services/api';
 import Button from './ui/Button';
 import { useAppStore } from '../store/useAppStore';
 import CompanyDetailsModal from './dashboard/CompanyDetailsModal';
-import { formatFormation } from '../utils/formatters';
+import { formatFormation, decimalToTime } from '../utils/formatters';
 
 const HERO_STYLE = {
     background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%)',
@@ -83,8 +83,8 @@ const TableWrapper = ({ children }: { children: React.ReactNode }) => (
     </div>
 );
 
-const Th = ({ children }: { children: React.ReactNode }) => (
-    <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-[#9ca3af] whitespace-nowrap border-b border-[#e5e0f5]">
+const Th = ({ children, ...props }: any) => (
+    <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-[#9ca3af] whitespace-nowrap border-b border-[#e5e0f5]" {...props}>
         {children}
     </th>
 );
@@ -144,7 +144,7 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
             adresse: { num: f["Numéro entreprise"] || "", voie: f["Voie entreprise"] || "", complement: f["Complément dadresse entreprise"] || "", code_postal: f["Code postal entreprise"] || "", ville: f["Ville entreprise"] || "", telephone: f["Téléphone entreprise"] || "", email: f["Email entreprise"] || "" },
             maitre_apprentissage: { nom: f["Nom Maître apprentissage"] || "", prenom: f["Prénom Maître apprentissage"] || "", date_naissance: f["Date de naissance Maître apprentissage"] || "", fonction: f["Fonction Maître apprentissage"] || "", diplome: f["Diplôme Maître apprentissage"] || "", experience: f["Année experience pro Maître apprentissage"] || "", telephone: f["Téléphone Maître apprentissage"] || "", email: f["Email Maître apprentissage"] || "" },
             opco: { nom: f["Nom OPCO"] || "" },
-            contrat: { type_contrat: f["Type de contrat"] || "", type_derogation: f["Type de dérogation"] || "", date_conclusion: f["Date de conclusion"] || "", date_debut_execution: f["Date de début exécution"] || "", duree_hebdomadaire: f["Durée hebdomadaire"] || "", poste_occupe: f["Poste occupé"] || "", lieu_execution: f["Lieu dexécution du contrat (si différent du siège)"] || "", machines_dangereuses: f["Travail sur machines dangereuses ou exposition à des risques particuliers"] || "", caisse_retraite: f["Caisse de retraite"] || "", numero_deca_ancien_contrat: f["Numéro DECA de ancien contrat"] || "", date_avenant: f["date Si avenant"] || "", montant_salaire_brut1: f["Salaire brut mensuel 1"] || 0, montant_salaire_brut2: f["Salaire brut mensuel 2"] || 0, montant_salaire_brut3: f["Salaire brut mensuel 3"] || 0, montant_salaire_brut4: f["Salaire brut mensuel 4"] || 0 },
+            contrat: { type_contrat: f["Type de contrat"] || "", type_derogation: f["Type de dérogation"] || "", date_conclusion: f["Date de conclusion"] || "", date_debut_execution: f["Date de début exécution"] || "", duree_hebdomadaire: decimalToTime(f["Durée hebdomadaire"] || "35"), poste_occupe: f["Poste occupé"] || "", lieu_execution: f["Lieu dexécution du contrat (si différent du siège)"] || "", machines_dangereuses: f["Travail sur machines dangereuses ou exposition à des risques particuliers"] || "", caisse_retraite: f["Caisse de retraite"] || "", numero_deca_ancien_contrat: f["Numéro DECA de ancien contrat"] || "", date_avenant: f["date Si avenant"] || "", montant_salaire_brut1: f["Salaire brut mensuel 1"] || 0, montant_salaire_brut2: f["Salaire brut mensuel 2"] || 0, montant_salaire_brut3: f["Salaire brut mensuel 3"] || 0, montant_salaire_brut4: f["Salaire brut mensuel 4"] || 0 },
             formation: { choisie: f["Formation"] || "", code_rncp: f["Code Rncp"] || "", code_diplome: f["Code  diplome"] || "", nb_heures: f["nombre heure formation"] || "", jours_cours: f["jour de cours"] || "", date_debut: f["Date de début exécution"] || "", date_fin: f["Fin du contrat apprentissage"] || "" },
             cfa: { rush_school: "oui", entreprise: "non", denomination: "RUSH SCHOOL", uai: "0932731W", siret: "91901416300018", adresse: "11-13 AVENUE DE LA DIVISION LECLERC", complement: "", code_postal: "93000", commune: "BOBIGNY" },
             missions: { formation_alternant: f["Formation de lalternant(e) (pour les missions)"] || "", selectionnees: [] },
