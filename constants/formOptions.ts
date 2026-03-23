@@ -183,24 +183,18 @@ export const DETAILED_DIPLOMA_OPTIONS: SelectOption[] = [
     { value: "13 Aucun diplôme ni titre professionnel", label: "13 Aucun diplôme ni titre professionnel" }
 ];
 
-export const LAST_CLASS_OPTIONS: SelectOption[] = toOptions([
-    'Diplôme obtenu',
-    '1ère année suivie et validée',
-    '1ère année validée',
-    '1ère année suivie non validée',
-    '1ère année non validée',
-    '2ème année suivie et validée',
-    '2ème année validée',
-    '2ème année suivie non validée',
-    '2ème année non validée',
-    '3ème année suivie et validée',
-    '3ème année validée',
-    '3ème année suivie non validée',
-    '3ème année non validée',
-    'Fin du collège',
-    'Études interrompues en 3ème',
-    'Études interrompues en 4ème'
-]);
+export const LAST_CLASS_OPTIONS: SelectOption[] = [
+    { value: 'Diplôme obtenu', label: '01 l’apprenti a suivi la dernière année du cycle de formation et a obtenu le diplôme ou titre' },
+    { value: '1ère année suivie et validée', label: '11 l’apprenti a suivi la 1ère année du cycle et l’a validée (examens réussis mais année non diplômante)' },
+    { value: '1ère année suivie non validée', label: '12 l’apprenti a suivi la 1ère année du cycle mais ne l’a pas validée (échec aux examens, interruption ou abandon de formation)' },
+    { value: '2ème année suivie et validée', label: '21 l’apprenti a suivi la 2è année du cycle et l’a validée (examens réussis mais année non diplômante)' },
+    { value: '2ème année suivie non validée', label: '22 l’apprenti a suivi la 2è année du cycle mais ne l’a pas validée (échec aux examens, interruption ou abandon de formation)' },
+    { value: '3ème année suivie et validée', label: '31 l’apprenti a suivi la 3è année du cycle et l’a validée (examens réussis mais année non diplômante, cycle adaptés)' },
+    { value: '3ème année suivie non validée', label: '32 l’apprenti a suivi la 3è année du cycle mais ne l’a pas validée (échec aux examens, interruption ou abandon de formation)' },
+    { value: 'Fin du collège', label: '40 l’apprenti a achevé le 1er cycle de l’enseignement secondaire (collège)' },
+    { value: 'Études interrompues en 3ème', label: '41 l’apprenti a interrompu ses études en classe de 3è' },
+    { value: 'Études interrompues en 4ème', label: '42 l’apprenti a interrompu ses études en classe de 4è' }
+];
 
 export const HIGHEST_DIPLOMA_OPTIONS: SelectOption[] = [
     { value: "Doctorat", label: "Doctorat" },
