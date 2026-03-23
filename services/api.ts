@@ -1396,7 +1396,11 @@ export const api = {
 
     const json = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(json?.error || 'Impossible de charger les tickets');
+      if (response.status === 404) {
+        console.warn('Support endpoint not available on this backend:', SUPPORT_URL + '/bugs');
+        return { data: [], pagination: { page: 1, limit: 50, total: 0, pages: 0 } };
+      }
+      throw new Error(json?.error || `Impossible de charger les tickets (${response.status})`);
     }
 
     return {
