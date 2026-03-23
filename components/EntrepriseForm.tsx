@@ -115,8 +115,8 @@ const companySchema = z.object({
         nombre_mois: z.number().optional(),
 
         // MAPPINGS DES PÉRIODES DE SALAIRE
-        date_debut_2periode_1er_annee: z.string().min(1, "Date de début requise"),
-        date_fin_2periode_1er_annee: z.string().min(1, "Date de fin requise"),
+        date_debut_2periode_1er_annee: z.string().optional().or(z.literal("")),
+        date_fin_2periode_1er_annee: z.string().optional().or(z.literal("")),
 
         date_debut_1periode_2eme_annee: z.string().optional().or(z.literal("")),
         date_fin_1periode_2eme_annee: z.string().optional().or(z.literal("")),
@@ -133,6 +133,17 @@ const companySchema = z.object({
         date_debut_2periode_4eme_annee: z.string().optional().or(z.literal("")),
         date_fin_2periode_4eme_annee: z.string().optional().or(z.literal(""))
     }).superRefine((data, ctx) => {
+        // Validation Dates de base
+        if (data.date_conclusion && data.date_debut_execution) {
+            if (new Date(data.date_conclusion) > new Date(data.date_debut_execution)) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "La date de conclusion doit être avant ou égale à la date de début d'exécution",
+                    path: ["date_debut_execution"]
+                });
+            }
+        }
+
         const conclusion = data.date_conclusion ? new Date(data.date_conclusion) : null;
 
         // Vérification des périodes
@@ -152,10 +163,10 @@ const companySchema = z.object({
                     });
                 }
 
-                if (checkConclusion && conclusion && start <= conclusion) {
+                if (checkConclusion && conclusion && start < conclusion) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
-                        message: `La date de début doit être après la date de conclusion`,
+                        message: `La date de début doit être après ou égale à la date de conclusion`,
                         path: [startKey]
                     });
                 }
@@ -732,10 +743,10 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                 <Input label="N° DECA ancien contrat" placeholder="Si applicable" {...register('contrat.numero_deca_ancien_contrat')} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
-                                <Input label="Date début exécution" type="date" error={errors.contrat?.date_debut_execution?.message} {...register('contrat.date_debut_execution')} />
+                                <Input label="Date de conclusion" type="date" error={errors.contrat?.date_conclusion?.message} {...register('contrat.date_conclusion')} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
-                                <Input label="Date de conclusion" type="date" error={errors.contrat?.date_conclusion?.message} {...register('contrat.date_conclusion')} />
+                                <Input label="Date début exécution" type="date" error={errors.contrat?.date_debut_execution?.message} {...register('contrat.date_debut_execution')} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
                                 <Input label="Date avenant" type="date" {...register('contrat.date_avenant')} />
