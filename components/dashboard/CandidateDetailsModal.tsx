@@ -205,7 +205,10 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                     </div>
                                     <div className="h-px bg-slate-100" />
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <Input label="Adresse (Rue)" value={editForm?.rue_residence || editForm?.adresse_residence || ""} onChange={(e) => setEditForm({ ...editForm, rue_residence: e.target.value, adresse_residence: e.target.value })} />
+                                        <div className="grid grid-cols-[80px_1fr] gap-4 md:col-span-2">
+                                            <Input label="N°" value={editForm?.num_residence || ""} onChange={(e) => setEditForm({ ...editForm, num_residence: e.target.value })} />
+                                            <Input label="Voie (Rue)" value={editForm?.rue_residence || ""} onChange={(e) => setEditForm({ ...editForm, rue_residence: e.target.value })} />
+                                        </div>
                                         <Input label="Code postal" value={editForm?.code_postal || ""} onChange={(e) => setEditForm({ ...editForm, code_postal: e.target.value })} />
                                         <Input label="Ville" value={editForm?.ville || ""} onChange={(e) => setEditForm({ ...editForm, ville: e.target.value })} />
                                         <Input label="Email" type="email" value={editForm?.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
