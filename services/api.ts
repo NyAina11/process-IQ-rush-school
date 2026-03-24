@@ -838,7 +838,7 @@ export const api = {
     try {
       const payload = mapStudentToBackend(data, role);
       console.log('📤 Update Candidate Payload:', payload);
-      const response = await fetch(`${BASE_URL}/admission/candidates/${id}`, {
+      const response = await fetch(`${BASE_URL}/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(payload),
@@ -1185,7 +1185,13 @@ export const api = {
       if (originalData) {
         const originalPayload = mapCompanyToBackend(originalData, role);
         finalPayload = diffObjects(originalPayload, payload);
-        console.log('🔄 Diff result:', finalPayload);
+        // Always include utilisateur and validation status for history tracking
+        finalPayload.utilisateur = payload.utilisateur;
+        finalPayload.validation = payload.validation;
+        // Always include utilisateur and validation status for history tracking
+        finalPayload.utilisateur = payload.utilisateur;
+        finalPayload.validation = payload.validation;
+        console.log('🔄 Diff result with audit fields:', finalPayload);
 
         if (Object.keys(finalPayload).length === 0) {
           console.log('ℹ️ No changes detected, skipping update.');
