@@ -882,7 +882,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
         setCurrentPage,
         totalPages,
         paginatedItems
-    } = usePagination(filteredStudents, 10);
+    } = usePagination(filteredStudents, 30);
 
     // Reset pagination when filters change
     useEffect(() => {
