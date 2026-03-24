@@ -267,7 +267,7 @@ const mapBackendToCompany = (backendData: any): any => {
 };
 
 // Helper to map student data to backend format (STRICT)
-const mapStudentToBackend = (data: any) => {
+const mapStudentToBackend = (data: any, role?: string) => {
   const cleanPhone = (p: any) => {
     if (!p) return "";
     let phone = p.toString().replace(/\D/g, '');
@@ -290,13 +290,14 @@ const mapStudentToBackend = (data: any) => {
   };
 
   const mapSituation = (v: string) => {
-    // New values are already in the format expected by the backend
-    return v || "";
+    const map: Record<string, string> = {
+      'scolaire': '1 Scolaire', 'apprenti': '2 Apprenti', 'etudiant': '3 Etudiant', 'recherche_emploi': '4 Recherche emploi', 'autre': '5 Autre'
+    };
+    return map[v] || v || "1 Scolaire";
   };
 
   const mapDiplome = (v: string) => {
     const map: Record<string, string> = {
-      'bac_techno': 'Baccalauréat Technologique', 'bac_general': 'Baccalauréat général', 'bac_pro': 'Baccalauréat pro',
       'brevet': 'Brevet', 'cap': 'CAP', 'bts': 'BTS', 'aucun': 'Aucun diplôme'
     };
     return map[v] || v || formatString(v);
@@ -366,12 +367,13 @@ const mapStudentToBackend = (data: any) => {
     date_de_reglement: data.date_de_reglement || new Date().toISOString().split('T')[0],
     entreprise_d_accueil: data.entreprise_d_accueil || "Non",
     connaissance_rush_how: formatString(data.connaissance_rush_how || "") || "Autre",
-    motivation_projet_professionnel: data.motivation_projet_professionnel || "Non renseigné"
+    motivation_projet_professionnel: data.motivation_projet_professionnel || "Non renseigné",
+    utilisateur: role || "admission",
+    validation: data.validation || "En attente"
   };
 };
-
-const mapCompanyToBackend = (data: any) => {
-  console.log('🔍 mapCompanyToBackend input:', data);
+const mapCompanyToBackend = (data: any, role?: string) => {
+  console.log('🔍 mapCompanyToBackend input:', data, 'role:', role);
   const ensureString = (val: any) => (val === undefined || val === null) ? "" : String(val);
 
   // Si les données sont déjà au format backend (cas de l'update avec fields)
@@ -383,7 +385,7 @@ const mapCompanyToBackend = (data: any) => {
         code_ape_naf: ensureString(data.identification?.code_ape_naf),
         type_employeur: ensureString(data.identification?.type_employeur),
         employeur_specifique: ensureString(data.identification?.employeur_specifique),
-        nombre_salaries: data.identification?.effectif ? parseInt(data.identification.effectif.toString()) : (data.identification?.nombre_salaries || null),
+        nombre_salaries: data.identification?.effectif ? parseInt(data.identification.effectif.toString()) : (data.identification?.nombre_salaries || 0),
         convention_collective: ensureString(data.identification?.convention || data.identification?.convention_collective)
       },
       adresse: {
@@ -411,21 +413,25 @@ const mapCompanyToBackend = (data: any) => {
         type_derogation: ensureString(data.contrat?.type_derogation),
         date_debut: ensureString(data.formation?.date_debut || data.contrat?.date_debut),
         date_fin: ensureString(data.formation?.date_fin || data.contrat?.date_fin),
-        duree_hebdomadaire: timeToDecimal(ensureString(data.contrat?.duree_hebdomadaire)),
+        duree_hebdomadaire: ensureString(data.contrat?.duree_hebdomadaire),
         poste_occupe: ensureString(data.contrat?.poste_occupe),
         lieu_execution: ensureString(data.contrat?.lieu_execution),
         pourcentage_smic1: data.contrat?.pourcentage_smic1 || 0,
-        smic1: ensureString(data.contrat?.smic1),
-        pourcentage_smic2: data.contrat?.pourcentage_smic2 || 0,
-        smic2: ensureString(data.contrat?.smic2),
-        pourcentage_smic3: data.contrat?.pourcentage_smic3 || 0,
-        smic3: ensureString(data.contrat?.smic3),
-        pourcentage_smic4: data.contrat?.pourcentage_smic4 || 0,
-        smic4: ensureString(data.contrat?.smic4),
-        montant_salaire_brut1: data.contrat?.montant_salaire_brut1 ? parseFloat(data.contrat.montant_salaire_brut1.toString()) : null,
-        montant_salaire_brut2: data.contrat?.montant_salaire_brut2 ? parseFloat(data.contrat.montant_salaire_brut2.toString()) : null,
-        montant_salaire_brut3: data.contrat?.montant_salaire_brut3 ? parseFloat(data.contrat.montant_salaire_brut3.toString()) : null,
-        montant_salaire_brut4: data.contrat?.montant_salaire_brut4 ? parseFloat(data.contrat.montant_salaire_brut4.toString()) : null,
+        pourcentage_smic1_2: data.contrat?.pourcentage_smic1_2 || "",
+        smic1: "smic",
+        montant_salaire_brut1: data.contrat?.montant_salaire_brut1 ? parseFloat(data.contrat.montant_salaire_brut1.toString()) : "",
+        pourcentage_smic2: data.contrat?.pourcentage_smic2 || "",
+        pourcentage_smic2_2: data.contrat?.pourcentage_smic2_2 || "",
+        smic2: data.contrat?.pourcentage_smic2 ? "smic" : "",
+        montant_salaire_brut2: data.contrat?.montant_salaire_brut2 ? parseFloat(data.contrat.montant_salaire_brut2.toString()) : "",
+        pourcentage_smic3: data.contrat?.pourcentage_smic3 || "",
+        pourcentage_smic3_2: data.contrat?.pourcentage_smic3_2 || "",
+        smic3: data.contrat?.pourcentage_smic3 ? "smic" : "",
+        montant_salaire_brut3: data.contrat?.montant_salaire_brut3 ? parseFloat(data.contrat.montant_salaire_brut3.toString()) : "",
+        pourcentage_smic4: data.contrat?.pourcentage_smic4 || "",
+        pourcentage_smic4_2: data.contrat?.pourcentage_smic4_2 || "",
+        smic4: data.contrat?.pourcentage_smic4 ? "smic" : "",
+        montant_salaire_brut4: data.contrat?.montant_salaire_brut4 ? parseFloat(data.contrat.montant_salaire_brut4.toString()) : "",
         date_conclusion: ensureString(data.contrat?.date_conclusion),
         date_debut_execution: ensureString(data.contrat?.date_debut_execution),
         date_debut_2periode_1er_annee: ensureString(data.contrat?.date_debut_2periode_1er_annee),
@@ -454,16 +460,20 @@ const mapCompanyToBackend = (data: any) => {
         code_diplome: ensureString(data.formation?.code_diplome || data.formation_missions?.code_diplome),
         nombre_heures_formation: data.formation?.nb_heures ? parseFloat(data.formation.nb_heures.toString()) : (data.formation_missions?.nombre_heures_formation || 0),
         jours_de_cours: data.formation_missions?.jours_de_cours || 0,
+        missions: ensureString(data.missions?.description || data.formation_missions?.missions),
+        formation_interne: ensureString(data.formation?.interne || data.formation_missions?.formation_interne),
         cfaEnterprise: !!(data.cfa?.entreprise === 'oui' || data.formation_missions?.cfaEnterprise),
         DenominationCFA: ensureString(data.cfa?.denomination || data.formation_missions?.DenominationCFA),
         NumeroUAI: ensureString(data.cfa?.uai || data.formation_missions?.NumeroUAI),
         NumeroSiretCFA: ensureString(data.cfa?.siret || data.formation_missions?.NumeroSiretCFA),
         AdresseCFA: ensureString(data.cfa?.adresse || data.formation_missions?.AdresseCFA),
         complementAdresseCFA: ensureString(data.cfa?.complement || data.formation_missions?.complementAdresseCFA),
-        codePostalCFA: ensureString(data.cfa?.code_postal || data.formation_missions?.codePostalCFA),
+        codePostalCFA: data.cfa?.code_postal ? parseInt(data.cfa.code_postal.toString()) : (data.formation_missions?.codePostalCFA || null),
         communeCFA: ensureString(data.cfa?.commune || data.formation_missions?.communeCFA)
       },
-      record_id_etudiant: ensureString(data.record_id_etudiant)
+      record_id_etudiant: ensureString(data.record_id_etudiant || data.recordIdetudiant),
+      utilisateur: role || "admission",
+      validation: data.validation || "En attente"
     };
   }
 
@@ -471,12 +481,12 @@ const mapCompanyToBackend = (data: any) => {
   // Cas des données plates provenant directement des "fields" d'Airtable
   return {
     identification: {
-      raison_sociale: ensureString(data["Raison sociale"]),
-      siret: ensureString(data["Numéro SIRET"]),
-      code_ape_naf: ensureString(data["Code APE/NAF"]),
+      raison_sociale: ensureString(data["Raison sociale"] || data["raison sociale"]),
+      siret: ensureString(data["Numéro SIRET"] || data["siret"]),
+      code_ape_naf: ensureString(data["Code APE/NAF"] || data["Code NAF"]),
       type_employeur: ensureString(data["Type demployeur"]),
       employeur_specifique: ensureString(data["Employeur spécifique"]),
-      nombre_salaries: parseInt(ensureString(data["Effectif salarié de l'entreprise"])) || null,
+      nombre_salaries: parseInt(ensureString(data["Effectif salarié de l'entreprise"])) || 0,
       convention_collective: ensureString(data["Convention collective"])
     },
     adresse: {
@@ -504,21 +514,25 @@ const mapCompanyToBackend = (data: any) => {
       type_derogation: ensureString(data["Type de dérogation"]),
       date_debut: ensureString(data["Date de début exécution"]),
       date_fin: ensureString(data["Fin du contrat apprentissage"]),
-      duree_hebdomadaire: timeToDecimal(ensureString(data["Durée hebdomadaire"])),
+      duree_hebdomadaire: ensureString(data["Durée hebdomadaire"]),
       poste_occupe: ensureString(data["Poste occupé"]),
       lieu_execution: ensureString(data["Lieu dexécution du contrat (si différent du siège)"]),
       pourcentage_smic1: data["Pourcentage du SMIC 1"] || data["Pourcentage smic 1"] || 0,
-      smic1: ensureString(data["SMIC 1"] || data["smic 1"]),
-      pourcentage_smic2: data["Pourcentage smic 2"] || 0,
-      smic2: ensureString(data["smic 2"]),
-      pourcentage_smic3: data["Pourcentage smic 3"] || 0,
-      smic3: ensureString(data["smic 3"]),
-      pourcentage_smic4: data["Pourcentage smic 4"] || 0,
-      smic4: ensureString(data["smic 4"]),
-      montant_salaire_brut1: parseFloat(ensureString(data["Salaire brut mensuel 1"])) || null,
-      montant_salaire_brut2: parseFloat(ensureString(data["Salaire brut mensuel 2"])) || null,
-      montant_salaire_brut3: parseFloat(ensureString(data["Salaire brut mensuel 3"])) || null,
-      montant_salaire_brut4: parseFloat(ensureString(data["Salaire brut mensuel 4"])) || null,
+      pourcentage_smic1_2: data["pourcentage_smic1_2"] || "",
+      smic1: "smic",
+      montant_salaire_brut1: parseFloat(ensureString(data["Salaire brut mensuel 1"])) || "",
+      pourcentage_smic2: data["Pourcentage smic 2"] || "",
+      pourcentage_smic2_2: data["pourcentage_smic2_2"] || "",
+      smic2: data["Pourcentage smic 2"] ? "smic" : "",
+      montant_salaire_brut2: parseFloat(ensureString(data["Salaire brut mensuel 2"])) || "",
+      pourcentage_smic3: data["Pourcentage smic 3"] || "",
+      pourcentage_smic3_2: data["pourcentage_smic3_2"] || "",
+      smic3: data["Pourcentage smic 3"] ? "smic" : "",
+      montant_salaire_brut3: parseFloat(ensureString(data["Salaire brut mensuel 3"])) || "",
+      pourcentage_smic4: data["Pourcentage smic 4"] || "",
+      pourcentage_smic4_2: data["pourcentage_smic4_2"] || "",
+      smic4: data["Pourcentage smic 4"] ? "smic" : "",
+      montant_salaire_brut4: parseFloat(ensureString(data["Salaire brut mensuel 4"])) || "",
       date_conclusion: ensureString(data["Date de conclusion"]),
       date_debut_execution: ensureString(data["Date de début exécution"]),
       numero_deca_ancien_contrat: ensureString(data["Numéro DECA de ancien contrat"]),
@@ -550,7 +564,9 @@ const mapCompanyToBackend = (data: any) => {
       cfaEnterprise: !!(data["cfaEnterprise"]),
       DenominationCFA: "", NumeroUAI: "", NumeroSiretCFA: "", AdresseCFA: "", complementAdresseCFA: "", codePostalCFA: "", communeCFA: ""
     },
-    record_id_etudiant: ensureString(data["recordIdetudiant"] || data.record_id_etudiant)
+    record_id_etudiant: ensureString(data["recordIdetudiant"] || data.record_id_etudiant),
+    utilisateur: role || "admission",
+    validation: data.validation || "En attente"
   };
 };
 
@@ -709,9 +725,9 @@ export const api = {
   },
 
   // --- CANDIDATES (CRUD) ---
-  async submitStudent(data: StudentFormData): Promise<ApiResponse> {
+  async submitStudent(data: StudentFormData, role?: string): Promise<ApiResponse> {
     try {
-      const payload = mapStudentToBackend(data);
+      const payload = mapStudentToBackend(data, role);
       console.log('📤 Submit Student Payload:', payload);
       const response = await fetch(`${BASE_URL}/candidates`, {
         method: 'POST',
@@ -782,12 +798,12 @@ export const api = {
     } catch (error) { throw error; }
   },
 
-  async updateCandidate(id: string, data: Partial<StudentFormData>): Promise<any> {
+  async updateCandidate(id: string, data: Partial<StudentFormData>, role?: string): Promise<any> {
     try {
-      const payload = mapStudentToBackend(data);
+      const payload = mapStudentToBackend(data, role);
       console.log('📤 Update Candidate Payload:', payload);
-      const response = await fetch(`${BASE_API_URL}/candidates/${id}`, {
-        method: 'PUT',
+      const response = await fetch(`${BASE_URL}/admission/candidates/${id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(payload),
       });
@@ -1049,9 +1065,11 @@ export const api = {
   },
 
   // --- ENTREPRISE (CRUD) ---
-  async submitCompany(data: CompanyFormData): Promise<ApiResponse> {
+  async submitCompany(data: CompanyFormData, role?: string): Promise<ApiResponse> {
     try {
-      const payload = mapCompanyToBackend(data);
+      const payload = mapCompanyToBackend(data, role);
+      console.log('📤 Submitting Company. Validation:', payload.validation, '| User:', payload.utilisateur);
+      console.log('📤 Full Payload:', payload);
       const response = await fetch(`${BASE_URL}/entreprise`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -1115,13 +1133,14 @@ export const api = {
       return json.data || json;
     } catch (error) { throw error; }
   },
-  async updateCompany(studentId: string, data: any, originalData?: any): Promise<any> {
+
+  async updateCompany(studentId: string, data: any, originalData?: any, role?: string): Promise<any> {
     try {
-      const payload = mapCompanyToBackend(data);
+      const payload = mapCompanyToBackend(data, role);
       let finalPayload = payload;
 
       if (originalData) {
-        const originalPayload = mapCompanyToBackend(originalData);
+        const originalPayload = mapCompanyToBackend(originalData, role);
         finalPayload = diffObjects(originalPayload, payload);
         console.log('🔄 Diff result:', finalPayload);
 
@@ -1132,7 +1151,8 @@ export const api = {
       }
 
       console.log('📤 Updating Company for Student ID:', studentId);
-      console.log('📤 Updating Company Payload (Partial):', finalPayload);
+      console.log('📤 Validation:', payload.validation, '| User:', payload.utilisateur);
+      console.log('📤 Updating Company Payload (Partial/Diff):', finalPayload);
       const response = await fetch(`${BASE_URL}/entreprises/${studentId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -1165,37 +1185,67 @@ export const api = {
   },
 
   // --- HISTORY ---
-  async getHistory(studentId: string): Promise<any[]> {
+  async getGlobalHistory(): Promise<any[]> {
     try {
-      console.log('📤 Fetching History for:', studentId);
+      console.log('📤 Fetching Global History');
       const response = await fetch(`${BASE_URL}/historique-utilisateurs`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
-      if (!response.ok) {
-        if (response.status === 404) return [];
-        throw new Error('History not found');
-      }
+      if (!response.ok) throw new Error('Global history not found');
       const json = await response.json();
+      
+      const rawData = json.data || [];
+      const flattenedHistory: any[] = [];
 
-      // La nouvelle API retourne typiquement { success: true, data: [...] }
-      const allHistory = Array.isArray(json) ? json : (json.data || []);
+      rawData.forEach((group: any) => {
+        const user = group.utilisateur || "Utilisateur inconnu";
+        
+        // Map Students
+        if (Array.isArray(group.eleves)) {
+          group.eleves.forEach((e: any, idx: number) => {
+            flattenedHistory.push({
+              id: `e-${group.utilisateur}-${e.record_id}-${idx}`,
+              action: 'Modification Étudiant',
+              details: `Mise à jour du dossier de ${e.prenom || ''} ${e.nom || ''} (${e.email || 'Pas d\'email'})`,
+              date: e.date_action || new Date().toISOString(),
+              utilisateur: user,
+              studentId: e.record_id
+            });
+          });
+        }
+        
+        // Map Entreprises
+        if (Array.isArray(group.entreprises)) {
+          group.entreprises.forEach((ent: any, idx: number) => {
+            flattenedHistory.push({
+              id: `ent-${group.utilisateur}-${ent.record_id}-${idx}`,
+              action: 'Modification Entreprise',
+              details: `Mise à jour de la fiche de ${ent.raison_sociale || 'Entreprise inconnue'} (SIRET: ${ent.siret || 'N/A'})`,
+              date: ent.date_action || new Date().toISOString(),
+              utilisateur: user,
+              studentId: ent.record_id_etudiant
+            });
+          });
+        }
+      });
 
-      // On filtre l'historique pour ne garder que celui de l'étudiant concerné s'il y a un champ d'identification
-      return allHistory.filter((item: any) =>
-        item.studentId === studentId ||
-        item.candidat_id === studentId ||
-        item.candidatId === studentId ||
-        item.record_id === studentId ||
-        item.eleve_id === studentId
-      );
+      // Sort by date desc
+      return flattenedHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     } catch (error) {
-      console.warn('⚠️ History API error, using mock data');
-      return [
-        { id: '1', action: 'Création dossier', date: new Date(Date.now() - 10000000).toISOString(), details: 'Inscription via formulaire web', utilisateur: 'Système' },
-        { id: '2', action: 'Document ajouté', date: new Date(Date.now() - 5000000).toISOString(), details: 'CV téléchargé', utilisateur: 'Ny Aina' },
-        { id: '3', action: 'Note', date: new Date().toISOString(), details: 'Entretien téléphonique positif', utilisateur: 'Ny Aina' }
-      ];
+      console.warn('⚠️ Global History API error:', error);
+      return [];
+    }
+  },
+
+  async getHistory(studentId: string): Promise<any[]> {
+    try {
+      const allHistory = await this.getGlobalHistory();
+      // Filter for specific student if ID is provided
+      return allHistory.filter(item => item.studentId === studentId);
+    } catch (error) {
+      console.warn('⚠️ Student History filter error:', error);
+      return [];
     }
   },
 

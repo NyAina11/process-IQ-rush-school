@@ -18,8 +18,6 @@ import {
     OPCO_OPTIONS,
     CONTRAT_TYPE_OPTIONS,
     DEROGATION_TYPE_OPTIONS,
-    AGE_TRANCHE_OPTIONS,
-    APPRENTISSAGE_YEAR_OPTIONS,
     YES_NO_OPTIONS,
     FORMATION_DETAILS
 } from '../constants/formOptions';
@@ -84,27 +82,27 @@ const companySchema = z.object({
     contrat: z.object({
         type_contrat: z.string().min(1, "Type de contrat requis"),
         type_derogation: z.string().optional().or(z.literal("")),
-        date_debut: z.string().optional().or(z.literal("")),
-        date_fin: z.string().optional().or(z.literal("")),
+        date_debut: z.string().min(1, "Date de début requise"),
+        date_fin: z.string().min(1, "Date de fin requise"),
         duree_hebdomadaire: z.string().min(1, "Durée requise").regex(/^\d+:[0-5]\d$/, "Format invalide (HH:mm)"),
         poste_occupe: z.string().optional().or(z.literal("")),
         lieu_execution: z.string().optional().or(z.literal("")),
 
         pourcentage_smic1: z.number().optional(),
-        smic1: z.string().optional(),
+        pourcentage_smic1_2: z.number().nullable().optional(),
         montant_salaire_brut1: z.number().optional(),
 
-        pourcentage_smic2: z.number().optional(),
-        smic2: z.string().optional(),
-        montant_salaire_brut2: z.number().optional(),
+        pourcentage_smic2: z.number().nullable().optional(),
+        pourcentage_smic2_2: z.number().nullable().optional(),
+        montant_salaire_brut2: z.number().nullable().optional(),
 
-        pourcentage_smic3: z.number().optional(),
-        smic3: z.string().optional(),
-        montant_salaire_brut3: z.number().optional(),
+        pourcentage_smic3: z.number().nullable().optional(),
+        pourcentage_smic3_2: z.number().nullable().optional(),
+        montant_salaire_brut3: z.number().nullable().optional(),
 
-        pourcentage_smic4: z.number().optional(),
-        smic4: z.string().optional(),
-        montant_salaire_brut4: z.number().optional(),
+        pourcentage_smic4: z.number().nullable().optional(),
+        pourcentage_smic4_2: z.number().nullable().optional(),
+        montant_salaire_brut4: z.number().nullable().optional(),
 
         date_conclusion: z.string().optional().or(z.literal("")),
         date_debut_execution: z.string().optional().or(z.literal("")),
@@ -134,6 +132,16 @@ const companySchema = z.object({
         date_fin_2periode_4eme_annee: z.string().optional().or(z.literal(""))
     }).superRefine((data, ctx) => {
         // Validation Dates de base
+        if (data.date_debut && data.date_fin) {
+            if (new Date(data.date_debut) >= new Date(data.date_fin)) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "La date de début doit être avant la date de fin",
+                    path: ["date_debut"]
+                });
+            }
+        }
+
         if (data.date_conclusion && data.date_debut_execution) {
             if (new Date(data.date_conclusion) > new Date(data.date_debut_execution)) {
                 ctx.addIssue({
@@ -173,7 +181,7 @@ const companySchema = z.object({
             }
         };
 
-        // 1ère année - 2ème période
+        // 1ère année - 2ème période (now effectively the main period for year 1)
         checkPeriod('date_debut_2periode_1er_annee', 'date_fin_2periode_1er_annee', '2ème période 1ère année', false);
 
         // Autres années
@@ -182,12 +190,6 @@ const companySchema = z.object({
             checkPeriod(`date_debut_1periode_${suffix}`, `date_fin_1periode_${suffix}`, `1ère période ${year}ème année`);
             checkPeriod(`date_debut_2periode_${suffix}`, `date_fin_2periode_${suffix}`, `2ème période ${year}ème année`);
         }
-    }),
-    salaire: z.object({
-        age1: z.string().min(1, "L'âge est requis"),
-        age2: z.string().optional(),
-        age3: z.string().optional(),
-        age4: z.string().optional()
     }),
     missions: z.object({
         formation_alternant: z.string().optional().or(z.literal("")),
@@ -204,9 +206,10 @@ import { useCandidates } from '../hooks/useCandidates';
 interface EntrepriseFormProps {
     onNext: (response?: any) => void;
     studentRecordId: string | null;
+    studentDateNaissance?: string;
 }
 
-const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId }) => {
+const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId, studentDateNaissance }) => {
     const { showToast, draftCompany, setDraftCompany, clearDraftCompany } = useAppStore();
     const { refresh: refreshCandidates } = useCandidates();
     const [activeSection, setActiveSection] = useState<string | null>('id');
@@ -237,13 +240,12 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
             contrat: draftCompany?.contrat || {
                 type_contrat: "", type_derogation: "", date_debut: "", date_fin: "", duree_hebdomadaire: "35:00", poste_occupe: "",
                 lieu_execution: "",
-                pourcentage_smic1: 0, smic1: "smic", montant_salaire_brut1: 0,
-                pourcentage_smic2: 0, smic2: "smic", montant_salaire_brut2: 0,
-                pourcentage_smic3: 0, smic3: "smic", montant_salaire_brut3: 0,
-                pourcentage_smic4: 0, smic4: "smic", montant_salaire_brut4: 0,
+                pourcentage_smic1: null, pourcentage_smic1_2: null, montant_salaire_brut1: null,
+                pourcentage_smic2: null, pourcentage_smic2_2: null, montant_salaire_brut2: null,
+                pourcentage_smic3: null, pourcentage_smic3_2: null, montant_salaire_brut3: null,
+                pourcentage_smic4: null, pourcentage_smic4_2: null, montant_salaire_brut4: null,
                 date_conclusion: "", date_debut_execution: "",
                 numero_deca_ancien_contrat: "", machines_dangereuses: "Non", caisse_retraite: "", date_avenant: "", nombre_mois: 12,
-                // Initialisation des dates de périodes de salaire
                 date_debut_2periode_1er_annee: "", date_fin_2periode_1er_annee: "",
                 date_debut_1periode_2eme_annee: "", date_fin_1periode_2eme_annee: "",
                 date_debut_2periode_2eme_annee: "", date_fin_2periode_2eme_annee: "",
@@ -251,9 +253,6 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                 date_debut_2periode_3eme_annee: "", date_fin_2periode_3eme_annee: "",
                 date_debut_1periode_4eme_annee: "", date_fin_1periode_4eme_annee: "",
                 date_debut_2periode_4eme_annee: "", date_fin_2periode_4eme_annee: ""
-            },
-            salaire: draftCompany?.salaire || {
-                age1: "", age2: "", age3: "", age4: ""
             },
             missions: draftCompany?.missions || { formation_alternant: "", selectionnees: [] as string[] },
             record_id_etudiant: studentRecordId || ""
@@ -298,42 +297,109 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         setValue('contrat.nombre_mois', nbMois);
     };
 
-    const calculateSalary = (age: string, annee: string) => {
-        const smicBrut = 1823.03;
-        let pct = 0;
+    // Auto-calculate SMIC % from student birth date at a given period start date
+    const getSmicPercentage = (birthDate: string | undefined, periodStartDate: string, yearNumber: number): number => {
+        if (!birthDate || !periodStartDate) return 0;
+        const birth = new Date(birthDate);
+        const periodStart = new Date(periodStartDate);
+        if (isNaN(birth.getTime()) || isNaN(periodStart.getTime())) return 0;
 
-        if (age === "16-17") {
-            pct = annee === "1" ? 27 : annee === "2" ? 39 : 55;
-        } else if (age === "18-20") {
-            pct = annee === "1" ? 43 : annee === "2" ? 51 : 67;
-        } else if (age === "21-25") {
-            pct = annee === "1" ? 53 : annee === "2" ? 61 : 78;
-        } else if (age === "26+") {
-            pct = 100;
-        }
+        let age = periodStart.getFullYear() - birth.getFullYear();
+        const m = periodStart.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && periodStart.getDate() < birth.getDate())) age--;
 
-        // Use 3rd year rates for 4th year by default if not specified
-        if (annee === "4" && age !== "26+") {
-            if (age === "16-17") pct = 55;
-            else if (age === "18-20") pct = 67;
-            else if (age === "21-25") pct = 78;
-        }
-
-        const montant = parseFloat(((smicBrut * pct) / 100).toFixed(2));
-        return { pct, montant };
+        if (age >= 26) return 100;
+        if (age >= 21) return yearNumber === 1 ? 53 : yearNumber === 2 ? 61 : 78;
+        if (age >= 18) return yearNumber === 1 ? 43 : yearNumber === 2 ? 51 : 67;
+        return yearNumber === 1 ? 27 : yearNumber === 2 ? 39 : 55; // 16-17
     };
 
-    const updateSalary = (yearIndex: string, age: string) => {
-        const { pct, montant } = calculateSalary(age, yearIndex);
+    const smicBase = 1823.03;
 
-        // Update the specific year in contrat object for API
-        setValue(`contrat.pourcentage_smic${yearIndex}` as any, pct, { shouldValidate: true });
-        setValue(`contrat.montant_salaire_brut${yearIndex}` as any, montant, { shouldValidate: true });
-        setValue(`contrat.smic${yearIndex}` as any, "smic", { shouldValidate: true });
+    // Helper to get age bracket from a date
+    const getAgeBracket = (birthDate: string | undefined, refDate: string | undefined): '16-17' | '18-20' | '21-25' | '26+' | null => {
+        if (!birthDate || !refDate) return null;
+        const birth = new Date(birthDate);
+        const ref = new Date(refDate);
+        if (isNaN(birth.getTime()) || isNaN(ref.getTime())) return null;
 
-        // Update the age for this specific year
-        setValue(`salaire.age${yearIndex}` as any, age, { shouldValidate: true });
+        let age = ref.getFullYear() - birth.getFullYear();
+        const m = ref.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && ref.getDate() < birth.getDate())) age--;
+
+        if (age >= 26) return '26+';
+        if (age >= 21) return '21-25';
+        if (age >= 18) return '18-20';
+        return '16-17';
     };
+
+    // Helper to get raw age from dates
+    const getRawAge = (birthDate: string | undefined, refDate: string | undefined): number | null => {
+        if (!birthDate || !refDate) return null;
+        const birth = new Date(birthDate);
+        const ref = new Date(refDate);
+        if (isNaN(birth.getTime()) || isNaN(ref.getTime())) return null;
+        let age = ref.getFullYear() - birth.getFullYear();
+        const m = ref.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && ref.getDate() < birth.getDate())) age--;
+        return age;
+    };
+
+    // Helper to get percentage from bracket and year
+    const getRateFromBracket = (bracket: string | null, year: number): number => {
+        if (!bracket) return 0;
+        if (bracket === '26+') return 100;
+        if (bracket === '21-25') return year === 1 ? 53 : year === 2 ? 61 : 78;
+        if (bracket === '18-20') return year === 1 ? 43 : year === 2 ? 51 : 67;
+        return year === 1 ? 27 : year === 2 ? 39 : 55;
+    };
+
+    // Compute SMIC % for each period from watcher
+    const computedPeriods = React.useMemo(() => {
+        const c = formData.contrat;
+        const bd = studentDateNaissance;
+
+        const getRate = (d: string | undefined, year: number) => {
+            if (!d || d === "" || !bd) return 0;
+            const bracket = getAgeBracket(bd, d);
+            return getRateFromBracket(bracket, year);
+        };
+
+        return {
+            y1p1: 0, // Removed from UI and calculation
+            y1p2: getRate(c?.date_debut_2periode_1er_annee, 1),
+
+            y2p1: getRate(c?.date_debut_1periode_2eme_annee, 2),
+            y2p2: getRate(c?.date_debut_2periode_2eme_annee, 2),
+
+            y3p1: getRate(c?.date_debut_1periode_3eme_annee, 3),
+            y3p2: getRate(c?.date_debut_2periode_3eme_annee, 3),
+
+            y4p1: getRate(c?.date_debut_1periode_4eme_annee, 4),
+            y4p2: getRate(c?.date_debut_2periode_4eme_annee, 4),
+        };
+    }, [studentDateNaissance, formData.contrat]);
+
+    // Push computed SMIC values into form state whenever they change
+    useEffect(() => {
+        // Année 1 -> utilise P2 pour le salaire brut et pourcentage principal
+        setValue('contrat.pourcentage_smic1', computedPeriods.y1p2 || null, { shouldValidate: false });
+        setValue('contrat.pourcentage_smic1_2', computedPeriods.y1p2 || null, { shouldValidate: false });
+        setValue('contrat.montant_salaire_brut1', computedPeriods.y1p2 ? parseFloat(((smicBase * computedPeriods.y1p2) / 100).toFixed(2)) : null, { shouldValidate: false });
+
+        // Années 2-4 -> utilisent P1 pour le salaire brut (le 2ème pourcentage est informatif)
+        setValue('contrat.pourcentage_smic2', computedPeriods.y2p1 || null, { shouldValidate: false });
+        setValue('contrat.pourcentage_smic2_2', computedPeriods.y2p2 || null, { shouldValidate: false });
+        setValue('contrat.montant_salaire_brut2', computedPeriods.y2p1 ? parseFloat(((smicBase * computedPeriods.y2p1) / 100).toFixed(2)) : null, { shouldValidate: false });
+
+        setValue('contrat.pourcentage_smic3', computedPeriods.y3p1 || null, { shouldValidate: false });
+        setValue('contrat.pourcentage_smic3_2', computedPeriods.y3p2 || null, { shouldValidate: false });
+        setValue('contrat.montant_salaire_brut3', computedPeriods.y3p1 ? parseFloat(((smicBase * computedPeriods.y3p1) / 100).toFixed(2)) : null, { shouldValidate: false });
+
+        setValue('contrat.pourcentage_smic4', computedPeriods.y4p1 || null, { shouldValidate: false });
+        setValue('contrat.pourcentage_smic4_2', computedPeriods.y4p2 || null, { shouldValidate: false });
+        setValue('contrat.montant_salaire_brut4', computedPeriods.y4p1 ? parseFloat(((smicBase * computedPeriods.y4p1) / 100).toFixed(2)) : null, { shouldValidate: false });
+    }, [computedPeriods, setValue]);
 
     const toggleMission = (mission: string) => {
         const current = watch('missions.selectionnees') || [];
@@ -384,7 +450,8 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         // Force the correct ID from props into the payload to avoid stale draft data
         const finalData = { ...data, record_id_etudiant: studentRecordId };
         console.log('📦 Final Payload sent to API:', finalData);
-        await submitCompany(finalData as any);
+        const userRole = localStorage.getItem('userRole') || 'admission';
+        await submitCompany(finalData as any, userRole);
     };
 
     const onError = (errors: any) => {
@@ -689,6 +756,12 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                         </div>
                         <div className="grid grid-cols-12 gap-5">
                             <div className="col-span-12 md:col-span-6">
+                                <Input label="Date de début du contrat" required type="date" error={errors.contrat?.date_debut?.message} {...register('contrat.date_debut')} />
+                            </div>
+                            <div className="col-span-12 md:col-span-6">
+                                <Input label="Date de fin du contrat" required type="date" error={errors.contrat?.date_fin?.message} {...register('contrat.date_fin')} />
+                            </div>
+                            <div className="col-span-12 md:col-span-6">
                                 <Select label="Type de contrat" required error={errors.contrat?.type_contrat?.message} {...register('contrat.type_contrat')} options={CONTRAT_TYPE_OPTIONS} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
@@ -768,27 +841,31 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                         </div>
                                         <div>
                                             <div className="text-white font-black text-[14px] tracking-tight">Simulateur de salaire apprenti</div>
-                                            <div className="text-white/40 text-[10px] font-bold uppercase tracking-widest">SMIC 2024 · 1 823,03 € brut/mois</div>
+                                            <div className="text-white/40 text-[10px] font-bold uppercase tracking-widest">
+                                                {studentDateNaissance ? 'SMIC 2024 · 1 823,03 € brut/mois' : '⚠️ Date de naissance manquante'}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         {["1", "2", "3", "4"].map(y => {
-                                            const a = (formData.salaire as any)[`age${y}`];
+                                            const p1Value = (computedPeriods as any)[`y${y}p1`];
                                             return (
-                                                <div key={y} className={`w-2 h-2 rounded-full transition-colors ${a ? 'bg-emerald-400' : 'bg-white/20'}`} />
+                                                <div key={y} className={`w-2 h-2 rounded-full transition-colors ${p1Value > 0 || (y === "1" && computedPeriods.y1p2 > 0) ? 'bg-emerald-400' : 'bg-white/20'}`} />
                                             );
                                         })}
                                         <span className="text-white/40 text-[10px] font-bold ml-2">
-                                            {["1", "2", "3", "4"].filter(y => (formData.salaire as any)[`age${y}`]).length}/4 configurées
+                                            {["1", "2", "3", "4"].filter(y => (y === "1" ? computedPeriods.y1p2 : (computedPeriods as any)[`y${y}p1`]) > 0).length}/4 configurées
                                         </span>
                                     </div>
                                 </div>
 
-                                {/* Cards grid */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-t-0 border-slate-200 rounded-b-2xl overflow-hidden">
                                     {["1", "2", "3", "4"].map((year, idx) => {
-                                        const yearAge = (formData.salaire as any)[`age${year}`];
-                                        const { pct, montant } = calculateSalary(yearAge, year);
+                                        const yearNum = parseInt(year);
+                                        const results = {
+                                            p1: (computedPeriods as any)[`y${year}p1`],
+                                            p2: (computedPeriods as any)[`y${year}p2`]
+                                        };
                                         const isRight = idx % 2 === 1;
                                         const isBottom = idx >= 2;
 
@@ -797,10 +874,9 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                 key={year}
                                                 className={`relative bg-white flex flex-col transition-colors hover:bg-slate-50/60 ${isRight ? 'border-l border-slate-200' : ''} ${isBottom ? 'border-t border-slate-200' : ''}`}
                                             >
-                                                {/* Year strip */}
                                                 <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-7 h-7 rounded-lg bg-[#1a1630] flex items-center justify-center shrink-0">
+                                                        <div className="w-7 h-7 rounded-lg bg-[#1a1630] shrink-0 flex items-center justify-center">
                                                             <span className="text-white text-[11px] font-black">{year}</span>
                                                         </div>
                                                         <div>
@@ -808,119 +884,96 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                             <div className="text-[13px] font-black text-slate-800 leading-none">{year}{year === "1" ? "ère" : "ème"} année</div>
                                                         </div>
                                                     </div>
-                                                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black transition-all ${yearAge ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
+                                                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black transition-all ${yearNum === 1 ? (results.p2 > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400') : (results.p1 > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}`}>
                                                         <CheckCircle2 size={11} />
-                                                        {yearAge ? 'Configuré' : 'En attente'}
+                                                        {yearNum === 1 ? (results.p2 > 0 ? 'Configuré' : 'En attente') : (results.p1 > 0 ? 'Configuré' : 'En attente')}
                                                     </div>
                                                 </div>
 
                                                 <div className="p-5 space-y-4 flex-grow">
-                                                    {/* Sélecteur d'âge */}
-                                                    <Select
-                                                        label={`Tranche d'âge`}
-                                                        required={year === "1"}
-                                                        value={yearAge}
-                                                        onChange={(e) => updateSalary(year, e.target.value)}
-                                                        options={AGE_TRANCHE_OPTIONS}
-                                                        placeholder="Choisir l'âge..."
-                                                        error={(errors.salaire as any)?.[`age${year}`]?.message}
-                                                    />
+                                                    <div className="space-y-4">
+                                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Calcul automatique des taux</div>
 
-                                                    {/* Périodes de dates */}
-                                                    <div className="space-y-2.5">
-                                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Périodes de rémunération</div>
-
-                                                        {year === "1" ? (
-                                                            <div className="rounded-lg border border-[#6B3CD2]/15 bg-[#6B3CD2]/3 p-3 space-y-3">
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]/50"></div>
-                                                                    <span className="text-[10px] font-black text-[#6B3CD2] uppercase tracking-wider">2ème Période</span>
+                                                        {yearNum > 1 && (
+                                                            <div className="rounded-lg border border-slate-100 bg-slate-50/30 p-3 space-y-3">
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+                                                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">1ère Période</span>
+                                                                    </div>
+                                                                    <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest pl-1 mb-1 shadow-sm shadow-[#6b3cd210]">
+                                                                        {yearNum}ème Année
+                                                                    </div>
                                                                 </div>
                                                                 <div className="grid grid-cols-2 gap-2">
                                                                     <Input
                                                                         type="date"
                                                                         label="Début"
-                                                                        required
-                                                                        error={errors.contrat?.date_debut_2periode_1er_annee?.message}
-                                                                        {...register(`contrat.date_debut_2periode_1er_annee` as any)}
+                                                                        {...register(`contrat.date_debut_1periode_${yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme'}_annee` as any)}
                                                                     />
                                                                     <Input
                                                                         type="date"
                                                                         label="Fin"
-                                                                        required
-                                                                        error={errors.contrat?.date_fin_2periode_1er_annee?.message}
-                                                                        {...register(`contrat.date_fin_2periode_1er_annee` as any)}
+                                                                        {...register(`contrat.date_fin_1periode_${yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme'}_annee` as any)}
                                                                     />
                                                                 </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="space-y-2.5">
-                                                                <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 space-y-3">
-                                                                    <div className="flex items-center gap-1.5">
-                                                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-                                                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">1ère Période</span>
-                                                                    </div>
-                                                                    <div className="grid grid-cols-2 gap-2">
-                                                                        <Input
-                                                                            type="date"
-                                                                            label="Début"
-                                                                            error={(errors.contrat as any)?.[`date_debut_1periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee`]?.message}
-                                                                            {...register(`contrat.date_debut_1periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee` as any)}
-                                                                        />
-                                                                        <Input
-                                                                            type="date"
-                                                                            label="Fin"
-                                                                            error={(errors.contrat as any)?.[`date_fin_1periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee`]?.message}
-                                                                            {...register(`contrat.date_fin_1periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee` as any)}
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="rounded-lg border border-[#6B3CD2]/15 bg-[#6B3CD2]/3 p-3 space-y-3">
-                                                                    <div className="flex items-center gap-1.5">
-                                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]/50"></div>
-                                                                        <span className="text-[10px] font-black text-[#6B3CD2] uppercase tracking-wider">2ème Période</span>
-                                                                    </div>
-                                                                    <div className="grid grid-cols-2 gap-2">
-                                                                        <Input
-                                                                            type="date"
-                                                                            label="Début"
-                                                                            error={(errors.contrat as any)?.[`date_debut_2periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee`]?.message}
-                                                                            {...register(`contrat.date_debut_2periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee` as any)}
-                                                                        />
-                                                                        <Input
-                                                                            type="date"
-                                                                            label="Fin"
-                                                                            error={(errors.contrat as any)?.[`date_fin_2periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee`]?.message}
-                                                                            {...register(`contrat.date_fin_2periode_${year === "2" ? "2eme" : year === "3" ? "3eme" : "4eme"}_annee` as any)}
-                                                                        />
-                                                                    </div>
+                                                                <div className="flex justify-between items-center px-1 mt-1">
+                                                                    <span className="text-[9px] font-bold text-slate-400 italic">
+                                                                        Age : {getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme'}_annee` as any)) ?? '?'} ans
+                                                                    </span>
+                                                                    <div className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{results.p1}% SMIC</div>
                                                                 </div>
                                                             </div>
                                                         )}
+
+                                                        <div className="rounded-lg border border-[#6B3CD2]/15 bg-[#6B3CD2]/3 p-3 space-y-3">
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]/50"></div>
+                                                                    <span className="text-[10px] font-black text-[#6B3CD2] uppercase tracking-wider">2ème Période</span>
+                                                                </div>
+                                                                <span className="text-[11px] font-black text-[#6B3CD2] bg-[#6B3CD2]/5 px-2 py-0.5 rounded-full">{results.p2}% SMIC</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-2">
+                                                                <Input
+                                                                    type="date"
+                                                                    label="Début"
+                                                                    {...register(`contrat.date_debut_2periode_${yearNum === 1 ? '1er' : yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme'}_annee` as any)}
+                                                                />
+                                                                <Input
+                                                                    type="date"
+                                                                    label="Fin"
+                                                                    {...register(`contrat.date_fin_2periode_${yearNum === 1 ? '1er' : yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme'}_annee` as any)}
+                                                                />
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Footer stats */}
                                                 <div className="mx-5 mb-5 rounded-xl bg-[#1a1630] overflow-hidden">
-                                                    {/* SMIC bar */}
                                                     <div className="h-1 bg-white/10">
                                                         <div
                                                             className="h-full bg-gradient-to-r from-[#6B3CD2] to-emerald-400 transition-all duration-700"
-                                                            style={{ width: yearAge ? `${Math.min(pct, 100)}%` : '0%' }}
+                                                            style={{ width: `${Math.min(results.p1, 100)}%` }}
                                                         />
                                                     </div>
                                                     <div className="flex items-center justify-between px-4 py-3">
                                                         <div>
-                                                            <div className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-0.5">Taux SMIC</div>
+                                                            <div className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-0.5">Taux Moyen</div>
                                                             <div className="text-white text-[18px] font-black leading-none">
-                                                                {yearAge ? `${pct}%` : <span className="text-white/30">--%</span>}
+                                                                {yearNum === 1 ? `${results.p2}%` : (results.p1 === results.p2 ? `${results.p1}%` : `${results.p1}% / ${results.p2}%`)}
                                                             </div>
                                                         </div>
                                                         <div className="w-px h-8 bg-white/10" />
                                                         <div className="text-right">
-                                                            <div className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-0.5">Salaire Brut</div>
-                                                            <div className="text-[18px] font-black leading-none" style={{ color: yearAge ? '#a78bfa' : 'rgba(255,255,255,0.2)' }}>
-                                                                {yearAge ? montant.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }) : '-- €'}
+                                                            <div className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-0.5">
+                                                                {results.p2 > 0 && results.p2 !== (yearNum === 1 ? results.p2 : results.p1) ? "Salaires (P1 / P2)" : `Salaire Brut (P${yearNum === 1 ? '2' : '1'})`}
+                                                            </div>
+                                                            <div className="text-[18px] font-black leading-none text-[#a78bfa]">
+                                                                {results.p2 > 0 && results.p2 !== (yearNum === 1 ? results.p2 : results.p1)
+                                                                    ? `${((smicBase * (yearNum === 1 ? results.p2 : results.p1)) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}€ / ${((smicBase * results.p2) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}€`
+                                                                    : `${((smicBase * (yearNum === 1 ? results.p2 : results.p1)) / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 })}`
+                                                                }
                                                             </div>
                                                         </div>
                                                     </div>
@@ -932,7 +985,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
 
                                 <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-400 italic">
                                     <Info size={12} className="shrink-0" />
-                                    Note : La tranche d'âge peut évoluer au cours du contrat. Configurez l'âge attendu pour chaque période. Calcul basé sur le SMIC 2024 de 1 823,03 € brut mensuel.
+                                    Note : Le taux est calculé automatiquement selon la date de naissance de l'étudiant et sa tranche d'âge à l'ouverture de chaque période.
                                 </div>
                             </div>
                         </div>

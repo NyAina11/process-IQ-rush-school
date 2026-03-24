@@ -284,7 +284,10 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
         showToast("Brouillon sauvegardé — vos données sont conservées.", "success");
     };
 
-    const onSubmit = async (data: StudentFormValues) => { await submitStudent(data as any); };
+    const onSubmit = async (data: StudentFormValues) => { 
+        const userRole = localStorage.getItem('userRole') || 'admission';
+        await submitStudent(data as any, userRole); 
+    };
 
     const onError = (errs: any) => {
         const errorCount = Object.keys(errs).length;

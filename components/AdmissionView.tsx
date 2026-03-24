@@ -2133,6 +2133,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                                         setActiveTab(AdmissionTab.ADMINISTRATIF);
                                     }}
                                     studentRecordId={studentData?.record_id || studentData?.id || localStorage.getItem('candidateRecordId')}
+                                    studentDateNaissance={studentData ? getC(studentData).date_naissance : undefined}
                                 />
                             </div>
                         )}

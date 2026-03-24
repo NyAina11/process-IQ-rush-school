@@ -179,20 +179,24 @@ export interface CompanyFormData {
     lieu_execution?: string;
 
     pourcentage_smic1?: number;
+    pourcentage_smic1_2?: number | null;
     smic1?: string;
     montant_salaire_brut1?: number;
 
-    pourcentage_smic2?: number;
-    smic2?: string;
-    montant_salaire_brut2?: number;
+    pourcentage_smic2?: number | null;
+    pourcentage_smic2_2?: number | null;
+    smic2?: string | null;
+    montant_salaire_brut2?: number | null;
 
-    pourcentage_smic3?: number;
-    smic3?: string;
-    montant_salaire_brut3?: number;
+    pourcentage_smic3?: number | null;
+    pourcentage_smic3_2?: number | null;
+    smic3?: string | null;
+    montant_salaire_brut3?: number | null;
 
-    pourcentage_smic4?: number;
-    smic4?: string;
-    montant_salaire_brut4?: number;
+    pourcentage_smic4?: number | null;
+    pourcentage_smic4_2?: number | null;
+    smic4?: string | null;
+    montant_salaire_brut4?: number | null;
 
     date_conclusion?: string;
     date_debut_execution?: string;
@@ -240,12 +244,7 @@ export interface CompanyFormData {
     code_postal: string;
     commune: string;
   };
-  salaire: {
-    salaire_age: string;
-    salaire_annee: string;
-    salaire_pourcentage: number;
-    salaire_brut: number;
-  };
+  // salaire section removed - SMIC is now auto-calculated per period from student birth date
   missions: {
     formation_alternant?: string;
     selectionnees: string[];

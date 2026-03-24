@@ -247,7 +247,8 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
     });
 
     const handleSaveCompanyEdit = async (id: string, data: any) => {
-        await updateCompany(id, data, selectedCompany);
+        const userRole = localStorage.getItem('userRole') || 'admission';
+        await updateCompany(id, data, selectedCompany, userRole);
     };
 
     useEffect(() => {
@@ -259,9 +260,26 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
 
     useEffect(() => {
         if (currentTab !== 'students') {
-            fetchStudents();
+            if (currentTab === 'history') {
+                fetchGlobalHistory();
+            } else {
+                fetchStudents();
+            }
         }
     }, [filter, currentTab]);
+
+    const fetchGlobalHistory = async () => {
+        try {
+            setLoadingHistory(true);
+            const data = await api.getGlobalHistory();
+            setGlobalHistory(data);
+        } catch (error) {
+            console.error('Error fetching global history:', error);
+            showToast('Erreur lors du chargement de l\'historique', 'error');
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
 
     const fetchStudents = async () => {
         if (currentTab === 'students') {
@@ -523,7 +541,8 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
 
     const handleSaveEdit = async () => {
         if (!selectedCandidate || !editForm) return;
-        await updateCandidate(selectedCandidate.record_id || selectedCandidate.id, editForm);
+        const userRole = localStorage.getItem('userRole') || 'admission';
+        await updateCandidate(selectedCandidate.record_id || selectedCandidate.id, editForm, userRole);
     };
 
     const handleDelete = async () => {

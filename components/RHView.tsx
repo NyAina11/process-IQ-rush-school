@@ -175,8 +175,10 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
         try {
             const studentId = data.record_id_etudiant || selectedCompany?.fields?.recordIdetudiant;
             if (!studentId) { showToast("Impossible d'identifier l'étudiant lié.", "error"); return; }
-            await api.updateCompany(studentId, data, selectedCompany);
-            showToast("Entreprise mise à jour avec succès", "success"); fetchCompanies(); setIsViewModalOpen(false);
+            const userRole = localStorage.getItem('userRole') || 'admission';
+            await api.updateCompany(studentId, data, selectedCompany, userRole);
+            showToast("Entreprise mise à jour", "success");
+            fetchCompanies(); setIsViewModalOpen(false);
         } catch { showToast("Erreur lors de la mise à jour.", "error"); }
         finally { setIsSavingCompany(false); }
     };

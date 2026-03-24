@@ -80,6 +80,8 @@ export const useCandidateDetails = (candidates: any[], onUpdate: () => void) => 
     const handleSaveEdit = async () => {
         if (!selectedCandidate || !editForm) return;
 
+        const userRole = localStorage.getItem('userRole') || 'admission';
+
         const cleanedForm = Object.keys(editForm).reduce((acc: any, key) => {
             acc[key] = editForm[key] === "" ? null : editForm[key];
             return acc;
@@ -94,7 +96,7 @@ export const useCandidateDetails = (candidates: any[], onUpdate: () => void) => 
             }
         };
 
-        await updateApi(selectedCandidate.id, updatedCandidate);
+        await updateApi(selectedCandidate.id, updatedCandidate, userRole);
     };
 
     const handleDelete = async () => {
