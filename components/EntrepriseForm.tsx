@@ -485,6 +485,27 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         onSuccess: (response) => {
             clearDraftCompany();
             refreshCandidates();
+
+            // Trigger document generation automatically after completion
+            if (studentRecordId) {
+                showToast("Génération automatique des documents (CERFA, Convention, Fiche)...", "info");
+                
+                Promise.allSettled([
+                    api.generateFicheRenseignement(studentRecordId),
+                    api.generateCerfa(studentRecordId),
+                    api.generateConventionApprentissage(studentRecordId)
+                ]).then((results) => {
+                    const rejectedCount = results.filter(r => r.status === 'rejected').length;
+                    if (rejectedCount > 0) {
+                        showToast(`${rejectedCount} document(s) n'ont pas pu être générés. Vous pouvez les générer manuellement depuis le dashboard.`, "info");
+                    } else {
+                        showToast("Documents générés avec succès !", "success");
+                    }
+                }).catch(err => {
+                    console.error('Error during automated document generation:', err);
+                });
+            }
+
             onNext(response);
         },
         errorMessage: "Une erreur est survenue lors de l'enregistrement. Vérifiez les données et réessayez."
@@ -968,10 +989,12 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                                             <div className="text-[13px] font-black text-slate-800 leading-none">{year}{year === "1" ? "ère" : "ème"} année</div>
                                                                                         </div>
                                                                                     </div>
-                                                                                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black transition-all ${yearNum === 1 ? (results.p1 > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400') : (results.p1 > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}`}>
-                                                                                        <CheckCircle2 size={11} />
-                                                                                        {results.p1 > 0 ? 'Configuré' : 'En attente'}
-                                                                                    </div>
+                                                                                    {results.p1 > 0 && (
+                                                                                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black transition-all bg-emerald-50 text-emerald-600">
+                                                                                            <CheckCircle2 size={11} />
+                                                                                            Configuré
+                                                                                        </div>
+                                                                                    )}
                                                                                 </div>
 
                                                                                 <div className="p-5 space-y-4 flex-grow">

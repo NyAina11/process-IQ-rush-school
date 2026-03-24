@@ -74,8 +74,8 @@ const mapBackendToStudent = (backendData: any): any => {
     email: fields["E-mail"] || "",
     telephone: fields["Téléphone"] || "",
     adresse_residence: fields["Adresse de résidence"] || "",
-    num_residence: "", // Souvent concaténé dans l'adresse
-    rue_residence: "",
+    num_residence: (fields["Adresse de résidence"] || "").includes(", ") ? (fields["Adresse de résidence"] || "").split(", ")[0] : "",
+    rue_residence: (fields["Adresse de résidence"] || "").includes(", ") ? (fields["Adresse de résidence"] || "").split(", ")[1] : (fields["Adresse de résidence"] || ""),
     complement_residence: fields["Complément d'adresse"] || "",
     code_postal: fields["Code postal"]?.toString() || fields["Code postal "]?.toString() || "",
     ville: fields["Ville de résidence"] || fields["ville"] || "",
@@ -1185,9 +1185,6 @@ export const api = {
       if (originalData) {
         const originalPayload = mapCompanyToBackend(originalData, role);
         finalPayload = diffObjects(originalPayload, payload);
-        // Always include utilisateur and validation status for history tracking
-        finalPayload.utilisateur = payload.utilisateur;
-        finalPayload.validation = payload.validation;
         // Always include utilisateur and validation status for history tracking
         finalPayload.utilisateur = payload.utilisateur;
         finalPayload.validation = payload.validation;

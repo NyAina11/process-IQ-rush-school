@@ -337,7 +337,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
 
     const sectionDefs = [
         { id: 'personal', fields: ['prenom', 'nom_naissance', 'sexe', 'date_naissance', 'nationalite', 'commune_naissance', 'departement'] },
-        { id: 'contact', fields: ['rue_residence', 'code_postal', 'ville', 'email', 'telephone'] },
+        { id: 'contact', fields: ['num_residence', 'rue_residence', 'code_postal', 'ville', 'email', 'telephone'] },
         { id: 'situation', fields: ['situation', 'declare_inscription_sportif_haut_niveau', 'declare_avoir_projet_creation_reprise_entreprise', 'declare_travailleur_handicape', 'alternance'] },
         { id: 'school', fields: ['derniere_classe', 'bac'] },
         { id: 'formation', fields: ['formation_souhaitee'] },
@@ -427,7 +427,10 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                     hasError={hasSectionError(sectionDefs[1].fields)}
                 >
                     <FormGrid>
-                        <FullCol><Input label="Adresse de résidence" required placeholder="Numéro et rue" error={errors.rue_residence?.message} {...register('rue_residence')} /></FullCol>
+                        <div className="grid grid-cols-[80px_1fr] gap-4 md:col-span-2">
+                            <Input label="N°" placeholder="11" error={errors.num_residence?.message} {...register('num_residence')} />
+                            <Input label="Voie" required placeholder="rue de la paix, avenue..." error={errors.rue_residence?.message} {...register('rue_residence')} />
+                        </div>
                         <FullCol><Input label="Complément d'adresse" placeholder="Bâtiment, appartement…" {...register('complement_residence')} /></FullCol>
                         <div><Input label="Code postal" required placeholder="75001" error={errors.code_postal?.message} {...register('code_postal')} /></div>
                         <div><Input label="Ville" required placeholder="Paris" error={errors.ville?.message} {...register('ville')} /></div>
