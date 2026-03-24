@@ -18,6 +18,7 @@ interface BugItem {
   reporterName?: string;
   reporterEmail?: string;
   pagePath?: string;
+  screenshotUrl?: string;
   createdAt: string;
 }
 
@@ -47,6 +48,8 @@ const SupportView: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | BugStatus>('all');
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [screenshotPreview, setScreenshotPreview] = useState('');
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -82,6 +85,14 @@ const SupportView: React.FC = () => {
     loadBugs();
   }, [statusFilter, isSuperAdmin]);
 
+  useEffect(() => {
+    return () => {
+      if (screenshotPreview) {
+        URL.revokeObjectURL(screenshotPreview);
+      }
+    };
+  }, [screenshotPreview]);
+
   const stats = useMemo(() => {
     return {
       total: bugs.length,
@@ -100,6 +111,11 @@ const SupportView: React.FC = () => {
 
     setSubmitting(true);
     try {
+      let screenshotUrl = '';
+      if (screenshotFile) {
+        screenshotUrl = await api.uploadBugScreenshot(screenshotFile);
+      }
+
       await api.createBugReport({
         title: form.title.trim(),
         description: form.description.trim(),
@@ -109,6 +125,7 @@ const SupportView: React.FC = () => {
         reporterName: name,
         reporterEmail: email,
         pagePath: window.location.pathname,
+        screenshotUrl: screenshotUrl || undefined,
       });
       showToast('Bug signalé avec succès', 'success');
       setForm({
@@ -117,12 +134,41 @@ const SupportView: React.FC = () => {
         module: role === 'rh' ? 'rh' : 'admission',
         priority: 'medium',
       });
+      setScreenshotFile(null);
+      setScreenshotPreview('');
       await loadBugs();
     } catch (error: any) {
       showToast(error?.message || 'Erreur lors du signalement', 'error');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      if (screenshotPreview) URL.revokeObjectURL(screenshotPreview);
+      setScreenshotFile(null);
+      setScreenshotPreview('');
+      return;
+    }
+
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      showToast('Format image invalide. Utilisez PNG, JPG ou WEBP.', 'error');
+      e.target.value = '';
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      showToast('Image trop lourde (max 8MB).', 'error');
+      e.target.value = '';
+      return;
+    }
+
+    if (screenshotPreview) URL.revokeObjectURL(screenshotPreview);
+    setScreenshotFile(file);
+    setScreenshotPreview(URL.createObjectURL(file));
   };
 
   const handleStatusChange = async (id: string, nextStatus: BugStatus) => {
@@ -215,6 +261,22 @@ const SupportView: React.FC = () => {
             placeholder="Décrivez le bug, les étapes pour le reproduire, et le résultat attendu."
             className="w-full px-4 py-3 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[13px] outline-none focus:border-[#6d28d9]/40 resize-y"
           />
+          <div className="space-y-2">
+            <label className="block text-[12px] font-semibold text-slate-600">Capture d'ecran (optionnel)</label>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp"
+              onChange={handleScreenshotChange}
+              className="w-full text-[12px] text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-[#f5f3ff] file:text-[#6d28d9] file:font-semibold"
+            />
+            {screenshotPreview && (
+              <img
+                src={screenshotPreview}
+                alt="Apercu capture bug"
+                className="h-24 rounded-lg border border-[#e5e0f5] object-cover"
+              />
+            )}
+          </div>
         </form>
       )}
 
@@ -279,6 +341,20 @@ const SupportView: React.FC = () => {
                     <td className="px-4 py-3 border-b border-[#f5f3ff] min-w-[320px]">
                       <div className="text-[13px] font-semibold text-[#1e1b2e]">{bug.title}</div>
                       <div className="text-[12px] text-slate-500 line-clamp-2">{bug.description}</div>
+                      {bug.screenshotUrl && (
+                        <a
+                          href={bug.screenshotUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-2 inline-block"
+                        >
+                          <img
+                            src={bug.screenshotUrl}
+                            alt={`Capture ticket ${bug.title}`}
+                            className="h-16 w-28 rounded-md object-cover border border-[#e5e0f5]"
+                          />
+                        </a>
+                      )}
                     </td>
                     <td className="px-4 py-3 border-b border-[#f5f3ff] text-[12px] font-medium text-slate-600 uppercase">{bug.module}</td>
                     <td className="px-4 py-3 border-b border-[#f5f3ff] text-[12px] text-slate-600">{priorityLabel[bug.priority]}</td>
