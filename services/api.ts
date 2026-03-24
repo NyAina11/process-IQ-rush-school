@@ -1400,7 +1400,30 @@ export const api = {
     }
   },
 
+  async uploadBugScreenshot(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
 
+    const response = await fetch(`${SUPPORT_URL}/bugs/upload-screenshot`, {
+      method: 'POST',
+      headers: withAuthHeaders({
+        Accept: 'application/json',
+      }),
+      body: formData,
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data?.error || data?.message || 'Impossible d\'uploader la capture d\'écran');
+    }
+
+    const screenshotUrl = data?.data?.screenshotUrl;
+    if (!screenshotUrl || typeof screenshotUrl !== 'string') {
+      throw new Error('URL de capture invalide retournée par le serveur');
+    }
+
+    return screenshotUrl;
+  },
   async createBugReport(payload: {
     title: string;
     description: string;
