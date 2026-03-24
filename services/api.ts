@@ -1401,32 +1401,48 @@ export const api = {
       console.error('‚ùå Error submitting projet pro:', error);
       throw error;
     }
-  },
+    },
 
   async uploadBugScreenshot(file: File): Promise<string> {
-    const formData = new FormData();
-    formData.append('file', file);
+    const uploadPaths = [
+      `${SUPPORT_URL}/bugs/upload-screenshot`,
+      `${SUPPORT_URL}/upload-screenshot`,
+    ];
 
-    const response = await fetch(`${SUPPORT_URL}/bugs/upload-screenshot`, {
-      method: 'POST',
-      headers: withAuthHeaders({
-        Accept: 'application/json',
-      }),
-      body: formData,
-    });
+    let lastError: string | null = null;
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data?.error || data?.message || 'Impossible d\'uploader la capture d\'Ècran');
+    for (const url of uploadPaths) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: withAuthHeaders({
+          Accept: 'application/json',
+        }),
+        body: formData,
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        lastError = data?.error || data?.message || `Upload screenshot impossible (${response.status})`;
+        if (response.status === 404) {
+          continue;
+        }
+        throw new Error(lastError);
+      }
+
+      const screenshotUrl = data?.data?.screenshotUrl;
+      if (!screenshotUrl || typeof screenshotUrl !== 'string') {
+        throw new Error('URL de capture invalide retournee par le serveur');
+      }
+
+      return screenshotUrl;
     }
 
-    const screenshotUrl = data?.data?.screenshotUrl;
-    if (!screenshotUrl || typeof screenshotUrl !== 'string') {
-      throw new Error('URL de capture invalide retournÈe par le serveur');
-    }
-
-    return screenshotUrl;
+    throw new Error(lastError || 'Route upload screenshot introuvable sur le backend');
   },
+
   async createBugReport(payload: {
     title: string;
     description: string;
