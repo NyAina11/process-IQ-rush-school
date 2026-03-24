@@ -1,9 +1,33 @@
 import { StudentFormData, CompanyFormData, ApiResponse } from '../types';
+import { getAuthToken } from './session';
 import { decimalToTime, timeToDecimal } from '../utils/formatters';
 
 const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 const AUTH_API_URL = `${BASE_API_URL}/auth`;
 const BASE_URL = `${BASE_API_URL}/admission`;
+const SUPPORT_URL = `${BASE_API_URL}/support`;
+
+const withAuthHeaders = (headers: Record<string, string> = {}): Record<string, string> => {
+  const token = getAuthToken();
+  if (!token) return headers;
+  return {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+  };
+};
+
+const readJsonSafely = async (response: Response): Promise<any> => {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
+
+const getApiErrorMessage = (payload: any, fallback: string): string => {
+  if (!payload) return fallback;
+  return payload.error || payload.message || payload.detail || fallback;
+};
 
 // Helper to format string (remove underscores, capitalize)
 const formatString = (str: string) => {
@@ -673,7 +697,11 @@ export const api = {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
-      const data = await response.json();
+      const data = await readJsonSafely(response);
+      if (!response.ok) {
+        const message = getApiErrorMessage(data, `Failed to fetch candidates (${response.status})`);
+        throw new Error(message);
+      }
       console.log('API getStudentsList RAW:', data);
 
       // Adaptation Local Backend: structure data { success: true, data: [...], count: ... }
@@ -767,8 +795,11 @@ export const api = {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
-      if (!response.ok) throw new Error('Failed to fetch candidates with documents');
-      const json = await response.json();
+      const json = await readJsonSafely(response);
+      if (!response.ok) {
+        const message = getApiErrorMessage(json, `Failed to fetch candidates with documents (${response.status})`);
+        throw new Error(message);
+      }
       console.log('API getCandidatsWithDocuments RAW:', json);
       return Array.isArray(json) ? json : (json.data || []);
     } catch (error) {
@@ -1098,14 +1129,21 @@ export const api = {
 
   async getAllCompanies(): Promise<any[]> {
     try {
-      console.log('📤 Fetching All Companies');
+      console.log('Fetching All Companies');
       const response = await fetch(`${BASE_URL}/entreprises`, { method: 'GET', headers: { 'Accept': 'application/json' } });
-      const json = await response.json();
+      const json = await readJsonSafely(response);
+      if (!response.ok) {
+        const message = getApiErrorMessage(json, `Failed to fetch companies (${response.status})`);
+        throw new Error(message);
+      }
       const data = json.data || json;
       const companies = Array.isArray(data) ? data.map(c => c.fields ? mapBackendToCompany(c) : c) : [];
-      console.log('📥 All Companies Received, count:', companies.length);
-      return response.ok ? companies : [];
-    } catch (error) { return []; }
+      console.log('All Companies Received, count:', companies.length);
+      return companies;
+    } catch (error) {
+      console.error('API Error (getAllCompanies):', error);
+      return [];
+    }
   },
 
   async getCompanyById(id: string): Promise<any> {
@@ -1351,6 +1389,100 @@ export const api = {
       console.error('❌ Error submitting projet pro:', error);
       throw error;
     }
+  },
+
+
+  async createBugReport(payload: {
+    title: string;
+    description: string;
+    module?: 'admission' | 'rh' | 'commercial' | 'other';
+    priority?: 'low' | 'medium' | 'high' | 'critical';
+    reporterRole?: string;
+    reporterName?: string;
+    reporterEmail?: string;
+    pagePath?: string;
+    screenshotUrl?: string;
+  }): Promise<any> {
+    const response = await fetch(`${SUPPORT_URL}/bugs`, {
+      method: 'POST',
+      headers: withAuthHeaders({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      }),
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data?.error || data?.message || 'Impossible de signaler le bug');
+    }
+    return data;
+  },
+
+  async getBugReports(params?: {
+    status?: 'new' | 'in_progress' | 'resolved';
+    module?: 'admission' | 'rh' | 'commercial' | 'other';
+    priority?: 'low' | 'medium' | 'high' | 'critical';
+    search?: string;
+    scope?: 'all' | 'mine';
+    requesterRole?: string;
+    reporterRole?: string;
+    reporterEmail?: string;
+  }): Promise<{ data: any[]; pagination?: any }> {
+    const query = new URLSearchParams();
+    if (params?.status) query.set('status', params.status);
+    if (params?.module) query.set('module', params.module);
+    if (params?.priority) query.set('priority', params.priority);
+    if (params?.search) query.set('search', params.search);
+    if (params?.scope) query.set('scope', params.scope);
+    if (params?.requesterRole) query.set('requesterRole', params.requesterRole);
+    if (params?.reporterRole) query.set('reporterRole', params.reporterRole);
+    if (params?.reporterEmail) query.set('reporterEmail', params.reporterEmail);
+
+    const response = await fetch(`${SUPPORT_URL}/bugs?${query.toString()}`, {
+      method: 'GET',
+      headers: withAuthHeaders({ Accept: 'application/json' }),
+    });
+
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const safeEmpty = { data: [], pagination: { page: 1, limit: 50, total: 0, pages: 0 } };
+      if (response.status === 404) {
+        console.warn('Support endpoint not available on this backend:', SUPPORT_URL + '/bugs');
+        return safeEmpty;
+      }
+      console.error('Support API error (getBugReports):', {
+        status: response.status,
+        body: json
+      });
+      if (response.status >= 500) {
+        return safeEmpty;
+      }
+      throw new Error(json?.error || `Impossible de charger les tickets (${response.status})`);
+    }
+
+    return {
+      data: Array.isArray(json?.data) ? json.data : [],
+      pagination: json?.pagination,
+    };
+  },
+
+  async updateBugStatus(id: string, status: 'new' | 'in_progress' | 'resolved', requesterRole: string): Promise<any> {
+    const response = await fetch(`${SUPPORT_URL}/bugs/${id}/status`, {
+      method: 'PATCH',
+      headers: withAuthHeaders({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      }),
+      body: JSON.stringify({ status, requesterRole }),
+    });
+
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(json?.error || 'Impossible de mettre � jour le statut');
+    }
+    return json;
   }
 };
+
 

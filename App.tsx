@@ -16,6 +16,7 @@ import AdminLoginPage from './components/AdminLoginPage';
 import AdminDashboard from './components/AdminDashboard';
 import TestPage from './components/TestPage';
 import StudentView from './components/StudentView';
+import SupportView from './components/SupportView';
 import { decodeJwtPayload, getAuthToken, isAuthenticated } from './services/session';
 
 const getEffectiveRole = (): string | null => {
@@ -210,6 +211,15 @@ const App = () => {
                   <Route path="questionnaires" element={<StudentView />} />
                   <Route index element={<Navigate to="dashboard" replace />} />
                 </Route>
+
+                <Route
+                  path="/support"
+                  element={
+                    <RequireAuth allowedRoles={['admission', 'rh']}>
+                      <SupportView />
+                    </RequireAuth>
+                  }
+                />
 
                 <Route
                   path="/parametres"

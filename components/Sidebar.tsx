@@ -246,6 +246,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </div>
         )}
 
+        {(userRole === 'admission' || userRole === 'rh' || userRole === 'super_admin') && (
+          <div className="px-3">
+            <NavLink
+              to="/support"
+              onClick={handleLinkClick}
+              className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] ${isActive ? 'bg-violet-600/20 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-slate-200'}`}
+            >
+              {({ isActive }) => (
+                <>
+                  <MessageSquare size={20} className={isActive ? 'text-white' : ''} />
+                  <span>Support</span>
+                </>
+              )}
+            </NavLink>
+          </div>
+        )}
         {/* Paramètres */}
         {(userRole === 'super_admin' || !userRole) && (
           <div className="px-3">
@@ -280,3 +296,4 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 };
 
 export default Sidebar;
+
