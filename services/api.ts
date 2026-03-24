@@ -222,6 +222,7 @@ const mapBackendToCompany = (backendData: any): any => {
       lieu_execution: fields["Lieu dexécution du contrat (si différent du siège)"] || "",
 
       pourcentage_smic1: fields["Pourcentage du SMIC 1"] || 0,
+      pourcentage_smic1_2: fields["Pourcentage smic 1_2"] || null,
       smic1: fields["SMIC 1"] || "",
       montant_salaire_brut1: fields["Salaire brut mensuel 1"] || 0,
 
@@ -458,6 +459,8 @@ const mapCompanyToBackend = (data: any, role?: string) => {
         montant_salaire_brut4: data.contrat?.montant_salaire_brut4 ? parseFloat(data.contrat.montant_salaire_brut4.toString()) : "",
         date_conclusion: ensureString(data.contrat?.date_conclusion),
         date_debut_execution: ensureString(data.contrat?.date_debut_execution),
+        date_debut_1periode_1er_annee: ensureString(data.contrat?.date_debut_1periode_1er_annee),
+        date_fin_1periode_1er_annee: ensureString(data.contrat?.date_fin_1periode_1er_annee),
         date_debut_2periode_1er_annee: ensureString(data.contrat?.date_debut_2periode_1er_annee),
         date_fin_2periode_1er_annee: ensureString(data.contrat?.date_fin_2periode_1er_annee),
         date_debut_1periode_2eme_annee: ensureString(data.contrat?.date_debut_1periode_2eme_annee),
@@ -563,6 +566,8 @@ const mapCompanyToBackend = (data: any, role?: string) => {
       travail_machine_dangereuse: ensureString(data["Travail sur machines dangereuses ou exposition à des risques particuliers"]),
       caisse_retraite: ensureString(data["Caisse de retraite"]),
       date_avenant: ensureString(data["date Si avenant"]),
+      date_debut_1periode_1er_annee: ensureString(data["date_debut_1periode_1er_annee"]),
+      date_fin_1periode_1er_annee: ensureString(data["date_fin_1periode_1er_annee"]),
       date_debut_2periode_1er_annee: ensureString(data["date_debut_2periode_1er_annee"]),
       date_fin_2periode_1er_annee: ensureString(data["date_fin_2periode_1er_annee"]),
       date_debut_1periode_2eme_annee: ensureString(data["date_debut_1periode_2eme_annee"]),
@@ -1207,17 +1212,18 @@ export const api = {
     }
   },
 
+  
   async deleteCompany(studentId: string): Promise<boolean> {
     try {
-      console.log('📤 Deleting Company for Student:', studentId);
+      console.log('\ud83d\udce4 Deleting Company for Student:', studentId);
       const response = await fetch(`${BASE_URL}/entreprises/${studentId}`, {
         method: 'DELETE',
         headers: { 'Accept': 'application/json' }
       });
-      console.log('📥 Delete Company Status:', response.status);
+      console.log('\ud83d\udce5 Delete Company Status:', response.status);
       return response.ok;
     } catch (error) {
-      console.error('❌ Delete Company Error:', error);
+      console.error('\u274c Delete Company Error:', error);
       return false;
     }
   },

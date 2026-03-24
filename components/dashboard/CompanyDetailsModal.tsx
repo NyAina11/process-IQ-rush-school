@@ -343,8 +343,17 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                                     {[1, 2, 3, 4].map(num => (
                                                         <div key={num} className="bg-white p-4 rounded-[4px] border border-slate-100 shadow-sm">
                                                             <span className="text-[10px] font-black text-blue-500 uppercase mb-2 block">Année {num}</span>
-                                                            <div className="text-lg font-black text-slate-800">{fields[`Salaire brut mensuel ${num}`] ? `${fields[`Salaire brut mensuel ${num}`]} €` : 'N/A'}</div>
-                                                            <div className="text-[10px] font-bold text-slate-400">{fields[`Pourcentage du SMIC ${num}`] || fields[`Pourcentage smic ${num}`] || 0}% du SMIC</div>
+                                                            <div className="text-lg font-black text-slate-800 mb-3">{fields[`Salaire brut mensuel ${num}`] ? `${fields[`Salaire brut mensuel ${num}`]} €` : 'N/A'}</div>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                <div className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-black bg-blue-50 text-blue-600 border border-blue-100 shadow-sm">
+                                                                    {fields[`Pourcentage smic ${num}`] || fields[`Pourcentage du SMIC ${num}`] || 0}%
+                                                                </div>
+                                                                {fields[`Pourcentage smic ${num}_2`] && fields[`Pourcentage smic ${num}_2`] !== (fields[`Pourcentage smic ${num}`] || fields[`Pourcentage du SMIC ${num}`]) && (
+                                                                    <div className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-black bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
+                                                                        {fields[`Pourcentage smic ${num}_2`]}%
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>

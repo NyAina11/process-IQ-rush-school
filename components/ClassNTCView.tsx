@@ -807,13 +807,15 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
 
                     <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter pl-3 py-1 block">Administration</span>
 
-                    <button
-                        onClick={() => handleDeleteCompany(student.id, student.entreprise_raison_sociale || 'Entreprise')}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#b91c1c] hover:bg-[#fee2e2] transition-colors"
-                    >
-                        <Building2 size={15} className="text-rose-400" />
-                        <span>Supprimer entreprise</span>
-                    </button>
+                    {studentInfo.id_entreprise && typeof studentInfo.id_entreprise === 'string' && studentInfo.id_entreprise.startsWith('rec') && (
+                        <button
+                            onClick={() => handleDeleteCompany(studentInfo.id_entreprise, studentInfo.entreprise || 'Entreprise')}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[#b91c1c] hover:bg-[#fee2e2] transition-colors"
+                        >
+                            <Building2 size={15} className="text-rose-400" />
+                            <span>Supprimer entreprise</span>
+                        </button>
+                    )}
 
                     <button
                         onClick={() => handleDeleteStudent(student.id, fullName)}

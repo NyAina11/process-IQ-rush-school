@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -113,6 +113,8 @@ const companySchema = z.object({
         nombre_mois: z.number().optional(),
 
         // MAPPINGS DES PÉRIODES DE SALAIRE
+        date_debut_1periode_1er_annee: z.string().optional().or(z.literal("")),
+        date_fin_1periode_1er_annee: z.string().optional().or(z.literal("")),
         date_debut_2periode_1er_annee: z.string().optional().or(z.literal("")),
         date_fin_2periode_1er_annee: z.string().optional().or(z.literal("")),
 
@@ -181,7 +183,8 @@ const companySchema = z.object({
             }
         };
 
-        // 1ère année - 2ème période (now effectively the main period for year 1)
+        // 1ère année
+        checkPeriod('date_debut_1periode_1er_annee', 'date_fin_1periode_1er_annee', '1ère période 1ère année', false);
         checkPeriod('date_debut_2periode_1er_annee', 'date_fin_2periode_1er_annee', '2ème période 1ère année', false);
 
         // Autres années
@@ -246,6 +249,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                 pourcentage_smic4: null, pourcentage_smic4_2: null, montant_salaire_brut4: null,
                 date_conclusion: "", date_debut_execution: "",
                 numero_deca_ancien_contrat: "", machines_dangereuses: "Non", caisse_retraite: "", date_avenant: "", nombre_mois: 12,
+                date_debut_1periode_1er_annee: "", date_fin_1periode_1er_annee: "",
                 date_debut_2periode_1er_annee: "", date_fin_2periode_1er_annee: "",
                 date_debut_1periode_2eme_annee: "", date_fin_1periode_2eme_annee: "",
                 date_debut_2periode_2eme_annee: "", date_fin_2periode_2eme_annee: "",
@@ -345,6 +349,56 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         return age;
     };
 
+    const [quickStartDate, setQuickStartDate] = useState<string>('');
+    const [quickDuration, setQuickDuration] = useState<string>('');
+
+    const applyQuickFill = useCallback((startDate: string, durationStr: string) => {
+        if (!startDate || !durationStr) return;
+        const durationYears = parseInt(durationStr);
+        if (isNaN(durationYears)) return;
+
+        let currentStart = new Date(startDate);
+        const years = ['1er', '2eme', '3eme', '4eme'];
+
+        for (let i = 0; i < 4; i++) {
+            const suffix = years[i];
+            if (i < durationYears) {
+                // Period 1
+                const p1Start = new Date(currentStart);
+                const p1End = new Date(p1Start);
+                p1End.setMonth(p1End.getMonth() + 6);
+                p1End.setDate(p1End.getDate() - 1);
+
+                setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
+                setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, p1End.toISOString().split('T')[0]);
+
+                // Period 2
+                const p2Start = new Date(p1End);
+                p2Start.setDate(p2Start.getDate() + 1);
+                const p2End = new Date(p2Start);
+                p2End.setMonth(p2End.getMonth() + 6);
+                p2End.setDate(p2End.getDate() - 1);
+
+                setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, p2Start.toISOString().split('T')[0]);
+                setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, p2End.toISOString().split('T')[0]);
+
+                // Prepare for next year
+                currentStart = new Date(p2End);
+                currentStart.setDate(currentStart.getDate() + 1);
+            } else {
+                // Clear years beyond duration
+                setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, "");
+                setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, "");
+                setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
+                setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
+            }
+        }
+    }, [setValue]);
+
+    useEffect(() => {
+        applyQuickFill(quickStartDate, quickDuration);
+    }, [quickStartDate, quickDuration, applyQuickFill]);
+
     // Helper to get percentage from bracket and year
     const getRateFromBracket = (bracket: string | null, year: number): number => {
         if (!bracket) return 0;
@@ -366,7 +420,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         };
 
         return {
-            y1p1: 0, // Removed from UI and calculation
+            y1p1: getRate(c?.date_debut_1periode_1er_annee, 1),
             y1p2: getRate(c?.date_debut_2periode_1er_annee, 1),
 
             y2p1: getRate(c?.date_debut_1periode_2eme_annee, 2),
@@ -382,10 +436,10 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
 
     // Push computed SMIC values into form state whenever they change
     useEffect(() => {
-        // Année 1 -> utilise P2 pour le salaire brut et pourcentage principal
-        setValue('contrat.pourcentage_smic1', computedPeriods.y1p2 || null, { shouldValidate: false });
+        // Année 1
+        setValue('contrat.pourcentage_smic1', computedPeriods.y1p1 || null, { shouldValidate: false });
         setValue('contrat.pourcentage_smic1_2', computedPeriods.y1p2 || null, { shouldValidate: false });
-        setValue('contrat.montant_salaire_brut1', computedPeriods.y1p2 ? parseFloat(((smicBase * computedPeriods.y1p2) / 100).toFixed(2)) : null, { shouldValidate: false });
+        setValue('contrat.montant_salaire_brut1', computedPeriods.y1p1 ? parseFloat(((smicBase * computedPeriods.y1p1) / 100).toFixed(2)) : null, { shouldValidate: false });
 
         // Années 2-4 -> utilisent P1 pour le salaire brut (le 2ème pourcentage est informatif)
         setValue('contrat.pourcentage_smic2', computedPeriods.y2p1 || null, { shouldValidate: false });
@@ -859,6 +913,35 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                     </div>
                                 </div>
 
+                                {/* Quick Fill Header */}
+                                <div className="bg-slate-50 border-x border-slate-200 p-4 flex flex-col md:flex-row items-center gap-4">
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Configuration rapide</span>
+                                    </div>
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <Input
+                                            label="Date de début contrat"
+                                            type="date"
+                                            value={quickStartDate}
+                                            onChange={(e) => setQuickStartDate(e.target.value)}
+                                            className="bg-white text-slate-800 font-bold"
+                                        />
+                                        <Select
+                                            label="Durée du contrat"
+                                            value={quickDuration}
+                                            onChange={(e) => setQuickDuration(e.target.value)}
+                                            className="bg-white text-slate-800 font-bold"
+                                            options={[
+                                                { label: "Sélectionner durée", value: "" },
+                                                { label: "1 an", value: "1" },
+                                                { label: "2 ans", value: "2" },
+                                                { label: "3 ans", value: "3" }
+                                            ]}
+                                        />
+                                    </div>
+                                </div>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-t-0 border-slate-200 rounded-b-2xl overflow-hidden">
                                     {["1", "2", "3", "4"].map((year, idx) => {
                                         const yearNum = parseInt(year);
@@ -869,62 +952,63 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                         const isRight = idx % 2 === 1;
                                         const isBottom = idx >= 2;
 
-                                        return (
-                                            <div
-                                                key={year}
-                                                className={`relative bg-white flex flex-col transition-colors hover:bg-slate-50/60 ${isRight ? 'border-l border-slate-200' : ''} ${isBottom ? 'border-t border-slate-200' : ''}`}
-                                            >
-                                                <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-7 h-7 rounded-lg bg-[#1a1630] shrink-0 flex items-center justify-center">
-                                                            <span className="text-white text-[11px] font-black">{year}</span>
-                                                        </div>
-                                                        <div>
-                                                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-0.5">Étape du contrat</div>
-                                                            <div className="text-[13px] font-black text-slate-800 leading-none">{year}{year === "1" ? "ère" : "ème"} année</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black transition-all ${yearNum === 1 ? (results.p2 > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400') : (results.p1 > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}`}>
-                                                        <CheckCircle2 size={11} />
-                                                        {yearNum === 1 ? (results.p2 > 0 ? 'Configuré' : 'En attente') : (results.p1 > 0 ? 'Configuré' : 'En attente')}
-                                                    </div>
-                                                </div>
+                                                                        const suffix = yearNum === 1 ? '1er' : yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme';
+                                                                        return (
+                                                                            <div
+                                                                                key={year}
+                                                                                className={`relative bg-white flex flex-col transition-colors hover:bg-slate-50/60 ${isRight ? 'border-l border-slate-200' : ''} ${isBottom ? 'border-t border-slate-200' : ''}`}
+                                                                            >
+                                                                                <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100">
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className="w-7 h-7 rounded-lg bg-[#1a1630] shrink-0 flex items-center justify-center">
+                                                                                            <span className="text-white text-[11px] font-black">{year}</span>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-0.5">Étape du contrat</div>
+                                                                                            <div className="text-[13px] font-black text-slate-800 leading-none">{year}{year === "1" ? "ère" : "ème"} année</div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black transition-all ${yearNum === 1 ? (results.p1 > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400') : (results.p1 > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}`}>
+                                                                                        <CheckCircle2 size={11} />
+                                                                                        {results.p1 > 0 ? 'Configuré' : 'En attente'}
+                                                                                    </div>
+                                                                                </div>
 
-                                                <div className="p-5 space-y-4 flex-grow">
-                                                    <div className="space-y-4">
-                                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Calcul automatique des taux</div>
+                                                                                <div className="p-5 space-y-4 flex-grow">
+                                                                                    <div className="space-y-4">
+                                                                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Calcul automatique des taux</div>
 
-                                                        {yearNum > 1 && (
-                                                            <div className="rounded-lg border border-slate-100 bg-slate-50/30 p-3 space-y-3">
-                                                                <div className="flex items-center justify-between">
-                                                                    <div className="flex items-center gap-1.5">
-                                                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-                                                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">1ère Période</span>
-                                                                    </div>
-                                                                    <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest pl-1 mb-1 shadow-sm shadow-[#6b3cd210]">
-                                                                        {yearNum}ème Année
-                                                                    </div>
-                                                                </div>
-                                                                <div className="grid grid-cols-2 gap-2">
-                                                                    <Input
-                                                                        type="date"
-                                                                        label="Début"
-                                                                        {...register(`contrat.date_debut_1periode_${yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme'}_annee` as any)}
-                                                                    />
-                                                                    <Input
-                                                                        type="date"
-                                                                        label="Fin"
-                                                                        {...register(`contrat.date_fin_1periode_${yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme'}_annee` as any)}
-                                                                    />
-                                                                </div>
-                                                                <div className="flex justify-between items-center px-1 mt-1">
-                                                                    <span className="text-[9px] font-bold text-slate-400 italic">
-                                                                        Age : {getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme'}_annee` as any)) ?? '?'} ans
-                                                                    </span>
-                                                                    <div className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{results.p1}% SMIC</div>
-                                                                </div>
-                                                            </div>
-                                                        )}
+                                                                                        {yearNum >= 1 && (
+                                                                                            <div className="rounded-lg border border-slate-100 bg-slate-50/30 p-3 space-y-3">
+                                                                                                <div className="flex items-center justify-between">
+                                                                                                    <div className="flex items-center gap-1.5">
+                                                                                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+                                                                                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">1ère Période</span>
+                                                                                                    </div>
+                                                                                                    <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest pl-1 mb-1 shadow-sm shadow-[#6b3cd210]">
+                                                                                                        {yearNum}{yearNum === 1 ? "ère" : "ème"} Année
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <div className="grid grid-cols-2 gap-2">
+                                                                                                    <Input
+                                                                                                        type="date"
+                                                                                                        label="Début"
+                                                                                                        {...register(`contrat.date_debut_1periode_${suffix}_annee` as any)}
+                                                                                                    />
+                                                                                                    <Input
+                                                                                                        type="date"
+                                                                                                        label="Fin"
+                                                                                                        {...register(`contrat.date_fin_1periode_${suffix}_annee` as any)}
+                                                                                                    />
+                                                                                                </div>
+                                                                                                <div className="flex justify-between items-center px-1 mt-1">
+                                                                                                    <span className="text-[9px] font-bold text-slate-400 italic">
+                                                                                                        Age : {getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any)) ?? '?'} ans
+                                                                                                    </span>
+                                                                                                    <div className="text-[12px] font-black text-emerald-700 bg-emerald-100/80 px-3 py-1 rounded-full shadow-sm">{results.p1}% SMIC</div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        )}
 
                                                         <div className="rounded-lg border border-[#6B3CD2]/15 bg-[#6B3CD2]/3 p-3 space-y-3">
                                                             <div className="flex items-center justify-between">
@@ -932,18 +1016,18 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                     <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]/50"></div>
                                                                     <span className="text-[10px] font-black text-[#6B3CD2] uppercase tracking-wider">2ème Période</span>
                                                                 </div>
-                                                                <span className="text-[11px] font-black text-[#6B3CD2] bg-[#6B3CD2]/5 px-2 py-0.5 rounded-full">{results.p2}% SMIC</span>
+                                                                <span className="text-[13px] font-black text-[#5831ad] bg-[#6B3CD2]/10 px-3 py-1 rounded-full shadow-sm">{results.p2}% SMIC</span>
                                                             </div>
                                                             <div className="grid grid-cols-2 gap-2">
                                                                 <Input
                                                                     type="date"
                                                                     label="Début"
-                                                                    {...register(`contrat.date_debut_2periode_${yearNum === 1 ? '1er' : yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme'}_annee` as any)}
+                                                                    {...register(`contrat.date_debut_2periode_${suffix}_annee` as any)}
                                                                 />
                                                                 <Input
                                                                     type="date"
                                                                     label="Fin"
-                                                                    {...register(`contrat.date_fin_2periode_${yearNum === 1 ? '1er' : yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme'}_annee` as any)}
+                                                                    {...register(`contrat.date_fin_2periode_${suffix}_annee` as any)}
                                                                 />
                                                             </div>
                                                         </div>
@@ -954,14 +1038,14 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                     <div className="h-1 bg-white/10">
                                                         <div
                                                             className="h-full bg-gradient-to-r from-[#6B3CD2] to-emerald-400 transition-all duration-700"
-                                                            style={{ width: `${Math.min(results.p1, 100)}%` }}
+                                                            style={{ width: `${Math.min(results.p1 || results.p2, 100)}%` }}
                                                         />
                                                     </div>
                                                     <div className="flex items-center justify-between px-4 py-3">
                                                         <div>
                                                             <div className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-0.5">Taux Moyen</div>
                                                             <div className="text-white text-[18px] font-black leading-none">
-                                                                {yearNum === 1 ? `${results.p2}%` : (results.p1 === results.p2 ? `${results.p1}%` : `${results.p1}% / ${results.p2}%`)}
+                                                                {results.p1 === results.p2 ? `${results.p1}%` : `${results.p1}% / ${results.p2}%`}
                                                             </div>
                                                         </div>
                                                         <div className="w-px h-8 bg-white/10" />
