@@ -907,38 +907,38 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                             </div>
 
                             {/* Simulateur de salaire multi-années indépendant */}
-                            <div className="col-span-12 mt-8">
+                            <div className="col-span-12 mt-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                                 {/* Header bar */}
-                                <div className="rounded-t-2xl bg-[#1a1630] px-6 py-4 flex items-center justify-between">
+                                <div className="rounded-t-2xl px-6 py-5 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%)' }}>
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                                            <Calculator size={16} className="text-white" />
+                                        <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
+                                            <Calculator size={17} className="text-white" />
                                         </div>
                                         <div>
-                                            <div className="text-white font-black text-[14px] tracking-tight">Simulateur de salaire apprenti</div>
-                                            <div className="text-white/40 text-[10px] font-bold uppercase tracking-widest">
-                                                {studentDateNaissance ? 'SMIC 2024 · 1 823,03 € brut/mois' : '⚠️ Date de naissance manquante'}
+                                            <div className="text-white font-bold text-[15px] tracking-tight">Simulateur de salaire apprenti</div>
+                                            <div className="text-white/50 text-[11px] font-medium mt-0.5">
+                                                {studentDateNaissance ? 'Base SMIC 2024 · 1 823,03 € brut/mois' : 'Date de naissance manquante'}
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center gap-2">
                                         {["1", "2", "3", "4"].map(y => {
                                             const p1Value = (computedPeriods as any)[`y${y}p1`];
                                             return (
-                                                <div key={y} className={`w-2 h-2 rounded-full transition-colors ${p1Value > 0 || (y === "1" && computedPeriods.y1p2 > 0) ? 'bg-emerald-400' : 'bg-white/20'}`} />
+                                                <div key={y} className={`w-2.5 h-2.5 rounded-full transition-colors ${p1Value > 0 || (y === "1" && computedPeriods.y1p2 > 0) ? 'bg-emerald-400' : 'bg-white/20'}`} />
                                             );
                                         })}
-                                        <span className="text-white/40 text-[10px] font-bold ml-2">
+                                        <span className="text-white/50 text-[11px] font-medium ml-1">
                                             {["1", "2", "3", "4"].filter(y => (y === "1" ? computedPeriods.y1p2 : (computedPeriods as any)[`y${y}p1`]) > 0).length}/4 configurées
                                         </span>
                                     </div>
                                 </div>
 
                                 {/* Quick Fill Header */}
-                                <div className="bg-slate-50 border-x border-slate-200 p-4 flex flex-col md:flex-row items-center gap-4">
-                                    <div className="flex items-center gap-2 shrink-0">
-                                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Configuration rapide</span>
+                                <div className="bg-white border-x border-[#e5e0f5] px-6 py-4 flex flex-col md:flex-row items-center gap-4">
+                                    <div className="flex items-center gap-2.5 shrink-0">
+                                        <div className="w-2 h-2 rounded-full bg-[#6d28d9]"></div>
+                                        <span className="text-[11px] font-semibold text-[#6d28d9] uppercase tracking-wider">Configuration rapide</span>
                                     </div>
                                     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <Input
@@ -946,13 +946,13 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                             type="date"
                                             value={quickStartDate}
                                             onChange={(e) => setQuickStartDate(e.target.value)}
-                                            className="bg-white text-slate-800 font-bold"
+                                            className="bg-white text-slate-800 font-medium"
                                         />
                                         <Select
                                             label="Durée du contrat"
                                             value={quickDuration}
                                             onChange={(e) => setQuickDuration(e.target.value)}
-                                            className="bg-white text-slate-800 font-bold"
+                                            className="bg-white text-slate-800 font-medium"
                                             options={[
                                                 { label: "Sélectionner durée", value: "" },
                                                 { label: "1 an", value: "1" },
@@ -963,7 +963,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-t-0 border-slate-200 rounded-b-2xl overflow-hidden">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-t-0 border-[#e5e0f5] rounded-b-2xl overflow-hidden">
                                     {["1", "2", "3", "4"].map((year, idx) => {
                                         const yearNum = parseInt(year);
                                         const results = {
@@ -977,40 +977,38 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                         return (
                                                                             <div
                                                                                 key={year}
-                                                                                className={`relative bg-white flex flex-col transition-colors hover:bg-slate-50/60 ${isRight ? 'border-l border-slate-200' : ''} ${isBottom ? 'border-t border-slate-200' : ''}`}
+                                                                                className={`relative bg-white flex flex-col transition-colors hover:bg-[#f9f7ff] ${isRight ? 'border-l border-[#e5e0f5]' : ''} ${isBottom ? 'border-t border-[#e5e0f5]' : ''}`}
                                                                             >
-                                                                                <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100">
+                                                                                <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#f0ecfa]">
                                                                                     <div className="flex items-center gap-3">
-                                                                                        <div className="w-7 h-7 rounded-lg bg-[#1a1630] shrink-0 flex items-center justify-center">
-                                                                                            <span className="text-white text-[11px] font-black">{year}</span>
+                                                                                        <div className="w-8 h-8 rounded-xl bg-[#6d28d9] shrink-0 flex items-center justify-center">
+                                                                                            <span className="text-white text-[12px] font-bold">{year}</span>
                                                                                         </div>
                                                                                         <div>
-                                                                                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-0.5">Étape du contrat</div>
-                                                                                            <div className="text-[13px] font-black text-slate-800 leading-none">{year}{year === "1" ? "ère" : "ème"} année</div>
+                                                                                            <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider leading-none mb-0.5">Année du contrat</div>
+                                                                                            <div className="text-[14px] font-bold text-slate-800 leading-none">{year}{year === "1" ? "ère" : "ème"} année</div>
                                                                                         </div>
                                                                                     </div>
-                                                                                    {results.p1 > 0 && (
-                                                                                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black transition-all bg-emerald-50 text-emerald-600">
-                                                                                            <CheckCircle2 size={11} />
-                                                                                            Configuré
-                                                                                        </div>
-                                                                                    )}
+                                                                                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${results.p1 > 0 || (yearNum === 1 && results.p2 > 0) ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                                                                                        <CheckCircle2 size={12} />
+                                                                                        {results.p1 > 0 || (yearNum === 1 && results.p2 > 0) ? 'Configuré' : 'En attente'}
+                                                                                    </div>
                                                                                 </div>
 
                                                                                 <div className="p-5 space-y-4 flex-grow">
                                                                                     <div className="space-y-4">
-                                                                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Calcul automatique des taux</div>
+                                                                                        <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Calcul automatique des taux</div>
 
                                                                                         {yearNum >= 1 && (
-                                                                                            <div className="rounded-lg border border-slate-100 bg-slate-50/30 p-3 space-y-3">
+                                                                                            <div className="rounded-xl border border-[#e5e0f5] bg-[#faf9fe] p-4 space-y-3">
                                                                                                 <div className="flex items-center justify-between">
-                                                                                                    <div className="flex items-center gap-1.5">
+                                                                                                    <div className="flex items-center gap-2">
                                                                                                         <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-                                                                                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">1ère Période</span>
+                                                                                                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">1ère Période</span>
                                                                                                     </div>
-                                                                                                    <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest pl-1 mb-1 shadow-sm shadow-[#6b3cd210]">
+                                                                                                    <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                                                                                                         {yearNum}{yearNum === 1 ? "ère" : "ème"} Année
-                                                                                                    </div>
+                                                                                                    </span>
                                                                                                 </div>
                                                                                                 <div className="grid grid-cols-2 gap-2">
                                                                                                     <Input
@@ -1025,21 +1023,21 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                                                     />
                                                                                                 </div>
                                                                                                 <div className="flex justify-between items-center px-1 mt-1">
-                                                                                                    <span className="text-[9px] font-bold text-slate-400 italic">
-                                                                                                        Age : {getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any)) ?? '?'} ans
+                                                                                                    <span className="text-[10px] font-medium text-slate-400">
+                                                                                                        Âge : {getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any)) ?? '?'} ans
                                                                                                     </span>
-                                                                                                    <div className="text-[12px] font-black text-emerald-700 bg-emerald-100/80 px-3 py-1 rounded-full shadow-sm">{results.p1}% SMIC</div>
+                                                                                                    <div className="text-[12px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">{results.p1}% SMIC</div>
                                                                                                 </div>
                                                                                             </div>
                                                                                         )}
 
-                                                        <div className="rounded-lg border border-[#6B3CD2]/15 bg-[#6B3CD2]/3 p-3 space-y-3">
+                                                        <div className="rounded-xl border border-[#6d28d9]/15 bg-[#6d28d9]/5 p-4 space-y-3">
                                                             <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]/50"></div>
-                                                                    <span className="text-[10px] font-black text-[#6B3CD2] uppercase tracking-wider">2ème Période</span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#6d28d9]"></div>
+                                                                    <span className="text-[10px] font-semibold text-[#6d28d9] uppercase tracking-wider">2ème Période</span>
                                                                 </div>
-                                                                <span className="text-[13px] font-black text-[#5831ad] bg-[#6B3CD2]/10 px-3 py-1 rounded-full shadow-sm">{results.p2}% SMIC</span>
+                                                                <span className="text-[12px] font-bold text-[#6d28d9] bg-[#6d28d9]/10 px-3 py-1 rounded-lg">{results.p2}% SMIC</span>
                                                             </div>
                                                             <div className="grid grid-cols-2 gap-2">
                                                                 <Input
@@ -1057,26 +1055,26 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                     </div>
                                                 </div>
 
-                                                <div className="mx-5 mb-5 rounded-xl bg-[#1a1630] overflow-hidden">
+                                                <div className="mx-5 mb-5 rounded-xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%)' }}>
                                                     <div className="h-1 bg-white/10">
                                                         <div
-                                                            className="h-full bg-gradient-to-r from-[#6B3CD2] to-emerald-400 transition-all duration-700"
+                                                            className="h-full bg-gradient-to-r from-white/60 to-emerald-400 transition-all duration-700"
                                                             style={{ width: `${Math.min(results.p1 || results.p2, 100)}%` }}
                                                         />
                                                     </div>
-                                                    <div className="flex items-center justify-between px-4 py-3">
+                                                    <div className="flex items-center justify-between px-4 py-3.5">
                                                         <div>
-                                                            <div className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-0.5">Taux Moyen</div>
-                                                            <div className="text-white text-[18px] font-black leading-none">
+                                                            <div className="text-white/50 text-[9px] font-semibold uppercase tracking-wider mb-0.5">Taux Moyen</div>
+                                                            <div className="text-white text-[18px] font-bold leading-none">
                                                                 {results.p1 === results.p2 ? `${results.p1}%` : `${results.p1}% / ${results.p2}%`}
                                                             </div>
                                                         </div>
                                                         <div className="w-px h-8 bg-white/10" />
                                                         <div className="text-right">
-                                                            <div className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-0.5">
+                                                            <div className="text-white/50 text-[9px] font-semibold uppercase tracking-wider mb-0.5">
                                                                 {results.p2 > 0 && results.p2 !== (yearNum === 1 ? results.p2 : results.p1) ? "Salaires (P1 / P2)" : `Salaire Brut (P${yearNum === 1 ? '2' : '1'})`}
                                                             </div>
-                                                            <div className="text-[18px] font-black leading-none text-[#a78bfa]">
+                                                            <div className="text-[18px] font-bold leading-none text-[#c4b5fd]">
                                                                 {results.p2 > 0 && results.p2 !== (yearNum === 1 ? results.p2 : results.p1)
                                                                     ? `${((smicBase * (yearNum === 1 ? results.p2 : results.p1)) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}€ / ${((smicBase * results.p2) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}€`
                                                                     : `${((smicBase * (yearNum === 1 ? results.p2 : results.p1)) / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 })}`
@@ -1090,9 +1088,9 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                     })}
                                 </div>
 
-                                <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-400 italic">
+                                <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-400">
                                     <Info size={12} className="shrink-0" />
-                                    Note : Le taux est calculé automatiquement selon la date de naissance de l'étudiant et sa tranche d'âge à l'ouverture de chaque période.
+                                    Le taux est calculé automatiquement selon la date de naissance de l'étudiant et sa tranche d'âge à l'ouverture de chaque période.
                                 </div>
                             </div>
                         </div>
