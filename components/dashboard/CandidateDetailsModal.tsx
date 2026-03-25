@@ -289,16 +289,21 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                             options={FORMATION_SOUHAITEE_OPTIONS}
                                         />
                                         <Select
-                                            label="Dernière année ou classe suivie"
+                                            label="Dernier diplôme ou titre préparé"
+                                            value={editForm?.dernier_diplome_prepare || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, dernier_diplome_prepare: e.target.value })}
+                                            options={DETAILED_DIPLOMA_OPTIONS}
+                                        />
+                                        <Select
+                                            label="Dernière classe / année suivie"
                                             value={editForm?.derniere_classe || ""}
                                             onChange={(e) => setEditForm({ ...editForm, derniere_classe: e.target.value })}
                                             options={LAST_CLASS_OPTIONS}
                                         />
-                                        <Select
+                                        <Input
                                             label="Intitulé précis du dernier diplôme ou titre préparé"
                                             value={editForm?.intitulePrecisDernierDiplome || ""}
                                             onChange={(e) => setEditForm({ ...editForm, intitulePrecisDernierDiplome: e.target.value })}
-                                            options={DETAILED_DIPLOMA_OPTIONS}
                                         />
                                         <Select
                                             label="Diplôme ou titre le plus élevé obtenu"
@@ -369,9 +374,9 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {renderInfoRow("Formation souhaitée", formatFormation(info.formation_souhaitee), GraduationCap)}
                                     {renderInfoRow("Dernier diplôme préparé", info.dernier_diplome_prepare, GraduationCap)}
-                                    {renderInfoRow("Dernière classe", info.derniere_classe, GraduationCap)}
-                                    {renderInfoRow("BAC", info.bac, GraduationCap)}
+                                    {renderInfoRow("Dernière classe / année", info.derniere_classe, GraduationCap)}
                                     {renderInfoRow("Intitulé précis diplôme", info.intitulePrecisDernierDiplome, FileText)}
+                                    {renderInfoRow("Diplôme le plus élevé", info.bac, GraduationCap)}
                                     {renderInfoRow("Entreprise d'accueil", info.entreprise_d_accueil, Building2)}
                                     {renderInfoRow("Connaissance Rush How", info.connaissance_rush_how, FileText)}
                                     <div className="md:col-span-2">

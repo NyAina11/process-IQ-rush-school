@@ -339,7 +339,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
         { id: 'personal', fields: ['prenom', 'nom_naissance', 'sexe', 'date_naissance', 'nationalite', 'commune_naissance', 'departement'] },
         { id: 'contact', fields: ['num_residence', 'rue_residence', 'code_postal', 'ville', 'email', 'telephone'] },
         { id: 'situation', fields: ['situation', 'declare_inscription_sportif_haut_niveau', 'declare_avoir_projet_creation_reprise_entreprise', 'declare_travailleur_handicape', 'alternance'] },
-        { id: 'school', fields: ['derniere_classe', 'bac'] },
+        { id: 'school', fields: ['dernier_diplome_prepare', 'derniere_classe', 'intitulePrecisDernierDiplome', 'bac'] },
         { id: 'formation', fields: ['formation_souhaitee'] },
     ];
 
@@ -544,8 +544,9 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                     hasError={hasSectionError(sectionDefs[3].fields)}
                 >
                     <div className="space-y-4">
-                        <Select label="Dernière année ou classe suivie" required error={errors.derniere_classe?.message} {...register('derniere_classe')} options={LAST_CLASS_OPTIONS} placeholder="Sélectionnez" />
-                        <Select label="Intitulé précis du dernier diplôme ou titre préparé" {...register('intitulePrecisDernierDiplome')} options={DETAILED_DIPLOMA_OPTIONS} placeholder="Sélectionnez" />
+                        <Select label="Dernier diplôme ou titre préparé" {...register('dernier_diplome_prepare')} options={DETAILED_DIPLOMA_OPTIONS} placeholder="Sélectionnez" />
+                        <Select label="Dernière classe / année suivie" required error={errors.derniere_classe?.message} {...register('derniere_classe')} options={LAST_CLASS_OPTIONS} placeholder="Sélectionnez" />
+                        <Input label="Intitulé précis du dernier diplôme ou titre préparé" placeholder="Ex: Licence Informatique" {...register('intitulePrecisDernierDiplome')} />
                         <Select label="Diplôme ou titre le plus élevé obtenu" required error={errors.bac?.message} {...register('bac')} options={HIGHEST_DIPLOMA_OPTIONS} placeholder="Sélectionnez votre diplôme" />
                     </div>
                 </SectionAccordion>

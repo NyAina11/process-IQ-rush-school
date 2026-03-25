@@ -383,7 +383,7 @@ const mapStudentToBackend = (data: any, role?: string) => {
     declare_avoir_projet_creation_reprise_entreprise: data.declare_avoir_projet_creation_reprise_entreprise || false,
     declare_travailleur_handicape: data.declare_travailleur_handicape || false,
     alternance: data.alternance || false,
-    dernier_diplome_prepare: mapDiplome(data.intitulePrecisDernierDiplome || ""),
+    dernier_diplome_prepare: mapDiplome(data.dernier_diplome_prepare || ""),
     derniere_classe: data.derniere_classe || "",
     bac: mapNiveau(data.bac) || "",
     intitulePrecisDernierDiplome: data.intitulePrecisDernierDiplome || "",
@@ -1527,7 +1527,7 @@ export const api = {
 
     const json = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(json?.error || 'Impossible de mettre à jour le statut');
+      throw new Error(json?.error || 'Impossible de mettre ï¿½ jour le statut');
     }
     return json;
   }
