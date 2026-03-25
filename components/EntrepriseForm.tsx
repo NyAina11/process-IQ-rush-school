@@ -301,11 +301,23 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         setValue('contrat.nombre_mois', nbMois);
     };
 
+    const parseSharedDate = (dStr: string) => {
+        if (!dStr) return new Date("");
+        if (dStr.includes('/')) {
+            const parts = dStr.split('/');
+            if (parts.length === 3) {
+                // assume DD/MM/YYYY
+                return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            }
+        }
+        return new Date(dStr);
+    };
+
     // Auto-calculate SMIC % from student birth date at a given period start date
     const getSmicPercentage = (birthDate: string | undefined, periodStartDate: string, yearNumber: number): number => {
         if (!birthDate || !periodStartDate) return 0;
-        const birth = new Date(birthDate);
-        const periodStart = new Date(periodStartDate);
+        const birth = parseSharedDate(birthDate);
+        const periodStart = parseSharedDate(periodStartDate);
         if (isNaN(birth.getTime()) || isNaN(periodStart.getTime())) return 0;
 
         let age = periodStart.getFullYear() - birth.getFullYear();
@@ -323,8 +335,8 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
     // Helper to get age bracket from a date
     const getAgeBracket = (birthDate: string | undefined, refDate: string | undefined): '16-17' | '18-20' | '21-25' | '26+' | null => {
         if (!birthDate || !refDate) return null;
-        const birth = new Date(birthDate);
-        const ref = new Date(refDate);
+        const birth = parseSharedDate(birthDate);
+        const ref = parseSharedDate(refDate);
         if (isNaN(birth.getTime()) || isNaN(ref.getTime())) return null;
 
         let age = ref.getFullYear() - birth.getFullYear();
@@ -340,8 +352,8 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
     // Helper to get raw age from dates
     const getRawAge = (birthDate: string | undefined, refDate: string | undefined): number | null => {
         if (!birthDate || !refDate) return null;
-        const birth = new Date(birthDate);
-        const ref = new Date(refDate);
+        const birth = parseSharedDate(birthDate);
+        const ref = parseSharedDate(refDate);
         if (isNaN(birth.getTime()) || isNaN(ref.getTime())) return null;
         let age = ref.getFullYear() - birth.getFullYear();
         const m = ref.getMonth() - birth.getMonth();
@@ -349,55 +361,128 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         return age;
     };
 
-    const [quickStartDate, setQuickStartDate] = useState<string>('');
-    const [quickDuration, setQuickDuration] = useState<string>('');
+    const dateDebutGlobal = watch('contrat.date_debut');
+    const dateFinGlobal = watch('contrat.date_fin');
 
-    const applyQuickFill = useCallback((startDate: string, durationStr: string) => {
-        if (!startDate || !durationStr) return;
-        const durationYears = parseInt(durationStr);
-        if (isNaN(durationYears)) return;
+    const applyQuickFill = useCallback((startDate: string, endDate: string) => {
+        if (!startDate || !endDate) return;
 
         let currentStart = new Date(startDate);
+        const endOfContract = new Date(endDate);
+        if (isNaN(currentStart.getTime()) || isNaN(endOfContract.getTime()) || currentStart > endOfContract) return;
+
+        const birth = studentDateNaissance ? parseSharedDate(studentDateNaissance) : null;
         const years = ['1er', '2eme', '3eme', '4eme'];
 
         for (let i = 0; i < 4; i++) {
             const suffix = years[i];
-            if (i < durationYears) {
-                // Period 1
+            
+            if (currentStart > endOfContract) {
+                // Clear remaining
+                setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, "");
+                setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, "");
+                setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
+                setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
+                continue;
+            }
+
+            // Calculate what a full year would be
+            let yearEnd = new Date(currentStart);
+            yearEnd.setFullYear(yearEnd.getFullYear() + 1);
+            yearEnd.setDate(yearEnd.getDate() - 1);
+
+            let bracketChanges = false;
+            
+            if (birth && !isNaN(birth.getTime())) {
+                const ageAtStart = getRawAge(studentDateNaissance, currentStart.toISOString().split('T')[0]);
+                const ageAtEnd = getRawAge(studentDateNaissance, yearEnd.toISOString().split('T')[0]);
+                
+                if (ageAtStart !== null && ageAtEnd !== null && ageAtEnd > ageAtStart) {
+                    let bdayYear = currentStart.getFullYear();
+                    let bdayThisYear = new Date(bdayYear, birth.getMonth(), birth.getDate());
+                    if (bdayThisYear < currentStart) {
+                        bdayYear++;
+                    }
+                    const newAge = bdayYear - birth.getFullYear();
+                    if ([18, 21, 26].includes(newAge)) {
+                        bracketChanges = true;
+                    }
+                }
+            }
+
+            if (bracketChanges) {
+                // Split exactly into two 6-month periods (original logic)
                 const p1Start = new Date(currentStart);
                 const p1End = new Date(p1Start);
                 p1End.setMonth(p1End.getMonth() + 6);
                 p1End.setDate(p1End.getDate() - 1);
 
-                setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
-                setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, p1End.toISOString().split('T')[0]);
+                if (p1End >= endOfContract) {
+                    setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
+                    setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, endOfContract.toISOString().split('T')[0]);
+                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
+                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
+                    currentStart = new Date(endOfContract);
+                    currentStart.setDate(currentStart.getDate() + 1);
+                    continue;
+                } else {
+                    setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
+                    setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, p1End.toISOString().split('T')[0]);
+                }
 
-                // Period 2
                 const p2Start = new Date(p1End);
                 p2Start.setDate(p2Start.getDate() + 1);
+                
+                if (p2Start > endOfContract) {
+                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
+                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
+                    continue;
+                }
+
                 const p2End = new Date(p2Start);
                 p2End.setMonth(p2End.getMonth() + 6);
                 p2End.setDate(p2End.getDate() - 1);
 
-                setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, p2Start.toISOString().split('T')[0]);
-                setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, p2End.toISOString().split('T')[0]);
-
-                // Prepare for next year
-                currentStart = new Date(p2End);
-                currentStart.setDate(currentStart.getDate() + 1);
+                if (p2End >= endOfContract) {
+                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, p2Start.toISOString().split('T')[0]);
+                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, endOfContract.toISOString().split('T')[0]);
+                    currentStart = new Date(endOfContract);
+                    currentStart.setDate(currentStart.getDate() + 1);
+                } else {
+                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, p2Start.toISOString().split('T')[0]);
+                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, p2End.toISOString().split('T')[0]);
+                    currentStart = new Date(p2End);
+                    currentStart.setDate(currentStart.getDate() + 1);
+                }
             } else {
-                // Clear years beyond duration
-                setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, "");
-                setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, "");
-                setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
-                setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
+                // Single period for exactly 1 year (or up to end of contract)
+                const p1Start = new Date(currentStart);
+                const p1End = new Date(p1Start);
+                p1End.setFullYear(p1End.getFullYear() + 1);
+                p1End.setDate(p1End.getDate() - 1);
+
+                if (p1End >= endOfContract) {
+                    setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
+                    setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, endOfContract.toISOString().split('T')[0]);
+                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
+                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
+                    currentStart = new Date(endOfContract);
+                    currentStart.setDate(currentStart.getDate() + 1);
+                } else {
+                    setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
+                    setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, p1End.toISOString().split('T')[0]);
+                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
+                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
+                    currentStart = new Date(p1End);
+                    currentStart.setDate(currentStart.getDate() + 1);
+                }
             }
         }
-    }, [setValue]);
+    }, [setValue, studentDateNaissance]);
 
     useEffect(() => {
-        applyQuickFill(quickStartDate, quickDuration);
-    }, [quickStartDate, quickDuration, applyQuickFill]);
+        applyQuickFill(dateDebutGlobal, dateFinGlobal);
+    }, [dateDebutGlobal, dateFinGlobal, applyQuickFill]);
 
     // Helper to get percentage from bracket and year
     const getRateFromBracket = (bracket: string | null, year: number): number => {
@@ -407,6 +492,14 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         if (bracket === '18-20') return year === 1 ? 43 : year === 2 ? 51 : 67;
         return year === 1 ? 27 : year === 2 ? 39 : 55;
     };
+
+    // Stringify dates to force useMemo update even if object reference is cached by react-hook-form
+    const stringifiedContratDates = JSON.stringify([
+        formData.contrat?.date_debut_1periode_1er_annee, formData.contrat?.date_debut_2periode_1er_annee,
+        formData.contrat?.date_debut_1periode_2eme_annee, formData.contrat?.date_debut_2periode_2eme_annee,
+        formData.contrat?.date_debut_1periode_3eme_annee, formData.contrat?.date_debut_2periode_3eme_annee,
+        formData.contrat?.date_debut_1periode_4eme_annee, formData.contrat?.date_debut_2periode_4eme_annee
+    ]);
 
     // Compute SMIC % for each period from watcher
     const computedPeriods = React.useMemo(() => {
@@ -432,7 +525,8 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
             y4p1: getRate(c?.date_debut_1periode_4eme_annee, 4),
             y4p2: getRate(c?.date_debut_2periode_4eme_annee, 4),
         };
-    }, [studentDateNaissance, formData.contrat]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [studentDateNaissance, stringifiedContratDates]);
 
     // Push computed SMIC values into form state whenever they change
     useEffect(() => {
@@ -934,36 +1028,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                     </div>
                                 </div>
 
-                                {/* Quick Fill Header */}
-                                <div className="bg-white border-x border-[#e5e0f5] px-6 py-4 flex flex-col md:flex-row items-center gap-4">
-                                    <div className="flex items-center gap-2.5 shrink-0">
-                                        <div className="w-2 h-2 rounded-full bg-[#6d28d9]"></div>
-                                        <span className="text-[11px] font-semibold text-[#6d28d9] uppercase tracking-wider">Configuration rapide</span>
-                                    </div>
-                                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <Input
-                                            label="Date de début contrat"
-                                            type="date"
-                                            value={quickStartDate}
-                                            onChange={(e) => setQuickStartDate(e.target.value)}
-                                            className="bg-white text-slate-800 font-medium"
-                                        />
-                                        <Select
-                                            label="Durée du contrat"
-                                            value={quickDuration}
-                                            onChange={(e) => setQuickDuration(e.target.value)}
-                                            className="bg-white text-slate-800 font-medium"
-                                            options={[
-                                                { label: "Sélectionner durée", value: "" },
-                                                { label: "1 an", value: "1" },
-                                                { label: "2 ans", value: "2" },
-                                                { label: "3 ans", value: "3" }
-                                            ]}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-t-0 border-[#e5e0f5] rounded-b-2xl overflow-hidden">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-[#e5e0f5] rounded-b-2xl overflow-hidden mt-4">
                                     {["1", "2", "3", "4"].map((year, idx) => {
                                         const yearNum = parseInt(year);
                                         const results = {
@@ -1024,9 +1089,9 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                                                 </div>
                                                                                                 <div className="flex justify-between items-center px-1 mt-1">
                                                                                                     <span className="text-[10px] font-medium text-slate-400">
-                                                                                                        Âge : {getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any)) ?? '?'} ans
+                                                                                                        {getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any)) !== null ? `Âge : ${getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any))} ans` : ""}
                                                                                                     </span>
-                                                                                                    <div className="text-[12px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">{results.p1}% SMIC</div>
+                                                                                                    {results.p1 > 0 && <div className="text-[12px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">{results.p1}% SMIC</div>}
                                                                                                 </div>
                                                                                             </div>
                                                                                         )}
@@ -1037,7 +1102,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                     <div className="w-1.5 h-1.5 rounded-full bg-[#6d28d9]"></div>
                                                                     <span className="text-[10px] font-semibold text-[#6d28d9] uppercase tracking-wider">2ème Période</span>
                                                                 </div>
-                                                                <span className="text-[12px] font-bold text-[#6d28d9] bg-[#6d28d9]/10 px-3 py-1 rounded-lg">{results.p2}% SMIC</span>
+                                                                {results.p2 > 0 && <span className="text-[12px] font-bold text-[#6d28d9] bg-[#6d28d9]/10 px-3 py-1 rounded-lg">{results.p2}% SMIC</span>}
                                                             </div>
                                                             <div className="grid grid-cols-2 gap-2">
                                                                 <Input
@@ -1066,7 +1131,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                         <div>
                                                             <div className="text-white/50 text-[9px] font-semibold uppercase tracking-wider mb-0.5">Taux Moyen</div>
                                                             <div className="text-white text-[18px] font-bold leading-none">
-                                                                {results.p1 === results.p2 ? `${results.p1}%` : `${results.p1}% / ${results.p2}%`}
+                                                                {results.p1 === 0 && results.p2 === 0 ? "-" : results.p1 === results.p2 ? `${results.p1}%` : `${results.p1}% / ${results.p2}%`}
                                                             </div>
                                                         </div>
                                                         <div className="w-px h-8 bg-white/10" />
@@ -1075,7 +1140,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                 {results.p2 > 0 && results.p2 !== (yearNum === 1 ? results.p2 : results.p1) ? "Salaires (P1 / P2)" : `Salaire Brut (P${yearNum === 1 ? '2' : '1'})`}
                                                             </div>
                                                             <div className="text-[18px] font-bold leading-none text-[#c4b5fd]">
-                                                                {results.p2 > 0 && results.p2 !== (yearNum === 1 ? results.p2 : results.p1)
+                                                                {results.p1 === 0 && results.p2 === 0 ? "-" : results.p2 > 0 && results.p2 !== (yearNum === 1 ? results.p2 : results.p1)
                                                                     ? `${((smicBase * (yearNum === 1 ? results.p2 : results.p1)) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}€ / ${((smicBase * results.p2) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}€`
                                                                     : `${((smicBase * (yearNum === 1 ? results.p2 : results.p1)) / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 })}`
                                                                 }
