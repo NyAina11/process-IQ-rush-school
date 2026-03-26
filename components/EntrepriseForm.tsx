@@ -514,7 +514,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         };
 
         return {
-            y1p1: getRate(c?.date_debut_1periode_1er_annee, 1),
+            y1p1: getRate(c?.date_debut_1periode_1er_annee || c?.date_debut_execution, 1),
             y1p2: getRate(c?.date_debut_2periode_1er_annee, 1),
 
             y2p1: getRate(c?.date_debut_1periode_2eme_annee, 2),
@@ -1159,13 +1159,10 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                         <div className="w-px h-8 bg-white/10" />
                                                         <div className="text-right">
                                                             <div className="text-white/50 text-[9px] font-semibold uppercase tracking-wider mb-0.5">
-                                                                {results.p2 > 0 && results.p2 !== (yearNum === 1 ? results.p2 : results.p1) ? "Salaires (P1 / P2)" : `Salaire Brut (P${yearNum === 1 ? '2' : '1'})`}
+                                                                Salaire Brut
                                                             </div>
-                                                            <div className="text-[18px] font-bold leading-none text-[#c4b5fd]">
-                                                                {results.p1 === 0 && results.p2 === 0 ? "-" : results.p2 > 0 && results.p2 !== (yearNum === 1 ? results.p2 : results.p1)
-                                                                    ? `${((smicBase * (yearNum === 1 ? results.p2 : results.p1)) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}€ / ${((smicBase * results.p2) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}€`
-                                                                    : `${((smicBase * (yearNum === 1 ? results.p2 : results.p1)) / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 })}`
-                                                                }
+                                                            <div className="text-[18px] font-black text-white leading-none">
+                                                                {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(smicBase * (results.p1 || results.p2 || 0) / 100)}
                                                             </div>
                                                         </div>
                                                     </div>
