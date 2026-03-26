@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Bug, CheckCircle2, Loader2, Send, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Bug, CheckCircle2, ChevronDown, Clock, Filter, Loader2, Plus, Search, Send, ShieldCheck, X } from 'lucide-react';
 import { api } from '../services/api';
 import { useAppStore } from '../store/useAppStore';
 
@@ -28,10 +28,16 @@ const statusLabel: Record<BugStatus, string> = {
   resolved: 'Résolu',
 };
 
-const statusClass: Record<BugStatus, string> = {
-  new: 'bg-rose-50 text-rose-700 border-rose-200',
-  in_progress: 'bg-amber-50 text-amber-700 border-amber-200',
-  resolved: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+const statusIcon: Record<BugStatus, React.ReactNode> = {
+  new: <AlertCircle size={12} />,
+  in_progress: <Clock size={12} />,
+  resolved: <CheckCircle2 size={12} />,
+};
+
+const statusStyle: Record<BugStatus, string> = {
+  new: 'bg-rose-50 text-rose-600 border-rose-200',
+  in_progress: 'bg-amber-50 text-amber-600 border-amber-200',
+  resolved: 'bg-emerald-50 text-emerald-600 border-emerald-200',
 };
 
 const priorityLabel: Record<BugPriority, string> = {
@@ -41,6 +47,20 @@ const priorityLabel: Record<BugPriority, string> = {
   critical: 'Critique',
 };
 
+const priorityDot: Record<BugPriority, string> = {
+  low: 'bg-slate-300',
+  medium: 'bg-blue-400',
+  high: 'bg-orange-400',
+  critical: 'bg-rose-500',
+};
+
+const moduleLabel: Record<BugModule, string> = {
+  admission: 'Admission',
+  rh: 'RH',
+  commercial: 'Commercial',
+  other: 'Autre',
+};
+
 const SupportView: React.FC = () => {
   const { showToast } = useAppStore();
   const [bugs, setBugs] = useState<BugItem[]>([]);
@@ -48,6 +68,7 @@ const SupportView: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | BugStatus>('all');
+  const [showForm, setShowForm] = useState(false);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState('');
   const [form, setForm] = useState({
@@ -136,6 +157,7 @@ const SupportView: React.FC = () => {
       });
       setScreenshotFile(null);
       setScreenshotPreview('');
+      setShowForm(false);
       await loadBugs();
     } catch (error: any) {
       showToast(error?.message || 'Erreur lors du signalement', 'error');
@@ -181,49 +203,80 @@ const SupportView: React.FC = () => {
     }
   };
 
+  const statusTabs: { key: 'all' | BugStatus; label: string; count: number }[] = [
+    { key: 'all', label: 'Tous', count: stats.total },
+    { key: 'new', label: 'Nouveaux', count: stats.newCount },
+    { key: 'in_progress', label: 'En cours', count: stats.inProgressCount },
+    { key: 'resolved', label: 'Résolus', count: stats.resolvedCount },
+  ];
+
   return (
-    <div className="animate-fade-in pb-20" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <div className="relative overflow-hidden rounded-2xl min-h-[148px] flex items-center px-10 py-8 mb-6 bg-gradient-to-r from-[#1f1b4d] via-[#332a86] to-[#4338ca]">
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 w-full">
-          <div>
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-1 rounded-lg mb-3">
-              <Bug size={13} />
-              <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/90">Support & Qualité</span>
+    <div className="animate-fade-in pb-20" style={{ fontFamily: "'DM Sans', 'Plus Jakarta Sans', sans-serif" }}>
+
+      {/* ── HEADER ── */}
+      <div className="bg-white border border-[#e5e0f5] rounded-2xl mb-5 overflow-hidden">
+        <div className="px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6d28d9] to-[#4338ca] flex items-center justify-center shadow-md shadow-violet-200">
+              <Bug size={18} className="text-white" />
             </div>
-            <h1 className="text-[28px] font-extrabold text-white leading-tight tracking-tight mb-1">
-              {isSuperAdmin ? 'Centre Support Superadmin' : 'Signaler un bug'}
-            </h1>
-            <p className="text-white/70 text-[14px] font-medium">
-              {isSuperAdmin
-                ? 'Tous les bugs remontés par les équipes Admission et RH.'
-                : 'Remontez vos bugs pour qu’ils soient traités dans la section Support.'}
-            </p>
+            <div>
+              <h1 className="text-[20px] font-extrabold text-[#1e1b2e] tracking-tight leading-tight">
+                {isSuperAdmin ? 'Centre Support' : 'Support & Bugs'}
+              </h1>
+              <p className="text-[12px] text-slate-400 font-medium mt-0.5">
+                {isSuperAdmin ? 'Gestion globale des tickets signalés' : 'Signalez et suivez vos bugs'}
+              </p>
+            </div>
+            {isSuperAdmin && (
+              <span className="ml-3 inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg text-emerald-600 text-[10px] font-bold uppercase tracking-wider">
+                <ShieldCheck size={12} /> Admin
+              </span>
+            )}
           </div>
-          {isSuperAdmin && (
-            <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-300/40 px-4 py-2 rounded-xl text-white text-[12px] font-semibold">
-              <ShieldCheck size={14} />
-              Vue globale activée
-            </div>
-          )}
+
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6d28d9] text-white text-[12px] font-bold hover:bg-[#5b21b6] transition-all shadow-md shadow-violet-200"
+          >
+            {showForm ? <X size={14} /> : <Plus size={14} />}
+            {showForm ? 'Fermer' : 'Nouveau ticket'}
+          </button>
+        </div>
+
+        {/* ── STAT CHIPS ── */}
+        <div className="px-6 pb-4 flex items-center gap-3">
+          {statusTabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(tab.key)}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-semibold border transition-all ${
+                statusFilter === tab.key
+                  ? 'bg-[#6d28d9] text-white border-[#6d28d9] shadow-sm'
+                  : 'bg-[#fafafa] text-slate-500 border-[#e5e0f5] hover:bg-[#f5f3ff] hover:text-[#6d28d9]'
+              }`}
+            >
+              {tab.label}
+              <span className={`ml-0.5 text-[10px] font-black px-1.5 py-0.5 rounded-md ${
+                statusFilter === tab.key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'
+              }`}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-        <div className="bg-white border border-[#e5e0f5] rounded-xl p-4"><div className="text-2xl font-black text-[#1e1b2e]">{stats.total}</div><div className="text-[11px] text-slate-500">Total tickets</div></div>
-        <div className="bg-white border border-[#e5e0f5] rounded-xl p-4"><div className="text-2xl font-black text-rose-600">{stats.newCount}</div><div className="text-[11px] text-slate-500">Nouveaux</div></div>
-        <div className="bg-white border border-[#e5e0f5] rounded-xl p-4"><div className="text-2xl font-black text-amber-600">{stats.inProgressCount}</div><div className="text-[11px] text-slate-500">En cours</div></div>
-        <div className="bg-white border border-[#e5e0f5] rounded-xl p-4"><div className="text-2xl font-black text-emerald-600">{stats.resolvedCount}</div><div className="text-[11px] text-slate-500">Résolus</div></div>
-      </div>
-
-      {!isSuperAdmin && (
-        <form onSubmit={handleSubmit} className="bg-white border border-[#e5e0f5] rounded-2xl p-5 mb-5 space-y-4 shadow-sm">
-          <h2 className="text-[16px] font-bold text-[#1e1b2e]">Nouveau signalement</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {/* ── NEW TICKET FORM (collapsible) ── */}
+      {showForm && (
+        <form onSubmit={handleSubmit} className="bg-white border border-[#e5e0f5] rounded-2xl p-5 mb-5 shadow-sm animate-fade-in">
+          <h2 className="text-[14px] font-bold text-[#1e1b2e] mb-4">Nouveau signalement</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
             <input
               value={form.title}
               onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
               placeholder="Titre du bug"
-              className="md:col-span-3 px-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[13px] outline-none focus:border-[#6d28d9]/40"
+              className="md:col-span-4 px-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[13px] outline-none focus:border-[#6d28d9]/40"
             />
             <select
               value={form.module}
@@ -240,160 +293,219 @@ const SupportView: React.FC = () => {
               onChange={(e) => setForm((prev) => ({ ...prev, priority: e.target.value as BugPriority }))}
               className="px-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[13px] outline-none focus:border-[#6d28d9]/40"
             >
-              <option value="low">Priorité faible</option>
-              <option value="medium">Priorité moyenne</option>
-              <option value="high">Priorité haute</option>
-              <option value="critical">Priorité critique</option>
+              <option value="low">Faible</option>
+              <option value="medium">Moyenne</option>
+              <option value="high">Haute</option>
+              <option value="critical">Critique</option>
             </select>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#6d28d9] text-white text-[13px] font-semibold hover:bg-[#5b21b6] transition-all disabled:opacity-60"
-            >
-              {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-              Envoyer
-            </button>
+            <div className="md:col-span-2 flex gap-2">
+              <label className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[12px] text-slate-500 cursor-pointer hover:border-[#6d28d9]/30">
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  onChange={handleScreenshotChange}
+                  className="hidden"
+                />
+                {screenshotFile ? (
+                  <span className="text-[#6d28d9] font-medium truncate">{screenshotFile.name}</span>
+                ) : (
+                  'Capture ecran (optionnel)'
+                )}
+              </label>
+            </div>
           </div>
           <textarea
             value={form.description}
             onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-            rows={4}
-            placeholder="Décrivez le bug, les étapes pour le reproduire, et le résultat attendu."
-            className="w-full px-4 py-3 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[13px] outline-none focus:border-[#6d28d9]/40 resize-y"
+            rows={3}
+            placeholder="Decrivez le bug, les etapes pour le reproduire, et le resultat attendu."
+            className="w-full px-4 py-3 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[13px] outline-none focus:border-[#6d28d9]/40 resize-y mb-3"
           />
-          <div className="space-y-2">
-            <label className="block text-[12px] font-semibold text-slate-600">Capture d'ecran (optionnel)</label>
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/jpg,image/webp"
-              onChange={handleScreenshotChange}
-              className="w-full text-[12px] text-slate-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-[#f5f3ff] file:text-[#6d28d9] file:font-semibold"
+          {screenshotPreview && (
+            <img
+              src={screenshotPreview}
+              alt="Apercu capture bug"
+              className="h-20 rounded-lg border border-[#e5e0f5] object-cover mb-3"
             />
-            {screenshotPreview && (
-              <img
-                src={screenshotPreview}
-                alt="Apercu capture bug"
-                className="h-24 rounded-lg border border-[#e5e0f5] object-cover"
-              />
-            )}
+          )}
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#6d28d9] text-white text-[13px] font-bold hover:bg-[#5b21b6] transition-all disabled:opacity-60 shadow-md shadow-violet-200"
+            >
+              {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+              Envoyer le ticket
+            </button>
           </div>
         </form>
       )}
 
+      {/* ── SEARCH BAR ── */}
       <div className="bg-white border border-[#e5e0f5] rounded-2xl overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-[#f3f0ff] flex flex-wrap gap-3 items-center">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un ticket..."
-            className="flex-1 min-w-[220px] px-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[13px] outline-none focus:border-[#6d28d9]/40"
-          />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="px-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[13px] outline-none focus:border-[#6d28d9]/40"
-          >
-            <option value="all">Tous les statuts</option>
-            <option value="new">Nouveaux</option>
-            <option value="in_progress">En cours</option>
-            <option value="resolved">Résolus</option>
-          </select>
+        <div className="px-5 py-3 border-b border-[#f3f0ff] flex items-center gap-3">
+          <div className="flex-1 flex items-center gap-2 px-3.5 py-2 bg-[#fafafa] border border-[#e5e0f5] rounded-xl">
+            <Search size={14} className="text-slate-400 flex-shrink-0" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && loadBugs()}
+              placeholder="Rechercher un ticket..."
+              className="bg-transparent text-[13px] outline-none w-full placeholder-slate-400"
+            />
+            {search && (
+              <button onClick={() => { setSearch(''); setTimeout(loadBugs, 0); }} className="text-slate-300 hover:text-slate-500">
+                <X size={14} />
+              </button>
+            )}
+          </div>
           <button
             onClick={loadBugs}
-            className="px-4 py-2.5 rounded-xl bg-[#f5f3ff] border border-[#e5e0f5] text-[#6d28d9] text-[13px] font-semibold hover:bg-[#ede9fe]"
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#f5f3ff] border border-[#e5e0f5] text-[#6d28d9] text-[12px] font-semibold hover:bg-[#ede9fe] transition-all disabled:opacity-50"
           >
-            Actualiser
+            {loading ? <Loader2 size={13} className="animate-spin" /> : <Filter size={13} />}
+            Rechercher
           </button>
         </div>
 
+        {/* ── TABLE ── */}
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full">
             <thead>
               <tr className="bg-[#faf8ff]">
-                {['Date', 'Titre', 'Module', 'Priorité', 'Statut', 'Signalé par', 'Action'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-[#9ca3af] border-b border-[#ece7ff] whitespace-nowrap">
-                    {h}
-                  </th>
-                ))}
+                <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[140px]">Date</th>
+                <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff]">Ticket</th>
+                <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[100px]">Module</th>
+                <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[100px]">Priorité</th>
+                <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[110px]">Statut</th>
+                <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[150px]">Signalé par</th>
+                {isSuperAdmin && (
+                  <th className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[130px]">Action</th>
+                )}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    <Loader2 size={24} className="animate-spin mx-auto mb-2" />
-                    Chargement des tickets...
+                  <td colSpan={isSuperAdmin ? 7 : 6} className="py-16 text-center">
+                    <Loader2 size={28} className="animate-spin mx-auto mb-3 text-[#6d28d9]" />
+                    <p className="text-[13px] text-slate-400 font-medium">Chargement des tickets...</p>
                   </td>
                 </tr>
               ) : bugs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    <AlertCircle size={24} className="mx-auto mb-2" />
-                    Aucun ticket trouvé
+                  <td colSpan={isSuperAdmin ? 7 : 6} className="py-16 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-[#f5f3ff] flex items-center justify-center mx-auto mb-3">
+                      <Bug size={22} className="text-[#c4b5fd]" />
+                    </div>
+                    <p className="text-[14px] text-slate-500 font-semibold">Aucun ticket trouvé</p>
+                    <p className="text-[12px] text-slate-400 mt-1">
+                      {search ? 'Essayez une recherche différente' : 'Aucun bug signalé pour le moment'}
+                    </p>
                   </td>
                 </tr>
               ) : (
-                bugs.map((bug) => (
-                  <tr key={bug._id} className="hover:bg-[#fafafa]">
-                    <td className="px-4 py-3 border-b border-[#f5f3ff] text-[12px] text-slate-500 whitespace-nowrap">
-                      {new Date(bug.createdAt).toLocaleString('fr-FR')}
+                bugs.map((bug, i) => (
+                  <tr
+                    key={bug._id}
+                    className={`group transition-colors hover:bg-[#fcfbff] ${i !== bugs.length - 1 ? 'border-b border-[#f3f0ff]' : ''}`}
+                  >
+                    {/* Date */}
+                    <td className="px-5 py-4 align-top">
+                      <div className="text-[12px] font-semibold text-slate-600">
+                        {new Date(bug.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                      </div>
+                      <div className="text-[10px] text-slate-400">
+                        {new Date(bug.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
                     </td>
-                    <td className="px-4 py-3 border-b border-[#f5f3ff] min-w-[320px]">
-                      <div className="text-[13px] font-semibold text-[#1e1b2e]">{bug.title}</div>
-                      <div className="text-[12px] text-slate-500 line-clamp-2">{bug.description}</div>
+
+                    {/* Ticket info */}
+                    <td className="px-5 py-4 align-top">
+                      <div className="text-[13px] font-bold text-[#1e1b2e] leading-tight mb-0.5">{bug.title}</div>
+                      <div className="text-[12px] text-slate-400 leading-snug line-clamp-2">{bug.description}</div>
                       {bug.screenshotUrl && (
-                        <a
-                          href={bug.screenshotUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mt-2 inline-block"
-                        >
+                        <a href={bug.screenshotUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block">
                           <img
                             src={bug.screenshotUrl}
-                            alt={`Capture ticket ${bug.title}`}
-                            className="h-16 w-28 rounded-md object-cover border border-[#e5e0f5]"
+                            alt={`Capture ${bug.title}`}
+                            className="h-12 w-20 rounded-md object-cover border border-[#e5e0f5] opacity-80 group-hover:opacity-100 transition-opacity"
                           />
                         </a>
                       )}
                     </td>
-                    <td className="px-4 py-3 border-b border-[#f5f3ff] text-[12px] font-medium text-slate-600 uppercase">{bug.module}</td>
-                    <td className="px-4 py-3 border-b border-[#f5f3ff] text-[12px] text-slate-600">{priorityLabel[bug.priority]}</td>
-                    <td className="px-4 py-3 border-b border-[#f5f3ff]">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${statusClass[bug.status]}`}>
+
+                    {/* Module */}
+                    <td className="px-5 py-4 align-top">
+                      <span className="text-[11px] font-semibold text-slate-500 bg-[#f5f3ff] px-2 py-1 rounded-md border border-[#ece7ff]">
+                        {moduleLabel[bug.module]}
+                      </span>
+                    </td>
+
+                    {/* Priority */}
+                    <td className="px-5 py-4 align-top">
+                      <div className="flex items-center gap-1.5">
+                        <div className={`w-2 h-2 rounded-full ${priorityDot[bug.priority]}`} />
+                        <span className="text-[12px] font-medium text-slate-600">{priorityLabel[bug.priority]}</span>
+                      </div>
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-5 py-4 align-top">
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${statusStyle[bug.status]}`}>
+                        {statusIcon[bug.status]}
                         {statusLabel[bug.status]}
                       </span>
                     </td>
-                    <td className="px-4 py-3 border-b border-[#f5f3ff] text-[12px] text-slate-600">
-                      <div>{bug.reporterName || 'Utilisateur'}</div>
-                      <div className="text-[11px] text-slate-400">{bug.reporterEmail || bug.reporterRole}</div>
+
+                    {/* Reporter */}
+                    <td className="px-5 py-4 align-top">
+                      <div className="text-[12px] font-semibold text-slate-600">{bug.reporterName || 'Utilisateur'}</div>
+                      <div className="text-[10px] text-slate-400">{bug.reporterEmail || bug.reporterRole}</div>
                     </td>
-                    <td className="px-4 py-3 border-b border-[#f5f3ff]">
-                      {isSuperAdmin ? (
-                        <select
-                          value={bug.status}
-                          onChange={(e) => handleStatusChange(bug._id, e.target.value as BugStatus)}
-                          className="px-2.5 py-1.5 bg-[#fafafa] border border-[#e5e0f5] rounded-lg text-[12px] outline-none"
-                        >
-                          <option value="new">Nouveau</option>
-                          <option value="in_progress">En cours</option>
-                          <option value="resolved">Résolu</option>
-                        </select>
-                      ) : bug.status === 'resolved' ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-600 text-[12px] font-semibold"><CheckCircle2 size={12} /> Corrigé</span>
-                      ) : (
-                        <span className="text-[12px] text-slate-400">En attente</span>
-                      )}
-                    </td>
+
+                    {/* Action (admin only) */}
+                    {isSuperAdmin && (
+                      <td className="px-5 py-4 align-top">
+                        <div className="relative">
+                          <select
+                            value={bug.status}
+                            onChange={(e) => handleStatusChange(bug._id, e.target.value as BugStatus)}
+                            className="appearance-none w-full px-3 py-1.5 pr-7 bg-[#fafafa] border border-[#e5e0f5] rounded-lg text-[11px] font-semibold outline-none hover:border-[#6d28d9]/30 transition-colors cursor-pointer"
+                          >
+                            <option value="new">Nouveau</option>
+                            <option value="in_progress">En cours</option>
+                            <option value="resolved">Résolu</option>
+                          </select>
+                          <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
+
+        {/* ── FOOTER ── */}
+        {bugs.length > 0 && (
+          <div className="px-5 py-3 border-t border-[#f3f0ff] flex items-center justify-between">
+            <span className="text-[11px] text-slate-400 font-medium">
+              {bugs.length} ticket{bugs.length > 1 ? 's' : ''} affiché{bugs.length > 1 ? 's' : ''}
+            </span>
+            <button
+              onClick={loadBugs}
+              className="text-[11px] text-[#6d28d9] font-semibold hover:underline"
+            >
+              Actualiser
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default SupportView;
-

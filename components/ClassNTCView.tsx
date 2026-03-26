@@ -1743,14 +1743,14 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
             )}
 
             {currentTab === 'history' && (
-                <div className="bg-white border border-[#e2e8f0] p-8 min-h-[500px]">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="w-10 h-10 rounded-[4px] bg-[#fee2e2] border border-[#fca5a5] text-[#b91c1c] flex items-center justify-center">
-                            <HistoryIcon size={20} />
+                <div className="bg-white border border-[#e5e0f5] rounded-2xl p-6 min-h-[500px]">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6d28d9] to-[#4338ca] flex items-center justify-center shadow-md shadow-violet-200">
+                            <HistoryIcon size={18} className="text-white" />
                         </div>
                         <div>
-                            <h2 className="text-base font-bold text-[#1e293b]">Historique des actions</h2>
-                            <p className="text-[#8898aa] text-sm">Toutes les activités récentes de la classe</p>
+                            <h2 className="text-[18px] font-extrabold text-[#1e1b2e] tracking-tight">Historique des actions</h2>
+                            <p className="text-[12px] text-slate-400 font-medium mt-0.5">Toutes les activités récentes de la classe</p>
                         </div>
                     </div>
                     <HistoryTimeline history={globalHistory} loading={loadingHistory} />
