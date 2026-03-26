@@ -235,15 +235,13 @@ const SupportView: React.FC = () => {
             )}
           </div>
 
-          {!isSuperAdmin && (
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6d28d9] text-white text-[12px] font-bold hover:bg-[#5b21b6] transition-all shadow-md shadow-violet-200"
-            >
-              {showForm ? <X size={14} /> : <Plus size={14} />}
-              {showForm ? 'Fermer' : 'Nouveau ticket'}
-            </button>
-          )}
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6d28d9] text-white text-[12px] font-bold hover:bg-[#5b21b6] transition-all shadow-md shadow-violet-200"
+          >
+            {showForm ? <X size={14} /> : <Plus size={14} />}
+            {showForm ? 'Fermer' : 'Nouveau ticket'}
+          </button>
         </div>
 
         {/* ── STAT CHIPS ── */}
@@ -270,7 +268,7 @@ const SupportView: React.FC = () => {
       </div>
 
       {/* ── NEW TICKET FORM (collapsible) ── */}
-      {!isSuperAdmin && showForm && (
+      {showForm && (
         <form onSubmit={handleSubmit} className="bg-white border border-[#e5e0f5] rounded-2xl p-5 mb-5 shadow-sm animate-fade-in">
           <h2 className="text-[14px] font-bold text-[#1e1b2e] mb-4">Nouveau signalement</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
