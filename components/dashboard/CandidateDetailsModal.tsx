@@ -211,8 +211,8 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                 <div className="space-y-8">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <Input label="Prénom" value={editForm?.prenom || ""} onChange={(e) => setEditForm({ ...editForm, prenom: e.target.value })} />
-                                        <Input label="Nom de naissance" value={editForm?.nom_naissance || ""} onChange={(e) => setEditForm({ ...editForm, nom_naissance: e.target.value })} />
-                                        <Input label="Nom d'usage" value={editForm?.nom_usage || ""} onChange={(e) => setEditForm({ ...editForm, nom_usage: e.target.value })} />
+                                        <Input label="Nom de naissance" value={editForm?.nom_naissance || ""} onChange={(e) => setEditForm({ ...editForm, nom_naissance: e.target.value.toUpperCase() })} />
+                                        <Input label="Nom d'usage" value={editForm?.nom_usage || ""} onChange={(e) => setEditForm({ ...editForm, nom_usage: e.target.value.toUpperCase() })} />
                                         <Select
                                             label="Sexe"
                                             value={editForm?.sexe || ""}
@@ -253,7 +253,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                     <div className="space-y-4">
                                         <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Représentant légal 1</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <Input label="Nom (Rep 1)" value={editForm?.nom_representant_legal || ""} onChange={(e) => setEditForm({ ...editForm, nom_representant_legal: e.target.value })} />
+                                            <Input label="Nom (Rep 1)" value={editForm?.nom_representant_legal || ""} onChange={(e) => setEditForm({ ...editForm, nom_representant_legal: e.target.value.toUpperCase() })} />
                                             <Input label="Prénom (Rep 1)" value={editForm?.prenom_representant_legal || ""} onChange={(e) => setEditForm({ ...editForm, prenom_representant_legal: e.target.value })} />
                                             <Input label="Lien (Rep 1)" value={editForm?.lien_parente_legal || ""} onChange={(e) => setEditForm({ ...editForm, lien_parente_legal: e.target.value })} />
                                             <Input label="Téléphone (Rep 1)" value={editForm?.numero_legal || ""} onChange={(e) => setEditForm({ ...editForm, numero_legal: e.target.value })} />
@@ -273,7 +273,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                     <div className="space-y-4">
                                         <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Représentant légal 2</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <Input label="Nom (Rep 2)" value={editForm?.nom_representant_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, nom_representant_legal2: e.target.value })} />
+                                            <Input label="Nom (Rep 2)" value={editForm?.nom_representant_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, nom_representant_legal2: e.target.value.toUpperCase() })} />
                                             <Input label="Prénom (Rep 2)" value={editForm?.prenom_representant_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, prenom_representant_legal2: e.target.value })} />
                                             <Input label="Lien (Rep 2)" value={editForm?.lien_parente_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, lien_parente_legal2: e.target.value })} />
                                             <Input label="Téléphone (Rep 2)" value={editForm?.numero_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, numero_legal2: e.target.value })} />

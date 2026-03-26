@@ -426,8 +426,8 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                 >
                     <FormGrid>
                         <div><Input label="Prénom" required placeholder="Votre prénom" error={errors.prenom?.message} {...register('prenom')} /></div>
-                        <div><Input label="Nom de naissance" required placeholder="Votre nom" error={errors.nom_naissance?.message} {...register('nom_naissance')} /></div>
-                        <FullCol><Input label="Nom d'usage" placeholder="Si différent du nom de naissance" {...register('nom_usage')} /></FullCol>
+                        <div><Input label="Nom de naissance" required placeholder="Votre nom" error={errors.nom_naissance?.message} {...register('nom_naissance', { onChange: (e) => { e.target.value = e.target.value.toUpperCase(); } })} /></div>
+                        <FullCol><Input label="Nom d'usage" placeholder="Si différent du nom de naissance" {...register('nom_usage', { onChange: (e) => { e.target.value = e.target.value.toUpperCase(); } })} /></FullCol>
 
                         <FullCol>
                             <FieldLabel required>Sexe</FieldLabel>
@@ -510,7 +510,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                             <div className="bg-slate-50/60 border border-slate-200 rounded-[4px] p-4">
                                 <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-4">Représentant légal 1</p>
                                 <FormGrid>
-                                    <div><Input label="Nom" required error={errors.representant_legal_1?.nom?.message} {...register('representant_legal_1.nom')} /></div>
+                                    <div><Input label="Nom" required error={errors.representant_legal_1?.nom?.message} {...register('representant_legal_1.nom', { onChange: (e) => { e.target.value = e.target.value.toUpperCase(); } })} /></div>
                                     <div><Input label="Prénom" required error={errors.representant_legal_1?.prenom?.message} {...register('representant_legal_1.prenom')} /></div>
                                     <FullCol><Input label="Lien de parenté" required placeholder="Père, Mère, Tuteur…" error={errors.representant_legal_1?.lien_parente?.message} {...register('representant_legal_1.lien_parente')} /></FullCol>
                                     <FullCol><Input label="Adresse" required placeholder="Numéro et rue" error={errors.representant_legal_1?.voie?.message} {...register('representant_legal_1.voie')} /></FullCol>
@@ -536,7 +536,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                                 <div className="bg-slate-50/60 border border-slate-200 rounded-[4px] p-4">
                                     <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-4">Représentant légal 2</p>
                                     <FormGrid>
-                                        <div><Input label="Nom" required error={errors.representant_legal_2?.nom?.message} {...register('representant_legal_2.nom')} /></div>
+                                        <div><Input label="Nom" required error={errors.representant_legal_2?.nom?.message} {...register('representant_legal_2.nom', { onChange: (e) => { e.target.value = e.target.value.toUpperCase(); } })} /></div>
                                         <div><Input label="Prénom" required error={errors.representant_legal_2?.prenom?.message} {...register('representant_legal_2.prenom')} /></div>
                                         <FullCol><Input label="Lien de parenté" required placeholder="Père, Mère, Tuteur…" error={errors.representant_legal_2?.lien_parente?.message} {...register('representant_legal_2.lien_parente')} /></FullCol>
                                         <FullCol><Input label="Adresse" required placeholder="Numéro et rue" error={errors.representant_legal_2?.voie?.message} {...register('representant_legal_2.voie')} /></FullCol>

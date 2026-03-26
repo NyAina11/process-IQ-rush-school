@@ -183,7 +183,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                     )}
                                     {activeTab === 'maitre' && (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <Input label="Nom" value={editForm?.maitre_apprentissage?.nom} onChange={e => updateNestedField('maitre_apprentissage.nom', e.target.value)} />
+                                            <Input label="Nom" value={editForm?.maitre_apprentissage?.nom} onChange={e => updateNestedField('maitre_apprentissage.nom', e.target.value.toUpperCase())} />
                                             <Input label="Prénom" value={editForm?.maitre_apprentissage?.prenom} onChange={e => updateNestedField('maitre_apprentissage.prenom', e.target.value)} />
                                             <Input label="Date de naissance" type="date" value={editForm?.maitre_apprentissage?.date_naissance} onChange={e => updateNestedField('maitre_apprentissage.date_naissance', e.target.value)} />
                                             <Input label="Fonction" value={editForm?.maitre_apprentissage?.fonction} onChange={e => updateNestedField('maitre_apprentissage.fonction', e.target.value)} />

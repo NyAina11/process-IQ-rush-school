@@ -788,7 +788,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                         </div>
                         <div className="fiche-form-grid">
                             <div className="fiche-field">
-                                <Input label="Nom" required placeholder="Nom" error={errors.maitre_apprentissage?.nom?.message} {...register('maitre_apprentissage.nom')} />
+                                <Input label="Nom" required placeholder="Nom" error={errors.maitre_apprentissage?.nom?.message} {...register('maitre_apprentissage.nom', { onChange: (e) => { e.target.value = e.target.value.toUpperCase(); } })} />
                             </div>
                             <div className="fiche-field">
                                 <Input label="Prénom" required placeholder="Prénom" error={errors.maitre_apprentissage?.prenom?.message} {...register('maitre_apprentissage.prenom')} />
