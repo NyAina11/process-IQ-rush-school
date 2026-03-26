@@ -221,6 +221,8 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         setActiveSection(prev => prev === section ? null : section);
     };
 
+    // Only use draft if it belongs to the current student
+    const validDraft = draftCompany?.record_id_etudiant === studentRecordId ? draftCompany : null;
 
     const {
         register,
@@ -231,16 +233,16 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
     } = useForm<CompanyFormValues>({
         resolver: zodResolver(companySchema),
         defaultValues: {
-            identification: draftCompany?.identification || { raison_sociale: "", siret: "", code_ape_naf: "", type_employeur: "", employeur_specifique: "Aucun de ces cas", effectif: "", convention: "" },
-            adresse: draftCompany?.adresse || { num: "", voie: "", complement: "", code_postal: "", ville: "", telephone: "", email: "" },
-            maitre_apprentissage: draftCompany?.maitre_apprentissage || { nom: "", prenom: "", date_naissance: "", fonction: "", diplome: "", experience: "", telephone: "", email: "" },
-            opco: draftCompany?.opco || { nom: "" },
-            formation: draftCompany?.formation || { choisie: "", date_debut: "", date_fin: "", code_rncp: "", code_diplome: "", nb_heures: "", jours_cours: "" },
-            cfa: draftCompany?.cfa || {
+            identification: validDraft?.identification || { raison_sociale: "", siret: "", code_ape_naf: "", type_employeur: "", employeur_specifique: "Aucun de ces cas", effectif: "", convention: "" },
+            adresse: validDraft?.adresse || { num: "", voie: "", complement: "", code_postal: "", ville: "", telephone: "", email: "" },
+            maitre_apprentissage: validDraft?.maitre_apprentissage || { nom: "", prenom: "", date_naissance: "", fonction: "", diplome: "", experience: "", telephone: "", email: "" },
+            opco: validDraft?.opco || { nom: "" },
+            formation: validDraft?.formation || { choisie: "", date_debut: "", date_fin: "", code_rncp: "", code_diplome: "", nb_heures: "", jours_cours: "" },
+            cfa: validDraft?.cfa || {
                 rush_school: "oui", entreprise: "non", denomination: "RUSH SCHOOL", uai: "0923033X",
                 siret: "918 707 704 00014", adresse: "6 rue des Bateliers", complement: "", code_postal: "92110", commune: "CLICHY"
             },
-            contrat: draftCompany?.contrat || {
+            contrat: validDraft?.contrat || {
                 type_contrat: "", type_derogation: "", date_debut: "", date_fin: "", duree_hebdomadaire: "35:00", poste_occupe: "",
                 lieu_execution: "",
                 pourcentage_smic1: null, pourcentage_smic1_2: null, montant_salaire_brut1: null,
@@ -258,7 +260,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                 date_debut_1periode_4eme_annee: "", date_fin_1periode_4eme_annee: "",
                 date_debut_2periode_4eme_annee: "", date_fin_2periode_4eme_annee: ""
             },
-            missions: draftCompany?.missions || { formation_alternant: "", selectionnees: [] as string[] },
+            missions: validDraft?.missions || { formation_alternant: "", selectionnees: [] as string[] },
             record_id_etudiant: studentRecordId || ""
         }
     });
@@ -480,9 +482,8 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         }
     }, [setValue, studentDateNaissance]);
 
-    useEffect(() => {
-        applyQuickFill(dateDebutGlobal, dateFinGlobal);
-    }, [dateDebutGlobal, dateFinGlobal, applyQuickFill]);
+    // Auto-fill is triggered by button click only, not automatically
+    // This prevents overwriting existing period data for renewals/3rd year students
 
     // Helper to get percentage from bracket and year
     const getRateFromBracket = (bracket: string | null, year: number): number => {
@@ -1015,16 +1016,30 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        {["1", "2", "3", "4"].map(y => {
-                                            const p1Value = (computedPeriods as any)[`y${y}p1`];
-                                            return (
-                                                <div key={y} className={`w-2.5 h-2.5 rounded-full transition-colors ${p1Value > 0 || (y === "1" && computedPeriods.y1p2 > 0) ? 'bg-emerald-400' : 'bg-white/20'}`} />
-                                            );
-                                        })}
-                                        <span className="text-white/50 text-[11px] font-medium ml-1">
-                                            {["1", "2", "3", "4"].filter(y => (y === "1" ? computedPeriods.y1p2 : (computedPeriods as any)[`y${y}p1`]) > 0).length}/4 configurées
-                                        </span>
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (dateDebutGlobal && dateFinGlobal) {
+                                                    applyQuickFill(dateDebutGlobal, dateFinGlobal);
+                                                }
+                                            }}
+                                            disabled={!dateDebutGlobal || !dateFinGlobal}
+                                            className="px-3 py-1.5 rounded-lg bg-white/15 text-white text-[10px] font-semibold uppercase tracking-wider hover:bg-white/25 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            Remplir auto
+                                        </button>
+                                        <div className="flex items-center gap-1.5">
+                                            {["1", "2", "3", "4"].map(y => {
+                                                const p1Value = (computedPeriods as any)[`y${y}p1`];
+                                                return (
+                                                    <div key={y} className={`w-2.5 h-2.5 rounded-full transition-colors ${p1Value > 0 || (y === "1" && computedPeriods.y1p2 > 0) ? 'bg-emerald-400' : 'bg-white/20'}`} />
+                                                );
+                                            })}
+                                            <span className="text-white/50 text-[11px] font-medium ml-1">
+                                                {["1", "2", "3", "4"].filter(y => (y === "1" ? computedPeriods.y1p2 : (computedPeriods as any)[`y${y}p1`]) > 0).length}/4 configurées
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -1091,7 +1106,13 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                                                     <span className="text-[10px] font-medium text-slate-400">
                                                                                                         {getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any)) !== null ? `Âge : ${getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any))} ans` : ""}
                                                                                                     </span>
-                                                                                                    {results.p1 > 0 && <div className="text-[12px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">{results.p1}% SMIC</div>}
+                                                                                                    <div className="text-[12px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">{results.p1}% SMIC</div>
+                                                                                                </div>
+                                                                                                <div className="flex justify-end px-1">
+                                                                                                    {(() => {
+                                                                                                        const bracket = getAgeBracket(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any));
+                                                                                                        return bracket ? <span className="text-[10px] font-semibold text-slate-400">Tranche : {bracket} ans</span> : null;
+                                                                                                    })()}
                                                                                                 </div>
                                                                                             </div>
                                                                                         )}
@@ -1102,7 +1123,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                     <div className="w-1.5 h-1.5 rounded-full bg-[#6d28d9]"></div>
                                                                     <span className="text-[10px] font-semibold text-[#6d28d9] uppercase tracking-wider">2ème Période</span>
                                                                 </div>
-                                                                {results.p2 > 0 && <span className="text-[12px] font-bold text-[#6d28d9] bg-[#6d28d9]/10 px-3 py-1 rounded-lg">{results.p2}% SMIC</span>}
+                                                                <span className="text-[12px] font-bold text-[#6d28d9] bg-[#6d28d9]/10 px-3 py-1 rounded-lg">{results.p2}% SMIC</span>
                                                             </div>
                                                             <div className="grid grid-cols-2 gap-2">
                                                                 <Input
@@ -1115,6 +1136,15 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                     label="Fin"
                                                                     {...register(`contrat.date_fin_2periode_${suffix}_annee` as any)}
                                                                 />
+                                                            </div>
+                                                            <div className="flex justify-between items-center px-1 mt-1">
+                                                                <span className="text-[10px] font-medium text-[#6d28d9]/60">
+                                                                    {getRawAge(studentDateNaissance, watch(`contrat.date_debut_2periode_${suffix}_annee` as any)) !== null ? `Âge : ${getRawAge(studentDateNaissance, watch(`contrat.date_debut_2periode_${suffix}_annee` as any))} ans` : ""}
+                                                                </span>
+                                                                {(() => {
+                                                                    const bracket = getAgeBracket(studentDateNaissance, watch(`contrat.date_debut_2periode_${suffix}_annee` as any));
+                                                                    return bracket ? <span className="text-[10px] font-semibold text-[#6d28d9]/70">Tranche : {bracket} ans</span> : null;
+                                                                })()}
                                                             </div>
                                                         </div>
                                                     </div>
