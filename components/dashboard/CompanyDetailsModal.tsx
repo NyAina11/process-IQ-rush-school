@@ -235,21 +235,57 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <Input label="Date conclusion" type="date" value={editForm?.contrat?.date_conclusion} onChange={e => updateNestedField('contrat.date_conclusion', e.target.value)} />
-                                                <Input label="Début exécution" type="date" value={editForm?.contrat?.date_debut_execution} onChange={e => updateNestedField('contrat.date_debut_execution', e.target.value)} />
+                                                <Input label="Date conclusion" type="date" value={editForm?.contrat?.date_conclusion || ""} onChange={e => updateNestedField('contrat.date_conclusion', e.target.value)} />
+                                                <Input label="Début exécution" type="date" value={editForm?.contrat?.date_debut_execution || ""} onChange={e => updateNestedField('contrat.date_debut_execution', e.target.value)} />
+                                                <Input label="Si avenant, date" type="date" value={editForm?.contrat?.date_avenant || ""} onChange={e => updateNestedField('contrat.date_avenant', e.target.value)} />
+                                                <Input label="Fin contrat" type="date" value={editForm?.contrat?.date_fin || ""} onChange={e => updateNestedField('contrat.date_fin', e.target.value)} />
                                                 <Select label="OPCO" options={OPCO_OPTIONS} value={editForm?.opco?.nom} onChange={e => updateNestedField('opco.nom', e.target.value)} />
                                                 <Select label="Machines dangereuses" options={YES_NO_OPTIONS} value={editForm?.contrat?.machines_dangereuses} onChange={e => updateNestedField('contrat.machines_dangereuses', e.target.value)} />
                                                 <Input label="Caisse de retraite" value={editForm?.contrat?.caisse_retraite} onChange={e => updateNestedField('contrat.caisse_retraite', e.target.value)} />
                                                 <Input label="N° DECA" value={editForm?.contrat?.numero_deca_ancien_contrat} onChange={e => updateNestedField('contrat.numero_deca_ancien_contrat', e.target.value)} />
                                             </div>
-                                            <div className="bg-slate-50 p-6 rounded-[4px] border border-slate-100">
-                                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Rémunération (Salaire Brut)</h4>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                    <Input label="Année 1 (€)" type="number" value={editForm?.contrat?.montant_salaire_brut1} onChange={e => updateNestedField('contrat.montant_salaire_brut1', e.target.value)} />
-                                                    <Input label="Année 2 (€)" type="number" value={editForm?.contrat?.montant_salaire_brut2} onChange={e => updateNestedField('contrat.montant_salaire_brut2', e.target.value)} />
-                                                    <Input label="Année 3 (€)" type="number" value={editForm?.contrat?.montant_salaire_brut3} onChange={e => updateNestedField('contrat.montant_salaire_brut3', e.target.value)} />
-                                                    <Input label="Année 4 (€)" type="number" value={editForm?.contrat?.montant_salaire_brut4} onChange={e => updateNestedField('contrat.montant_salaire_brut4', e.target.value)} />
-                                                </div>
+                                            <div className="bg-slate-50 p-6 rounded-[4px] border border-slate-100 space-y-6">
+                                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Rémunération & Périodes</h4>
+                                                {[1, 2, 3, 4].map(year => {
+                                                    const sfx = year === 1 ? '1er' : `${year}eme`;
+                                                    return (
+                                                        <div key={year} className="bg-white p-4 rounded-[4px] border border-slate-200 shadow-sm space-y-4">
+                                                            <h5 className="text-[12px] font-black text-blue-600 uppercase">Année {year}</h5>
+                                                            
+                                                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                                                <div className="space-y-3 p-4 bg-slate-50 rounded-[4px] border border-slate-100">
+                                                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">1ère Période</div>
+                                                                    <div className="grid grid-cols-2 gap-3">
+                                                                        {year > 1 ? (
+                                                                            <Input type="date" label="Date de début" value={editForm?.contrat?.[`date_debut_1periode_${sfx}_annee`]} onChange={e => updateNestedField(`contrat.date_debut_1periode_${sfx}_annee`, e.target.value)} />
+                                                                        ) : (
+                                                                            <div className="flex flex-col justify-center">
+                                                                                <span className="text-[10px] font-semibold text-slate-500 uppercase">Date de début</span>
+                                                                                <span className="text-[12px] font-medium text-slate-400 mt-1">Identique au début d'exécution</span>
+                                                                            </div>
+                                                                        )}
+                                                                        <Input type="date" label="Date de fin" value={editForm?.contrat?.[`date_fin_1periode_${sfx}_annee`]} onChange={e => updateNestedField(`contrat.date_fin_1periode_${sfx}_annee`, e.target.value)} />
+                                                                    </div>
+                                                                    <div className="grid grid-cols-2 gap-3">
+                                                                        <Input type="number" label="% SMIC" value={editForm?.contrat?.[`pourcentage_smic${year}`]} onChange={e => updateNestedField(`contrat.pourcentage_smic${year}`, e.target.value)} />
+                                                                        <Input type="number" label="Salaire Brut (€)" value={editForm?.contrat?.[`montant_salaire_brut${year}`]} onChange={e => updateNestedField(`contrat.montant_salaire_brut${year}`, e.target.value)} />
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div className="space-y-3 p-4 bg-indigo-50/50 rounded-[4px] border border-indigo-100/50">
+                                                                    <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">2ème Période (Optionnel)</div>
+                                                                    <div className="grid grid-cols-2 gap-3">
+                                                                        <Input type="date" label="Date de début" value={editForm?.contrat?.[`date_debut_2periode_${sfx}_annee`]} onChange={e => updateNestedField(`contrat.date_debut_2periode_${sfx}_annee`, e.target.value)} />
+                                                                        <Input type="date" label="Date de fin" value={editForm?.contrat?.[`date_fin_2periode_${sfx}_annee`]} onChange={e => updateNestedField(`contrat.date_fin_2periode_${sfx}_annee`, e.target.value)} />
+                                                                    </div>
+                                                                    <div className="grid grid-cols-2 gap-3">
+                                                                        <Input type="number" label="% SMIC (P2)" value={editForm?.contrat?.[`pourcentage_smic${year}_2`]} onChange={e => updateNestedField(`contrat.pourcentage_smic${year}_2`, e.target.value)} />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}
@@ -331,6 +367,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                                 {renderInfoRow("Type de dérogation", fields["Type de dérogation"], ShieldCheck)}
                                                 {renderInfoRow("Date de conclusion", fields["Date de conclusion"], Clock)}
                                                 {renderInfoRow("Début exécution", fields["Date de début exécution"], Clock)}
+                                                {fields["date Si avenant"] && renderInfoRow("Date avenant", fields["date Si avenant"], Clock)}
                                                 {renderInfoRow("Fin contrat", fields["Fin du contrat apprentissage"], Clock)}
                                                 {renderInfoRow("Poste occupé", fields["Poste occupé"], Briefcase)}
                                                 {renderInfoRow("Durée hebdomadaire", company.contrat?.duree_hebdomadaire || "35:00", Clock)}
@@ -338,24 +375,41 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                             </div>
 
                                             <div className="bg-slate-50 p-6 rounded-[4px] border border-slate-100">
-                                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Rémunération</h4>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                    {[1, 2, 3, 4].map(num => (
-                                                        <div key={num} className="bg-white p-4 rounded-[4px] border border-slate-100 shadow-sm">
-                                                            <span className="text-[10px] font-black text-blue-500 uppercase mb-2 block">Année {num}</span>
-                                                            <div className="text-lg font-black text-slate-800 mb-3">{fields[`Salaire brut mensuel ${num}`] ? `${fields[`Salaire brut mensuel ${num}`]} €` : 'N/A'}</div>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                <div className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-black bg-blue-50 text-blue-600 border border-blue-100 shadow-sm">
-                                                                    {fields[`Pourcentage smic ${num}`] || fields[`Pourcentage du SMIC ${num}`] || 0}%
-                                                                </div>
-                                                                {fields[`Pourcentage smic ${num}_2`] && fields[`Pourcentage smic ${num}_2`] !== (fields[`Pourcentage smic ${num}`] || fields[`Pourcentage du SMIC ${num}`]) && (
-                                                                    <div className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-black bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
-                                                                        {fields[`Pourcentage smic ${num}_2`]}%
+                                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Rémunération & Périodes</h4>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                                                    {[1, 2, 3, 4].map(num => {
+                                                        const sfx = num === 1 ? '1er_annee' : `${num}eme_annee`;
+                                                        const p1start = num === 1 ? fields["Date de début exécution"] : fields[`date_debut_1periode_${sfx}`];
+                                                        const p1end = fields[`date_fin_1periode_${sfx}`];
+                                                        const p2start = fields[`date_debut_2periode_${sfx}`];
+                                                        const p2end = fields[`date_fin_2periode_${sfx}`];
+                                                        const p1smic = fields[`Pourcentage smic ${num}`] || fields[`Pourcentage du SMIC ${num}`];
+                                                        const p2smic = fields[`Pourcentage smic ${num}_2`];
+
+                                                        return (
+                                                        <div key={num} className="bg-white p-4 rounded-[4px] border border-slate-100 shadow-sm space-y-3">
+                                                            <span className="text-[10px] font-black text-blue-500 uppercase block">Année {num}</span>
+                                                            <div className="text-lg font-black text-slate-800">{fields[`Salaire brut mensuel ${num}`] ? `${fields[`Salaire brut mensuel ${num}`]} €` : 'N/A'}</div>
+                                                            
+                                                            <div className="space-y-2 pt-2 border-t border-slate-50">
+                                                                <div className="flex flex-col gap-1">
+                                                                    <div className="flex justify-between items-center text-[10px] text-slate-500">
+                                                                        <span>{p1start ? new Date(p1start).toLocaleDateString('fr-FR') : '--'} au {p1end ? new Date(p1end).toLocaleDateString('fr-FR') : '--'}</span>
+                                                                        <span className="font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">{p1smic || 0}%</span>
                                                                     </div>
+                                                                </div>
+                                                                {p2smic && p2smic !== p1smic && (
+                                                                <div className="flex flex-col gap-1">
+                                                                    <div className="flex justify-between items-center text-[10px] text-indigo-500">
+                                                                        <span>{p2start ? new Date(p2start).toLocaleDateString('fr-FR') : '--'} au {p2end ? new Date(p2end).toLocaleDateString('fr-FR') : '--'}</span>
+                                                                        <span className="font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">{p2smic}%</span>
+                                                                    </div>
+                                                                </div>
                                                                 )}
                                                             </div>
                                                         </div>
-                                                    ))}
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         </div>

@@ -240,6 +240,9 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                             <Input label="N°" value={editForm?.num_residence || ""} onChange={(e) => setEditForm({ ...editForm, num_residence: e.target.value })} />
                                             <Input label="Voie (Rue)" value={editForm?.rue_residence || ""} onChange={(e) => setEditForm({ ...editForm, rue_residence: e.target.value })} />
                                         </div>
+                                        <div className="md:col-span-2">
+                                            <Input label="Complément d'adresse" value={editForm?.complement_residence || ""} onChange={(e) => setEditForm({ ...editForm, complement_residence: e.target.value })} />
+                                        </div>
                                         <Input label="Code postal" value={editForm?.code_postal || ""} onChange={(e) => setEditForm({ ...editForm, code_postal: e.target.value })} />
                                         <Input label="Ville" value={editForm?.ville || ""} onChange={(e) => setEditForm({ ...editForm, ville: e.target.value })} />
                                         <Input label="Email" type="email" value={editForm?.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
@@ -255,6 +258,15 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                             <Input label="Lien (Rep 1)" value={editForm?.lien_parente_legal || ""} onChange={(e) => setEditForm({ ...editForm, lien_parente_legal: e.target.value })} />
                                             <Input label="Téléphone (Rep 1)" value={editForm?.numero_legal || ""} onChange={(e) => setEditForm({ ...editForm, numero_legal: e.target.value })} />
                                             <Input label="Email (Rep 1)" value={editForm?.courriel_legal || ""} onChange={(e) => setEditForm({ ...editForm, courriel_legal: e.target.value })} />
+                                            <div className="grid grid-cols-[80px_1fr] gap-4 md:col-span-2">
+                                                <Input label="N°" value={editForm?.numero_adress_legal || ""} onChange={(e) => setEditForm({ ...editForm, numero_adress_legal: e.target.value })} />
+                                                <Input label="Voie" value={editForm?.voie_representant_legal || ""} onChange={(e) => setEditForm({ ...editForm, voie_representant_legal: e.target.value })} />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <Input label="Complément d'adresse" value={editForm?.complement_adresse_legal || ""} onChange={(e) => setEditForm({ ...editForm, complement_adresse_legal: e.target.value })} />
+                                            </div>
+                                            <Input label="Code postal" value={editForm?.code_postal_legal || ""} onChange={(e) => setEditForm({ ...editForm, code_postal_legal: e.target.value })} />
+                                            <Input label="Ville" value={editForm?.commune_legal || ""} onChange={(e) => setEditForm({ ...editForm, commune_legal: e.target.value })} />
                                         </div>
                                     </div>
                                     <div className="h-px bg-slate-100" />
@@ -266,6 +278,15 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                             <Input label="Lien (Rep 2)" value={editForm?.lien_parente_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, lien_parente_legal2: e.target.value })} />
                                             <Input label="Téléphone (Rep 2)" value={editForm?.numero_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, numero_legal2: e.target.value })} />
                                             <Input label="Email (Rep 2)" value={editForm?.courriel_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, courriel_legal2: e.target.value })} />
+                                            <div className="grid grid-cols-[80px_1fr] gap-4 md:col-span-2">
+                                                <Input label="N°" value={editForm?.numero_adress_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, numero_adress_legal2: e.target.value })} />
+                                                <Input label="Voie" value={editForm?.voie_representant_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, voie_representant_legal2: e.target.value })} />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <Input label="Complément d'adresse" value={editForm?.complement_adresse_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, complement_adresse_legal2: e.target.value })} />
+                                            </div>
+                                            <Input label="Code postal" value={editForm?.code_postal_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, code_postal_legal2: e.target.value })} />
+                                            <Input label="Ville" value={editForm?.commune_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, commune_legal2: e.target.value })} />
                                         </div>
                                     </div>
                                     <div className="h-px bg-slate-100" />
@@ -354,6 +375,8 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                             onChange={(e) => setEditForm({ ...editForm, connaissance_rush_how: e.target.value })}
                                             options={KNOW_RUSH_SCHOOL_OPTIONS}
                                         />
+                                        <Input label="Date visite/JPO" type="date" value={editForm?.date_de_visite || ""} onChange={(e) => setEditForm({ ...editForm, date_de_visite: e.target.value })} />
+                                        <Input label="Date règlement" type="date" value={editForm?.date_de_reglement || ""} onChange={(e) => setEditForm({ ...editForm, date_de_reglement: e.target.value })} />
                                     </div>
                                     <div className="h-px bg-slate-100" />
                                     <div className="grid grid-cols-1 gap-4">
@@ -394,10 +417,34 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                     {renderInfoRow("Nationalité", info.nationalite, ShieldCheck)}
                                     {renderInfoRow("Commune de naissance", info.commune_naissance, MapPin)}
                                     <div className="md:col-span-2">
-                                        {renderInfoRow("Adresse de résidence", info.adresse_residence, MapPin)}
+                                        {renderInfoRow("Adresse de résidence", info.adresse_residence || `${info.num_residence || ''} ${info.rue_residence || ''}${info.complement_residence ? ` - ${info.complement_residence}` : ''}, ${info.code_postal || ''} ${info.ville || ''}`, MapPin)}
                                     </div>
                                     {renderInfoRow("Situation", info.situation, Briefcase)}
                                     {renderInfoRow("Régime social", info.regime_social, ShieldCheck)}
+                                    
+                                    {info.nom_representant_legal && (
+                                        <>
+                                            <div className="md:col-span-2 mt-4 mb-2 h-px bg-slate-100" />
+                                            <div className="md:col-span-2 text-[11px] font-black text-slate-400 uppercase tracking-widest">Représentant Légal 1</div>
+                                            {renderInfoRow("Représentant 1", `${info.nom_representant_legal || ''} ${info.prenom_representant_legal || ''} (${info.lien_parente_legal || ''})`, User)}
+                                            {renderInfoRow("Contact", `${info.courriel_legal || ''} / ${info.numero_legal || ''}`, Phone)}
+                                            <div className="md:col-span-2">
+                                                {renderInfoRow("Adresse Rep. 1", `${info.numero_adress_legal || ''} ${info.voie_representant_legal || ''} ${info.complement_adresse_legal || ''}, ${info.code_postal_legal || ''} ${info.commune_legal || ''}`, MapPin)}
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {info.nom_representant_legal2 && (
+                                        <>
+                                            <div className="md:col-span-2 mt-4 mb-2 h-px bg-slate-100" />
+                                            <div className="md:col-span-2 text-[11px] font-black text-slate-400 uppercase tracking-widest">Représentant Légal 2</div>
+                                            {renderInfoRow("Représentant 2", `${info.nom_representant_legal2 || ''} ${info.prenom_representant_legal2 || ''} (${info.lien_parente_legal2 || ''})`, User)}
+                                            {renderInfoRow("Contact", `${info.courriel_legal2 || ''} / ${info.numero_legal2 || ''}`, Phone)}
+                                            <div className="md:col-span-2">
+                                                {renderInfoRow("Adresse Rep. 2", `${info.numero_adress_legal2 || ''} ${info.voie_representant_legal2 || ''} ${info.complement_adresse_legal2 || ''}, ${info.code_postal_legal2 || ''} ${info.commune_legal2 || ''}`, MapPin)}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             )}
 
@@ -410,6 +457,8 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                     {renderInfoRow("Diplôme le plus élevé", info.bac, GraduationCap)}
                                     {renderInfoRow("Entreprise d'accueil", info.entreprise_d_accueil, Building2)}
                                     {renderInfoRow("Connaissance Rush How", info.connaissance_rush_how, FileText)}
+                                    {renderInfoRow("Date visite/JPO", info.date_de_visite, Clock)}
+                                    {renderInfoRow("Date règlement", info.date_de_reglement, Clock)}
                                     <div className="md:col-span-2">
                                         {renderInfoRow("Motivation", info.motivation_projet_professionnel, FileText)}
                                     </div>

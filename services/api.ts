@@ -246,6 +246,7 @@ const mapBackendToCompany = (backendData: any): any => {
       date_avenant: fields["date Si avenant"] || "",
 
       // Périodes
+      date_fin_1periode_1er_annee: fields["date_fin_1periode_1er_annee"] || "",
       date_debut_2periode_1er_annee: fields["date_debut_2periode_1er_annee"] || "",
       date_fin_2periode_1er_annee: fields["date_fin_2periode_1er_annee"] || "",
       date_debut_1periode_2eme_annee: fields["date_debut_1periode_2eme_annee"] || "",
