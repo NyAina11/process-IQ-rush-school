@@ -436,8 +436,8 @@ const mapCompanyToBackend = (data: any, role?: string) => {
       contrat: {
         type_contrat: ensureString(data.contrat?.type_contrat),
         type_derogation: ensureString(data.contrat?.type_derogation),
-        date_debut: ensureString(data.formation?.date_debut || data.contrat?.date_debut),
-        date_fin: ensureString(data.formation?.date_fin || data.contrat?.date_fin),
+        date_debut: ensureString(data.contrat?.date_debut_execution || data.formation?.date_debut),
+        date_fin: ensureString(data.contrat?.date_fin),
         duree_hebdomadaire: ensureString(data.contrat?.duree_hebdomadaire),
         poste_occupe: ensureString(data.contrat?.poste_occupe),
         lieu_execution: ensureString(data.contrat?.lieu_execution),
@@ -459,8 +459,8 @@ const mapCompanyToBackend = (data: any, role?: string) => {
         montant_salaire_brut4: data.contrat?.montant_salaire_brut4 ? parseFloat(data.contrat.montant_salaire_brut4.toString()) : "",
         date_conclusion: ensureString(data.contrat?.date_conclusion),
         date_debut_execution: ensureString(data.contrat?.date_debut_execution),
-        date_debut_1periode_1er_annee: ensureString(data.contrat?.date_debut_1periode_1er_annee),
-        date_fin_1periode_1er_annee: ensureString(data.contrat?.date_fin_1periode_1er_annee),
+        // 1ère année : date_debut (above) = début p1. Seuls fin p1, début/fin p2 sont envoyés.
+        date_fin_1periode_1ere_annee: ensureString(data.contrat?.date_fin_1periode_1er_annee),
         date_debut_2periode_1er_annee: ensureString(data.contrat?.date_debut_2periode_1er_annee),
         date_fin_2periode_1er_annee: ensureString(data.contrat?.date_fin_2periode_1er_annee),
         date_debut_1periode_2eme_annee: ensureString(data.contrat?.date_debut_1periode_2eme_annee),

@@ -61,8 +61,8 @@ const companySchema = z.object({
     }),
     formation: z.object({
         choisie: z.string().min(1, "Veuillez sélectionner la formation"),
-        date_debut: z.string().min(1, "Date de début requise"),
-        date_fin: z.string().min(1, "Date de fin requise"),
+        date_debut: z.string().optional().or(z.literal("")),
+        date_fin: z.string().optional().or(z.literal("")),
         code_rncp: z.string().optional().or(z.literal("")),
         code_diplome: z.string().optional().or(z.literal("")),
         nb_heures: z.string().optional().or(z.literal("")),
@@ -82,7 +82,7 @@ const companySchema = z.object({
     contrat: z.object({
         type_contrat: z.string().min(1, "Type de contrat requis"),
         type_derogation: z.string().optional().or(z.literal("")),
-        date_debut: z.string().min(1, "Date de début requise"),
+        date_debut: z.string().optional().or(z.literal("")),
         date_fin: z.string().min(1, "Date de fin requise"),
         duree_hebdomadaire: z.string().min(1, "Durée requise").regex(/^\d+:[0-5]\d$/, "Format invalide (HH:mm)"),
         poste_occupe: z.string().optional().or(z.literal("")),
@@ -134,12 +134,12 @@ const companySchema = z.object({
         date_fin_2periode_4eme_annee: z.string().optional().or(z.literal(""))
     }).superRefine((data, ctx) => {
         // Validation Dates de base
-        if (data.date_debut && data.date_fin) {
-            if (new Date(data.date_debut) >= new Date(data.date_fin)) {
+        if (data.date_debut_execution && data.date_fin) {
+            if (new Date(data.date_debut_execution) >= new Date(data.date_fin)) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
-                    message: "La date de début doit être avant la date de fin",
-                    path: ["date_debut"]
+                    message: "La date de début d'exécution doit être avant la date de fin",
+                    path: ["date_debut_execution"]
                 });
             }
         }
@@ -235,13 +235,13 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
             adresse: draftCompany?.adresse || { num: "", voie: "", complement: "", code_postal: "", ville: "", telephone: "", email: "" },
             maitre_apprentissage: draftCompany?.maitre_apprentissage || { nom: "", prenom: "", date_naissance: "", fonction: "", diplome: "", experience: "", telephone: "", email: "" },
             opco: draftCompany?.opco || { nom: "" },
-            formation: draftCompany?.formation || { choisie: "", date_debut: "", date_fin: "", code_rncp: "", code_diplome: "", nb_heures: "", jours_cours: "" },
+            formation: draftCompany?.formation || { choisie: "", date_debut: "", date_fin: "", code_rncp: "", code_diplome: "", nb_heures: "", jours_cours: "" }, // date_debut/date_fin kept internal for nbMois calc
             cfa: draftCompany?.cfa || {
                 rush_school: "oui", entreprise: "non", denomination: "RUSH SCHOOL", uai: "0923033X",
                 siret: "918 707 704 00014", adresse: "6 rue des Bateliers", complement: "", code_postal: "92110", commune: "CLICHY"
             },
             contrat: draftCompany?.contrat || {
-                type_contrat: "", type_derogation: "", date_debut: "", date_fin: "", duree_hebdomadaire: "35:00", poste_occupe: "",
+                type_contrat: "", type_derogation: "", date_fin: "", duree_hebdomadaire: "35:00", poste_occupe: "",
                 lieu_execution: "",
                 pourcentage_smic1: null, pourcentage_smic1_2: null, montant_salaire_brut1: null,
                 pourcentage_smic2: null, pourcentage_smic2_2: null, montant_salaire_brut2: null,
@@ -361,7 +361,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         return age;
     };
 
-    const dateDebutGlobal = watch('contrat.date_debut');
+    const dateDebutGlobal = watch('contrat.date_debut_execution');
     const dateFinGlobal = watch('contrat.date_fin');
 
     const applyQuickFill = useCallback((startDate: string, endDate: string) => {
@@ -376,7 +376,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
 
         for (let i = 0; i < 4; i++) {
             const suffix = years[i];
-            
+
             if (currentStart > endOfContract) {
                 // Clear remaining
                 setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, "");
@@ -392,11 +392,11 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
             yearEnd.setDate(yearEnd.getDate() - 1);
 
             let bracketChanges = false;
-            
+
             if (birth && !isNaN(birth.getTime())) {
                 const ageAtStart = getRawAge(studentDateNaissance, currentStart.toISOString().split('T')[0]);
                 const ageAtEnd = getRawAge(studentDateNaissance, yearEnd.toISOString().split('T')[0]);
-                
+
                 if (ageAtStart !== null && ageAtEnd !== null && ageAtEnd > ageAtStart) {
                     let bdayYear = currentStart.getFullYear();
                     let bdayThisYear = new Date(bdayYear, birth.getMonth(), birth.getDate());
@@ -432,7 +432,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
 
                 const p2Start = new Date(p1End);
                 p2Start.setDate(p2Start.getDate() + 1);
-                
+
                 if (p2Start > endOfContract) {
                     setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
                     setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
@@ -525,7 +525,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
             y4p1: getRate(c?.date_debut_1periode_4eme_annee, 4),
             y4p2: getRate(c?.date_debut_2periode_4eme_annee, 4),
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [studentDateNaissance, stringifiedContratDates]);
 
     // Push computed SMIC values into form state whenever they change
@@ -583,7 +583,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
             // Trigger document generation automatically after completion
             if (studentRecordId) {
                 showToast("Génération automatique des documents (CERFA, Convention, Fiche)...", "info");
-                
+
                 Promise.allSettled([
                     api.generateFicheRenseignement(studentRecordId),
                     api.generateCerfa(studentRecordId),
@@ -864,12 +864,6 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                 </div>
                                 {errors.formation?.choisie && <p className="mt-1 text-rose-500 text-[10px] font-bold">{errors.formation.choisie.message}</p>}
                             </div>
-                            <div className="fiche-field">
-                                <Input label="Date de début" required type="date" error={errors.formation?.date_debut?.message} {...register('formation.date_debut')} />
-                            </div>
-                            <div className="fiche-field">
-                                <Input label="Date de fin" required type="date" error={errors.formation?.date_fin?.message} {...register('formation.date_fin')} />
-                            </div>
 
                             <div className="full-width mt-2">
                                 <div className="flex flex-wrap items-center gap-6 mb-4">
@@ -925,12 +919,6 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                         </div>
                         <div className="grid grid-cols-12 gap-5">
                             <div className="col-span-12 md:col-span-6">
-                                <Input label="Date de début du contrat" required type="date" error={errors.contrat?.date_debut?.message} {...register('contrat.date_debut')} />
-                            </div>
-                            <div className="col-span-12 md:col-span-6">
-                                <Input label="Date de fin du contrat" required type="date" error={errors.contrat?.date_fin?.message} {...register('contrat.date_fin')} />
-                            </div>
-                            <div className="col-span-12 md:col-span-6">
                                 <Select label="Type de contrat" required error={errors.contrat?.type_contrat?.message} {...register('contrat.type_contrat')} options={CONTRAT_TYPE_OPTIONS} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
@@ -985,19 +973,23 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                 <Input label="N° DECA ancien contrat" placeholder="Si applicable" {...register('contrat.numero_deca_ancien_contrat')} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
-                                <Input label="Date de conclusion" type="date" error={errors.contrat?.date_conclusion?.message} {...register('contrat.date_conclusion')} />
-                            </div>
-                            <div className="col-span-12 md:col-span-6">
-                                <Input label="Date début exécution" type="date" error={errors.contrat?.date_debut_execution?.message} {...register('contrat.date_debut_execution')} />
-                            </div>
-                            <div className="col-span-12 md:col-span-6">
-                                <Input label="Date avenant" type="date" {...register('contrat.date_avenant')} />
+                                <Select label="Travail sur machines dangereuses" required {...register('contrat.machines_dangereuses')} options={YES_NO_OPTIONS} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
                                 <Input label="Caisse de retraite" placeholder="Nom de la caisse" {...register('contrat.caisse_retraite')} />
                             </div>
+                            {/* Ordre des dates : conclusion → début exécution → avenant → fin */}
                             <div className="col-span-12 md:col-span-6">
-                                <Select label="Travail sur machines dangereuses" required {...register('contrat.machines_dangereuses')} options={YES_NO_OPTIONS} />
+                                <Input label="Date de conclusion" type="date" error={errors.contrat?.date_conclusion?.message} {...register('contrat.date_conclusion')} />
+                            </div>
+                            <div className="col-span-12 md:col-span-6">
+                                <Input label="Date de début d'exécution (= Date de début du contrat)" required type="date" error={errors.contrat?.date_debut_execution?.message} {...register('contrat.date_debut_execution')} />
+                            </div>
+                            <div className="col-span-12 md:col-span-6">
+                                <Input label="Si avenant, date avenant : ../../...." type="date" {...register('contrat.date_avenant')} />
+                            </div>
+                            <div className="col-span-12 md:col-span-6">
+                                <Input label="Date de fin du contrat" required type="date" error={errors.contrat?.date_fin?.message} {...register('contrat.date_fin')} />
                             </div>
 
                             {/* Simulateur de salaire multi-années indépendant */}
@@ -1038,63 +1030,63 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                         const isRight = idx % 2 === 1;
                                         const isBottom = idx >= 2;
 
-                                                                        const suffix = yearNum === 1 ? '1er' : yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme';
-                                                                        return (
-                                                                            <div
-                                                                                key={year}
-                                                                                className={`relative bg-white flex flex-col transition-colors hover:bg-[#f9f7ff] ${isRight ? 'border-l border-[#e5e0f5]' : ''} ${isBottom ? 'border-t border-[#e5e0f5]' : ''}`}
-                                                                            >
-                                                                                <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#f0ecfa]">
-                                                                                    <div className="flex items-center gap-3">
-                                                                                        <div className="w-8 h-8 rounded-xl bg-[#6d28d9] shrink-0 flex items-center justify-center">
-                                                                                            <span className="text-white text-[12px] font-bold">{year}</span>
-                                                                                        </div>
-                                                                                        <div>
-                                                                                            <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider leading-none mb-0.5">Année du contrat</div>
-                                                                                            <div className="text-[14px] font-bold text-slate-800 leading-none">{year}{year === "1" ? "ère" : "ème"} année</div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${results.p1 > 0 || (yearNum === 1 && results.p2 > 0) ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
-                                                                                        <CheckCircle2 size={12} />
-                                                                                        {results.p1 > 0 || (yearNum === 1 && results.p2 > 0) ? 'Configuré' : 'En attente'}
-                                                                                    </div>
-                                                                                </div>
+                                        const suffix = yearNum === 1 ? '1er' : yearNum === 2 ? '2eme' : yearNum === 3 ? '3eme' : '4eme';
+                                        return (
+                                            <div
+                                                key={year}
+                                                className={`relative bg-white flex flex-col transition-colors hover:bg-[#f9f7ff] ${isRight ? 'border-l border-[#e5e0f5]' : ''} ${isBottom ? 'border-t border-[#e5e0f5]' : ''}`}
+                                            >
+                                                <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#f0ecfa]">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-xl bg-[#6d28d9] shrink-0 flex items-center justify-center">
+                                                            <span className="text-white text-[12px] font-bold">{year}</span>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider leading-none mb-0.5">Année du contrat</div>
+                                                            <div className="text-[14px] font-bold text-slate-800 leading-none">{year}{year === "1" ? "ère" : "ème"} année</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${results.p1 > 0 || (yearNum === 1 && results.p2 > 0) ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                                                        <CheckCircle2 size={12} />
+                                                        {results.p1 > 0 || (yearNum === 1 && results.p2 > 0) ? 'Configuré' : 'En attente'}
+                                                    </div>
+                                                </div>
 
-                                                                                <div className="p-5 space-y-4 flex-grow">
-                                                                                    <div className="space-y-4">
-                                                                                        <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Calcul automatique des taux</div>
+                                                <div className="p-5 space-y-4 flex-grow">
+                                                    <div className="space-y-4">
+                                                        <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Calcul automatique des taux</div>
 
-                                                                                        {yearNum >= 1 && (
-                                                                                            <div className="rounded-xl border border-[#e5e0f5] bg-[#faf9fe] p-4 space-y-3">
-                                                                                                <div className="flex items-center justify-between">
-                                                                                                    <div className="flex items-center gap-2">
-                                                                                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-                                                                                                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">1ère Période</span>
-                                                                                                    </div>
-                                                                                                    <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-                                                                                                        {yearNum}{yearNum === 1 ? "ère" : "ème"} Année
-                                                                                                    </span>
-                                                                                                </div>
-                                                                                                <div className="grid grid-cols-2 gap-2">
-                                                                                                    <Input
-                                                                                                        type="date"
-                                                                                                        label="Début"
-                                                                                                        {...register(`contrat.date_debut_1periode_${suffix}_annee` as any)}
-                                                                                                    />
-                                                                                                    <Input
-                                                                                                        type="date"
-                                                                                                        label="Fin"
-                                                                                                        {...register(`contrat.date_fin_1periode_${suffix}_annee` as any)}
-                                                                                                    />
-                                                                                                </div>
-                                                                                                <div className="flex justify-between items-center px-1 mt-1">
-                                                                                                    <span className="text-[10px] font-medium text-slate-400">
-                                                                                                        {getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any)) !== null ? `Âge : ${getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any))} ans` : ""}
-                                                                                                    </span>
-                                                                                                    {results.p1 > 0 && <div className="text-[12px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">{results.p1}% SMIC</div>}
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        )}
+                                                        {yearNum >= 1 && (
+                                                            <div className="rounded-xl border border-[#e5e0f5] bg-[#faf9fe] p-4 space-y-3">
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+                                                                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">1ère Période</span>
+                                                                    </div>
+                                                                    <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                                                                        {yearNum}{yearNum === 1 ? "ère" : "ème"} Année
+                                                                    </span>
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    <Input
+                                                                        type="date"
+                                                                        label="Début"
+                                                                        {...register(`contrat.date_debut_1periode_${suffix}_annee` as any)}
+                                                                    />
+                                                                    <Input
+                                                                        type="date"
+                                                                        label="Fin"
+                                                                        {...register(`contrat.date_fin_1periode_${suffix}_annee` as any)}
+                                                                    />
+                                                                </div>
+                                                                <div className="flex justify-between items-center px-1 mt-1">
+                                                                    <span className="text-[10px] font-medium text-slate-400">
+                                                                        {getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any)) !== null ? `Âge : ${getRawAge(studentDateNaissance, watch(`contrat.date_debut_1periode_${suffix}_annee` as any))} ans` : ""}
+                                                                    </span>
+                                                                    {results.p1 > 0 && <div className="text-[12px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">{results.p1}% SMIC</div>}
+                                                                </div>
+                                                            </div>
+                                                        )}
 
                                                         <div className="rounded-xl border border-[#6d28d9]/15 bg-[#6d28d9]/5 p-4 space-y-3">
                                                             <div className="flex items-center justify-between">
