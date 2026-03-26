@@ -21,7 +21,8 @@ import {
     FileCheck,
     RefreshCw,
     Building2,
-    History
+    History,
+    Upload
 } from 'lucide-react';
 
 import Button from '../ui/Button';
@@ -83,6 +84,36 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
     const [activeTab, setActiveTab] = useState<'personal' | 'school' | 'documents' | 'history'>('personal');
     const [history, setHistory] = useState<any[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
+    const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
+    const [uploadedDocs, setUploadedDocs] = useState<Record<string, boolean>>({});
+
+    // Sync uploaded state from candidate prop
+    useEffect(() => {
+        if (candidate) {
+            setUploadedDocs({
+                cv: !!candidate.has_cv,
+                cni: !!candidate.has_cni,
+                lettre: !!candidate.has_lettre_motivation,
+                vitale: !!candidate.has_vitale,
+                diplome: !!candidate.has_diplome,
+            });
+        }
+    }, [candidate]);
+
+    const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>, docId: string) => {
+        const file = e.target.files?.[0];
+        if (!file || !candidate?.record_id) return;
+        setUploadingDoc(docId);
+        try {
+            await api.uploadDocument(candidate.record_id, docId, file);
+            setUploadedDocs(prev => ({ ...prev, [docId]: true }));
+        } catch (err) {
+            console.error('Upload failed:', err);
+        } finally {
+            setUploadingDoc(null);
+            e.target.value = '';
+        }
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -398,13 +429,14 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                                 { key: 'vitale', label: 'Carte Vitale', hasKey: 'has_vitale', urlKey: 'vitale_url', nameKey: 'vitale_name' },
                                                 { key: 'diplome', label: 'Dernier diplôme', hasKey: 'has_diplome', urlKey: 'diplome_url', nameKey: 'diplome_name' },
                                             ].map(({ key, label, hasKey, urlKey, nameKey }) => {
-                                                const uploaded = !!(candidate as any)[hasKey];
+                                                const uploaded = uploadedDocs[key] || !!(candidate as any)[hasKey];
                                                 const url = (candidate as any)[urlKey];
                                                 const name = (candidate as any)[nameKey];
+                                                const isUploading = uploadingDoc === key;
                                                 return (
-                                                    <div key={key} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-[4px] hover:border-rose-200 transition-all group">
+                                                    <div key={key} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-[#6d28d9]/20 transition-all group">
                                                         <div className="flex items-center gap-3">
-                                                            <div className={`w-9 h-9 rounded-[4px] flex items-center justify-center flex-shrink-0 ${uploaded ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-300'}`}>
+                                                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${uploaded ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-300'}`}>
                                                                 {uploaded ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
                                                             </div>
                                                             <div>
@@ -418,16 +450,38 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        {uploaded && url && (
-                                                            <a
-                                                                href={url}
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-400 hover:bg-rose-500 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100"
-                                                            >
-                                                                <Download size={13} /> Voir
-                                                            </a>
-                                                        )}
+                                                        <div className="flex items-center gap-2">
+                                                            {/* Upload / Replace button */}
+                                                            <label className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer transition-all text-[10px] font-bold uppercase tracking-wide ${isUploading
+                                                                ? 'bg-slate-100 text-slate-400 cursor-wait'
+                                                                : uploaded
+                                                                    ? 'bg-[#6d28d9]/5 text-[#6d28d9] hover:bg-[#6d28d9] hover:text-white'
+                                                                    : 'bg-[#6d28d9]/10 text-[#6d28d9] hover:bg-[#6d28d9] hover:text-white'
+                                                            }`}>
+                                                                <input
+                                                                    type="file"
+                                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                                                    disabled={isUploading}
+                                                                    onChange={(e) => handleDocUpload(e, key)}
+                                                                />
+                                                                {isUploading
+                                                                    ? <><Loader2 size={12} className="animate-spin" /> Envoi...</>
+                                                                    : <><Upload size={12} /> {uploaded ? 'Remplacer' : 'Ajouter'}</>
+                                                                }
+                                                            </label>
+                                                            {/* Download button */}
+                                                            {uploaded && url && (
+                                                                <a
+                                                                    href={url}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 text-slate-400 hover:bg-emerald-500 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide"
+                                                                >
+                                                                    <Download size={13} /> Voir
+                                                                </a>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 );
                                             })}
