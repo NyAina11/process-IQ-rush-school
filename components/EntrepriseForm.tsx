@@ -482,8 +482,9 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         }
     }, [setValue, studentDateNaissance]);
 
-    // Auto-fill is triggered by button click only, not automatically
-    // This prevents overwriting existing period data for renewals/3rd year students
+    useEffect(() => {
+        applyQuickFill(dateDebutGlobal, dateFinGlobal);
+    }, [dateDebutGlobal, dateFinGlobal, applyQuickFill]);
 
     // Helper to get percentage from bracket and year
     const getRateFromBracket = (bracket: string | null, year: number): number => {
@@ -1008,30 +1009,16 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                if (dateDebutGlobal && dateFinGlobal) {
-                                                    applyQuickFill(dateDebutGlobal, dateFinGlobal);
-                                                }
-                                            }}
-                                            disabled={!dateDebutGlobal || !dateFinGlobal}
-                                            className="px-3 py-1.5 rounded-lg bg-white/15 text-white text-[10px] font-semibold uppercase tracking-wider hover:bg-white/25 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                                        >
-                                            Remplir auto
-                                        </button>
-                                        <div className="flex items-center gap-1.5">
-                                            {["1", "2", "3", "4"].map(y => {
-                                                const p1Value = (computedPeriods as any)[`y${y}p1`];
-                                                return (
-                                                    <div key={y} className={`w-2.5 h-2.5 rounded-full transition-colors ${p1Value > 0 || (y === "1" && computedPeriods.y1p2 > 0) ? 'bg-emerald-400' : 'bg-white/20'}`} />
-                                                );
-                                            })}
-                                            <span className="text-white/50 text-[11px] font-medium ml-1">
-                                                {["1", "2", "3", "4"].filter(y => (y === "1" ? computedPeriods.y1p2 : (computedPeriods as any)[`y${y}p1`]) > 0).length}/4 configurées
-                                            </span>
-                                        </div>
+                                    <div className="flex items-center gap-1.5">
+                                        {["1", "2", "3", "4"].map(y => {
+                                            const p1Value = (computedPeriods as any)[`y${y}p1`];
+                                            return (
+                                                <div key={y} className={`w-2.5 h-2.5 rounded-full transition-colors ${p1Value > 0 || (y === "1" && computedPeriods.y1p2 > 0) ? 'bg-emerald-400' : 'bg-white/20'}`} />
+                                            );
+                                        })}
+                                        <span className="text-white/50 text-[11px] font-medium ml-1">
+                                            {["1", "2", "3", "4"].filter(y => (y === "1" ? computedPeriods.y1p2 : (computedPeriods as any)[`y${y}p1`]) > 0).length}/4 configurées
+                                        </span>
                                     </div>
                                 </div>
 
