@@ -223,18 +223,38 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
 
     const { execute: updateCandidate, loading: isSaving } = useApi(api.updateCandidate, {
         successMessage: "Candidat mis à jour avec succès",
-        onSuccess: () => {
+        onSuccess: (response: any) => {
             fetchStudents();
             setIsModalOpen(false);
+
+            // Automate document regeneration after modification
+            const recordId = selectedCandidate?.id || response?.record_id || response?.id;
+            if (recordId) {
+                console.log('🔄 Triggering document regeneration for:', recordId);
+                api.generateCerfa(recordId).catch(err => console.error("CERFA regeneration failed:", err));
+                api.generateFicheRenseignement(recordId).catch(err => console.error("Fiche regeneration failed:", err));
+                api.generateConventionApprentissage(recordId).catch(err => console.error("Convention regeneration failed:", err));
+                api.generateCertificatScolarite(recordId).catch(err => console.error("Certificat regeneration failed:", err));
+            }
         }
     });
 
 
     const { execute: updateCompany, loading: isSavingCompany } = useApi(api.updateCompany, {
         successMessage: "Entreprise mise à jour avec succès",
-        onSuccess: () => {
+        onSuccess: (response: any) => {
             fetchStudents();
             setIsCompanyModalOpen(false);
+
+            // Automate document regeneration after modification
+            // For company update, we take candidate ID from the selected candidate context
+            const recordId = selectedCandidate?.id || response?.record_id_etudiant;
+            if (recordId) {
+                console.log('🔄 Triggering document regeneration (Company update) for:', recordId);
+                api.generateCerfa(recordId).catch(err => console.error("CERFA regeneration failed:", err));
+                api.generateFicheRenseignement(recordId).catch(err => console.error("Fiche regeneration failed:", err));
+                api.generateConventionApprentissage(recordId).catch(err => console.error("Convention regeneration failed:", err));
+            }
         }
     });
 

@@ -178,6 +178,13 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
             const userRole = localStorage.getItem('userRole') || 'admission';
             await api.updateCompany(studentId, data, selectedCompany, userRole);
             showToast("Entreprise mise à jour", "success");
+            
+            // Automate document regeneration after modification
+            console.log('🔄 Triggering document regeneration (RH Company update) for:', studentId);
+            api.generateCerfa(studentId).catch(err => console.error("CERFA regeneration failed:", err));
+            api.generateFicheRenseignement(studentId).catch(err => console.error("Fiche regeneration failed:", err));
+            api.generateConventionApprentissage(studentId).catch(err => console.error("Convention regeneration failed:", err));
+
             fetchCompanies(); setIsViewModalOpen(false);
         } catch { showToast("Erreur lors de la mise à jour.", "error"); }
         finally { setIsSavingCompany(false); }

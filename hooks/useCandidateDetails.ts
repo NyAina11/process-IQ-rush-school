@@ -19,9 +19,19 @@ export const useCandidateDetails = (candidates: any[], onUpdate: () => void) => 
 
     const { execute: updateApi, loading: isSaving } = useApi(api.updateCandidate, {
         successMessage: "Candidat mis à jour avec succès",
-        onSuccess: () => {
+        onSuccess: (response: any) => {
             onUpdate();
             setIsModalOpen(false);
+
+            // Automate document regeneration after modification
+            const recordId = selectedCandidate?.id || response?.record_id || response?.id;
+            if (recordId) {
+                console.log('🔄 Triggering document regeneration for:', recordId);
+                api.generateCerfa(recordId).catch(err => console.error("CERFA regeneration failed:", err));
+                api.generateFicheRenseignement(recordId).catch(err => console.error("Fiche regeneration failed:", err));
+                api.generateConventionApprentissage(recordId).catch(err => console.error("Convention regeneration failed:", err));
+                api.generateCertificatScolarite(recordId).catch(err => console.error("Certificat regeneration failed:", err));
+            }
         }
     });
 
