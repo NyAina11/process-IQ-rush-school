@@ -10,6 +10,7 @@ import Button from './ui/Button';
 
 import Input from './ui/Input';
 import Select from './ui/Select';
+import PhoneInput from './ui/PhoneInput';
 import { formatPhone, formatSIRET } from '../utils/formatters';
 import {
     EMPLOYER_TYPE_OPTIONS,
@@ -43,7 +44,7 @@ const companySchema = z.object({
         complement: z.string().optional().or(z.literal("")),
         code_postal: z.string().regex(/^[0-9]{5}$/, "Le code postal doit contenir 5 chiffres"),
         ville: z.string().min(1, "La ville est requise"),
-        telephone: z.string().regex(/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/, "Téléphone invalide"),
+        telephone: z.string().min(1, "Téléphone requis"),
         email: z.string().email("L'adresse e-mail est invalide")
     }),
     maitre_apprentissage: z.object({
@@ -53,7 +54,7 @@ const companySchema = z.object({
         fonction: z.string().optional().or(z.literal("")),
         diplome: z.string().min(1, "Veuillez sélectionner le diplôme"),
         experience: z.string().optional().or(z.literal("")),
-        telephone: z.string().regex(/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/, "Téléphone invalide").optional().or(z.literal("")),
+        telephone: z.string().optional().or(z.literal("")),
         email: z.string().email("L'adresse e-mail est invalide").optional().or(z.literal(""))
     }),
     opco: z.object({
@@ -229,6 +230,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         handleSubmit,
         watch,
         setValue,
+        trigger,
         formState: { errors }
     } = useForm<CompanyFormValues>({
         resolver: zodResolver(companySchema),
@@ -768,11 +770,14 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                 <Input label="Ville" required placeholder="Ville" error={errors.adresse?.ville?.message} {...register('adresse.ville')} />
                             </div>
                             <div className="fiche-field">
-                                <Input label="Téléphone" required type="tel" placeholder="Téléphone entreprise" error={errors.adresse?.telephone?.message} {...register('adresse.telephone', {
-                                    onChange: (e) => {
-                                        e.target.value = formatPhone(e.target.value);
-                                    }
-                                })} />
+                                <PhoneInput
+                                    label="Téléphone"
+                                    required
+                                    error={errors.adresse?.telephone?.message}
+                                    value={watch('adresse.telephone')}
+                                    onChange={(val) => setValue('adresse.telephone', val, { shouldValidate: true })}
+                                    onBlur={() => trigger('adresse.telephone')}
+                                />
                             </div>
                             <div className="fiche-field">
                                 <Input label="Email" required type="email" placeholder="Email de contact" error={errors.adresse?.email?.message} {...register('adresse.email')} />
@@ -812,11 +817,13 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                 <Input label="Années d'expérience" type="number" placeholder="Années" {...register('maitre_apprentissage.experience')} />
                             </div>
                             <div className="fiche-field">
-                                <Input label="Téléphone" type="tel" placeholder="Téléphone" error={errors.maitre_apprentissage?.telephone?.message} {...register('maitre_apprentissage.telephone', {
-                                    onChange: (e) => {
-                                        e.target.value = formatPhone(e.target.value);
-                                    }
-                                })} />
+                                <PhoneInput
+                                    label="Téléphone"
+                                    error={errors.maitre_apprentissage?.telephone?.message}
+                                    value={watch('maitre_apprentissage.telephone')}
+                                    onChange={(val) => setValue('maitre_apprentissage.telephone', val, { shouldValidate: true })}
+                                    onBlur={() => trigger('maitre_apprentissage.telephone')}
+                                />
                             </div>
                             <div className="fiche-field">
                                 <Input label="Email" type="email" placeholder="Email" error={errors.maitre_apprentissage?.email?.message} {...register('maitre_apprentissage.email')} />
