@@ -631,7 +631,13 @@ export const api = {
     let name = 'Admin User';
 
     const emailLower = email.toLowerCase();
-    if (emailLower.includes('superadmin')) {
+    if (emailLower === 'responsable1@rush.fr' && pass === 'responsable1') {
+      role = 'admission';
+      name = 'Responsable 1';
+    } else if (emailLower === 'responsable2@rush.fr' && pass === 'responsable2') {
+      role = 'admission';
+      name = 'Responsable 2';
+    } else if (emailLower.includes('superadmin')) {
       role = 'super_admin';
       name = 'Super Administrateur';
     } else if (emailLower.includes('rh')) {
@@ -1528,7 +1534,45 @@ export const api = {
 
     const json = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(json?.error || 'Impossible de mettre � jour le statut');
+      throw new Error(json?.error || 'Impossible de mettre à jour le statut');
+    }
+    return json;
+  },
+
+  async updateBugReport(id: string, payload: {
+    title?: string;
+    description?: string;
+    module?: 'admission' | 'rh' | 'commercial' | 'other';
+    priority?: 'low' | 'medium' | 'high' | 'critical';
+    screenshotUrl?: string;
+  }): Promise<any> {
+    const response = await fetch(`${SUPPORT_URL}/bugs/${id}`, {
+      method: 'PATCH',
+      headers: withAuthHeaders({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      }),
+      body: JSON.stringify(payload),
+    });
+
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(json?.error || 'Impossible de mettre à jour le ticket');
+    }
+    return json;
+  },
+
+  async deleteBugReport(id: string): Promise<any> {
+    const response = await fetch(`${SUPPORT_URL}/bugs/${id}`, {
+      method: 'DELETE',
+      headers: withAuthHeaders({
+        Accept: 'application/json',
+      }),
+    });
+
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(json?.error || 'Impossible de supprimer le ticket');
     }
     return json;
   }
