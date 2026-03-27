@@ -42,18 +42,18 @@ interface EditingRow {
   originalScreenshotUrl?: string;
 }
 
-const statusLabel: Record<BugStatus, string> = { new: 'Nouveau', in_progress: 'En cours', resolved: 'Résolu' };
+const statusLabel: Record<BugStatus, string> = { new: 'NOUVEAU', in_progress: 'EN COURS', resolved: 'RÉSOLU' };
 const statusStyle: Record<BugStatus, string> = {
-  new: 'bg-rose-50 text-rose-600 border-rose-200',
-  in_progress: 'bg-amber-50 text-amber-600 border-amber-200',
-  resolved: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+  new: 'bg-rose-500 text-white border-rose-500',
+  in_progress: 'bg-orange-500 text-white border-orange-500',
+  resolved: 'bg-emerald-500 text-white border-emerald-500',
 };
 const priorityLabel: Record<BugPriority, string> = { low: 'Faible', medium: 'Moyenne', high: 'Haute', critical: 'Critique' };
 const priorityDot: Record<BugPriority, string> = { low: 'bg-slate-300', medium: 'bg-blue-400', high: 'bg-orange-400', critical: 'bg-rose-500' };
 
-const CELL = "px-4 py-3 border-b border-[#ece7ff] text-[13px]";
-const CELL_INPUT = "w-full px-2.5 py-1.5 bg-white border border-[#e5e0f5] rounded-lg text-[13px] outline-none focus:border-[#6d28d9]/40 transition-colors";
-const CELL_SELECT = "w-full px-2 py-1.5 bg-white border border-[#e5e0f5] rounded-lg text-[12px] outline-none focus:border-[#6d28d9]/40 appearance-none cursor-pointer";
+const CELL = "px-6 py-4 border-b border-[#ece7ff] border-r border-r-gray-200 text-[15px]";
+const CELL_INPUT = "w-full px-3 py-2 bg-white border border-[#e5e0f5] rounded-lg text-[15px] outline-none focus:border-[#6d28d9]/40 transition-colors";
+const CELL_SELECT = "w-full px-3 py-2 bg-white border border-[#e5e0f5] rounded-lg text-[14px] outline-none focus:border-[#6d28d9]/40 appearance-none cursor-pointer";
 
 const SupportView: React.FC = () => {
   const { showToast } = useAppStore();
@@ -342,34 +342,20 @@ const SupportView: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[#faf8ff]">
-                <th className="px-4 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[90px]">Date</th>
-                <th className="px-4 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] min-w-[180px]">Titre</th>
-                <th className="px-4 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] min-w-[180px]">Description</th>
-                <th className="px-4 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[100px]">Module</th>
-                <th className="px-4 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[100px]">Priorité</th>
-                <th className="px-4 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[110px]">Statut</th>
-                <th className="px-4 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[120px]">Signalé par</th>
-                <th className="px-4 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[50px]">Capture</th>
-                <th className="px-4 py-2.5 text-center text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#ece7ff] w-[100px]">Actions</th>
+              <tr className="bg-[#faf8ff] border-b-2 border-gray-200">
+                <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600 border-b border-[#ece7ff] border-r border-r-gray-200 w-[120px]">DATE</th>
+                <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600 border-b border-[#ece7ff] border-r border-r-gray-200 min-w-[200px]">TITRE</th>
+                <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600 border-b border-[#ece7ff] border-r border-r-gray-200 min-w-[220px]">DESCRIPTION</th>
+                <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600 border-b border-[#ece7ff] border-r border-r-gray-200 w-[120px]">MODULE</th>
+                <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600 border-b border-[#ece7ff] border-r border-r-gray-200 w-[120px]">PRIORITÉ</th>
+                <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600 border-b border-[#ece7ff] border-r border-r-gray-200 w-[130px]">STATUT</th>
+                <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600 border-b border-[#ece7ff] border-r border-r-gray-200 w-[150px]">SIGNALÉ PAR</th>
+                <th className="px-6 py-4 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600 border-b border-[#ece7ff] border-r border-r-gray-200 w-[80px]">CAPTURE</th>
+                <th className="px-6 py-4 text-center text-[12px] font-bold uppercase tracking-wider text-slate-600 border-b border-[#ece7ff] w-[120px]">ACTIONS</th>
               </tr>
             </thead>
             <tbody>
 
-              {/* ── ADD NEW TICKET ROW ── */}
-              {!newRow && !editingRow && (
-                <tr className="border-b border-[#f3f0ff]">
-                  <td colSpan={9} className="px-4 py-3">
-                    <button
-                      onClick={handleAddRow}
-                      className="w-full flex items-center justify-center gap-2 py-2 text-[#6d28d9] hover:bg-[#f5f3ff] rounded-lg transition-colors border-2 border-dashed border-[#e5e0f5] hover:border-[#6d28d9]/30"
-                    >
-                      <Plus size={16} />
-                      <span className="text-[13px] font-semibold">Nouveau ticket</span>
-                    </button>
-                  </td>
-                </tr>
-              )}
 
               {/* ── NEW ROW (inline) ── */}
               {newRow && (
@@ -421,12 +407,12 @@ const SupportView: React.FC = () => {
                     </select>
                   </td>
                   <td className={CELL}>
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold border bg-rose-50 text-rose-600 border-rose-200">
-                      <AlertCircle size={10} /> Nouveau
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-bold bg-rose-500 text-white border-rose-500">
+                      <AlertCircle size={12} /> NOUVEAU
                     </span>
                   </td>
                   <td className={CELL}>
-                    <span className="text-[11px] font-semibold text-slate-600">{userName || 'Moi'}</span>
+                    <span className="text-[14px] font-bold text-slate-700">{userName || 'Moi'}</span>
                   </td>
                   <td className={CELL}>
                     <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp" onChange={handleScreenshot} className="hidden" />
@@ -502,10 +488,10 @@ const SupportView: React.FC = () => {
                     >
                       {/* Date */}
                       <td className={CELL}>
-                        <div className="text-[11px] font-semibold text-slate-600">
+                        <div className="text-[14px] font-bold text-slate-700">
                           {new Date(bug.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
                         </div>
-                        <div className="text-[9px] text-slate-400 font-mono">
+                        <div className="text-[12px] text-slate-500 font-mono">
                           {new Date(bug.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </td>
@@ -522,7 +508,7 @@ const SupportView: React.FC = () => {
                             autoFocus
                           />
                         ) : (
-                          <span className="text-[13px] font-bold text-[#1e1b2e] cursor-pointer">{bug.title}</span>
+                          <span className="text-[15px] font-bold text-[#1e1b2e] cursor-pointer">{bug.title}</span>
                         )}
                       </td>
 
@@ -537,7 +523,7 @@ const SupportView: React.FC = () => {
                             className={CELL_INPUT}
                           />
                         ) : (
-                          <span className="text-[12px] text-slate-500 line-clamp-2 cursor-pointer">{bug.description || '—'}</span>
+                          <span className="text-[14px] text-slate-600 line-clamp-2 cursor-pointer">{bug.description || '—'}</span>
                         )}
                       </td>
 
@@ -555,8 +541,8 @@ const SupportView: React.FC = () => {
                             <option value="other">Autre</option>
                           </select>
                         ) : (
-                          <span className="text-[10px] font-semibold text-slate-500 bg-[#f5f3ff] px-2 py-0.5 rounded border border-[#ece7ff] cursor-pointer">
-                            {bug.module === 'admission' ? 'Admission' : bug.module === 'rh' ? 'RH' : bug.module === 'commercial' ? 'Commercial' : 'Autre'}
+                          <span className="text-[12px] font-bold text-slate-700 bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 cursor-pointer">
+                            {bug.module === 'admission' ? 'ADMISSION' : bug.module === 'rh' ? 'RH' : bug.module === 'commercial' ? 'COMMERCIAL' : 'AUTRE'}
                           </span>
                         )}
                       </td>
@@ -575,9 +561,9 @@ const SupportView: React.FC = () => {
                             <option value="critical">Critique</option>
                           </select>
                         ) : (
-                          <div className="flex items-center gap-1.5 cursor-pointer">
-                            <div className={`w-2 h-2 rounded-full ${priorityDot[bug.priority]}`} />
-                            <span className="text-[11px] font-medium text-slate-600">{priorityLabel[bug.priority]}</span>
+                          <div className="flex items-center gap-2 cursor-pointer">
+                            <div className={`w-3 h-3 rounded-full ${priorityDot[bug.priority]}`} />
+                            <span className="text-[13px] font-semibold text-slate-700">{priorityLabel[bug.priority]}</span>
                           </div>
                         )}
                       </td>
@@ -597,10 +583,10 @@ const SupportView: React.FC = () => {
                             </select>
                           </div>
                         ) : (
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold border ${statusStyle[bug.status]}`}>
-                            {bug.status === 'new' && <AlertCircle size={10} />}
-                            {bug.status === 'in_progress' && <Clock size={10} />}
-                            {bug.status === 'resolved' && <CheckCircle2 size={10} />}
+                          <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-bold border ${statusStyle[bug.status]}`}>
+                            {bug.status === 'new' && <AlertCircle size={12} />}
+                            {bug.status === 'in_progress' && <Clock size={12} />}
+                            {bug.status === 'resolved' && <CheckCircle2 size={12} />}
                             {statusLabel[bug.status]}
                           </span>
                         )}
@@ -608,8 +594,8 @@ const SupportView: React.FC = () => {
 
                       {/* Reporter */}
                       <td className={CELL}>
-                        <div className="text-[11px] font-semibold text-slate-600">{bug.reporterName || 'Utilisateur'}</div>
-                        <div className="text-[9px] text-slate-400">{bug.reporterEmail || bug.reporterRole}</div>
+                        <div className="text-[14px] font-bold text-slate-700">{bug.reporterName || 'Utilisateur'}</div>
+                        <div className="text-[12px] text-slate-500">{bug.reporterEmail || bug.reporterRole}</div>
                       </td>
 
                       {/* Screenshot */}
@@ -654,42 +640,42 @@ const SupportView: React.FC = () => {
                       {/* Actions */}
                       <td className={`${CELL} text-center`}>
                         {isEditing ? (
-                          <div className="flex items-center justify-center gap-1">
+                          <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={saveEditing}
                               disabled={isSaving}
-                              className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#6d28d9] text-white hover:bg-[#5b21b6] transition-colors disabled:opacity-50"
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
                               title="Sauvegarder (Enter)"
                             >
-                              {isSaving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+                              {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                             </button>
                             <button
                               onClick={cancelEditing}
                               disabled={isSaving}
-                              className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors disabled:opacity-50"
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-500 text-white hover:bg-gray-600 transition-colors disabled:opacity-50"
                               title="Annuler (Escape)"
                             >
-                              <X size={12} />
+                              <X size={14} />
                             </button>
                           </div>
                         ) : (
-                          <div className="flex items-center justify-center gap-1">
+                          <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => startEditing(bug)}
                               disabled={isDeleting}
-                              className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-[#6d28d9] hover:bg-[#f5f3ff] transition-colors disabled:opacity-50"
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors disabled:opacity-50"
                               title="Éditer (double-clic)"
                             >
-                              <Edit3 size={12} />
+                              <Edit3 size={14} />
                             </button>
                             {isSuperAdmin && (
                               <button
                                 onClick={() => deleteBug(bug._id)}
                                 disabled={isDeleting}
-                                className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors disabled:opacity-50"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-500 text-white hover:bg-rose-600 transition-colors disabled:opacity-50"
                                 title="Supprimer"
                               >
-                                {isDeleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                                {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                               </button>
                             )}
                           </div>
@@ -698,6 +684,21 @@ const SupportView: React.FC = () => {
                     </tr>
                   );
                 })
+              )}
+
+              {/* ── ADD NEW TICKET ROW (BOTTOM) ── */}
+              {!newRow && !editingRow && (
+                <tr>
+                  <td colSpan={9} className="px-6 py-4 border-t border-gray-200">
+                    <button
+                      onClick={handleAddRow}
+                      className="w-full flex items-center justify-center gap-2 py-3 text-[#6d28d9] hover:bg-[#f5f3ff] rounded-lg transition-colors border-2 border-dashed border-[#e5e0f5] hover:border-[#6d28d9]/30"
+                    >
+                      <Plus size={18} />
+                      <span className="text-[15px] font-semibold">Nouveau ticket</span>
+                    </button>
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
