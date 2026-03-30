@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       proxy: {
         '/api': {
-          target: 'https://processiqfilegenerator.onrender.com',
+          target: process.env.VITE_BACKEND_URL || 'http://localhost:8001',
           changeOrigin: true,
         }
       }

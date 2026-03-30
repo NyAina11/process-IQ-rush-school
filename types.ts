@@ -207,6 +207,8 @@ export interface CompanyFormData {
     date_avenant?: string;
 
     // Dates pour les périodes de rémunération (Frontend model)
+    date_debut_1periode_1er_annee?: string;
+    date_fin_1periode_1er_annee?: string;
     date_debut_2periode_1er_annee?: string;
     date_fin_2periode_1er_annee?: string;
     date_debut_1periode_2eme_annee?: string;
