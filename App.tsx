@@ -93,10 +93,10 @@ const App = () => {
         </Suspense>
       )}
 
-      <div className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${!isStandalonePage ? 'md:ml-[260px]' : ''}`}>
+      <div className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${!isStandalonePage ? 'md:ml-[240px]' : ''}`}>
         {!isStandalonePage && <Header toggleSidebar={toggleSidebar} />}
 
-        <main className={`${!isStandalonePage ? 'flex-1 overflow-y-auto p-8 md:p-10' : 'h-screen'}`}>
+        <main className={`${!isStandalonePage ? 'flex-1 overflow-y-auto p-6' : 'h-screen'}`} style={!isStandalonePage ? { background: '#f0f2f8' } : undefined}>
           <Suspense fallback={null}>
             <Routes>
               <Route path="/" element={<LandingPage />} />
