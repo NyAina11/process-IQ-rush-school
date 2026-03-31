@@ -21,7 +21,8 @@ import {
     FileCheck,
     RefreshCw,
     Building2,
-    History
+    History,
+    Upload
 } from 'lucide-react';
 
 import Button from '../ui/Button';
@@ -83,6 +84,36 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
     const [activeTab, setActiveTab] = useState<'personal' | 'school' | 'documents' | 'history'>('personal');
     const [history, setHistory] = useState<any[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
+    const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
+    const [uploadedDocs, setUploadedDocs] = useState<Record<string, boolean>>({});
+
+    // Sync uploaded state from candidate prop
+    useEffect(() => {
+        if (candidate) {
+            setUploadedDocs({
+                cv: !!candidate.has_cv,
+                cni: !!candidate.has_cni,
+                lettre: !!candidate.has_lettre_motivation,
+                vitale: !!candidate.has_vitale,
+                diplome: !!candidate.has_diplome,
+            });
+        }
+    }, [candidate]);
+
+    const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>, docId: string) => {
+        const file = e.target.files?.[0];
+        if (!file || !candidate?.record_id) return;
+        setUploadingDoc(docId);
+        try {
+            await api.uploadDocument(candidate.record_id, docId, file);
+            setUploadedDocs(prev => ({ ...prev, [docId]: true }));
+        } catch (err) {
+            console.error('Upload failed:', err);
+        } finally {
+            setUploadingDoc(null);
+            e.target.value = '';
+        }
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -180,8 +211,8 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                 <div className="space-y-8">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <Input label="Prénom" value={editForm?.prenom || ""} onChange={(e) => setEditForm({ ...editForm, prenom: e.target.value })} />
-                                        <Input label="Nom de naissance" value={editForm?.nom_naissance || ""} onChange={(e) => setEditForm({ ...editForm, nom_naissance: e.target.value })} />
-                                        <Input label="Nom d'usage" value={editForm?.nom_usage || ""} onChange={(e) => setEditForm({ ...editForm, nom_usage: e.target.value })} />
+                                        <Input label="Nom de naissance" value={editForm?.nom_naissance || ""} onChange={(e) => setEditForm({ ...editForm, nom_naissance: e.target.value.toUpperCase() })} />
+                                        <Input label="Nom d'usage" value={editForm?.nom_usage || ""} onChange={(e) => setEditForm({ ...editForm, nom_usage: e.target.value.toUpperCase() })} />
                                         <Select
                                             label="Sexe"
                                             value={editForm?.sexe || ""}
@@ -209,6 +240,9 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                             <Input label="N°" value={editForm?.num_residence || ""} onChange={(e) => setEditForm({ ...editForm, num_residence: e.target.value })} />
                                             <Input label="Voie (Rue)" value={editForm?.rue_residence || ""} onChange={(e) => setEditForm({ ...editForm, rue_residence: e.target.value })} />
                                         </div>
+                                        <div className="md:col-span-2">
+                                            <Input label="Complément d'adresse" value={editForm?.complement_residence || ""} onChange={(e) => setEditForm({ ...editForm, complement_residence: e.target.value })} />
+                                        </div>
                                         <Input label="Code postal" value={editForm?.code_postal || ""} onChange={(e) => setEditForm({ ...editForm, code_postal: e.target.value })} />
                                         <Input label="Ville" value={editForm?.ville || ""} onChange={(e) => setEditForm({ ...editForm, ville: e.target.value })} />
                                         <Input label="Email" type="email" value={editForm?.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
@@ -219,22 +253,40 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                     <div className="space-y-4">
                                         <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Représentant légal 1</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <Input label="Nom (Rep 1)" value={editForm?.nom_representant_legal || ""} onChange={(e) => setEditForm({ ...editForm, nom_representant_legal: e.target.value })} />
+                                            <Input label="Nom (Rep 1)" value={editForm?.nom_representant_legal || ""} onChange={(e) => setEditForm({ ...editForm, nom_representant_legal: e.target.value.toUpperCase() })} />
                                             <Input label="Prénom (Rep 1)" value={editForm?.prenom_representant_legal || ""} onChange={(e) => setEditForm({ ...editForm, prenom_representant_legal: e.target.value })} />
                                             <Input label="Lien (Rep 1)" value={editForm?.lien_parente_legal || ""} onChange={(e) => setEditForm({ ...editForm, lien_parente_legal: e.target.value })} />
                                             <Input label="Téléphone (Rep 1)" value={editForm?.numero_legal || ""} onChange={(e) => setEditForm({ ...editForm, numero_legal: e.target.value })} />
                                             <Input label="Email (Rep 1)" value={editForm?.courriel_legal || ""} onChange={(e) => setEditForm({ ...editForm, courriel_legal: e.target.value })} />
+                                            <div className="grid grid-cols-[80px_1fr] gap-4 md:col-span-2">
+                                                <Input label="N°" value={editForm?.numero_adress_legal || ""} onChange={(e) => setEditForm({ ...editForm, numero_adress_legal: e.target.value })} />
+                                                <Input label="Voie" value={editForm?.voie_representant_legal || ""} onChange={(e) => setEditForm({ ...editForm, voie_representant_legal: e.target.value })} />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <Input label="Complément d'adresse" value={editForm?.complement_adresse_legal || ""} onChange={(e) => setEditForm({ ...editForm, complement_adresse_legal: e.target.value })} />
+                                            </div>
+                                            <Input label="Code postal" value={editForm?.code_postal_legal || ""} onChange={(e) => setEditForm({ ...editForm, code_postal_legal: e.target.value })} />
+                                            <Input label="Ville" value={editForm?.commune_legal || ""} onChange={(e) => setEditForm({ ...editForm, commune_legal: e.target.value })} />
                                         </div>
                                     </div>
                                     <div className="h-px bg-slate-100" />
                                     <div className="space-y-4">
                                         <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Représentant légal 2</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <Input label="Nom (Rep 2)" value={editForm?.nom_representant_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, nom_representant_legal2: e.target.value })} />
+                                            <Input label="Nom (Rep 2)" value={editForm?.nom_representant_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, nom_representant_legal2: e.target.value.toUpperCase() })} />
                                             <Input label="Prénom (Rep 2)" value={editForm?.prenom_representant_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, prenom_representant_legal2: e.target.value })} />
                                             <Input label="Lien (Rep 2)" value={editForm?.lien_parente_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, lien_parente_legal2: e.target.value })} />
                                             <Input label="Téléphone (Rep 2)" value={editForm?.numero_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, numero_legal2: e.target.value })} />
                                             <Input label="Email (Rep 2)" value={editForm?.courriel_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, courriel_legal2: e.target.value })} />
+                                            <div className="grid grid-cols-[80px_1fr] gap-4 md:col-span-2">
+                                                <Input label="N°" value={editForm?.numero_adress_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, numero_adress_legal2: e.target.value })} />
+                                                <Input label="Voie" value={editForm?.voie_representant_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, voie_representant_legal2: e.target.value })} />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <Input label="Complément d'adresse" value={editForm?.complement_adresse_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, complement_adresse_legal2: e.target.value })} />
+                                            </div>
+                                            <Input label="Code postal" value={editForm?.code_postal_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, code_postal_legal2: e.target.value })} />
+                                            <Input label="Ville" value={editForm?.commune_legal2 || ""} onChange={(e) => setEditForm({ ...editForm, commune_legal2: e.target.value })} />
                                         </div>
                                     </div>
                                     <div className="h-px bg-slate-100" />
@@ -289,16 +341,21 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                             options={FORMATION_SOUHAITEE_OPTIONS}
                                         />
                                         <Select
-                                            label="Dernière année ou classe suivie"
+                                            label="Dernier diplôme ou titre préparé"
+                                            value={editForm?.dernier_diplome_prepare || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, dernier_diplome_prepare: e.target.value })}
+                                            options={DETAILED_DIPLOMA_OPTIONS}
+                                        />
+                                        <Select
+                                            label="Dernière classe / année suivie"
                                             value={editForm?.derniere_classe || ""}
                                             onChange={(e) => setEditForm({ ...editForm, derniere_classe: e.target.value })}
                                             options={LAST_CLASS_OPTIONS}
                                         />
-                                        <Select
+                                        <Input
                                             label="Intitulé précis du dernier diplôme ou titre préparé"
                                             value={editForm?.intitulePrecisDernierDiplome || ""}
                                             onChange={(e) => setEditForm({ ...editForm, intitulePrecisDernierDiplome: e.target.value })}
-                                            options={DETAILED_DIPLOMA_OPTIONS}
                                         />
                                         <Select
                                             label="Diplôme ou titre le plus élevé obtenu"
@@ -318,6 +375,8 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                             onChange={(e) => setEditForm({ ...editForm, connaissance_rush_how: e.target.value })}
                                             options={KNOW_RUSH_SCHOOL_OPTIONS}
                                         />
+                                        <Input label="Date visite/JPO" type="date" value={editForm?.date_de_visite || ""} onChange={(e) => setEditForm({ ...editForm, date_de_visite: e.target.value })} />
+                                        <Input label="Date règlement" type="date" value={editForm?.date_de_reglement || ""} onChange={(e) => setEditForm({ ...editForm, date_de_reglement: e.target.value })} />
                                     </div>
                                     <div className="h-px bg-slate-100" />
                                     <div className="grid grid-cols-1 gap-4">
@@ -358,10 +417,34 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                     {renderInfoRow("Nationalité", info.nationalite, ShieldCheck)}
                                     {renderInfoRow("Commune de naissance", info.commune_naissance, MapPin)}
                                     <div className="md:col-span-2">
-                                        {renderInfoRow("Adresse de résidence", info.adresse_residence, MapPin)}
+                                        {renderInfoRow("Adresse de résidence", info.adresse_residence || `${info.num_residence || ''} ${info.rue_residence || ''}${info.complement_residence ? ` - ${info.complement_residence}` : ''}, ${info.code_postal || ''} ${info.ville || ''}`, MapPin)}
                                     </div>
                                     {renderInfoRow("Situation", info.situation, Briefcase)}
                                     {renderInfoRow("Régime social", info.regime_social, ShieldCheck)}
+                                    
+                                    {info.nom_representant_legal && (
+                                        <>
+                                            <div className="md:col-span-2 mt-4 mb-2 h-px bg-slate-100" />
+                                            <div className="md:col-span-2 text-[11px] font-black text-slate-400 uppercase tracking-widest">Représentant Légal 1</div>
+                                            {renderInfoRow("Représentant 1", `${info.nom_representant_legal || ''} ${info.prenom_representant_legal || ''} (${info.lien_parente_legal || ''})`, User)}
+                                            {renderInfoRow("Contact", `${info.courriel_legal || ''} / ${info.numero_legal || ''}`, Phone)}
+                                            <div className="md:col-span-2">
+                                                {renderInfoRow("Adresse Rep. 1", `${info.numero_adress_legal || ''} ${info.voie_representant_legal || ''} ${info.complement_adresse_legal || ''}, ${info.code_postal_legal || ''} ${info.commune_legal || ''}`, MapPin)}
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {info.nom_representant_legal2 && (
+                                        <>
+                                            <div className="md:col-span-2 mt-4 mb-2 h-px bg-slate-100" />
+                                            <div className="md:col-span-2 text-[11px] font-black text-slate-400 uppercase tracking-widest">Représentant Légal 2</div>
+                                            {renderInfoRow("Représentant 2", `${info.nom_representant_legal2 || ''} ${info.prenom_representant_legal2 || ''} (${info.lien_parente_legal2 || ''})`, User)}
+                                            {renderInfoRow("Contact", `${info.courriel_legal2 || ''} / ${info.numero_legal2 || ''}`, Phone)}
+                                            <div className="md:col-span-2">
+                                                {renderInfoRow("Adresse Rep. 2", `${info.numero_adress_legal2 || ''} ${info.voie_representant_legal2 || ''} ${info.complement_adresse_legal2 || ''}, ${info.code_postal_legal2 || ''} ${info.commune_legal2 || ''}`, MapPin)}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             )}
 
@@ -369,11 +452,13 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {renderInfoRow("Formation souhaitée", formatFormation(info.formation_souhaitee), GraduationCap)}
                                     {renderInfoRow("Dernier diplôme préparé", info.dernier_diplome_prepare, GraduationCap)}
-                                    {renderInfoRow("Dernière classe", info.derniere_classe, GraduationCap)}
-                                    {renderInfoRow("BAC", info.bac, GraduationCap)}
+                                    {renderInfoRow("Dernière classe / année", info.derniere_classe, GraduationCap)}
                                     {renderInfoRow("Intitulé précis diplôme", info.intitulePrecisDernierDiplome, FileText)}
+                                    {renderInfoRow("Diplôme le plus élevé", info.bac, GraduationCap)}
                                     {renderInfoRow("Entreprise d'accueil", info.entreprise_d_accueil, Building2)}
                                     {renderInfoRow("Connaissance Rush How", info.connaissance_rush_how, FileText)}
+                                    {renderInfoRow("Date visite/JPO", info.date_de_visite, Clock)}
+                                    {renderInfoRow("Date règlement", info.date_de_reglement, Clock)}
                                     <div className="md:col-span-2">
                                         {renderInfoRow("Motivation", info.motivation_projet_professionnel, FileText)}
                                     </div>
@@ -393,13 +478,14 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                                 { key: 'vitale', label: 'Carte Vitale', hasKey: 'has_vitale', urlKey: 'vitale_url', nameKey: 'vitale_name' },
                                                 { key: 'diplome', label: 'Dernier diplôme', hasKey: 'has_diplome', urlKey: 'diplome_url', nameKey: 'diplome_name' },
                                             ].map(({ key, label, hasKey, urlKey, nameKey }) => {
-                                                const uploaded = !!(candidate as any)[hasKey];
+                                                const uploaded = uploadedDocs[key] || !!(candidate as any)[hasKey];
                                                 const url = (candidate as any)[urlKey];
                                                 const name = (candidate as any)[nameKey];
+                                                const isUploading = uploadingDoc === key;
                                                 return (
-                                                    <div key={key} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-[4px] hover:border-rose-200 transition-all group">
+                                                    <div key={key} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-[#6d28d9]/20 transition-all group">
                                                         <div className="flex items-center gap-3">
-                                                            <div className={`w-9 h-9 rounded-[4px] flex items-center justify-center flex-shrink-0 ${uploaded ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-300'}`}>
+                                                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${uploaded ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-300'}`}>
                                                                 {uploaded ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
                                                             </div>
                                                             <div>
@@ -413,16 +499,38 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        {uploaded && url && (
-                                                            <a
-                                                                href={url}
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-400 hover:bg-rose-500 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide opacity-0 group-hover:opacity-100"
-                                                            >
-                                                                <Download size={13} /> Voir
-                                                            </a>
-                                                        )}
+                                                        <div className="flex items-center gap-2">
+                                                            {/* Upload / Replace button */}
+                                                            <label className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer transition-all text-[10px] font-bold uppercase tracking-wide ${isUploading
+                                                                ? 'bg-slate-100 text-slate-400 cursor-wait'
+                                                                : uploaded
+                                                                    ? 'bg-[#6d28d9]/5 text-[#6d28d9] hover:bg-[#6d28d9] hover:text-white'
+                                                                    : 'bg-[#6d28d9]/10 text-[#6d28d9] hover:bg-[#6d28d9] hover:text-white'
+                                                            }`}>
+                                                                <input
+                                                                    type="file"
+                                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                                                    disabled={isUploading}
+                                                                    onChange={(e) => handleDocUpload(e, key)}
+                                                                />
+                                                                {isUploading
+                                                                    ? <><Loader2 size={12} className="animate-spin" /> Envoi...</>
+                                                                    : <><Upload size={12} /> {uploaded ? 'Remplacer' : 'Ajouter'}</>
+                                                                }
+                                                            </label>
+                                                            {/* Download button */}
+                                                            {uploaded && url && (
+                                                                <a
+                                                                    href={url}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 text-slate-400 hover:bg-emerald-500 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide"
+                                                                >
+                                                                    <Download size={13} /> Voir
+                                                                </a>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 );
                                             })}

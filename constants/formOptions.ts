@@ -333,7 +333,7 @@ export const OPCO_OPTIONS: SelectOption[] = [
 ];
 
 export const CONTRAT_TYPE_OPTIONS: SelectOption[] = [
-    { value: "11 Premier contrat d apprentissage de l apprenti", label: "11 Premier contrat'apprentissage de l'apprenti" },
+    { value: "11 Premier contrat d apprentissage de l apprenti", label: "11 Premier contrat d'apprentissage de l'apprenti" },
     { value: "21 Nouveau contrat avec un apprenti qui a terminé son précédent contrat auprès d un même employeur", label: "21 Nouveau contrat avec un apprenti qui a terminé son précédent contrat auprès d'un même employeur" },
     { value: "22 Nouveau contrat avec un apprenti qui a terminé son précédent contrat auprès d un autre employeur", label: "22 Nouveau contrat avec un apprenti qui a terminé son précédent contrat auprès d'un autre employeur" },
     { value: "23 Nouveau contrat avec un apprenti dont le précédent contrat a été rompu", label: "23 Nouveau contrat avec un apprenti dont le précédent contrat a été rompu" },

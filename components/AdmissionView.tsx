@@ -1587,8 +1587,8 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                     onClick={generatePDF}
                     className="flex items-center gap-2 px-6 py-2.5 rounded-[4px] bg-emerald-600 text-white font-black text-[11px] uppercase tracking-widest hover:bg-emerald-700 transition-all active:scale-95 shadow-md shadow-emerald-200"
                 >
-                    <Save size={14} />
-                    Enregistrer
+                    <Download size={14} />
+                    Télécharger PDF
                 </button>
                 <button
                     disabled={isSubmitting}

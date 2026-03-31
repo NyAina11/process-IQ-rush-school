@@ -92,6 +92,40 @@ const studentSchema = z.object({
         code_postal: z.string().optional(), ville: z.string().optional(),
         email: z.string().optional(), telephone: z.string().optional(),
     }).optional()
+}).superRefine((data, ctx) => {
+    // Validation conditionnelle pour les mineurs
+    if (data.date_naissance) {
+        const birth = new Date(data.date_naissance);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+
+        if (age < 18) {
+            const rl1 = data.representant_legal_1;
+            if (!rl1?.nom) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Le nom est requis", path: ['representant_legal_1', 'nom'] });
+            if (!rl1?.prenom) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Le prénom est requis", path: ['representant_legal_1', 'prenom'] });
+            if (!rl1?.lien_parente) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Le lien de parenté est requis", path: ['representant_legal_1', 'lien_parente'] });
+            if (!rl1?.voie) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "L'adresse est requise", path: ['representant_legal_1', 'voie'] });
+            if (!rl1?.code_postal) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Le code postal est requis", path: ['representant_legal_1', 'code_postal'] });
+            if (!rl1?.ville) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "La ville est requise", path: ['representant_legal_1', 'ville'] });
+            if (!rl1?.email) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "L'email est requis", path: ['representant_legal_1', 'email'] });
+            if (!rl1?.telephone) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Le téléphone est requis", path: ['representant_legal_1', 'telephone'] });
+        }
+    }
+
+    // Validation pour le second représentant si coché
+    if (data.add_second_representative) {
+        const rl2 = data.representant_legal_2;
+        if (!rl2?.nom) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Le nom est requis", path: ['representant_legal_2', 'nom'] });
+        if (!rl2?.prenom) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Le prénom est requis", path: ['representant_legal_2', 'prenom'] });
+        if (!rl2?.lien_parente) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Le lien de parenté est requis", path: ['representant_legal_2', 'lien_parente'] });
+        if (!rl2?.voie) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "L'adresse est requise", path: ['representant_legal_2', 'voie'] });
+        if (!rl2?.code_postal) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Le code postal est requis", path: ['representant_legal_2', 'code_postal'] });
+        if (!rl2?.ville) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "La ville est requise", path: ['representant_legal_2', 'ville'] });
+        if (!rl2?.email) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "L'email est requis", path: ['representant_legal_2', 'email'] });
+        if (!rl2?.telephone) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Le téléphone est requis", path: ['representant_legal_2', 'telephone'] });
+    }
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
@@ -339,7 +373,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
         { id: 'personal', fields: ['prenom', 'nom_naissance', 'sexe', 'date_naissance', 'nationalite', 'commune_naissance', 'departement'] },
         { id: 'contact', fields: ['num_residence', 'rue_residence', 'code_postal', 'ville', 'email', 'telephone'] },
         { id: 'situation', fields: ['situation', 'declare_inscription_sportif_haut_niveau', 'declare_avoir_projet_creation_reprise_entreprise', 'declare_travailleur_handicape', 'alternance'] },
-        { id: 'school', fields: ['derniere_classe', 'bac'] },
+        { id: 'school', fields: ['dernier_diplome_prepare', 'derniere_classe', 'intitulePrecisDernierDiplome', 'bac'] },
         { id: 'formation', fields: ['formation_souhaitee'] },
     ];
 
@@ -392,22 +426,33 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                 >
                     <FormGrid>
                         <div><Input label="Prénom" required placeholder="Votre prénom" error={errors.prenom?.message} {...register('prenom')} /></div>
-                        <div><Input label="Nom de naissance" required placeholder="Votre nom" error={errors.nom_naissance?.message} {...register('nom_naissance')} /></div>
-                        <FullCol><Input label="Nom d'usage" placeholder="Si différent du nom de naissance" {...register('nom_usage')} /></FullCol>
+                        <div><Input label="Nom de naissance" required placeholder="Votre nom" error={errors.nom_naissance?.message} {...register('nom_naissance', { onChange: (e) => { e.target.value = e.target.value.toUpperCase(); } })} /></div>
+                        <FullCol><Input label="Nom d'usage" placeholder="Si différent du nom de naissance" {...register('nom_usage', { onChange: (e) => { e.target.value = e.target.value.toUpperCase(); } })} /></FullCol>
 
                         <FullCol>
                             <FieldLabel required>Sexe</FieldLabel>
                             <div className="grid grid-cols-2 gap-3">
-                                {SEXE_OPTIONS.map(opt => (
-                                    <label key={opt.value} className={`flex items-center gap-3 p-3.5 rounded-[4px] border-2 cursor-pointer transition-all ${selectedSexe === opt.value ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]' : 'border-slate-200 text-slate-500 hover:border-[#6B3CD2]/30'
-                                        }`}>
-                                        <input type="radio" value={opt.value} className="hidden" {...register('sexe')} />
-                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedSexe === opt.value ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
-                                            {selectedSexe === opt.value && <div className="w-2 h-2 rounded-full bg-[#6B3CD2]" />}
-                                        </div>
-                                        <span className="text-[12px] font-bold">{opt.label}</span>
-                                    </label>
-                                ))}
+                                {SEXE_OPTIONS.map(opt => {
+                                    const isSelected = selectedSexe === opt.value;
+                                    const hasError = !!errors.sexe;
+                                    return (
+                                        <label key={opt.value} className={`flex items-center gap-3 p-3.5 rounded-[4px] border-2 cursor-pointer transition-all ${isSelected 
+                                            ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]' 
+                                            : hasError 
+                                                ? 'border-rose-200 bg-rose-50/30 text-rose-400 hover:border-rose-300'
+                                                : 'border-slate-200 text-slate-500 hover:border-[#6B3CD2]/30'
+                                            }`}>
+                                            <input type="radio" value={opt.value} className="hidden" {...register('sexe')} />
+                                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected 
+                                                ? 'border-[#6B3CD2]' 
+                                                : hasError ? 'border-rose-300' : 'border-slate-300'
+                                            }`}>
+                                                {isSelected && <div className="w-2 h-2 rounded-full bg-[#6B3CD2]" />}
+                                            </div>
+                                            <span className="text-[12px] font-bold">{opt.label}</span>
+                                        </label>
+                                    );
+                                })}
                             </div>
                             {errors.sexe && <p className="mt-1.5 text-rose-500 text-[10px] font-bold">{errors.sexe.message}</p>}
                         </FullCol>
@@ -465,14 +510,14 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                             <div className="bg-slate-50/60 border border-slate-200 rounded-[4px] p-4">
                                 <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-4">Représentant légal 1</p>
                                 <FormGrid>
-                                    <div><Input label="Nom" {...register('representant_legal_1.nom')} /></div>
-                                    <div><Input label="Prénom" {...register('representant_legal_1.prenom')} /></div>
-                                    <FullCol><Input label="Lien de parenté" required placeholder="Père, Mère, Tuteur…" {...register('representant_legal_1.lien_parente')} /></FullCol>
-                                    <FullCol><Input label="Adresse" required placeholder="Numéro et rue" {...register('representant_legal_1.voie')} /></FullCol>
-                                    <div><Input label="Code postal" required {...register('representant_legal_1.code_postal')} /></div>
-                                    <div><Input label="Ville" required {...register('representant_legal_1.ville')} /></div>
-                                    <div><Input label="Email" required type="email" {...register('representant_legal_1.email')} /></div>
-                                    <div><Input label="Téléphone" required type="tel" {...register('representant_legal_1.telephone')} /></div>
+                                    <div><Input label="Nom" required error={errors.representant_legal_1?.nom?.message} {...register('representant_legal_1.nom', { onChange: (e) => { e.target.value = e.target.value.toUpperCase(); } })} /></div>
+                                    <div><Input label="Prénom" required error={errors.representant_legal_1?.prenom?.message} {...register('representant_legal_1.prenom')} /></div>
+                                    <FullCol><Input label="Lien de parenté" required placeholder="Père, Mère, Tuteur…" error={errors.representant_legal_1?.lien_parente?.message} {...register('representant_legal_1.lien_parente')} /></FullCol>
+                                    <FullCol><Input label="Adresse" required placeholder="Numéro et rue" error={errors.representant_legal_1?.voie?.message} {...register('representant_legal_1.voie')} /></FullCol>
+                                    <div><Input label="Code postal" required error={errors.representant_legal_1?.code_postal?.message} {...register('representant_legal_1.code_postal')} /></div>
+                                    <div><Input label="Ville" required error={errors.representant_legal_1?.ville?.message} {...register('representant_legal_1.ville')} /></div>
+                                    <div><Input label="Email" required type="email" error={errors.representant_legal_1?.email?.message} {...register('representant_legal_1.email')} /></div>
+                                    <div><Input label="Téléphone" required type="tel" error={errors.representant_legal_1?.telephone?.message} {...register('representant_legal_1.telephone')} /></div>
                                 </FormGrid>
                             </div>
 
@@ -491,14 +536,14 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                                 <div className="bg-slate-50/60 border border-slate-200 rounded-[4px] p-4">
                                     <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-4">Représentant légal 2</p>
                                     <FormGrid>
-                                        <div><Input label="Nom" {...register('representant_legal_2.nom')} /></div>
-                                        <div><Input label="Prénom" {...register('representant_legal_2.prenom')} /></div>
-                                        <FullCol><Input label="Lien de parenté" {...register('representant_legal_2.lien_parente')} /></FullCol>
-                                        <FullCol><Input label="Adresse" {...register('representant_legal_2.voie')} /></FullCol>
-                                        <div><Input label="Code postal" {...register('representant_legal_2.code_postal')} /></div>
-                                        <div><Input label="Ville" {...register('representant_legal_2.ville')} /></div>
-                                        <div><Input label="Email" type="email" {...register('representant_legal_2.email')} /></div>
-                                        <div><Input label="Téléphone" type="tel" {...register('representant_legal_2.telephone')} /></div>
+                                        <div><Input label="Nom" required error={errors.representant_legal_2?.nom?.message} {...register('representant_legal_2.nom', { onChange: (e) => { e.target.value = e.target.value.toUpperCase(); } })} /></div>
+                                        <div><Input label="Prénom" required error={errors.representant_legal_2?.prenom?.message} {...register('representant_legal_2.prenom')} /></div>
+                                        <FullCol><Input label="Lien de parenté" required placeholder="Père, Mère, Tuteur…" error={errors.representant_legal_2?.lien_parente?.message} {...register('representant_legal_2.lien_parente')} /></FullCol>
+                                        <FullCol><Input label="Adresse" required placeholder="Numéro et rue" error={errors.representant_legal_2?.voie?.message} {...register('representant_legal_2.voie')} /></FullCol>
+                                        <div><Input label="Code postal" required error={errors.representant_legal_2?.code_postal?.message} {...register('representant_legal_2.code_postal')} /></div>
+                                        <div><Input label="Ville" required error={errors.representant_legal_2?.ville?.message} {...register('representant_legal_2.ville')} /></div>
+                                        <div><Input label="Email" required type="email" error={errors.representant_legal_2?.email?.message} {...register('representant_legal_2.email')} /></div>
+                                        <div><Input label="Téléphone" required type="tel" error={errors.representant_legal_2?.telephone?.message} {...register('representant_legal_2.telephone')} /></div>
                                     </FormGrid>
                                 </div>
                             )}
@@ -544,8 +589,9 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                     hasError={hasSectionError(sectionDefs[3].fields)}
                 >
                     <div className="space-y-4">
-                        <Select label="Dernière année ou classe suivie" required error={errors.derniere_classe?.message} {...register('derniere_classe')} options={LAST_CLASS_OPTIONS} placeholder="Sélectionnez" />
-                        <Select label="Intitulé précis du dernier diplôme ou titre préparé" {...register('intitulePrecisDernierDiplome')} options={DETAILED_DIPLOMA_OPTIONS} placeholder="Sélectionnez" />
+                        <Select label="Dernier diplôme ou titre préparé" {...register('dernier_diplome_prepare')} options={DETAILED_DIPLOMA_OPTIONS} placeholder="Sélectionnez" />
+                        <Select label="Dernière classe / année suivie" required error={errors.derniere_classe?.message} {...register('derniere_classe')} options={LAST_CLASS_OPTIONS} placeholder="Sélectionnez" />
+                        <Input label="Intitulé précis du dernier diplôme ou titre préparé" placeholder="Ex: Licence Informatique" {...register('intitulePrecisDernierDiplome')} />
                         <Select label="Diplôme ou titre le plus élevé obtenu" required error={errors.bac?.message} {...register('bac')} options={HIGHEST_DIPLOMA_OPTIONS} placeholder="Sélectionnez votre diplôme" />
                     </div>
                 </SectionAccordion>
@@ -563,10 +609,18 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
                                 {FORMATION_SOUHAITEE_OPTIONS.map(opt => {
                                     const selected = formValues.formation_souhaitee === opt.value;
+                                    const hasError = !!errors.formation_souhaitee;
                                     return (
-                                        <label key={opt.value} className={`flex items-center gap-2 px-3 py-2.5 rounded-[4px] border-2 cursor-pointer transition-all text-[12px] font-bold leading-tight ${selected ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]' : 'border-slate-200 text-slate-600 hover:border-[#6B3CD2]/30'
+                                        <label key={opt.value} className={`flex items-center gap-2 px-3 py-2.5 rounded-[4px] border-2 cursor-pointer transition-all text-[12px] font-bold leading-tight ${selected 
+                                            ? 'border-[#6B3CD2] bg-[#6B3CD2]/5 text-[#6B3CD2]' 
+                                            : hasError 
+                                                ? 'border-rose-200 bg-rose-50/30 text-rose-400 hover:border-rose-300'
+                                                : 'border-slate-200 text-slate-600 hover:border-[#6B3CD2]/30'
                                             }`}>
-                                            <div className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${selected ? 'border-[#6B3CD2]' : 'border-slate-300'}`}>
+                                            <div className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${selected 
+                                                ? 'border-[#6B3CD2]' 
+                                                : hasError ? 'border-rose-300' : 'border-slate-300'
+                                            }`}>
                                                 {selected && <div className="w-1.5 h-1.5 rounded-full bg-[#6B3CD2]" />}
                                             </div>
                                             <input type="radio" className="hidden" value={opt.value} {...register('formation_souhaitee')} />
@@ -620,7 +674,11 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                     <label className="flex items-start gap-3 cursor-pointer group mb-6">
                         <div
                             onClick={() => setValue('agreement', !formValues.agreement)}
-                            className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${formValues.agreement ? 'bg-[#6B3CD2] border-[#6B3CD2]' : 'border-slate-300 group-hover:border-[#6B3CD2]/40'
+                            className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${formValues.agreement 
+                                ? 'bg-[#6B3CD2] border-[#6B3CD2]' 
+                                : errors.agreement 
+                                    ? 'border-rose-300 bg-rose-50' 
+                                    : 'border-slate-300 group-hover:border-[#6B3CD2]/40'
                                 }`}
                         >
                             {formValues.agreement && <svg viewBox="0 0 10 10" fill="none" width="8" height="8"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}

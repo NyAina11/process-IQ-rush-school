@@ -24,8 +24,8 @@ interface SidebarProps {
 }
 
 const SectionLabel = ({ label }: { label: string }) => (
-  <div className="px-5 pt-5 pb-1">
-    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-amber-400/80">
+  <div className="px-5 pt-6 pb-1">
+    <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#8b92a9' }}>
       {label}
     </span>
   </div>
@@ -62,16 +62,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   };
 
   const parentCls = (active: boolean) =>
-    `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] ${active ? 'bg-violet-600/20 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-slate-200'
+    `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-150 font-medium text-[13px] ${active ? 'text-white' : 'hover:text-white'
     }`;
 
+  const parentStyle = (active: boolean): React.CSSProperties => ({
+    background: active ? '#2d3154' : 'transparent',
+    borderLeft: active ? '3px solid #6c63ff' : '3px solid transparent',
+    color: active ? '#ffffff' : '#8b92a9',
+  });
+
   return (
-    <aside className={`fixed top-0 left-0 h-full w-[260px] bg-sidebar text-slate-200 flex flex-col z-50 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+    <aside className={`fixed top-0 left-0 h-full flex flex-col z-50 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+      style={{ width: 240, background: '#1a1d2e', color: '#ffffff' }}>
 
       {/* Logo */}
-      <div className="p-5 flex items-center gap-3">
+      <div className="flex items-center gap-3" style={{ padding: 20 }}>
         <img src="/images/logo-process-iq.png" alt="Process IQ" className="h-9 w-auto" />
-        <span className="text-[1.15rem] font-bold tracking-tight text-white">
+        <span style={{ fontSize: 16, fontWeight: 800, color: '#ffffff', letterSpacing: '-0.01em' }}>
           PROCESSIQ
         </span>
       </div>
@@ -89,8 +96,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <div
               onClick={() => setAdmissionOpen(!admissionOpen)}
               className={parentCls(isModuleActive('/admission') || isModuleActive('/classe-ntc'))}
+              style={parentStyle(isModuleActive('/admission') || isModuleActive('/classe-ntc'))}
             >
-              <Users size={20} />
+              <Users size={16} />
               <span>Admissions</span>
               <ChevronDown size={16} className={`ml-auto transition-transform duration-300 ${admissionOpen ? 'rotate-180' : ''}`} />
             </div>
@@ -112,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <Users size={15} />
                 <span className="flex-1">Tableau de bord</span>
                 {candidates.length > 0 && (
-                  <span className="ml-auto bg-violet-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px]">
+                  <span className="ml-auto" style={{ background: '#6c63ff', color: '#ffffff', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>
                     {candidates.length}
                   </span>
                 )}
@@ -128,8 +136,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <div
               onClick={() => setCommercialOpen(!commercialOpen)}
               className={parentCls(isModuleActive('/commercial'))}
+              style={parentStyle(isModuleActive('/commercial'))}
             >
-              <Monitor size={20} />
+              <Monitor size={16} />
               <span>Commercial</span>
               <ChevronDown size={16} className={`ml-auto transition-transform duration-300 ${commercialOpen ? 'rotate-180' : ''}`} />
             </div>
@@ -150,7 +159,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               >
                 <UserPlus size={15} />
                 <span className="flex-1">Élèves à placer</span>
-                <span className="ml-auto bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-[4px] border border-emerald-500/30">
+                <span className="ml-auto" style={{ background: '#22c55e', color: '#ffffff', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>
                   Actif
                 </span>
               </NavLink>
@@ -177,8 +186,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <div
               onClick={() => setRhOpen(!rhOpen)}
               className={parentCls(isModuleActive('/rh'))}
+              style={parentStyle(isModuleActive('/rh'))}
             >
-              <Users size={20} />
+              <Users size={16} />
               <span>RH</span>
               <ChevronDown size={16} className={`ml-auto transition-transform duration-300 ${rhOpen ? 'rotate-180' : ''}`} />
             </div>
@@ -234,11 +244,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <NavLink
               to="/etudiant"
               onClick={handleLinkClick}
-              className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] ${isActive ? 'bg-violet-600/20 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-slate-200'}`}
+              className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-150 font-medium text-[13px] ${isActive ? 'text-white' : 'hover:text-white'}`}
+              style={({ isActive }: { isActive: boolean }) => ({ background: isActive ? '#2d3154' : 'transparent', borderLeft: isActive ? '3px solid #6c63ff' : '3px solid transparent', color: isActive ? '#ffffff' : '#8b92a9' }) as React.CSSProperties}
             >
               {({ isActive }) => (
                 <>
-                  <BookOpen size={20} className={isActive ? 'text-white' : ''} />
+                  <BookOpen size={16} className={isActive ? 'text-white' : ''} />
                   <span>Étudiant</span>
                 </>
               )}
@@ -251,11 +262,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <NavLink
               to="/support"
               onClick={handleLinkClick}
-              className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] ${isActive ? 'bg-violet-600/20 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-slate-200'}`}
+              className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-150 font-medium text-[13px] ${isActive ? 'text-white' : 'hover:text-white'}`}
+              style={({ isActive }: { isActive: boolean }) => ({ background: isActive ? '#2d3154' : 'transparent', borderLeft: isActive ? '3px solid #6c63ff' : '3px solid transparent', color: isActive ? '#ffffff' : '#8b92a9' }) as React.CSSProperties}
             >
               {({ isActive }) => (
                 <>
-                  <MessageSquare size={20} className={isActive ? 'text-white' : ''} />
+                  <MessageSquare size={16} className={isActive ? 'text-white' : ''} />
                   <span>Support</span>
                 </>
               )}
@@ -268,11 +280,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <NavLink
               to="/parametres"
               onClick={handleLinkClick}
-              className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] ${isActive ? 'bg-violet-600/20 text-white' : 'text-slate-400 hover:bg-white/8 hover:text-slate-200'}`}
+              className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-150 font-medium text-[13px] ${isActive ? 'text-white' : 'hover:text-white'}`}
+              style={({ isActive }: { isActive: boolean }) => ({ background: isActive ? '#2d3154' : 'transparent', borderLeft: isActive ? '3px solid #6c63ff' : '3px solid transparent', color: isActive ? '#ffffff' : '#8b92a9' }) as React.CSSProperties}
             >
               {({ isActive }) => (
                 <>
-                  <Settings size={20} className={isActive ? 'text-white' : ''} />
+                  <Settings size={16} className={isActive ? 'text-white' : ''} />
                   <span>Paramètres</span>
                 </>
               )}
@@ -282,12 +295,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       </nav>
 
       {/* Footer */}
-      <div className="px-3 py-3 border-t border-slate-700/50">
+      <div className="px-3 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-200 font-semibold text-[0.93rem] w-full text-slate-400 hover:bg-rose-500/10 hover:text-rose-400"
+          className="flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-150 font-medium text-[13px] w-full"
+          style={{ color: '#8b92a9', background: 'transparent' }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#252847'; e.currentTarget.style.color = '#ffffff'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#8b92a9'; }}
         >
-          <LogOut size={20} />
+          <LogOut size={16} />
           <span>Déconnexion</span>
         </button>
       </div>

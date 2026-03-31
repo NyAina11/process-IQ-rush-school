@@ -223,18 +223,38 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
 
     const { execute: updateCandidate, loading: isSaving } = useApi(api.updateCandidate, {
         successMessage: "Candidat mis à jour avec succès",
-        onSuccess: () => {
+        onSuccess: (response: any) => {
             fetchStudents();
             setIsModalOpen(false);
+
+            // Automate document regeneration after modification
+            const recordId = selectedCandidate?.id || response?.record_id || response?.id;
+            if (recordId) {
+                console.log('🔄 Triggering document regeneration for:', recordId);
+                api.generateCerfa(recordId).catch(err => console.error("CERFA regeneration failed:", err));
+                api.generateFicheRenseignement(recordId).catch(err => console.error("Fiche regeneration failed:", err));
+                api.generateConventionApprentissage(recordId).catch(err => console.error("Convention regeneration failed:", err));
+                api.generateCertificatScolarite(recordId).catch(err => console.error("Certificat regeneration failed:", err));
+            }
         }
     });
 
 
     const { execute: updateCompany, loading: isSavingCompany } = useApi(api.updateCompany, {
         successMessage: "Entreprise mise à jour avec succès",
-        onSuccess: () => {
+        onSuccess: (response: any) => {
             fetchStudents();
             setIsCompanyModalOpen(false);
+
+            // Automate document regeneration after modification
+            // For company update, we take candidate ID from the selected candidate context
+            const recordId = selectedCandidate?.id || response?.record_id_etudiant;
+            if (recordId) {
+                console.log('🔄 Triggering document regeneration (Company update) for:', recordId);
+                api.generateCerfa(recordId).catch(err => console.error("CERFA regeneration failed:", err));
+                api.generateFicheRenseignement(recordId).catch(err => console.error("Fiche regeneration failed:", err));
+                api.generateConventionApprentissage(recordId).catch(err => console.error("Convention regeneration failed:", err));
+            }
         }
     });
 
@@ -1743,14 +1763,14 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
             )}
 
             {currentTab === 'history' && (
-                <div className="bg-white border border-[#e2e8f0] p-8 min-h-[500px]">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="w-10 h-10 rounded-[4px] bg-[#fee2e2] border border-[#fca5a5] text-[#b91c1c] flex items-center justify-center">
-                            <HistoryIcon size={20} />
+                <div className="bg-white border border-[#e5e0f5] rounded-2xl p-6 min-h-[500px]">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6d28d9] to-[#4338ca] flex items-center justify-center shadow-md shadow-violet-200">
+                            <HistoryIcon size={18} className="text-white" />
                         </div>
                         <div>
-                            <h2 className="text-base font-bold text-[#1e293b]">Historique des actions</h2>
-                            <p className="text-[#8898aa] text-sm">Toutes les activités récentes de la classe</p>
+                            <h2 className="text-[18px] font-extrabold text-[#1e1b2e] tracking-tight">Historique des actions</h2>
+                            <p className="text-[12px] text-slate-400 font-medium mt-0.5">Toutes les activités récentes de la classe</p>
                         </div>
                     </div>
                     <HistoryTimeline history={globalHistory} loading={loadingHistory} />

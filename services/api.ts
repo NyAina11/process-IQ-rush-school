@@ -249,7 +249,12 @@ const mapBackendToCompany = (backendData: any): any => {
       caisse_retraite: fields["Caisse de retraite"] || "",
       date_avenant: fields["date Si avenant"] || "",
 
+<<<<<<< HEAD
       // PÃƒÆ’Ã‚Â©riodes
+=======
+      // Périodes
+      date_fin_1periode_1er_annee: fields["date_fin_1periode_1er_annee"] || "",
+>>>>>>> d9d9c7361e04442fd8efc05e6f672f8b1dcde87a
       date_debut_2periode_1er_annee: fields["date_debut_2periode_1er_annee"] || "",
       date_fin_2periode_1er_annee: fields["date_fin_2periode_1er_annee"] || "",
       date_debut_1periode_2eme_annee: fields["date_debut_1periode_2eme_annee"] || "",
@@ -387,7 +392,7 @@ const mapStudentToBackend = (data: any, role?: string) => {
     declare_avoir_projet_creation_reprise_entreprise: data.declare_avoir_projet_creation_reprise_entreprise || false,
     declare_travailleur_handicape: data.declare_travailleur_handicape || false,
     alternance: data.alternance || false,
-    dernier_diplome_prepare: mapDiplome(data.intitulePrecisDernierDiplome || ""),
+    dernier_diplome_prepare: mapDiplome(data.dernier_diplome_prepare || ""),
     derniere_classe: data.derniere_classe || "",
     bac: mapNiveau(data.bac) || "",
     intitulePrecisDernierDiplome: data.intitulePrecisDernierDiplome || "",
@@ -440,8 +445,8 @@ const mapCompanyToBackend = (data: any, role?: string) => {
       contrat: {
         type_contrat: ensureString(data.contrat?.type_contrat),
         type_derogation: ensureString(data.contrat?.type_derogation),
-        date_debut: ensureString(data.formation?.date_debut || data.contrat?.date_debut),
-        date_fin: ensureString(data.formation?.date_fin || data.contrat?.date_fin),
+        date_debut: ensureString(data.contrat?.date_debut_execution || data.formation?.date_debut),
+        date_fin: ensureString(data.contrat?.date_fin),
         duree_hebdomadaire: ensureString(data.contrat?.duree_hebdomadaire),
         poste_occupe: ensureString(data.contrat?.poste_occupe),
         lieu_execution: ensureString(data.contrat?.lieu_execution),
@@ -463,8 +468,8 @@ const mapCompanyToBackend = (data: any, role?: string) => {
         montant_salaire_brut4: data.contrat?.montant_salaire_brut4 ? parseFloat(data.contrat.montant_salaire_brut4.toString()) : "",
         date_conclusion: ensureString(data.contrat?.date_conclusion),
         date_debut_execution: ensureString(data.contrat?.date_debut_execution),
-        date_debut_1periode_1er_annee: ensureString(data.contrat?.date_debut_1periode_1er_annee),
-        date_fin_1periode_1er_annee: ensureString(data.contrat?.date_fin_1periode_1er_annee),
+        // 1ère année : date_debut (above) = début p1. Seuls fin p1, début/fin p2 sont envoyés.
+        date_fin_1periode_1ere_annee: ensureString(data.contrat?.date_fin_1periode_1er_annee),
         date_debut_2periode_1er_annee: ensureString(data.contrat?.date_debut_2periode_1er_annee),
         date_fin_2periode_1er_annee: ensureString(data.contrat?.date_fin_2periode_1er_annee),
         date_debut_1periode_2eme_annee: ensureString(data.contrat?.date_debut_1periode_2eme_annee),
@@ -637,10 +642,41 @@ export const api = {
       })
     });
 
+<<<<<<< HEAD
     const data = await readJsonSafely(response);
     if (!response.ok) {
       const message = getApiErrorMessage(data, `Login failed (${response.status})`);
       throw new Error(message);
+=======
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    let role = 'admission';
+    let name = 'Admin User';
+
+    const emailLower = email.toLowerCase();
+    if (emailLower === 'responsable1@rush.fr' && pass === 'responsable1') {
+      role = 'admission';
+      name = 'Responsable 1';
+    } else if (emailLower === 'responsable2@rush.fr' && pass === 'responsable2') {
+      role = 'admission';
+      name = 'Responsable 2';
+    } else if (emailLower.includes('superadmin')) {
+      role = 'super_admin';
+      name = 'Super Administrateur';
+    } else if (emailLower.includes('rh')) {
+      role = 'rh';
+      name = 'Responsable RH';
+    } else if (emailLower.includes('commercial')) {
+      role = 'commercial';
+      name = 'Conseiller Commercial';
+    } else if (emailLower.includes('etudiant') || emailLower.includes('eleve')) {
+      role = 'eleve';
+      name = 'Étudiant Démo';
+    } else if (emailLower.includes('admission')) {
+      role = 'admission';
+      name = 'Chargé d\'Admission';
+>>>>>>> d9d9c7361e04442fd8efc05e6f672f8b1dcde87a
     }
 
     const accessToken = String(data?.access_token || '');
@@ -1554,7 +1590,49 @@ export const api = {
 
     const json = await response.json().catch(() => ({}));
     if (!response.ok) {
+<<<<<<< HEAD
       throw new Error(json?.error || 'Impossible de mettre ÃƒÂ  jour le statut');
+=======
+      throw new Error(json?.error || 'Impossible de mettre à jour le statut');
+    }
+    return json;
+  },
+
+  async updateBugReport(id: string, payload: {
+    title?: string;
+    description?: string;
+    module?: 'admission' | 'rh' | 'commercial' | 'other';
+    priority?: 'low' | 'medium' | 'high' | 'critical';
+    screenshotUrl?: string;
+  }): Promise<any> {
+    const response = await fetch(`${SUPPORT_URL}/bugs/${id}`, {
+      method: 'PATCH',
+      headers: withAuthHeaders({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      }),
+      body: JSON.stringify(payload),
+    });
+
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(json?.error || 'Impossible de mettre à jour le ticket');
+    }
+    return json;
+  },
+
+  async deleteBugReport(id: string): Promise<any> {
+    const response = await fetch(`${SUPPORT_URL}/bugs/${id}`, {
+      method: 'DELETE',
+      headers: withAuthHeaders({
+        Accept: 'application/json',
+      }),
+    });
+
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(json?.error || 'Impossible de supprimer le ticket');
+>>>>>>> d9d9c7361e04442fd8efc05e6f672f8b1dcde87a
     }
     return json;
   }
