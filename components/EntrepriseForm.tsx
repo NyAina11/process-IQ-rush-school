@@ -368,7 +368,6 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
     const dateDebutGlobal = watch('contrat.date_debut_execution');
     const dateFinGlobal = watch('contrat.date_fin');
 
-<<<<<<< HEAD
     const parseIsoDate = (value: string): Date | null => {
         if (!value) return null;
         const d = new Date(`${value}T00:00:00`);
@@ -418,120 +417,6 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                 setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
                 setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
                 continue;
-=======
-    const applyQuickFill = useCallback((startDate: string, endDate: string) => {
-        if (!startDate || !endDate) return;
-
-        let currentStart = new Date(startDate);
-        const endOfContract = new Date(endDate);
-        if (isNaN(currentStart.getTime()) || isNaN(endOfContract.getTime()) || currentStart > endOfContract) return;
-
-        const birth = studentDateNaissance ? parseSharedDate(studentDateNaissance) : null;
-        const years = ['1er', '2eme', '3eme', '4eme'];
-
-        for (let i = 0; i < 4; i++) {
-            const suffix = years[i];
-
-            if (currentStart > endOfContract) {
-                // Clear remaining
-                setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, "");
-                setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, "");
-                setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
-                setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
-                continue;
-            }
-
-            // Calculate what a full year would be
-            let yearEnd = new Date(currentStart);
-            yearEnd.setFullYear(yearEnd.getFullYear() + 1);
-            yearEnd.setDate(yearEnd.getDate() - 1);
-
-            let bracketChanges = false;
-
-            if (birth && !isNaN(birth.getTime())) {
-                const ageAtStart = getRawAge(studentDateNaissance, currentStart.toISOString().split('T')[0]);
-                const ageAtEnd = getRawAge(studentDateNaissance, yearEnd.toISOString().split('T')[0]);
-
-                if (ageAtStart !== null && ageAtEnd !== null && ageAtEnd > ageAtStart) {
-                    let bdayYear = currentStart.getFullYear();
-                    let bdayThisYear = new Date(bdayYear, birth.getMonth(), birth.getDate());
-                    if (bdayThisYear < currentStart) {
-                        bdayYear++;
-                    }
-                    const newAge = bdayYear - birth.getFullYear();
-                    if ([18, 21, 26].includes(newAge)) {
-                        bracketChanges = true;
-                    }
-                }
-            }
-
-            if (bracketChanges) {
-                // Split exactly into two 6-month periods (original logic)
-                const p1Start = new Date(currentStart);
-                const p1End = new Date(p1Start);
-                p1End.setMonth(p1End.getMonth() + 6);
-                p1End.setDate(p1End.getDate() - 1);
-
-                if (p1End >= endOfContract) {
-                    setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
-                    setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, endOfContract.toISOString().split('T')[0]);
-                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
-                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
-                    currentStart = new Date(endOfContract);
-                    currentStart.setDate(currentStart.getDate() + 1);
-                    continue;
-                } else {
-                    setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
-                    setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, p1End.toISOString().split('T')[0]);
-                }
-
-                const p2Start = new Date(p1End);
-                p2Start.setDate(p2Start.getDate() + 1);
-
-                if (p2Start > endOfContract) {
-                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
-                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
-                    continue;
-                }
-
-                const p2End = new Date(p2Start);
-                p2End.setMonth(p2End.getMonth() + 6);
-                p2End.setDate(p2End.getDate() - 1);
-
-                if (p2End >= endOfContract) {
-                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, p2Start.toISOString().split('T')[0]);
-                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, endOfContract.toISOString().split('T')[0]);
-                    currentStart = new Date(endOfContract);
-                    currentStart.setDate(currentStart.getDate() + 1);
-                } else {
-                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, p2Start.toISOString().split('T')[0]);
-                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, p2End.toISOString().split('T')[0]);
-                    currentStart = new Date(p2End);
-                    currentStart.setDate(currentStart.getDate() + 1);
-                }
-            } else {
-                // Single period for exactly 1 year (or up to end of contract)
-                const p1Start = new Date(currentStart);
-                const p1End = new Date(p1Start);
-                p1End.setFullYear(p1End.getFullYear() + 1);
-                p1End.setDate(p1End.getDate() - 1);
-
-                if (p1End >= endOfContract) {
-                    setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
-                    setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, endOfContract.toISOString().split('T')[0]);
-                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
-                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
-                    currentStart = new Date(endOfContract);
-                    currentStart.setDate(currentStart.getDate() + 1);
-                } else {
-                    setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
-                    setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, p1End.toISOString().split('T')[0]);
-                    setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
-                    setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
-                    currentStart = new Date(p1End);
-                    currentStart.setDate(currentStart.getDate() + 1);
-                }
->>>>>>> d9d9c7361e04442fd8efc05e6f672f8b1dcde87a
             }
 
             const yearStart = new Date(currentStart);
@@ -577,16 +462,16 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
 
             currentStart = addDays(yearEnd, 1);
         }
-    }, [setValue, studentDateNaissance]);
+    }, [setValue]);
 
     useEffect(() => {
-<<<<<<< HEAD
-        applyQuickFill(quickStartDate, quickDuration, formData?.contrat?.date_fin || '', studentDateNaissance);
-    }, [quickStartDate, quickDuration, formData?.contrat?.date_fin, studentDateNaissance, applyQuickFill]);
-=======
-        applyQuickFill(dateDebutGlobal, dateFinGlobal);
-    }, [dateDebutGlobal, dateFinGlobal, applyQuickFill]);
->>>>>>> d9d9c7361e04442fd8efc05e6f672f8b1dcde87a
+        if (!dateDebutGlobal || !dateFinGlobal) return;
+        const start = parseIsoDate(dateDebutGlobal);
+        const end = parseIsoDate(dateFinGlobal);
+        if (!start || !end || end < start) return;
+        const durationYears = Math.max(1, Math.ceil((end.getTime() - start.getTime() + 1) / (365.25 * 24 * 60 * 60 * 1000)));
+        applyQuickFill(dateDebutGlobal, String(durationYears), dateFinGlobal, studentDateNaissance);
+    }, [dateDebutGlobal, dateFinGlobal, studentDateNaissance, applyQuickFill]);
 
     // Helper to get percentage from bracket and year
     const getRateFromBracket = (bracket: string | null, year: number): number => {
@@ -1352,3 +1237,4 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
 };
 
 export default EntrepriseForm;
+

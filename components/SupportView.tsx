@@ -153,20 +153,8 @@ const SupportView: React.FC = () => {
         pagePath: window.location.pathname,
         screenshotUrl: screenshotUrl || undefined,
       });
-<<<<<<< HEAD
-      showToast('Bug signalé avec succès', 'success');
-      setForm({
-        title: '',
-        description: '',
-        module: role === 'rh' ? 'rh' : role === 'commercial' ? 'commercial' : 'admission',
-        priority: 'medium',
-      });
-      setScreenshotFile(null);
-      setScreenshotPreview('');
-=======
-      showToast('Ticket créé', 'success');
+      showToast('Ticket cr��', 'success');
       handleCancelRow();
->>>>>>> d9d9c7361e04442fd8efc05e6f672f8b1dcde87a
       await loadBugs();
     } catch (error: any) {
       showToast(error?.message || 'Erreur lors de la création', 'error');
@@ -737,3 +725,4 @@ const SupportView: React.FC = () => {
 };
 
 export default SupportView;
+
