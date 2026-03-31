@@ -57,7 +57,13 @@ const SupportView: React.FC = () => {
     priority: 'medium' as BugPriority,
   });
 
-  const role = (localStorage.getItem('userRole') || 'unknown').toLowerCase();
+  const normalizeRole = (raw: string): string => {
+    const role = String(raw || '').trim().toLowerCase();
+    if (role === 'admissions') return 'admission';
+    if (role === 'superadmin') return 'super_admin';
+    return role || 'unknown';
+  };
+  const role = normalizeRole(localStorage.getItem('userRole') || 'unknown');
   const email = localStorage.getItem('userEmail') || '';
   const name = localStorage.getItem('userName') || '';
   const isSuperAdmin = role === 'super_admin' || role === 'admin';
@@ -131,7 +137,7 @@ const SupportView: React.FC = () => {
       setForm({
         title: '',
         description: '',
-        module: role === 'rh' ? 'rh' : 'admission',
+        module: role === 'rh' ? 'rh' : role === 'commercial' ? 'commercial' : 'admission',
         priority: 'medium',
       });
       setScreenshotFile(null);

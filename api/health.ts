@@ -5,7 +5,7 @@ export default function handler(req: any, res: any) {
         url: req.url,
         query: req.query,
         env: {
-            has_airtable_key: !!process.env.AIRTABLE_API_KEY,
+            has_airtable_key: !!(process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_API_TOKEN),
             node_env: process.env.NODE_ENV
         }
     });

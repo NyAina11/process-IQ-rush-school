@@ -26,7 +26,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             className={`
-              w-full px-4 py-3 bg-white border rounded-[4px] text-base text-slate-800 placeholder:text-slate-400
+              w-full px-4 py-3 bg-white border rounded-[4px] text-[16px] leading-[1.25] text-slate-800 placeholder:text-slate-400
               transition-all focus:ring-4 focus:outline-none
               ${leftIcon ? 'pl-12' : ''}
               ${error 

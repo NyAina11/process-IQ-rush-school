@@ -352,52 +352,105 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
     const [quickStartDate, setQuickStartDate] = useState<string>('');
     const [quickDuration, setQuickDuration] = useState<string>('');
 
-    const applyQuickFill = useCallback((startDate: string, durationStr: string) => {
-        if (!startDate || !durationStr) return;
-        const durationYears = parseInt(durationStr);
-        if (isNaN(durationYears)) return;
+    const parseIsoDate = (value: string): Date | null => {
+        if (!value) return null;
+        const d = new Date(`${value}T00:00:00`);
+        return Number.isNaN(d.getTime()) ? null : d;
+    };
 
-        let currentStart = new Date(startDate);
-        const years = ['1er', '2eme', '3eme', '4eme'];
+    const formatIsoDate = (d: Date): string => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    };
+
+    const addDays = (d: Date, days: number): Date => {
+        const next = new Date(d);
+        next.setDate(next.getDate() + days);
+        return next;
+    };
+
+    const addYears = (d: Date, years: number): Date => {
+        const next = new Date(d);
+        next.setFullYear(next.getFullYear() + years);
+        return next;
+    };
+
+    const minDate = (a: Date, b: Date): Date => (a <= b ? a : b);
+
+    const applyQuickFill = useCallback((startDate: string, durationStr: string, contractEndDate: string, birthDate?: string) => {
+        if (!startDate || !durationStr) return;
+        const durationYears = parseInt(durationStr, 10);
+        const start = parseIsoDate(startDate);
+        if (!start || Number.isNaN(durationYears) || durationYears < 1) return;
+
+        const inferredEnd = addDays(addYears(start, durationYears), -1);
+        const explicitEnd = parseIsoDate(contractEndDate);
+        const effectiveEnd = explicitEnd && explicitEnd >= start ? explicitEnd : inferredEnd;
+
+        const years = ['1er', '2eme', '3eme', '4eme'] as const;
+        let currentStart = new Date(start);
 
         for (let i = 0; i < 4; i++) {
             const suffix = years[i];
-            if (i < durationYears) {
-                // Period 1
-                const p1Start = new Date(currentStart);
-                const p1End = new Date(p1Start);
-                p1End.setMonth(p1End.getMonth() + 6);
-                p1End.setDate(p1End.getDate() - 1);
 
-                setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, p1Start.toISOString().split('T')[0]);
-                setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, p1End.toISOString().split('T')[0]);
-
-                // Period 2
-                const p2Start = new Date(p1End);
-                p2Start.setDate(p2Start.getDate() + 1);
-                const p2End = new Date(p2Start);
-                p2End.setMonth(p2End.getMonth() + 6);
-                p2End.setDate(p2End.getDate() - 1);
-
-                setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, p2Start.toISOString().split('T')[0]);
-                setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, p2End.toISOString().split('T')[0]);
-
-                // Prepare for next year
-                currentStart = new Date(p2End);
-                currentStart.setDate(currentStart.getDate() + 1);
-            } else {
-                // Clear years beyond duration
+            if (i >= durationYears || currentStart > effectiveEnd) {
                 setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, "");
                 setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, "");
                 setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
                 setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
+                continue;
             }
+
+            const yearStart = new Date(currentStart);
+            const nominalYearEnd = addDays(addYears(yearStart, 1), -1);
+            const yearEnd = minDate(nominalYearEnd, effectiveEnd);
+            const yearNumber = i + 1;
+
+            const rateAtStart = getRateFromBracket(getAgeBracket(birthDate, formatIsoDate(yearStart)), yearNumber);
+            let splitStart: Date | null = null;
+
+            if (birthDate) {
+                const birth = parseIsoDate(birthDate);
+                if (birth) {
+                    const month = birth.getMonth();
+                    const day = birth.getDate();
+
+                    let candidate = new Date(yearStart.getFullYear(), month, day);
+                    if (candidate < yearStart) {
+                        candidate = new Date(yearStart.getFullYear() + 1, month, day);
+                    }
+
+                    if (candidate >= yearStart && candidate <= yearEnd) {
+                        const rateAfterBirthday = getRateFromBracket(getAgeBracket(birthDate, formatIsoDate(candidate)), yearNumber);
+                        if (rateAfterBirthday !== rateAtStart) {
+                            splitStart = candidate;
+                        }
+                    }
+                }
+            }
+
+            if (splitStart) {
+                const p1End = addDays(splitStart, -1);
+                setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, formatIsoDate(yearStart));
+                setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, formatIsoDate(p1End));
+                setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, formatIsoDate(splitStart));
+                setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, formatIsoDate(yearEnd));
+            } else {
+                setValue(`contrat.date_debut_1periode_${suffix}_annee` as any, formatIsoDate(yearStart));
+                setValue(`contrat.date_fin_1periode_${suffix}_annee` as any, formatIsoDate(yearEnd));
+                setValue(`contrat.date_debut_2periode_${suffix}_annee` as any, "");
+                setValue(`contrat.date_fin_2periode_${suffix}_annee` as any, "");
+            }
+
+            currentStart = addDays(yearEnd, 1);
         }
     }, [setValue]);
 
     useEffect(() => {
-        applyQuickFill(quickStartDate, quickDuration);
-    }, [quickStartDate, quickDuration, applyQuickFill]);
+        applyQuickFill(quickStartDate, quickDuration, formData?.contrat?.date_fin || '', studentDateNaissance);
+    }, [quickStartDate, quickDuration, formData?.contrat?.date_fin, studentDateNaissance, applyQuickFill]);
 
     // Helper to get percentage from bracket and year
     const getRateFromBracket = (bracket: string | null, year: number): number => {
