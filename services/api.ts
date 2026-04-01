@@ -627,59 +627,46 @@ const diffObjects = (original: any, modified: any): any => {
 export const api = {
   // --- AUTH ---
   async login(email: string, pass: string): Promise<{ access_token: string, role: string, email: string, name: string }> {
-    const response = await fetch(`${AUTH_API_URL}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        email,
-        password: pass
-      })
-    });
+    console.log('📤 Mock Login Attempt:', email);
 
-    const data = await readJsonSafely(response);
-    if (!response.ok) {
-      const message = getApiErrorMessage(data, `Login failed (${response.status})`);
-      throw new Error(message);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    let role = 'admission';
+    let name = 'Utilisateur';
+
+    const emailLower = email.toLowerCase();
+    
+    // Custom roles requested by the user
+    if (emailLower === 'responsable@processiq.fr' || emailLower === 'responsable1@rush.fr') {
+      role = 'admission';
+      name = 'Responsable Admission';
+    } else if (emailLower.includes('superadmin')) {
+      role = 'super_admin';
+      name = 'Super Administrateur';
+    } else if (emailLower.includes('rh')) {
+      role = 'rh';
+      name = 'Responsable RH';
+    } else if (emailLower.includes('commercial')) {
+      role = 'commercial';
+      name = 'Conseiller Commercial';
+    } else if (emailLower.includes('etudiant') || emailLower.includes('eleve')) {
+      role = 'eleve';
+      name = 'Étudiant Démo';
+    } else if (emailLower.includes('admission')) {
+      role = 'admission';
+      name = 'Chargé d\'Admission';
     }
 
-    const accessToken = String(data?.access_token || '');
-    if (!accessToken) {
-      throw new Error('Token de connexion manquant');
-    }
-
-    let role = '';
-    let name = '';
-    let normalizedEmail = email;
-
-    try {
-      const meResponse = await fetch(`${AUTH_API_URL}/me`, {
-        method: 'GET',
-        headers: {
-          ...withAuthHeaders({
-            'Accept': 'application/json'
-          }),
-          Authorization: `Bearer ${accessToken}`
-        }
-      });
-      const meData = await readJsonSafely(meResponse);
-      if (meResponse.ok) {
-        role = String(meData?.user?.role || '');
-        name = String(meData?.user?.name || '');
-        normalizedEmail = String(meData?.user?.email || normalizedEmail);
-      }
-    } catch {
-      // Keep login successful even if profile lookup fails.
-    }
-
-    return {
-      access_token: accessToken,
-      role,
-      email: normalizedEmail,
-      name
+    const mockData = {
+      access_token: 'mock-jwt-token-' + Date.now(),
+      role: role,
+      email: email,
+      name: name
     };
+
+    console.log('📥 Mock Login Success:', mockData);
+    return mockData;
   },
   async register(userData: any): Promise<{ access_token: string }> {
     console.log('Ã°Å¸â€œÂ¤ Mock Register Attempt:', userData.email);
