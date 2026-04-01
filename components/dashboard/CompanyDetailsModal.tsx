@@ -187,7 +187,8 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                             <Input label="Prénom" value={editForm?.maitre_apprentissage?.prenom} onChange={e => updateNestedField('maitre_apprentissage.prenom', e.target.value)} />
                                             <Input label="Date de naissance" type="date" value={editForm?.maitre_apprentissage?.date_naissance} onChange={e => updateNestedField('maitre_apprentissage.date_naissance', e.target.value)} />
                                             <Input label="Fonction" value={editForm?.maitre_apprentissage?.fonction} onChange={e => updateNestedField('maitre_apprentissage.fonction', e.target.value)} />
-                                            <Select label="Diplôme" options={MAITRE_DIPLOMA_OPTIONS} value={editForm?.maitre_apprentissage?.diplome} onChange={e => updateNestedField('maitre_apprentissage.diplome', e.target.value)} />
+                                            <Input label="Dipl�me ou titre le plus �lev� obtenu" value={editForm?.maitre_apprentissage?.diplome_plus_eleve || ""} onChange={e => updateNestedField('maitre_apprentissage.diplome_plus_eleve', e.target.value)} />
+                                            <Select label="Niveau du dipl�me ou titre le plus �lev� obtenu" options={MAITRE_DIPLOMA_OPTIONS} value={editForm?.maitre_apprentissage?.diplome} onChange={e => updateNestedField('maitre_apprentissage.diplome', e.target.value)} />
                                             <Input label="Expérience" value={editForm?.maitre_apprentissage?.experience} onChange={e => updateNestedField('maitre_apprentissage.experience', e.target.value)} />
                                             <Input label="Téléphone" value={editForm?.maitre_apprentissage?.telephone} onChange={e => updateNestedField('maitre_apprentissage.telephone', e.target.value)} />
                                             <Input label="Email" type="email" value={editForm?.maitre_apprentissage?.email} onChange={e => updateNestedField('maitre_apprentissage.email', e.target.value)} />
@@ -353,7 +354,8 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                             {renderInfoRow("Prénom", fields["Prénom Maître apprentissage"], User)}
                                             {renderInfoRow("Date de naissance", fields["Date de naissance Maître apprentissage"], Clock)}
                                             {renderInfoRow("Fonction", fields["Fonction Maître apprentissage"], Briefcase)}
-                                            {renderInfoRow("Diplôme", fields["Diplôme Maître apprentissage"], GraduationCap)}
+                                            {renderInfoRow("Dipl�me ou titre le plus �lev� obtenu", fields["Diplôme Maître apprentissage intitulé"] || fields["Diplôme Maître apprentissage"], GraduationCap)}
+                                            {renderInfoRow("Niveau du dipl�me ou titre le plus �lev� obtenu", fields["Diplôme Maître apprentissage"], GraduationCap)}
                                             {renderInfoRow("Expérience (années)", fields["Année experience pro Maître apprentissage"], Clock)}
                                             {renderInfoRow("Téléphone", fields["Téléphone Maître apprentissage"], Phone)}
                                             {renderInfoRow("Email", fields["Email Maître apprentissage"], Mail)}

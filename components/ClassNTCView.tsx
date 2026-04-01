@@ -154,6 +154,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                 prenom: f["Prénom Maître apprentissage"] || "",
                 date_naissance: f["Date de naissance Maître apprentissage"] || "",
                 fonction: f["Fonction Maître apprentissage"] || "",
+                diplome_plus_eleve: f["Diplôme Maître apprentissage intitulé"] || f["Diplôme Maître apprentissage"] || "",
                 diplome: f["Diplôme Maître apprentissage"] || "",
                 experience: f["Année experience pro Maître apprentissage"] || "",
                 telephone: f["Téléphone Maître apprentissage"] || "",

@@ -208,6 +208,7 @@ const mapBackendToCompany = (backendData: any): any => {
       prenom: fields["PrÃƒÂ©nom MaÃƒÂ®tre apprentissage"] || "",
       date_naissance: fields["Date de naissance MaÃƒÂ®tre apprentissage"] || "",
       fonction: fields["Fonction MaÃƒÂ®tre apprentissage"] || "",
+      diplome_plus_eleve: fields["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage intitulÃƒÂ©"] || fields["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage"] || "",
       diplome: fields["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage"] || "",
       experience: fields["AnnÃƒÂ©e experience pro MaÃƒÂ®tre apprentissage"] || "",
       telephone: fields["TÃƒÂ©lÃƒÂ©phone MaÃƒÂ®tre apprentissage"] || "",
@@ -433,7 +434,8 @@ const mapCompanyToBackend = (data: any, role?: string) => {
         prenom: ensureString(data.maitre_apprentissage?.prenom),
         date_naissance: ensureString(data.maitre_apprentissage?.date_naissance),
         fonction: ensureString(data.maitre_apprentissage?.fonction),
-        diplome_plus_eleve: ensureString(data.maitre_apprentissage?.diplome || data.maitre_apprentissage?.diplome_plus_eleve),
+        diplome_plus_eleve: ensureString(data.maitre_apprentissage?.diplome_plus_eleve || data.maitre_apprentissage?.diplome),
+        niveau_diplome: ensureString(data.maitre_apprentissage?.niveau_diplome || data.maitre_apprentissage?.diplome),
         annees_experience: ensureString(data.maitre_apprentissage?.experience || data.maitre_apprentissage?.annees_experience),
         telephone: ensureString(data.maitre_apprentissage?.telephone),
         email: ensureString(data.maitre_apprentissage?.email)
@@ -536,7 +538,8 @@ const mapCompanyToBackend = (data: any, role?: string) => {
       prenom: ensureString(data["PrÃƒÂ©nom MaÃƒÂ®tre apprentissage"]),
       date_naissance: ensureString(data["Date de naissance MaÃƒÂ®tre apprentissage"]),
       fonction: ensureString(data["Fonction MaÃƒÂ®tre apprentissage"]),
-      diplome_plus_eleve: ensureString(data["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage"]),
+      diplome_plus_eleve: ensureString(data["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage intitulÃƒÂ©"] || data["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage"]),
+      niveau_diplome: ensureString(data["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage"]),
       annees_experience: ensureString(data["AnnÃƒÂ©e experience pro MaÃƒÂ®tre apprentissage"]),
       telephone: ensureString(data["TÃƒÂ©lÃƒÂ©phone MaÃƒÂ®tre apprentissage"]),
       email: ensureString(data["Email MaÃƒÂ®tre apprentissage"])

@@ -52,6 +52,7 @@ const companySchema = z.object({
         prenom: z.string().min(2, "Le pr√©nom est requis"),
         date_naissance: z.string().min(1, "La date de naissance est requise"),
         fonction: z.string().optional().or(z.literal("")),
+        diplome_plus_eleve: z.string().optional().or(z.literal("")),
         diplome: z.string().min(1, "Veuillez s√©lectionner le dipl√¥me"),
         experience: z.string().optional().or(z.literal("")),
         telephone: z.string().optional().or(z.literal("")),
@@ -237,7 +238,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
         defaultValues: {
             identification: validDraft?.identification || { raison_sociale: "", siret: "", code_ape_naf: "", type_employeur: "", employeur_specifique: "Aucun de ces cas", effectif: "", convention: "" },
             adresse: validDraft?.adresse || { num: "", voie: "", complement: "", code_postal: "", ville: "", telephone: "", email: "" },
-            maitre_apprentissage: validDraft?.maitre_apprentissage || { nom: "", prenom: "", date_naissance: "", fonction: "", diplome: "", experience: "", telephone: "", email: "" },
+            maitre_apprentissage: validDraft?.maitre_apprentissage || { nom: "", prenom: "", date_naissance: "", fonction: "", diplome_plus_eleve: "", diplome: "", experience: "", telephone: "", email: "" },
             opco: validDraft?.opco || { nom: "" },
             formation: validDraft?.formation || { choisie: "", date_debut: "", date_fin: "", code_rncp: "", code_diplome: "", nb_heures: "", jours_cours: "" },
             cfa: validDraft?.cfa || {
@@ -790,8 +791,16 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                 <Input label="Fonction" placeholder="Poste occup√©" error={errors.maitre_apprentissage?.fonction?.message} {...register('maitre_apprentissage.fonction')} />
                             </div>
                             <div className="fiche-field">
+                                <Input
+                                    label="DiplÙme ou titre le plus ÈlevÈ obtenu"
+                                    placeholder="Ex: BTS MCO"
+                                    error={errors.maitre_apprentissage?.diplome_plus_eleve?.message}
+                                    {...register('maitre_apprentissage.diplome_plus_eleve')}
+                                />
+                            </div>
+                            <div className="fiche-field">
                                 <Select
-                                    label="Dipl√¥me le plus √©lev√©"
+                                    label="Niveau du diplÙme ou titre le plus ÈlevÈ obtenu"
                                     error={errors.maitre_apprentissage?.diplome?.message}
                                     {...register('maitre_apprentissage.diplome')}
                                     options={MAITRE_DIPLOMA_OPTIONS}

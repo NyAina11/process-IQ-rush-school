@@ -160,6 +160,7 @@ export interface CompanyFormData {
     prenom: string;
     date_naissance: string;
     fonction?: string;
+    diplome_plus_eleve?: string;
     diplome?: string;
     experience?: string | number;
     telephone?: string;
