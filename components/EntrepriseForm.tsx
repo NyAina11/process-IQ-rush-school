@@ -597,18 +597,18 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
 
     const handleSaveDraft = () => {
         setDraftCompany(watch());
-        showToast("Brouillon sauvegardé — vos données sont conservées.", "success");
+        showToast("Brouillon sauvegardé â vos données sont conservées.", "success");
     };
 
     const onSubmit = async (data: CompanyFormValues) => {
-        console.log('📝 Submitting Company for Student ID (Prop):', studentRecordId);
+        console.log('ð Submitting Company for Student ID (Prop):', studentRecordId);
         if (!studentRecordId) {
             showToast("Erreur: ID étudiant manquant. Veuillez revenir à l'étape précédente.", "error");
             return;
         }
         // Force the correct ID from props into the payload to avoid stale draft data
         const finalData = { ...data, record_id_etudiant: studentRecordId };
-        console.log('📦 Final Payload sent to API:', finalData);
+        console.log('ð¦ Final Payload sent to API:', finalData);
         const userRole = localStorage.getItem('userRole') || 'admission';
         await submitCompany(finalData as any, userRole);
     };
@@ -741,7 +741,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                         </div>
                         <div className="fiche-form-grid">
                             <div className="fiche-field">
-                                <Input label="Numéro" placeholder="N°" {...register('adresse.num')} />
+                                <Input label="Numéro" placeholder="NÂ°" {...register('adresse.num')} />
                             </div>
                             <div className="fiche-field">
                                 <Input label="Voie" required placeholder="Rue, avenue, boulevard..." error={errors.adresse?.voie?.message} {...register('adresse.voie')} />
@@ -792,7 +792,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                             </div>
                             <div className="fiche-field">
                                 <Input
-                                    label="Dipl�me ou titre le plus �lev� obtenu"
+                                    label="Diplôme ou titre le plus élevé obtenu"
                                     placeholder="Ex: BTS MCO"
                                     error={errors.maitre_apprentissage?.diplome_plus_eleve?.message}
                                     {...register('maitre_apprentissage.diplome_plus_eleve')}
@@ -800,7 +800,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                             </div>
                             <div className="fiche-field">
                                 <Select
-                                    label="Niveau du dipl�me ou titre le plus �lev� obtenu"
+                                    label="Niveau du diplôme ou titre le plus élevé obtenu"
                                     error={errors.maitre_apprentissage?.diplome?.message}
                                     {...register('maitre_apprentissage.diplome')}
                                     options={MAITRE_DIPLOMA_OPTIONS}
@@ -973,7 +973,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                 <Input label="Lieu d'exécution" placeholder="Adresse si différente" {...register('contrat.lieu_execution')} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
-                                <Input label="N° DECA ancien contrat" placeholder="Si applicable" {...register('contrat.numero_deca_ancien_contrat')} />
+                                <Input label="NÂ° DECA ancien contrat" placeholder="Si applicable" {...register('contrat.numero_deca_ancien_contrat')} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
                                 <Select label="Travail sur machines dangereuses" required {...register('contrat.machines_dangereuses')} options={YES_NO_OPTIONS} />
@@ -981,7 +981,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                             <div className="col-span-12 md:col-span-6">
                                 <Input label="Caisse de retraite" placeholder="Nom de la caisse" {...register('contrat.caisse_retraite')} />
                             </div>
-                            {/* Ordre des dates : conclusion → début exécution → avenant → fin */}
+                            {/* Ordre des dates : conclusion â début exécution â avenant â fin */}
                             <div className="col-span-12 md:col-span-6">
                                 <Input label="Date de conclusion" type="date" error={errors.contrat?.date_conclusion?.message} {...register('contrat.date_conclusion')} />
                             </div>
@@ -1006,7 +1006,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                         <div>
                                             <div className="text-white font-bold text-[15px] tracking-tight">Simulateur de salaire apprenti</div>
                                             <div className="text-white/50 text-[11px] font-medium mt-0.5">
-                                                {studentDateNaissance ? 'Base SMIC 2024 · 1 823,03 € brut/mois' : 'Date de naissance manquante'}
+                                                {studentDateNaissance ? 'Base SMIC 2024 Â· 1 823,03 â¬ brut/mois' : 'Date de naissance manquante'}
                                             </div>
                                         </div>
                                     </div>
