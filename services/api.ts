@@ -363,7 +363,8 @@ const mapStudentToBackend = (data: any, role?: string) => {
       'bac5': '73 Master', 
       'bac5+': '80 Doctorat'
     };
-    return map[v.toLowerCase()] || v;
+    const low = v.toLowerCase();
+    return map[low] || v;
   };
 
   const mapFormation = (v: string) => {
