@@ -1296,7 +1296,7 @@ export const api = {
           group.eleves.forEach((e: any, idx: number) => {
             flattenedHistory.push({
               id: `e-${group.utilisateur}-${e.record_id}-${idx}`,
-              action: 'Modification ÉÆââ¬Â°tudiant',
+              action: 'Modification Étudiant',
               details: `Mise à jour du dossier de ${e.prenom || ''} ${e.nom || ''} (${e.email || 'Pas d\'email'})`,
               date: e.date_action || new Date().toISOString(),
               utilisateur: user,

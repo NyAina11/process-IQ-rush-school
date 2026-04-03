@@ -741,7 +741,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                         </div>
                         <div className="fiche-form-grid">
                             <div className="fiche-field">
-                                <Input label="Numéro" placeholder="NÂ°" {...register('adresse.num')} />
+                                <Input label="Numéro" placeholder="N°" {...register('adresse.num')} />
                             </div>
                             <div className="fiche-field">
                                 <Input label="Voie" required placeholder="Rue, avenue, boulevard..." error={errors.adresse?.voie?.message} {...register('adresse.voie')} />
@@ -973,7 +973,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                 <Input label="Lieu d'exécution" placeholder="Adresse si différente" {...register('contrat.lieu_execution')} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
-                                <Input label="NÂ° DECA ancien contrat" placeholder="Si applicable" {...register('contrat.numero_deca_ancien_contrat')} />
+                                <Input label="N° DECA ancien contrat" placeholder="Si applicable" {...register('contrat.numero_deca_ancien_contrat')} />
                             </div>
                             <div className="col-span-12 md:col-span-6">
                                 <Select label="Travail sur machines dangereuses" required {...register('contrat.machines_dangereuses')} options={YES_NO_OPTIONS} />
@@ -1006,7 +1006,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                         <div>
                                             <div className="text-white font-bold text-[15px] tracking-tight">Simulateur de salaire apprenti</div>
                                             <div className="text-white/50 text-[11px] font-medium mt-0.5">
-                                                {studentDateNaissance ? 'Base SMIC 2024 Â· 1 823,03 â¬ brut/mois' : 'Date de naissance manquante'}
+                                                {studentDateNaissance ? 'Base SMIC 2024 · 1 823,03 € brut/mois' : 'Date de naissance manquante'}
                                             </div>
                                         </div>
                                     </div>

@@ -224,9 +224,12 @@ export const HIGHEST_DIPLOMA_OPTIONS: SelectOption[] = [
     { value: "Certificat de spécialisation", label: "35 Certificat de spécialisation (ex-Mention complémentaire)" },
     { value: "Autre diplôme ou titre CAP/BEP", label: "38 Autre diplôme ou titre de niveau CAP/BEP" },
     { value: "header6", label: "Aucun diplôme ni titre", disabled: true },
-    { value: "Diplôme National du Brevet", label: "25 Diplôme national du Brevet" },
-    { value: "Certificat de Formation Générale", label: "26 Certificat de formation générale" },
-    { value: "Aucun diplôme ni titre professionnel", label: "13 Aucun diplôme ni titre professionnel" }
+    { value: "Diplôme National du Brevet", label: "25 Brevet" },
+    { value: "25 Diplôme national du Brevet", label: "25 Brevet (National)" },
+    { value: "Certificat de Formation Générale", label: "26 Certificat formation" },
+    { value: "26 Certificat de formation générale", label: "26 Certificat formation (Générale)" },
+    { value: "Aucun diplôme ni titre professionnel", label: "13 Aucun titre" },
+    { value: "13 Aucun diplôme ni titre professionnel", label: "13 Aucun titre (Pro)" }
 ];
 
 export const FORMATION_SOUHAITEE_OPTIONS: SelectOption[] = [
