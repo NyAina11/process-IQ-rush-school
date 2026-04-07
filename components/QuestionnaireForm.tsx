@@ -591,7 +591,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                     <div className="space-y-4">
                         <Select label="Dernier diplôme ou titre préparé" {...register('dernier_diplome_prepare')} options={DETAILED_DIPLOMA_OPTIONS} placeholder="Sélectionnez" />
                         <Select label="Dernière classe / année suivie" required error={errors.derniere_classe?.message} {...register('derniere_classe')} options={LAST_CLASS_OPTIONS} placeholder="Sélectionnez" />
-                        <Input label="Intitulé précis du dernier diplôme ou titre préparé" placeholder="Ex: Licence Informatique" {...register('intitulePrecisDernierDiplome')} />
+                        <Input label="Intitulé précis du dernier diplôme ou titre préparé" placeholder="Ex: LICENCE INFORMATIQUE" {...register('intitulePrecisDernierDiplome', { onChange: (e) => { e.target.value = e.target.value.toUpperCase(); } })} />
                         <Select label="Diplôme ou titre le plus élevé obtenu" required error={errors.bac?.message} {...register('bac')} options={HIGHEST_DIPLOMA_OPTIONS} placeholder="Sélectionnez votre diplôme" />
                     </div>
                 </SectionAccordion>

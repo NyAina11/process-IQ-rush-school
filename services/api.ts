@@ -423,7 +423,7 @@ const mapStudentToBackend = (data: any, role?: string) => {
     dernier_diplome_prepare: mapDiplome(data.dernier_diplome_prepare || ""),
     derniere_classe: data.derniere_classe || "",
     bac: mapNiveau(data.bac) || "",
-    intitulePrecisDernierDiplome: data.intitulePrecisDernierDiplome || "",
+    intitulePrecisDernierDiplome: (data.intitulePrecisDernierDiplome || "").toUpperCase(),
     formation_souhaitee: mapFormation(data.formation_souhaitee),
     date_de_visite: data.date_de_visite || new Date().toISOString().split('T')[0],
     date_de_reglement: data.date_de_reglement || new Date().toISOString().split('T')[0],

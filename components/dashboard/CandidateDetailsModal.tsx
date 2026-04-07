@@ -355,7 +355,7 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                                         <Input
                                             label="Intitulé précis du dernier diplôme ou titre préparé"
                                             value={editForm?.intitulePrecisDernierDiplome || ""}
-                                            onChange={(e) => setEditForm({ ...editForm, intitulePrecisDernierDiplome: e.target.value })}
+                                            onChange={(e) => setEditForm({ ...editForm, intitulePrecisDernierDiplome: e.target.value.toUpperCase() })}
                                         />
                                         <Select
                                             label="Diplôme ou titre le plus élevé obtenu"
