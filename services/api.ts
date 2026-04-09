@@ -1,5 +1,12 @@
 import { StudentFormData, CompanyFormData, ApiResponse } from '../types';
-import { getAuthToken } from './session';
+import {
+  decodeJwtPayload,
+  getAuthEmail,
+  getAuthStudentId,
+  getAuthToken,
+  getCurrentStudentId as getStoredStudentId,
+  setCurrentStudentId,
+} from './session';
 import { decimalToTime, timeToDecimal } from '../utils/formatters';
 
 const BASE_API_URL = (import.meta.env.VITE_BASE_API_URL || '/api').replace(/\/+$/, '');
@@ -647,46 +654,65 @@ const diffObjects = (original: any, modified: any): any => {
 export const api = {
   // --- AUTH ---
   async login(email: string, pass: string): Promise<{ access_token: string, role: string, email: string, name: string }> {
-    console.log('📤 Mock Login Attempt:', email);
+    console.log('Login attempt:', email);
 
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const response = await fetch(`${AUTH_API_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        password: pass
+      })
+    });
 
-    let role = 'admission';
-    let name = 'Utilisateur';
-
-    const emailLower = email.toLowerCase();
-    
-    // Custom roles requested by the user
-    if (emailLower === 'responsable@processiq.fr' || emailLower === 'responsable1@rush.fr') {
-      role = 'admission';
-      name = 'Responsable Admission';
-    } else if (emailLower.includes('superadmin')) {
-      role = 'super_admin';
-      name = 'Super Administrateur';
-    } else if (emailLower.includes('rh')) {
-      role = 'rh';
-      name = 'Responsable RH';
-    } else if (emailLower.includes('commercial')) {
-      role = 'commercial';
-      name = 'Conseiller Commercial';
-    } else if (emailLower.includes('etudiant') || emailLower.includes('eleve')) {
-      role = 'eleve';
-      name = 'Étudiant Démo';
-    } else if (emailLower.includes('admission')) {
-      role = 'admission';
-      name = 'Chargé d\'Admission';
+    const json = await readJsonSafely(response);
+    if (!response.ok) {
+      throw new Error(getApiErrorMessage(json, `Identifiants invalides (${response.status})`));
     }
 
-    const mockData = {
-      access_token: 'mock-jwt-token-' + Date.now(),
-      role: role,
-      email: email,
-      name: name
+    const accessToken = String(json?.access_token || '');
+    if (!accessToken) {
+      throw new Error('Token de connexion manquant');
+    }
+
+    const payload = decodeJwtPayload(accessToken);
+    const rawRole = String(json?.role || payload?.role || '').trim().toLowerCase();
+    const role = rawRole === 'student' ? 'eleve' : (rawRole || 'admission');
+
+    let profileEmail = email;
+    let profileName = '';
+
+    try {
+      const meResponse = await fetch(`${AUTH_API_URL}/me`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      const meJson = await readJsonSafely(meResponse);
+      if (meResponse.ok) {
+        const user = meJson?.user || {};
+        profileEmail = user.email || profileEmail;
+        profileName = user.name || profileName;
+      }
+    } catch {
+      // Le login reste valide meme si le profil n'est pas recuperable.
+    }
+
+    const loginData = {
+      access_token: accessToken,
+      role,
+      email: profileEmail,
+      name: profileName
     };
 
-    console.log('📥 Mock Login Success:', mockData);
-    return mockData;
+    console.log('Login success:', loginData);
+    return loginData;
   },
   async register(userData: any): Promise<{ access_token: string }> {
     console.log('Ã°Å¸â€œÂ¤ Mock Register Attempt:', userData.email);
@@ -1127,6 +1153,289 @@ export const api = {
       console.error('Ã°Å¸â€™Â¥ [API] Signing Link Error:', error);
       throw error;
     }
+  },
+
+  // --- STUDENT SPACE ---
+  async getCurrentStudent(): Promise<any | null> {
+    try {
+      const storedStudentId = getStoredStudentId() || getAuthStudentId();
+      if (storedStudentId) {
+        const response = await fetch(`${BASE_URL}/candidates/${storedStudentId}`, {
+          method: 'GET',
+          headers: withAuthHeaders({ Accept: 'application/json' }),
+        });
+        const json = await readJsonSafely(response);
+        if (response.ok) {
+          const record = json?.data || json;
+          if (record) {
+            const recordId = getRecordId(record);
+            if (recordId) setCurrentStudentId(recordId);
+            return looksLikeBackendRecord(record) ? mapBackendToStudent(record) : record;
+          }
+        }
+      }
+
+      const email = (getAuthEmail() || '').trim().toLowerCase();
+      if (!email) return null;
+
+      const response = await fetch(`${BASE_URL}/candidats`, {
+        method: 'GET',
+        headers: withAuthHeaders({ Accept: 'application/json' }),
+      });
+      const json = await readJsonSafely(response);
+      if (!response.ok) return null;
+      const list = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+      const match = list.find((item: any) => {
+        const fields = getRecordFields(item);
+        const candidateEmail = String(fields['E-mail'] || fields.email || item.email || '').trim().toLowerCase();
+        return candidateEmail === email;
+      });
+      if (!match) return null;
+      const recordId = getRecordId(match);
+      if (recordId) setCurrentStudentId(recordId);
+      return looksLikeBackendRecord(match) ? mapBackendToStudent(match) : match;
+    } catch (error) {
+      console.error('API Error (getCurrentStudent):', error);
+      return null;
+    }
+  },
+
+  async getCurrentStudentId(): Promise<string | undefined> {
+    const stored = getStoredStudentId() || getAuthStudentId();
+    if (stored) return String(stored);
+    const student = await this.getCurrentStudent();
+    const studentId = student?.id || student?.record_id || student?._id;
+    return studentId ? String(studentId) : undefined;
+  },
+
+  async getAttendances(studentId?: string): Promise<any[]> {
+    try {
+      const resolvedStudentId = studentId || await this.getCurrentStudentId();
+      if (!resolvedStudentId) return [];
+      const response = await fetch(`${BASE_API_URL}/attendances?studentId=${encodeURIComponent(String(resolvedStudentId))}`, {
+        method: 'GET',
+        headers: withAuthHeaders({ Accept: 'application/json' }),
+      });
+      const json = await readJsonSafely(response);
+      return response.ok ? (Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : []) : [];
+    } catch (error) {
+      console.error('API Error (getAttendances):', error);
+      return [];
+    }
+  },
+
+  async getGrades(studentId?: string): Promise<any[]> {
+    try {
+      const resolvedStudentId = studentId || await this.getCurrentStudentId();
+      if (!resolvedStudentId) return [];
+      const response = await fetch(`${BASE_API_URL}/grades?studentId=${encodeURIComponent(String(resolvedStudentId))}`, {
+        method: 'GET',
+        headers: withAuthHeaders({ Accept: 'application/json' }),
+      });
+      const json = await readJsonSafely(response);
+      return response.ok ? (Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : []) : [];
+    } catch (error) {
+      console.error('API Error (getGrades):', error);
+      return [];
+    }
+  },
+
+  async getEvents(studentId?: string): Promise<any[]> {
+    try {
+      const resolvedStudentId = studentId || await this.getCurrentStudentId();
+      if (!resolvedStudentId) return [];
+      const response = await fetch(`${BASE_API_URL}/events?studentId=${encodeURIComponent(String(resolvedStudentId))}`, {
+        method: 'GET',
+        headers: withAuthHeaders({ Accept: 'application/json' }),
+      });
+      const json = await readJsonSafely(response);
+      return response.ok ? (Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : []) : [];
+    } catch (error) {
+      console.error('API Error (getEvents):', error);
+      return [];
+    }
+  },
+
+  async getAppointments(studentId?: string): Promise<any[]> {
+    try {
+      const resolvedStudentId = studentId || await this.getCurrentStudentId();
+      if (!resolvedStudentId) return [];
+      const response = await fetch(`${BASE_API_URL}/appointments?studentId=${encodeURIComponent(String(resolvedStudentId))}`, {
+        method: 'GET',
+        headers: withAuthHeaders({ Accept: 'application/json' }),
+      });
+      const json = await readJsonSafely(response);
+      return response.ok ? (Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : []) : [];
+    } catch (error) {
+      console.error('API Error (getAppointments):', error);
+      return [];
+    }
+  },
+
+  async getDocuments(studentId?: string): Promise<any[]> {
+    try {
+      const resolvedStudentId = studentId || await this.getCurrentStudentId();
+      if (!resolvedStudentId) return [];
+      const response = await fetch(`${BASE_API_URL}/documents?studentId=${encodeURIComponent(String(resolvedStudentId))}`, {
+        method: 'GET',
+        headers: withAuthHeaders({ Accept: 'application/json' }),
+      });
+      const json = await readJsonSafely(response);
+      return response.ok ? (Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : []) : [];
+    } catch (error) {
+      console.error('API Error (getDocuments):', error);
+      return [];
+    }
+  },
+
+  async getQuestionnaires(studentId?: string): Promise<any[]> {
+    try {
+      const resolvedStudentId = studentId || await this.getCurrentStudentId();
+      if (!resolvedStudentId) return [];
+      const response = await fetch(`${BASE_API_URL}/questionnaires?studentId=${encodeURIComponent(String(resolvedStudentId))}`, {
+        method: 'GET',
+        headers: withAuthHeaders({ Accept: 'application/json' }),
+      });
+      const json = await readJsonSafely(response);
+      return response.ok ? (Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : []) : [];
+    } catch (error) {
+      console.error('API Error (getQuestionnaires):', error);
+      return [];
+    }
+  },
+
+  async createEvent(payload: any): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/events`, {
+      method: 'POST',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Failed to create event'));
+    return json?.data || json;
+  },
+
+  async createAppointment(payload: any): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/appointments`, {
+      method: 'POST',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Failed to create appointment'));
+    return json?.data || json;
+  },
+
+  async createDocument(payload: any): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/documents`, {
+      method: 'POST',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Failed to create document'));
+    return json?.data || json;
+  },
+
+  async uploadStudentDocument(payload: { studentId: string; file: File; title?: string; description?: string; category?: string; status?: string }): Promise<any> {
+    const formData = new FormData();
+    formData.append('file', payload.file);
+    if (payload.studentId) formData.append('studentId', payload.studentId);
+    if (payload.title) formData.append('title', payload.title);
+    if (payload.description) formData.append('description', payload.description);
+    if (payload.category) formData.append('category', payload.category);
+    if (payload.status) formData.append('status', payload.status);
+
+    const response = await fetch(`${BASE_API_URL}/documents/upload`, {
+      method: 'POST',
+      headers: withAuthHeaders({ Accept: 'application/json' }),
+      body: formData,
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Failed to upload document'));
+    return json?.data || json;
+  },
+
+  async downloadStudentDocument(documentId: string): Promise<Response> {
+    const response = await fetch(`${BASE_API_URL}/documents/${documentId}/download`, {
+      method: 'GET',
+      headers: withAuthHeaders({ Accept: '*/*' }),
+    });
+    if (!response.ok) {
+      const json = await readJsonSafely(response);
+      throw new Error(getApiErrorMessage(json, 'Failed to download document'));
+    }
+    return response;
+  },
+
+  async requestDocumentSignature(documentId: string, payload?: { participants?: Record<string, { email: string; name: string }> }): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/documents/${documentId}/signature/request`, {
+      method: 'POST',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify(payload || {}),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Failed to request signature'));
+    return json?.data || json;
+  },
+
+  async getDocumentSigningLink(documentId: string, payload?: { signerRole?: 'student' | 'cfa' | 'maitre_apprentissage' | 'charge_admission' | 'charge_rh' | 'commercial'; signerEmail?: string; signerName?: string; returnUrl?: string }): Promise<{ signingUrl: string; envelopeId?: string }> {
+    const response = await fetch(`${BASE_API_URL}/documents/${documentId}/signature/signing-link`, {
+      method: 'POST',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify(payload || {}),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Failed to generate signing link'));
+    const data = json?.data || json;
+    return {
+      signingUrl: data?.signingUrl,
+      envelopeId: data?.envelopeId,
+    };
+  },
+
+  async updateAttendance(id: string, payload: any): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/attendances/${id}`, {
+      method: 'PUT',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Failed to update attendance'));
+    return json?.data || json;
+  },
+
+  async updateAppointment(id: string, payload: any): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/appointments/${id}`, {
+      method: 'PUT',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Failed to update appointment'));
+    return json?.data || json;
+  },
+
+  async updateQuestionnaire(id: string, payload: any): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/questionnaires/${id}`, {
+      method: 'PUT',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Failed to update questionnaire'));
+    return json?.data || json;
+  },
+
+  async updateQuestionnaireStatus(id: string, statut: 'pending' | 'in_progress' | 'completed' | 'expired'): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/questionnaires/${id}/status`, {
+      method: 'PATCH',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify({ statut }),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Failed to update questionnaire status'));
+    return json?.data || json;
   },
 
   // --- ENTREPRISE (CRUD) ---

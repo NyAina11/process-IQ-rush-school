@@ -1,5 +1,6 @@
 const AUTH_TOKEN_KEY = 'authToken';
 const LEGACY_TOKEN_KEY = 'token';
+const CURRENT_STUDENT_ID_KEY = 'currentStudentId';
 
 export const getAuthToken = (): string | null => {
   return localStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem(LEGACY_TOKEN_KEY);
@@ -10,9 +11,37 @@ export const setAuthToken = (token: string) => {
   localStorage.setItem(LEGACY_TOKEN_KEY, token);
 };
 
+export const getAuthEmail = (): string | null => {
+  const payload = decodeJwtPayload(getAuthToken());
+  return payload?.email || payload?.user?.email || null;
+};
+
+export const getAuthUserId = (): string | null => {
+  const payload = decodeJwtPayload(getAuthToken());
+  return payload?.userId || payload?.sub || payload?.id || payload?.user?.id || null;
+};
+
+export const getAuthStudentId = (): string | null => {
+  const payload = decodeJwtPayload(getAuthToken());
+  return payload?.studentId || payload?.student_id || null;
+};
+
+export const getCurrentStudentId = (): string | null => {
+  return localStorage.getItem(CURRENT_STUDENT_ID_KEY) || getAuthStudentId();
+};
+
+export const setCurrentStudentId = (studentId: string | null) => {
+  if (studentId) {
+    localStorage.setItem(CURRENT_STUDENT_ID_KEY, studentId);
+    return;
+  }
+  localStorage.removeItem(CURRENT_STUDENT_ID_KEY);
+};
+
 export const clearSession = () => {
   localStorage.removeItem(AUTH_TOKEN_KEY);
   localStorage.removeItem(LEGACY_TOKEN_KEY);
+  localStorage.removeItem(CURRENT_STUDENT_ID_KEY);
   localStorage.removeItem('userRole');
   localStorage.removeItem('adminAuthToken');
 };

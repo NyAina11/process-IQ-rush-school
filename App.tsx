@@ -15,8 +15,14 @@ import { AdmissionTab } from './types';
 import AdminLoginPage from './components/AdminLoginPage';
 import AdminDashboard from './components/AdminDashboard';
 import TestPage from './components/TestPage';
-import StudentView from './components/StudentView';
 import SupportView from './components/SupportView';
+import StudentDashboard from './pages/student/StudentDashboard';
+import StudentNotes from './pages/student/StudentNotes';
+import StudentDocuments from './pages/student/StudentDocuments';
+import StudentPlanning from './pages/student/StudentPlanning';
+import StudentAppointments from './pages/student/StudentAppointments';
+import StudentAttendance from './pages/student/StudentAttendance';
+import StudentQuestionnaires from './pages/student/StudentQuestionnaires';
 import { decodeJwtPayload, getAuthToken, isAuthenticated } from './services/session';
 
 const getEffectiveRole = (): string | null => {
@@ -202,13 +208,13 @@ const App = () => {
                 </Route>
 
                 <Route path="/etudiant" element={<RequireAuth allowedRoles={['eleve']}><Outlet /></RequireAuth>}>
-                  <Route path="dashboard" element={<StudentView />} />
-                  <Route path="notes" element={<StudentView />} />
-                  <Route path="documents" element={<StudentView />} />
-                  <Route path="planning" element={<StudentView />} />
-                  <Route path="rdv" element={<StudentView />} />
-                  <Route path="presences" element={<StudentView />} />
-                  <Route path="questionnaires" element={<StudentView />} />
+                  <Route path="dashboard" element={<StudentDashboard />} />
+                  <Route path="notes" element={<StudentNotes />} />
+                  <Route path="documents" element={<StudentDocuments />} />
+                  <Route path="planning" element={<StudentPlanning />} />
+                  <Route path="rdv" element={<StudentAppointments />} />
+                  <Route path="presences" element={<StudentAttendance />} />
+                  <Route path="questionnaires" element={<StudentQuestionnaires />} />
                   <Route index element={<Navigate to="dashboard" replace />} />
                 </Route>
 
