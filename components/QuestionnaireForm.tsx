@@ -573,7 +573,7 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                                     <YesNo
                                         label={item.label}
                                         value={!!formValues[item.name]}
-                                        onChange={v => setValue(item.name, v)}
+                                        onChange={v => setValue(item.name, v, { shouldDirty: true, shouldTouch: true, shouldValidate: true })}
                                     />
                                 </div>
                             ))}
@@ -671,9 +671,10 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
 
                 {/* ─── VALIDATION FOOTER ─── */}
                 <div className="bg-white border-2 border-slate-200 rounded-[4px] p-6 mt-2">
-                    <label className="flex items-start gap-3 cursor-pointer group mb-6">
-                        <div
-                            onClick={() => setValue('agreement', !formValues.agreement)}
+                    <div className="flex items-start gap-3 group mb-6">
+                        <button
+                            type="button"
+                            onClick={() => setValue('agreement', !formValues.agreement, { shouldDirty: true, shouldTouch: true, shouldValidate: true })}
                             className={`w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${formValues.agreement 
                                 ? 'bg-[#6B3CD2] border-[#6B3CD2]' 
                                 : errors.agreement 
@@ -682,12 +683,12 @@ const QuestionnaireForm: React.FC<QuestionnaireFormProps> = ({ onNext, initialDa
                                 }`}
                         >
                             {formValues.agreement && <svg viewBox="0 0 10 10" fill="none" width="8" height="8"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                        </div>
+                        </button>
                         <input type="checkbox" className="hidden" {...register('agreement')} />
                         <span className="text-[12px] font-medium text-slate-600 leading-relaxed">
                             J'atteste sur l'honneur l'exactitude des informations fournies ci-dessus. <span className="text-rose-400">*</span>
                         </span>
-                    </label>
+                    </div>
                     {errors.agreement && <p className="mb-4 text-rose-500 text-[10px] font-bold uppercase">{errors.agreement.message}</p>}
 
                     <div className="flex items-center justify-end gap-3">
