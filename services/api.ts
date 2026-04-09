@@ -2,7 +2,7 @@ import { StudentFormData, CompanyFormData, ApiResponse } from '../types';
 import { getAuthToken } from './session';
 import { decimalToTime, timeToDecimal } from '../utils/formatters';
 
-const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
+const BASE_API_URL = (import.meta.env.VITE_BASE_API_URL || '/api').replace(/\/+$/, '');
 const AUTH_API_URL = `${BASE_API_URL}/auth`;
 const BASE_URL = `${BASE_API_URL}/admission`;
 const SUPPORT_URL = `${BASE_API_URL}/support`;
@@ -43,14 +43,31 @@ const getField = (data: any, fieldName: string, defaultValue: any = "") => {
   return data.fields[fieldName] ?? defaultValue;
 };
 
+const getRecordId = (data: any): string => data?.id || data?.record_id || data?._id || "";
+
+const getRecordFields = (data: any): Record<string, any> => {
+  if (!data || typeof data !== 'object') return {};
+  if (data.fields && typeof data.fields === 'object') return data.fields;
+  if (data.informations_personnelles && typeof data.informations_personnelles === 'object') {
+    return data.informations_personnelles;
+  }
+  return data;
+};
+
+const looksLikeBackendRecord = (data: any): boolean => {
+  if (!data || typeof data !== 'object') return false;
+  return !!(data.fields || data.informations_personnelles || data.id || data.record_id);
+};
+
 // Mapper: Backend (Airtable fields) -> Frontend (StudentFormData)
 const mapBackendToStudent = (backendData: any): any => {
-  const fields = backendData.fields || {};
+  const fields = getRecordFields(backendData);
+  const recordId = getRecordId(backendData);
 
   return {
     // Meta
-    id: backendData.id,
-    record_id: backendData.id,
+    id: recordId,
+    record_id: recordId,
     fields: fields, // Maintain raw fields for modal view modes
 
     // Enterprise Link (Critical for Dashboard)
@@ -734,8 +751,7 @@ export const api = {
 
       // Map backend fields to frontend format
       const formattedStudents = students.map(s => {
-        // Use mapBackendToStudent if it looks like an Airtable record (has .fields)
-        if (s.fields) {
+        if (looksLikeBackendRecord(s)) {
           return mapBackendToStudent(s);
         }
         // Fallback for objects that might already be flat or different format
@@ -840,7 +856,7 @@ export const api = {
       // Adapt response for local backend (usually returns { success: true, data: { ... } })
       const candidateData = json.data || json;
 
-      if (candidateData.fields) {
+      if (looksLikeBackendRecord(candidateData)) {
         return mapBackendToStudent(candidateData);
       }
       return candidateData;
@@ -1155,7 +1171,7 @@ export const api = {
         throw new Error(message);
       }
       const data = json.data || json;
-      const companies = Array.isArray(data) ? data.map(c => c.fields ? mapBackendToCompany(c) : c) : [];
+      const companies = Array.isArray(data) ? data.map(c => looksLikeBackendRecord(c) ? mapBackendToCompany(c) : c) : [];
       console.log('All Companies Received, count:', companies.length);
       return companies;
     } catch (error) {

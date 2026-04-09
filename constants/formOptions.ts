@@ -136,7 +136,7 @@ export const SITUATION_BEFORE_CONTRACT_OPTIONS: SelectOption[] = [
 ];
 
 export const REGIME_SOCIAL_OPTIONS: SelectOption[] = [
-    { value: 'Sécurité Sociale', label: 'URSSAF / Sécurité Sociale' },
+    { value: 'URSSAF', label: 'URSSAF (régime général)' },
     { value: 'MSA', label: 'MSA (Mutualité Sociale Agricole)' }
 ];
 
@@ -198,52 +198,52 @@ export const LAST_CLASS_OPTIONS: SelectOption[] = [
 
 export const HIGHEST_DIPLOMA_OPTIONS: SelectOption[] = [
     { value: "header1", label: "Diplôme ou titre de niveau bac +5 et plus", disabled: true },
-    { value: "Doctorat", label: "80 Doctorat" },
-    { value: "Master", label: "73 Master" },
-    { value: "Diplôme ingénieur", label: "75 Diplôme d'ingénieur" },
-    { value: "Diplôme école de commerce", label: "76 Diplôme d'école de commerce" },
-    { value: "Autre diplôme ou titre bac +5 ou plus", label: "79 Autre diplôme ou titre de niveau bac+5 ou plus" },
+    { value: "80", label: "80 Doctorat" },
+    { value: "73", label: "73 Master" },
+    { value: "75", label: "75 Diplôme d'ingénieur" },
+    { value: "76", label: "76 Diplôme d'école de commerce" },
+    { value: "79", label: "79 Autre diplôme ou titre de niveau bac+5 ou plus" },
     
     { value: "header2", label: "Diplôme ou titre de niveau bac +3 et 4", disabled: true },
-    { value: "Licence professionnelle", label: "62 Licence professionnelle" },
-    { value: "Licence générale", label: "63 Licence générale" },
-    { value: "Bachelor universitaire de technologie (BUT)", label: "64 Bachelor universitaire de technologie BUT" },
-    { value: "Bachelor RDC", label: "64 Bachelor universitaire de technologie BUT" },
-    { value: "Autre diplôme ou titre bac +3 ou 4", label: "69 Autre diplôme ou titre de niveau bac +3 ou 4" },
+    { value: "62", label: "62 Licence professionnelle" },
+    { value: "63", label: "63 Licence générale" },
+    { value: "64", label: "64 Bachelor universitaire de technologie BUT" },
+    { value: "64", label: "64 Bachelor universitaire de technologie BUT" },
+    { value: "69", label: "69 Autre diplôme ou titre de niveau bac +3 ou 4" },
     
     { value: "header3", label: "Diplôme ou titre de niveau bac +2", disabled: true },
-    { value: "Brevet de Technicien Supérieur (BTS)", label: "54 Brevet de Technicien Supérieur" },
-    { value: "BTS", label: "54 Brevet de Technicien Supérieur" },
-    { value: "BTS MCO", label: "54 Brevet de Technicien Supérieur" },
-    { value: "BTS NDRC", label: "54 Brevet de Technicien Supérieur" },
-    { value: "BTS COM", label: "54 Brevet de Technicien Supérieur" },
-    { value: "TP NTC", label: "54 Brevet de Technicien Supérieur" },
-    { value: "Diplôme Universitaire de Technologie (DUT)", label: "55 Diplôme Universitaire de technologie" },
-    { value: "DUT", label: "55 Diplôme Universitaire de technologie" },
-    { value: "Autre diplôme ou titre bac +2", label: "58 Autre diplôme ou titre de niveau bac+2" },
+    { value: "54", label: "54 Brevet de Technicien Supérieur" },
+    { value: "54", label: "54 Brevet de Technicien Supérieur" },
+    { value: "54", label: "54 Brevet de Technicien Supérieur" },
+    { value: "54", label: "54 Brevet de Technicien Supérieur" },
+    { value: "54", label: "54 Brevet de Technicien Supérieur" },
+    { value: "54", label: "54 Brevet de Technicien Supérieur" },
+    { value: "55", label: "55 Diplôme Universitaire de technologie" },
+    { value: "55", label: "55 Diplôme Universitaire de technologie" },
+    { value: "58", label: "58 Autre diplôme ou titre de niveau bac+2" },
     
     { value: "header4", label: "Diplôme ou titre de niveau bac", disabled: true },
-    { value: "Baccalauréat professionnel", label: "41 Baccalauréat professionnel" },
-    { value: "Bac Pro", label: "41 Baccalauréat professionnel" },
-    { value: "Baccalauréat général", label: "42 Baccalauréat général" },
-    { value: "Bac général", label: "42 Baccalauréat général" },
-    { value: "Baccalauréat technologique", label: "43 Baccalauréat technologique" },
-    { value: "Bac techno", label: "43 Baccalauréat technologique" },
-    { value: "Diplôme de spécialisation professionnelle", label: "44 Diplôme de spécialisation professionnelle" },
-    { value: "Autre diplôme ou titre niveau bac", label: "49 Autre diplôme ou titre de niveau bac" },
+    { value: "41", label: "41 Baccalauréat professionnel" },
+    { value: "41", label: "41 Baccalauréat professionnel" },
+    { value: "42", label: "42 Baccalauréat général" },
+    { value: "42", label: "42 Baccalauréat général" },
+    { value: "43", label: "43 Baccalauréat technologique" },
+    { value: "43", label: "43 Baccalauréat technologique" },
+    { value: "44", label: "44 Diplôme de spécialisation professionnelle" },
+    { value: "49", label: "49 Autre diplôme ou titre de niveau bac" },
     
     { value: "header5", label: "Diplôme ou titre de niveau CAP/BEP", disabled: true },
-    { value: "CAP", label: "33 CAP" },
-    { value: "BEP", label: "34 BEP" },
-    { value: "Certificat de spécialisation", label: "35 Certificat de spécialisation (ex-Mention complémentaire)" },
-    { value: "Autre diplôme ou titre CAP/BEP", label: "38 Autre diplôme ou titre de niveau CAP/BEP" },
+    { value: "33", label: "33 CAP" },
+    { value: "34", label: "34 BEP" },
+    { value: "35", label: "35 Certificat de spécialisation (ex-Mention complémentaire)" },
+    { value: "38", label: "38 Autre diplôme ou titre de niveau CAP/BEP" },
     
     { value: "header6", label: "Aucun diplôme ni titre", disabled: true },
-    { value: "Diplôme National du Brevet", label: "25 Diplôme national du Brevet" },
-    { value: "Brevet", label: "25 Diplôme national du Brevet" },
-    { value: "Certificat de Formation Générale", label: "26 Certificat de formation générale" },
-    { value: "Aucun diplôme ni titre professionnel", label: "13 Aucun diplôme ni titre" },
-    { value: "Aucun", label: "13 Aucun diplôme ni titre" }
+    { value: "25", label: "25 Diplôme national du Brevet" },
+    { value: "25", label: "25 Diplôme national du Brevet" },
+    { value: "26", label: "26 Certificat de formation générale" },
+    { value: "13", label: "13 Aucun diplôme ni titre" },
+    { value: "13", label: "13 Aucun diplôme ni titre" }
 ];
 
 export const FORMATION_SOUHAITEE_OPTIONS: SelectOption[] = [
