@@ -1438,6 +1438,74 @@ export const api = {
     return json?.data || json;
   },
 
+  // --- OPCO ---
+  async getOpcoConfig(): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/opco/config`, {
+      method: 'GET',
+      headers: withAuthHeaders({ Accept: 'application/json' }),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Impossible de charger la configuration OPCO'));
+    return json?.data || json;
+  },
+
+  async getOpcoDossiers(params?: { candidateId?: string; studentId?: string; companyId?: string; status?: string }): Promise<any[]> {
+    const query = new URLSearchParams();
+    if (params?.candidateId) query.set('candidateId', params.candidateId);
+    if (params?.studentId) query.set('studentId', params.studentId);
+    if (params?.companyId) query.set('companyId', params.companyId);
+    if (params?.status) query.set('status', params.status);
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    const response = await fetch(`${BASE_API_URL}/opco/dossiers${suffix}`, {
+      method: 'GET',
+      headers: withAuthHeaders({ Accept: 'application/json' }),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Impossible de charger les dossiers OPCO'));
+    return Array.isArray(json?.data) ? json.data : [];
+  },
+
+  async getOpcoDossier(id: string): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/opco/dossiers/${id}`, {
+      method: 'GET',
+      headers: withAuthHeaders({ Accept: 'application/json' }),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Impossible de charger le dossier OPCO'));
+    return json?.data || json;
+  },
+
+  async createOpcoDossier(payload: { opcoName?: string; candidateId?: string; studentId?: string; companyId?: string; payload: any; metadata?: any; documents?: any[]; autoSubmit?: boolean }): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/opco/dossiers`, {
+      method: 'POST',
+      headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Impossible de creer le dossier OPCO'));
+    return json?.data || json;
+  },
+
+  async resubmitOpcoDossier(id: string): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/opco/dossiers/${id}/resubmit`, {
+      method: 'POST',
+      headers: withAuthHeaders({ Accept: 'application/json' }),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Impossible de renvoyer le dossier OPCO'));
+    return json?.data || json;
+  },
+
+  async syncOpcoDossier(id: string): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/opco/dossiers/${id}/sync`, {
+      method: 'POST',
+      headers: withAuthHeaders({ Accept: 'application/json' }),
+    });
+    const json = await readJsonSafely(response);
+    if (!response.ok) throw new Error(getApiErrorMessage(json, 'Impossible de synchroniser le dossier OPCO'));
+    return json?.data || json;
+  },
+
   // --- ENTREPRISE (CRUD) ---
   async submitCompany(data: CompanyFormData, role?: string): Promise<ApiResponse> {
     try {

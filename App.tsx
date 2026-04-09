@@ -46,7 +46,7 @@ const RequireAuth = ({ children, allowedRoles }: { children: React.ReactNode; al
     if (!role) {
       return <Navigate to="/" replace />;
     }
-    if (role !== 'super_admin' && !allowedRoles.includes(role)) {
+    if (role !== 'super_admin' && role !== 'admin' && !allowedRoles.includes(role)) {
       return <Navigate to="/" replace />;
     }
   }
@@ -124,6 +124,7 @@ const App = () => {
                       if (role === 'admission') return <Navigate to="/admission" replace />;
                       if (role === 'rh') return <Navigate to="/rh/dashboard" replace />;
                       if (role === 'eleve') return <Navigate to="/etudiant/dashboard" replace />;
+                      if (role === 'admin') return <Navigate to="/admission" replace />;
                       if (role === 'super_admin') return <Navigate to="/admission" replace />;
                       return <Navigate to="/commercial/dashboard" replace />;
                     })()
