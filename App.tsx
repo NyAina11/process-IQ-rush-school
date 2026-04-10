@@ -36,8 +36,9 @@ const getEffectiveRole = (): string | null => {
 
 const RequireAuth = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) => {
   const location = useLocation();
+  const authenticated = isAuthenticated();
 
-  if (!isAuthenticated()) {
+  if (!authenticated) {
     return <Navigate to="/landing" state={{ from: location }} replace />;
   }
 
@@ -46,7 +47,7 @@ const RequireAuth = ({ children, allowedRoles }: { children: React.ReactNode; al
     if (!role) {
       return <Navigate to="/" replace />;
     }
-    if (role !== 'super_admin' && !allowedRoles.includes(role)) {
+    if (role !== 'super_admin' && role !== 'admin' && !allowedRoles.includes(role)) {
       return <Navigate to="/" replace />;
     }
   }

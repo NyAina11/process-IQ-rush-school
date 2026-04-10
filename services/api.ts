@@ -82,78 +82,78 @@ const mapBackendToStudent = (backendData: any): any => {
     entreprise_raison_sociale: fields["Entreprise d'accueil"] || fields["Raison sociale (from Entreprise)"] || fields["Nom Entreprise"] || fields["Entreprise"] || "",
 
 
-    // IdentitÃƒÂ©
-    prenom: fields["PrÃƒÂ©nom"] || "",
+    // Identité
+    prenom: fields["Prénom"] || "",
     nom_naissance: fields["NOM de naissance"] || "",
     nom_usage: fields["Nom d'usage"] || "",
     numero_inscription: fields["Numero Inscription"] || "",
     sexe: fields["Sexe"] || "",
     date_naissance: fields["Date de naissance"] || "",
-    nationalite: fields["NationalitÃƒÂ©"] || "FranÃƒÂ§aise",
+    nationalite: fields["Nationalité"] || "Française",
     commune_naissance: fields["Commune de naissance"] || "",
     departement:
-      fields["D�partement de naissance"] ||
-      fields["D�partement"] ||
+      fields["Département de naissance"] ||
+      fields["Département"] ||
       fields["departement"] ||
       "",
 
-    // CoordonnÃƒÂ©es
-    // CoordonnÃƒÂ©es
+    // Coordonnées
+    // Coordonnées
     email: fields["E-mail"] || "",
-    telephone: fields["TÃƒÂ©lÃƒÂ©phone"] || "",
-    adresse_residence: fields["Adresse de rÃƒÂ©sidence"] || "",
-    num_residence: (fields["Adresse de rÃƒÂ©sidence"] || "").includes(", ") ? (fields["Adresse de rÃƒÂ©sidence"] || "").split(", ")[0] : "",
-    rue_residence: (fields["Adresse de rÃƒÂ©sidence"] || "").includes(", ") ? (fields["Adresse de rÃƒÂ©sidence"] || "").split(", ")[1] : (fields["Adresse de rÃƒÂ©sidence"] || ""),
-    complement_residence: fields["ComplÃƒÂ©ment d'adresse"] || "",
+    telephone: fields["Téléphone"] || "",
+    adresse_residence: fields["Adresse de résidence"] || "",
+    num_residence: (fields["Adresse de résidence"] || "").includes(", ") ? (fields["Adresse de résidence"] || "").split(", ")[0] : "",
+    rue_residence: (fields["Adresse de résidence"] || "").includes(", ") ? (fields["Adresse de résidence"] || "").split(", ")[1] : (fields["Adresse de résidence"] || ""),
+    complement_residence: fields["Complément d'adresse"] || "",
     code_postal: fields["Code postal"]?.toString() || fields["Code postal "]?.toString() || "",
-    ville: fields["Ville de rÃƒÂ©sidence"] || fields["ville"] || "",
+    ville: fields["Ville de résidence"] || fields["ville"] || "",
 
     // Social / Admin
     nir: fields["NIR"] || "",
     situation: fields["Situation avant le contrat"] || "",
-    regime_social: fields["RÃƒÂ©gime social"] || "",
+    regime_social: fields["Régime social"] || "",
     declare_inscription_sportif_haut_niveau: fields["Sportif de haut niveau"] || false,
-    declare_avoir_projet_creation_reprise_entreprise: fields["Projet de crÃƒÂ©ation/reprise d'entreprise"] || false,
-    declare_travailleur_handicape: fields["Reconnaissance travailleur handicapÃƒÂ©"] || false,
+    declare_avoir_projet_creation_reprise_entreprise: fields["Projet de création/reprise d'entreprise"] || false,
+    declare_travailleur_handicape: fields["Reconnaissance travailleur handicapé"] || false,
     alternance: fields["En alternance"] || false,
 
-    // ScolaritÃƒÂ©
-    dernier_diplome_prepare: fields["Dernier diplÃƒÂ´me ou titre prÃƒÂ©parÃƒÂ©"] || "",
-    derniere_classe: fields["DerniÃƒÂ¨re classe suivie"] || fields["DerniÃƒÂ¨re classe / annÃƒÂ©e suivie"] || "",
-    bac: fields["DiplÃƒÂ´me ou titre le plus ÃƒÂ©levÃƒÂ© obtenu"] || fields["BAC"] || "",
-    intitulePrecisDernierDiplome: fields["IntitulÃƒÂ© prÃƒÂ©cis du dernier diplÃƒÂ´me"] || fields["IntitulÃƒÂ© prÃƒÂ©cis du dernier diplÃƒÂ´me ou titre prÃƒÂ©parÃƒÂ©"] || "",
-    formation_souhaitee: fields["Formation souhaitÃƒÂ©e"] || fields["Formation"] || "",
+    // Scolarité
+    dernier_diplome_prepare: fields["Dernier diplôme ou titre préparé"] || "",
+    derniere_classe: fields["Dernière classe suivie"] || fields["Dernière classe / année suivie"] || "",
+    bac: fields["Diplôme ou titre le plus élevé obtenu"] || fields["BAC"] || "",
+    intitulePrecisDernierDiplome: fields["Intitulé précis du dernier diplôme"] || fields["Intitulé précis du dernier diplôme ou titre préparé"] || "",
+    formation_souhaitee: fields["Formation souhaitée"] || fields["Formation"] || "",
 
     // Autres
     date_de_visite: fields["Date de visite"] || "",
-    date_de_reglement: fields["Date de rÃƒÂ¨glement"] || "",
+    date_de_reglement: fields["Date de règlement"] || "",
     entreprise_d_accueil: fields["Entreprise d'accueil"] || "",
     connaissance_rush_how: fields["Comment avez-vous connu Rush School?"] || "",
     motivation_projet_professionnel: fields["Motivation et projet professionnel"] || "",
 
-    // ReprÃƒÂ©sentant LÃƒÂ©gal 1
-    nom_representant_legal: fields["Nom du reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    prenom_representant_legal: fields["PrÃƒÂ©nom du reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    voie_representant_legal: fields["Voie du reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    lien_parente_legal: fields["Lien de parentÃƒÂ©"] || "",
-    numero_legal: fields["NumÃƒÂ©ro du reprÃƒÂ©sentant lÃƒÂ©gal"] || "", // TÃƒÂ©lÃƒÂ©phone
-    numero_adress_legal: fields["NumÃƒÂ©ro adresse reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    complement_adresse_legal: fields["ComplÃƒÂ©ment d'adresse du reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    code_postal_legal: fields["Code postal du reprÃƒÂ©sentant lÃƒÂ©gal"]?.toString() || "",
-    commune_legal: fields["Commune du reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    courriel_legal: fields["Email du reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
+    // Représentant Légal 1
+    nom_representant_legal: fields["Nom du représentant légal"] || "",
+    prenom_representant_legal: fields["Prénom du représentant légal"] || "",
+    voie_representant_legal: fields["Voie du représentant légal"] || "",
+    lien_parente_legal: fields["Lien de parenté"] || "",
+    numero_legal: fields["Numéro du représentant légal"] || "", // Téléphone
+    numero_adress_legal: fields["Numéro adresse représentant légal"] || "",
+    complement_adresse_legal: fields["Complément d'adresse du représentant légal"] || "",
+    code_postal_legal: fields["Code postal du représentant légal"]?.toString() || "",
+    commune_legal: fields["Commune du représentant légal"] || "",
+    courriel_legal: fields["Email du représentant légal"] || "",
 
-    // ReprÃƒÂ©sentant LÃƒÂ©gal 2
-    nom_representant_legal2: fields["Nom du deuxiÃƒÂ¨me reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    prenom_representant_legal2: fields["PrÃƒÂ©nom du deuxiÃƒÂ¨me reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    voie_representant_legal2: fields["Voie du deuxiÃƒÂ¨me reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    lien_parente_legal2: fields["Lien de parentÃƒÂ© avec le deuxiÃƒÂ¨me reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    numero_legal2: fields["NumÃƒÂ©ro du deuxiÃƒÂ¨me reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    numero_adress_legal2: fields["NumÃƒÂ©ro adresse reprÃƒÂ©sentant lÃƒÂ©gal 2"] || "",
-    complement_adresse_legal2: fields["ComplÃƒÂ©ment d'adresse du deuxiÃƒÂ¨me reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    code_postal_legal2: fields["Code postal du deuxiÃƒÂ¨me reprÃƒÂ©sentant lÃƒÂ©gal"]?.toString() || "",
-    commune_legal2: fields["Commune du deuxiÃƒÂ¨me reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
-    courriel_legal2: fields["Email du deuxiÃƒÂ¨me reprÃƒÂ©sentant lÃƒÂ©gal"] || "",
+    // Représentant Légal 2
+    nom_representant_legal2: fields["Nom du deuxième représentant légal"] || "",
+    prenom_representant_legal2: fields["Prénom du deuxième représentant légal"] || "",
+    voie_representant_legal2: fields["Voie du deuxième représentant légal"] || "",
+    lien_parente_legal2: fields["Lien de parenté avec le deuxième représentant légal"] || "",
+    numero_legal2: fields["Numéro du deuxième représentant légal"] || "",
+    numero_adress_legal2: fields["Numéro adresse représentant légal 2"] || "",
+    complement_adresse_legal2: fields["Complément d'adresse du deuxième représentant légal"] || "",
+    code_postal_legal2: fields["Code postal du deuxième représentant légal"]?.toString() || "",
+    commune_legal2: fields["Commune du deuxième représentant légal"] || "",
+    courriel_legal2: fields["Email du deuxième représentant légal"] || "",
 
     // Documents (PDF generated)
     atre_url: fields["Atre"]?.[0]?.url || "",
@@ -176,9 +176,9 @@ const mapBackendToStudent = (backendData: any): any => {
     livret_apprentissage_name: (fields["livret dapprentissage"] || fields["Livret Apprentissage"])?.[0]?.filename || "",
     has_livret_apprentissage: !!((fields["livret dapprentissage"] && fields["livret dapprentissage"].length > 0) || (fields["Livret Apprentissage"] && fields["Livret Apprentissage"].length > 0)),
 
-    certificat_scolarite_url: fields["certificat de scolaritÃƒÂ©"]?.[0]?.url || "",
-    certificat_scolarite_name: fields["certificat de scolaritÃƒÂ©"]?.[0]?.filename || "",
-    has_certificat_scolarite: !!(fields["certificat de scolaritÃƒÂ©"] && fields["certificat de scolaritÃƒÂ©"].length > 0),
+    certificat_scolarite_url: fields["certificat de scolarité"]?.[0]?.url || "",
+    certificat_scolarite_name: fields["certificat de scolarité"]?.[0]?.filename || "",
+    has_certificat_scolarite: !!(fields["certificat de scolarité"] && fields["certificat de scolarité"].length > 0),
 
     cv_url: fields["CV"]?.[0]?.url || "",
     cv_name: fields["CV"]?.[0]?.filename || "",
@@ -211,44 +211,44 @@ const mapBackendToCompany = (backendData: any): any => {
     fields: fields, // Maintain raw fields for modal view modes
     identification: {
       raison_sociale: fields["Raison sociale"] || "",
-      siret: fields["NumÃƒÂ©ro SIRET"] || "",
+      siret: fields["Numéro SIRET"] || "",
       code_ape_naf: fields["Code APE/NAF"] || "",
       type_employeur: fields["Type demployeur"] || "",
-      employeur_specifique: fields["Employeur spÃƒÂ©cifique"] || "",
-      effectif: fields["Effectif salariÃƒÂ© de l'entreprise"] || "",
+      employeur_specifique: fields["Employeur spécifique"] || "",
+      effectif: fields["Effectif salarié de l'entreprise"] || "",
       convention: fields["Convention collective"] || ""
     },
     adresse: {
-      num: fields["NumÃƒÂ©ro entreprise"] || "",
+      num: fields["Numéro entreprise"] || "",
       voie: fields["Voie entreprise"] || "",
-      complement: fields["ComplÃƒÂ©ment dadresse entreprise"] || "",
+      complement: fields["Complément dadresse entreprise"] || "",
       code_postal: fields["Code postal entreprise"] || "",
       ville: fields["Ville entreprise"] || "",
-      telephone: fields["TÃƒÂ©lÃƒÂ©phone entreprise"] || "",
+      telephone: fields["Téléphone entreprise"] || "",
       email: fields["Email entreprise"] || ""
     },
     maitre_apprentissage: {
-      nom: fields["Nom MaÃƒÂ®tre apprentissage"] || "",
-      prenom: fields["PrÃƒÂ©nom MaÃƒÂ®tre apprentissage"] || "",
-      date_naissance: fields["Date de naissance MaÃƒÂ®tre apprentissage"] || "",
-      fonction: fields["Fonction MaÃƒÂ®tre apprentissage"] || "",
-      diplome_plus_eleve: fields["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage intitulÃƒÂ©"] || fields["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage"] || "",
-      diplome: fields["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage"] || "",
-      experience: fields["AnnÃƒÂ©e experience pro MaÃƒÂ®tre apprentissage"] || "",
-      telephone: fields["TÃƒÂ©lÃƒÂ©phone MaÃƒÂ®tre apprentissage"] || "",
-      email: fields["Email MaÃƒÂ®tre apprentissage"] || ""
+      nom: fields["Nom Maître apprentissage"] || "",
+      prenom: fields["Prénom Maître apprentissage"] || "",
+      date_naissance: fields["Date de naissance Maître apprentissage"] || "",
+      fonction: fields["Fonction Maître apprentissage"] || "",
+      diplome_plus_eleve: fields["Diplôme Maître apprentissage intitulé"] || fields["Diplôme Maître apprentissage"] || "",
+      diplome: fields["Diplôme Maître apprentissage"] || "",
+      experience: fields["Année experience pro Maître apprentissage"] || "",
+      telephone: fields["Téléphone Maître apprentissage"] || "",
+      email: fields["Email Maître apprentissage"] || ""
     },
     opco: {
       nom: fields["Nom OPCO"] || ""
     },
     contrat: {
       type_contrat: fields["Type de contrat"] || "",
-      type_derogation: fields["Type de dÃƒÂ©rogation"] || "",
-      date_debut: fields["Date de dÃƒÂ©but exÃƒÂ©cution"] || "",
+      type_derogation: fields["Type de dérogation"] || "",
+      date_debut: fields["Date de début exécution"] || "",
       date_fin: fields["Fin du contrat apprentissage"] || "",
-      duree_hebdomadaire: decimalToTime(fields["DurÃƒÂ©e hebdomadaire"] || "35"),
-      poste_occupe: fields["Poste occupÃƒÂ©"] || "",
-      lieu_execution: fields["Lieu dexÃƒÂ©cution du contrat (si diffÃƒÂ©rent du siÃƒÂ¨ge)"] || "",
+      duree_hebdomadaire: decimalToTime(fields["Durée hebdomadaire"] || "35"),
+      poste_occupe: fields["Poste occupé"] || "",
+      lieu_execution: fields["Lieu dexécution du contrat (si différent du siège)"] || "",
 
       pourcentage_smic1: fields["Pourcentage du SMIC 1"] || 0,
       pourcentage_smic1_2: fields["Pourcentage smic 1_2"] || null,
@@ -268,13 +268,13 @@ const mapBackendToCompany = (backendData: any): any => {
       montant_salaire_brut4: fields["Salaire brut mensuel 4"] || 0,
 
       date_conclusion: fields["Date de conclusion"] || "",
-      date_debut_execution: fields["Date de dÃƒÂ©but exÃƒÂ©cution"] || "",
-      numero_deca_ancien_contrat: fields["NumÃƒÂ©ro DECA de ancien contrat"] || "",
-      machines_dangereuses: fields["Travail sur machines dangereuses ou exposition ÃƒÂ  des risques particuliers"] || "",
+      date_debut_execution: fields["Date de début exécution"] || "",
+      numero_deca_ancien_contrat: fields["Numéro DECA de ancien contrat"] || "",
+      machines_dangereuses: fields["Travail sur machines dangereuses ou exposition à des risques particuliers"] || "",
       caisse_retraite: fields["Caisse de retraite"] || "",
       date_avenant: fields["date Si avenant"] || "",
 
-      // PÃƒÂ©riodes
+      // Périodes
       date_debut_1periode_1er_annee: fields["date_debut_1periode_1er_annee"] || "",
       date_fin_1periode_1er_annee: fields["date_fin_1periode_1er_annee"] || "",
       date_debut_2periode_1er_annee: fields["date_debut_2periode_1er_annee"] || "",
@@ -294,7 +294,7 @@ const mapBackendToCompany = (backendData: any): any => {
     },
     formation: {
       choisie: fields["Formation"] || "",
-      date_debut: fields["Date de dÃƒÂ©but formation"] || "",
+      date_debut: fields["Date de début formation"] || "",
       date_fin: fields["Date de fin formation"] || "",
       code_rncp: fields["Code Rncp"] || "",
       code_diplome: fields["Code  diplome"] || "",
@@ -333,15 +333,15 @@ const mapStudentToBackend = (data: any, role?: string) => {
   };
 
   const mapSexe = (v: string) => {
-    if (v === 'feminin' || v === 'FÃƒÂ©minin' || v === 'Femme') return 'FÃƒÂ©minin';
+    if (v === 'feminin' || v === 'Féminin' || v === 'Femme') return 'Féminin';
     if (v === 'masculin' || v === 'Masculin' || v === 'Homme') return 'Masculin';
     return v;
   };
 
   const mapNationalite = (v: string) => {
-    if (v === 'francaise') return 'FranÃƒÂ§aise';
-    if (v === 'ue') return 'Union EuropÃƒÂ©enne';
-    if (v === 'hors_ue') return 'Hors Union EuropÃƒÂ©enne';
+    if (v === 'francaise') return 'Française';
+    if (v === 'ue') return 'Union Européenne';
+    if (v === 'hors_ue') return 'Hors Union Européenne';
     return formatString(v);
   };
 
@@ -354,7 +354,7 @@ const mapStudentToBackend = (data: any, role?: string) => {
 
   const mapDiplome = (v: string) => {
     const map: Record<string, string> = {
-      'brevet': 'Brevet', 'cap': 'CAP', 'bts': 'BTS', 'aucun': 'Aucun diplÃƒÂ´me'
+      'brevet': 'Brevet', 'cap': 'CAP', 'bts': 'BTS', 'aucun': 'Aucun diplôme'
     };
     return map[v] || v || formatString(v);
   };
@@ -409,7 +409,7 @@ const mapStudentToBackend = (data: any, role?: string) => {
     telephone: cleanPhone(data.telephone),
     nir: data.nir ? data.nir.replace(/\s/g, '') : "",
     situation: mapSituation(data.situation),
-    regime_social: (data.regime_social === 'urssaf') ? "SÃƒÂ©curitÃƒÂ© Sociale" : (data.regime_social === 'msa' ? "MSA" : "SÃƒÂ©curitÃƒÂ© Sociale"),
+    regime_social: (data.regime_social === 'urssaf') ? "Sécurité Sociale" : (data.regime_social === 'msa' ? "MSA" : "Sécurité Sociale"),
     declare_inscription_sportif_haut_niveau: data.declare_inscription_sportif_haut_niveau || false,
     declare_avoir_projet_creation_reprise_entreprise: data.declare_avoir_projet_creation_reprise_entreprise || false,
     declare_travailleur_handicape: data.declare_travailleur_handicape || false,
@@ -423,16 +423,16 @@ const mapStudentToBackend = (data: any, role?: string) => {
     date_de_reglement: data.date_de_reglement || new Date().toISOString().split('T')[0],
     entreprise_d_accueil: data.entreprise_d_accueil || "Non",
     connaissance_rush_how: formatString(data.connaissance_rush_how || "") || "Autre",
-    motivation_projet_professionnel: data.motivation_projet_professionnel || "Non renseignÃƒÂ©",
+    motivation_projet_professionnel: data.motivation_projet_professionnel || "Non renseigné",
     utilisateur: role || "admission",
     validation: data.validation || "En attente"
   };
 };
 const mapCompanyToBackend = (data: any, role?: string) => {
-  console.log('Ã°Å¸â€Â mapCompanyToBackend input:', data, 'role:', role);
+  console.log('🚀 mapCompanyToBackend input:', data, 'role:', role);
   const ensureString = (val: any) => (val === undefined || val === null) ? "" : String(val);
 
-  // Si les donnÃƒÂ©es sont dÃƒÂ©jÃƒÂ  au format backend (cas de l'update avec fields)
+  // Si les données sont déjà au format backend (cas de l'update avec fields)
   if (data.identification || data.adresse || data.maitre_apprentissage) {
     return {
       identification: {
@@ -491,7 +491,7 @@ const mapCompanyToBackend = (data: any, role?: string) => {
         montant_salaire_brut4: data.contrat?.montant_salaire_brut4 ? parseFloat(data.contrat.montant_salaire_brut4.toString()) : "",
         date_conclusion: ensureString(data.contrat?.date_conclusion),
         date_debut_execution: ensureString(data.contrat?.date_debut_execution),
-        // 1�re ann�e : date_debut (above) = d�but p1. Seuls fin p1, d�but/fin p2 sont envoy�s.
+        // 1ère année : date_debut (above) = début p1. Seuls fin p1, début/fin p2 sont envoyés.
         date_fin_1periode_1ere_annee: ensureString(data.contrat?.date_fin_1periode_1er_annee),
         date_debut_2periode_1er_annee: ensureString(data.contrat?.date_debut_2periode_1er_annee),
         date_fin_2periode_1er_annee: ensureString(data.contrat?.date_fin_2periode_1er_annee),
@@ -536,47 +536,47 @@ const mapCompanyToBackend = (data: any, role?: string) => {
     };
   }
 
-  console.log('Ã°Å¸â€Â record_id_etudiant being mapped (flat case):', data["recordIdetudiant"]);
-  // Cas des donnÃƒÂ©es plates provenant directement des "fields" d'Airtable
+  console.log('🚀 record_id_etudiant being mapped (flat case):', data["recordIdetudiant"]);
+  // Cas des données plates provenant directement des "fields" d'Airtable
   return {
     identification: {
       raison_sociale: ensureString(data["Raison sociale"] || data["raison sociale"]),
-      siret: ensureString(data["NumÃƒÂ©ro SIRET"] || data["siret"]),
+      siret: ensureString(data["Numéro SIRET"] || data["siret"]),
       code_ape_naf: ensureString(data["Code APE/NAF"] || data["Code NAF"]),
       type_employeur: ensureString(data["Type demployeur"]),
-      employeur_specifique: ensureString(data["Employeur spÃƒÂ©cifique"]),
-      nombre_salaries: parseInt(ensureString(data["Effectif salariÃƒÂ© de l'entreprise"])) || 0,
+      employeur_specifique: ensureString(data["Employeur spécifique"]),
+      nombre_salaries: parseInt(ensureString(data["Effectif salarié de l'entreprise"])) || 0,
       convention_collective: ensureString(data["Convention collective"])
     },
     adresse: {
-      numero: ensureString(data["NumÃƒÂ©ro entreprise"]),
+      numero: ensureString(data["Numéro entreprise"]),
       voie: ensureString(data["Voie entreprise"]),
-      complement: ensureString(data["ComplÃƒÂ©ment dadresse entreprise"]),
+      complement: ensureString(data["Complément dadresse entreprise"]),
       code_postal: ensureString(data["Code postal entreprise"]),
       ville: ensureString(data["Ville entreprise"]),
-      telephone: ensureString(data["TÃƒÂ©lÃƒÂ©phone entreprise"]),
+      telephone: ensureString(data["Téléphone entreprise"]),
       email: ensureString(data["Email entreprise"])
     },
     maitre_apprentissage: {
-      nom: ensureString(data["Nom MaÃƒÂ®tre apprentissage"]),
-      prenom: ensureString(data["PrÃƒÂ©nom MaÃƒÂ®tre apprentissage"]),
-      date_naissance: ensureString(data["Date de naissance MaÃƒÂ®tre apprentissage"]),
-      fonction: ensureString(data["Fonction MaÃƒÂ®tre apprentissage"]),
-      diplome_plus_eleve: ensureString(data["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage intitulÃƒÂ©"] || data["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage"]),
-      niveau_diplome: ensureString(data["DiplÃƒÂ´me MaÃƒÂ®tre apprentissage"]),
-      annees_experience: ensureString(data["AnnÃƒÂ©e experience pro MaÃƒÂ®tre apprentissage"]),
-      telephone: ensureString(data["TÃƒÂ©lÃƒÂ©phone MaÃƒÂ®tre apprentissage"]),
-      email: ensureString(data["Email MaÃƒÂ®tre apprentissage"])
+      nom: ensureString(data["Nom Maître apprentissage"]),
+      prenom: ensureString(data["Prénom Maître apprentissage"]),
+      date_naissance: ensureString(data["Date de naissance Maître apprentissage"]),
+      fonction: ensureString(data["Fonction Maître apprentissage"]),
+      diplome_plus_eleve: ensureString(data["Diplôme Maître apprentissage intitulé"] || data["Diplôme Maître apprentissage"]),
+      niveau_diplome: ensureString(data["Diplôme Maître apprentissage"]),
+      annees_experience: ensureString(data["Année experience pro Maître apprentissage"]),
+      telephone: ensureString(data["Téléphone Maître apprentissage"]),
+      email: ensureString(data["Email Maître apprentissage"])
     },
     opco: { nom_opco: ensureString(data["Nom OPCO"]) },
     contrat: {
       type_contrat: ensureString(data["Type de contrat"]),
-      type_derogation: ensureString(data["Type de dÃƒÂ©rogation"]),
-      date_debut: ensureString(data["Date de dÃƒÂ©but exÃƒÂ©cution"]),
+      type_derogation: ensureString(data["Type de dérogation"]),
+      date_debut: ensureString(data["Date de début exécution"]),
       date_fin: ensureString(data["Fin du contrat apprentissage"]),
-      duree_hebdomadaire: ensureString(data["DurÃƒÂ©e hebdomadaire"]),
-      poste_occupe: ensureString(data["Poste occupÃƒÂ©"]),
-      lieu_execution: ensureString(data["Lieu dexÃƒÂ©cution du contrat (si diffÃƒÂ©rent du siÃƒÂ¨ge)"]),
+      duree_hebdomadaire: ensureString(data["Durée hebdomadaire"]),
+      poste_occupe: ensureString(data["Poste occupé"]),
+      lieu_execution: ensureString(data["Lieu dexécution du contrat (si différent du siège)"]),
       pourcentage_smic1: data["Pourcentage du SMIC 1"] || data["Pourcentage smic 1"] || 0,
       pourcentage_smic1_2: data["pourcentage_smic1_2"] || "",
       smic1: "smic",
@@ -594,9 +594,9 @@ const mapCompanyToBackend = (data: any, role?: string) => {
       smic4: data["Pourcentage smic 4"] ? "smic" : "",
       montant_salaire_brut4: parseFloat(ensureString(data["Salaire brut mensuel 4"])) || "",
       date_conclusion: ensureString(data["Date de conclusion"]),
-      date_debut_execution: ensureString(data["Date de dÃƒÂ©but exÃƒÂ©cution"]),
-      numero_deca_ancien_contrat: ensureString(data["NumÃƒÂ©ro DECA de ancien contrat"]),
-      travail_machine_dangereuse: ensureString(data["Travail sur machines dangereuses ou exposition ÃƒÂ  des risques particuliers"]),
+      date_debut_execution: ensureString(data["Date de début exécution"]),
+      numero_deca_ancien_contrat: ensureString(data["Numéro DECA de ancien contrat"]),
+      travail_machine_dangereuse: ensureString(data["Travail sur machines dangereuses ou exposition à des risques particuliers"]),
       caisse_retraite: ensureString(data["Caisse de retraite"]),
       date_avenant: ensureString(data["date Si avenant"]),
       date_debut_1periode_1er_annee: ensureString(data["date_debut_1periode_1er_annee"]),
@@ -715,7 +715,7 @@ export const api = {
     return loginData;
   },
   async register(userData: any): Promise<{ access_token: string }> {
-    console.log('Ã°Å¸â€œÂ¤ Mock Register Attempt:', userData.email);
+    console.log('📦 Mock Register Attempt:', userData.email);
 
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -724,19 +724,19 @@ export const api = {
       access_token: 'mock-jwt-token-reg-' + Date.now()
     };
 
-    console.log('Ã°Å¸â€œÂ¥ Mock Register Success:', mockData);
+    console.log('📤 Mock Register Success:', mockData);
     return mockData;
   },
 
   // --- HEALTH ---
   async checkHealth(): Promise<boolean> {
     try {
-      console.log('Ã°Å¸â€Â Checking API Health at:', `${BASE_API_URL}/health`);
+      console.log('🚀 Checking API Health at:', `${BASE_API_URL}/health`);
       const response = await fetch(`${BASE_API_URL}/health`, { method: 'GET' });
-      console.log('Ã°Å¸â€œÅ  Health Check Result:', response.ok ? 'Ã¢Å“â€¦ OK' : `Ã¢ÂÅ’ Failed (${response.status})`);
+      console.log('📊 Health Check Result:', response.ok ? '✅ OK' : `❌ Failed (${response.status})`);
       return response.ok;
     } catch (error) {
-      console.error('Ã¢ÂÅ’ Health Check Error:', error);
+      console.error('❌ Health Check Error:', error);
       return false;
     }
   },
@@ -789,7 +789,7 @@ export const api = {
         etudiants: formattedStudents
       };
     } catch (error) {
-      console.error('Ã¢ÂÅ’ API Error (Get Students List):', error);
+      console.error('❌ API Error (Get Students List):', error);
       throw error;
     }
   },
@@ -797,17 +797,17 @@ export const api = {
   // Get RH Stats
   async getRHStats(): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Fetching RH Stats');
+      console.log('📦 Fetching RH Stats');
       const response = await fetch(`${BASE_API_URL}/rh/statistiques`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
       if (!response.ok) throw new Error('Failed to fetch RH stats');
       const data = await response.json();
-      console.log('Ã°Å¸â€œÂ¥ RH Stats Received:', data);
+      console.log('📤 RH Stats Received:', data);
       return data;
     } catch (error) {
-      console.error('Ã¢ÂÅ’ API Error (Get RH Stats):', error);
+      console.error('❌ API Error (Get RH Stats):', error);
       throw error;
     }
   },
@@ -816,7 +816,7 @@ export const api = {
   async submitStudent(data: StudentFormData, role?: string): Promise<ApiResponse> {
     try {
       const payload = mapStudentToBackend(data, role);
-      console.log('Ã°Å¸â€œÂ¤ Submit Student Payload:', payload);
+      console.log('📦 Submit Student Payload:', payload);
       const response = await fetch(`${BASE_URL}/candidates`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -824,14 +824,14 @@ export const api = {
       });
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Ã¢ÂÅ’ Submit Student Failed:', errorData);
+        console.error('❌ Submit Student Failed:', errorData);
         throw new Error(errorData.detail || `Error ${response.status}`);
       }
       const json = await response.json();
-      console.log('Ã°Å¸â€œÂ¥ Submit Student Success:', json);
+      console.log('📤 Submit Student Success:', json);
       return { success: true, record_id: json.record_id || json.id, data: json };
     } catch (error: any) {
-      console.error('Ã¢ÂÅ’ API Error (Submit Student):', error);
+      console.error('❌ API Error (Submit Student):', error);
       throw error;
     }
   },
@@ -863,21 +863,21 @@ export const api = {
       console.log('API getCandidatsWithDocuments RAW:', json);
       return Array.isArray(json) ? json : (json.data || []);
     } catch (error) {
-      console.error('Ã¢ÂÅ’ API Error (getCandidatsWithDocuments):', error);
+      console.error('❌ API Error (getCandidatsWithDocuments):', error);
       return [];
     }
   },
 
   async getCandidateById(id: string): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Fetching Candidate:', id);
+      console.log('📦 Fetching Candidate:', id);
       const response = await fetch(`${BASE_URL}/candidates/${id}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
       if (!response.ok) throw new Error('Candidate not found');
       const json = await response.json();
-      console.log('Ã°Å¸â€œÂ¥ Candidate Received:', json);
+      console.log('📤 Candidate Received:', json);
 
       // Adapt response for local backend (usually returns { success: true, data: { ... } })
       const candidateData = json.data || json;
@@ -892,30 +892,30 @@ export const api = {
   async updateCandidate(id: string, data: Partial<StudentFormData>, role?: string): Promise<any> {
     try {
       const payload = mapStudentToBackend(data, role);
-      console.log('Ã°Å¸â€œÂ¤ Update Candidate Payload:', payload);
+      console.log('📦 Update Candidate Payload:', payload);
       const response = await fetch(`${BASE_URL}/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(payload),
       });
       if (!response.ok) {
-        console.error('Ã¢ÂÅ’ Update Candidate Failed');
+        console.error('❌ Update Candidate Failed');
         throw new Error('Update failed');
       }
       const json = await response.json();
-      console.log('Ã°Å¸â€œÂ¥ Update Candidate Success:', json);
+      console.log('📤 Update Candidate Success:', json);
       return json;
     } catch (error) { throw error; }
   },
 
   async deleteCandidate(id: string): Promise<boolean> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Deleting Candidate:', id);
+      console.log('📦 Deleting Candidate:', id);
       const response = await fetch(`${BASE_URL}/candidates/${id}`, {
         method: 'DELETE',
         headers: { 'Accept': 'application/json' }
       });
-      console.log('Ã°Å¸â€œÂ¥ Delete Candidate Status:', response.status);
+      console.log('📤 Delete Candidate Status:', response.status);
       return response.ok;
     } catch (error) { return false; }
   },
@@ -923,7 +923,7 @@ export const api = {
   // --- DOCUMENTS ---
   async uploadDocument(recordId: string, docType: string, file: File): Promise<any> {
     try {
-      console.log(`Ã°Å¸â€œÂ¤ Uploading Document (${docType}) for ${recordId}:`, file.name);
+      console.log(`📦 Uploading Document (${docType}) for ${recordId}:`, file.name);
       const formData = new FormData();
       formData.append('file', file);
       const endpointMap: Record<string, string> = { 'cv': 'cv', 'cni': 'cin', 'lettre': 'lettre-motivation', 'vitale': 'carte-vitale', 'diplome': 'dernier-diplome' };
@@ -931,7 +931,7 @@ export const api = {
       const response = await fetch(url, { method: 'POST', headers: { 'Accept': 'application/json' }, body: formData });
       if (!response.ok) throw new Error(`Upload failed: ${response.statusText}`);
       const json = await response.json();
-      console.log('Ã°Å¸â€œÂ¥ Upload Success:', json);
+      console.log('📤 Upload Success:', json);
       return json;
     } catch (error) { throw error; }
   },
@@ -939,23 +939,23 @@ export const api = {
   // --- GENERATION ---
   async generateFicheRenseignement(recordId: string): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Generating Fiche Renseignement:', recordId);
+      console.log('📦 Generating Fiche Renseignement:', recordId);
       const response = await fetch(`${BASE_URL}/candidats/${recordId}/fiche-renseignement`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' }
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Ã¢ÂÅ’ Fiche Renseignement Generation Failed:', errorData);
+        console.error('❌ Fiche Renseignement Generation Failed:', errorData);
         throw new Error(errorData.detail || errorData.message || 'Generation failed');
       }
       const text = await response.text();
       try {
         const json = JSON.parse(text);
-        console.log('Ã°Å¸â€œÂ¥ Generation Success:', json);
+        console.log('📤 Generation Success:', json);
         return json;
       } catch (e) {
-        console.log('Ã°Å¸â€œÂ¥ Generation Success (Non-JSON):', text);
+        console.log('📤 Generation Success (Non-JSON):', text);
         return { success: true, message: text };
       }
     } catch (error) { throw error; }
@@ -963,7 +963,7 @@ export const api = {
 
   async generateCerfa(recordId: string): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Generating CERFA:', recordId);
+      console.log('📦 Generating CERFA:', recordId);
       const url = `${BASE_URL}/candidats/${recordId}/cerfa`;
       const response = await fetch(url, {
         method: 'POST',
@@ -974,21 +974,21 @@ export const api = {
         try {
           const errorData = await response.json();
           errorDetail = errorData.detail || errorData.message || errorDetail;
-          console.error('Ã¢ÂÅ’ CERFA Generation Failed (JSON):', errorData);
+          console.error('❌ CERFA Generation Failed (JSON):', errorData);
         } catch (e) {
           const errorText = await response.text().catch(() => '');
           errorDetail = errorText || errorDetail;
-          console.error('Ã¢ÂÅ’ CERFA Generation Failed (Text):', errorText);
+          console.error('❌ CERFA Generation Failed (Text):', errorText);
         }
         throw new Error(errorDetail);
       }
       const text = await response.text();
       try {
         const json = JSON.parse(text);
-        console.log('Ã°Å¸â€œÂ¥ CERFA Generation Success:', json);
+        console.log('📤 CERFA Generation Success:', json);
         return json;
       } catch (e) {
-        console.log('Ã°Å¸â€œÂ¥ CERFA Generation Success (Non-JSON):', text);
+        console.log('📤 CERFA Generation Success (Non-JSON):', text);
         return { success: true, message: text };
       }
     } catch (error) { throw error; }
@@ -996,23 +996,23 @@ export const api = {
 
   async generateAtre(recordId: string): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Generating ATRE:', recordId);
+      console.log('📦 Generating ATRE:', recordId);
       const response = await fetch(`${BASE_URL}/candidats/${recordId}/atre`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' }
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Ã¢ÂÅ’ ATRE Generation Failed:', errorData);
+        console.error('❌ ATRE Generation Failed:', errorData);
         throw new Error(errorData.detail || errorData.message || 'Generation failed');
       }
       const text = await response.text();
       try {
         const json = JSON.parse(text);
-        console.log('Ã°Å¸â€œÂ¥ ATRE Generation Success:', json);
+        console.log('📤 ATRE Generation Success:', json);
         return json;
       } catch (e) {
-        console.log('Ã°Å¸â€œÂ¥ ATRE Generation Success (Non-JSON):', text);
+        console.log('📤 ATRE Generation Success (Non-JSON):', text);
         return { success: true, message: text };
       }
     } catch (error) { throw error; }
@@ -1020,23 +1020,23 @@ export const api = {
 
   async generateCompteRendu(recordId: string): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Generating Compte Rendu:', recordId);
+      console.log('📦 Generating Compte Rendu:', recordId);
       const response = await fetch(`${BASE_URL}/candidats/${recordId}/compte-rendu`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' }
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Ã¢ÂÅ’ Compte Rendu Generation Failed:', errorData);
+        console.error('❌ Compte Rendu Generation Failed:', errorData);
         throw new Error(errorData.detail || errorData.message || 'Generation failed');
       }
       const text = await response.text();
       try {
         const json = JSON.parse(text);
-        console.log('Ã°Å¸â€œÂ¥ Compte Rendu Generation Success:', json);
+        console.log('📤 Compte Rendu Generation Success:', json);
         return json;
       } catch (e) {
-        console.log('Ã°Å¸â€œÂ¥ Compte Rendu Generation Success (Non-JSON):', text);
+        console.log('📤 Compte Rendu Generation Success (Non-JSON):', text);
         return { success: true, message: text };
       }
     } catch (error) { throw error; }
@@ -1044,23 +1044,23 @@ export const api = {
 
   async generateConventionApprentissage(recordId: string): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Generating Convention Apprentissage:', recordId);
+      console.log('📦 Generating Convention Apprentissage:', recordId);
       const response = await fetch(`${BASE_URL}/candidats/${recordId}/convention-apprentissage`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' }
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Ã¢ÂÅ’ Convention Apprentissage Generation Failed:', errorData);
+        console.error('❌ Convention Apprentissage Generation Failed:', errorData);
         throw new Error(errorData.detail || errorData.message || 'Generation failed');
       }
       const text = await response.text();
       try {
         const json = JSON.parse(text);
-        console.log('Ã°Å¸â€œÂ¥ Convention Apprentissage Generation Success:', json);
+        console.log('📤 Convention Apprentissage Generation Success:', json);
         return json;
       } catch (e) {
-        console.log('Ã°Å¸â€œÂ¥ Convention Apprentissage Generation Success (Non-JSON):', text);
+        console.log('📤 Convention Apprentissage Generation Success (Non-JSON):', text);
         return { success: true, message: text };
       }
     } catch (error) { throw error; }
@@ -1068,23 +1068,23 @@ export const api = {
 
   async generateLivretApprentissage(recordId: string): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Generating Livret Apprentissage:', recordId);
+      console.log('📦 Generating Livret Apprentissage:', recordId);
       const response = await fetch(`${BASE_URL}/candidats/${recordId}/livret-apprentissage`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' }
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Ã¢ÂÅ’ Livret Apprentissage Generation Failed:', errorData);
+        console.error('❌ Livret Apprentissage Generation Failed:', errorData);
         throw new Error(errorData.detail || errorData.message || 'Generation failed');
       }
       const text = await response.text();
       try {
         const json = JSON.parse(text);
-        console.log('Ã°Å¸â€œÂ¥ Livret Apprentissage Generation Success:', json);
+        console.log('📤 Livret Apprentissage Generation Success:', json);
         return json;
       } catch (e) {
-        console.log('Ã°Å¸â€œÂ¥ Livret Apprentissage Generation Success (Non-JSON):', text);
+        console.log('📤 Livret Apprentissage Generation Success (Non-JSON):', text);
         return { success: true, message: text };
       }
     } catch (error) { throw error; }
@@ -1092,7 +1092,7 @@ export const api = {
 
   async generateCertificatScolarite(recordId: string): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Generating Certificat de ScolaritÃƒÂ©:', recordId);
+      console.log('📦 Generating Certificat de Scolarité:', recordId);
       const response = await fetch(`${BASE_URL}/candidats/${recordId}/certificat-scolarite`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' }
@@ -1102,21 +1102,21 @@ export const api = {
         try {
           const errorData = await response.json();
           errorDetail = errorData.detail || errorData.message || errorDetail;
-          console.error('Ã¢ÂÅ’ Certificat ScolaritÃƒÂ© Generation Failed:', errorData);
+          console.error('❌ Certificat Scolarité Generation Failed:', errorData);
         } catch (e) {
           const errorText = await response.text().catch(() => '');
           errorDetail = errorText || errorDetail;
-          console.error('Ã¢ÂÅ’ Certificat ScolaritÃƒÂ© Generation Failed (Text):', errorText);
+          console.error('❌ Certificat Scolarité Generation Failed (Text):', errorText);
         }
         throw new Error(errorDetail);
       }
       const text = await response.text();
       try {
         const json = JSON.parse(text);
-        console.log('Ã°Å¸â€œÂ¥ Certificat ScolaritÃƒÂ© Generation Success:', json);
+        console.log('📤 Certificat Scolarité Generation Success:', json);
         return json;
       } catch (e) {
-        console.log('Ã°Å¸â€œÂ¥ Certificat ScolaritÃƒÂ© Generation Success (Non-JSON):', text);
+        console.log('📤 Certificat Scolarité Generation Success (Non-JSON):', text);
         return { success: true, message: text };
       }
     } catch (error) { throw error; }
@@ -1125,7 +1125,7 @@ export const api = {
   async generateSigningLink(documentId: string): Promise<any> {
     try {
       const url = `${BASE_API_URL}/documents/${documentId}/signature/signing-link`;
-      console.log('Ã°Å¸Å¡â‚¬ [API] Requesting Signing Link:', {
+      console.log('🚀 [API] Requesting Signing Link:', {
         url: url,
         method: 'POST',
         documentId: documentId
@@ -1138,7 +1138,7 @@ export const api = {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Ã¢ÂÅ’ [API] Signing Link Generation Failed:', {
+        console.error('❌ [API] Signing Link Generation Failed:', {
           status: response.status,
           statusText: response.statusText,
           error: errorData
@@ -1147,10 +1147,10 @@ export const api = {
       }
 
       const json = await response.json();
-      console.log('Ã¢Å“â€¦ [API] Signing Link Received:', json);
+      console.log('✅ [API] Signing Link Received:', json);
       return json;
     } catch (error) {
-      console.error('Ã°Å¸â€™Â¥ [API] Signing Link Error:', error);
+      console.error('💥 [API] Signing Link Error:', error);
       throw error;
     }
   },
@@ -1442,19 +1442,19 @@ export const api = {
   async submitCompany(data: CompanyFormData, role?: string): Promise<ApiResponse> {
     try {
       const payload = mapCompanyToBackend(data, role);
-      console.log('Ã°Å¸â€œÂ¤ Submitting Company. Validation:', payload.validation, '| User:', payload.utilisateur);
-      console.log('Ã°Å¸â€œÂ¤ Full Payload:', payload);
+      console.log('📦 Submitting Company. Validation:', payload.validation, '| User:', payload.utilisateur);
+      console.log('📦 Full Payload:', payload);
       const response = await fetch(`${BASE_URL}/entreprise`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(payload),
       });
       if (!response.ok) {
-        console.error(`Ã¢ÂÅ’ Company Submission Failed (${response.status}):`, response.statusText);
+        console.error(`❌ Company Submission Failed (${response.status}):`, response.statusText);
         throw new Error(`Submission failed: ${response.status}`);
       }
       const json = await response.json();
-      console.log('Ã¢Å“â€¦ Company Submission Success. Full Response:', json);
+      console.log('✅ Company Submission Success. Full Response:', json);
       return {
         success: true,
         data: json,
@@ -1465,7 +1465,7 @@ export const api = {
         }
       };
     } catch (error: any) {
-      console.error('Ã¢ÂÅ’ Company Submission Error:', error);
+      console.error('❌ Company Submission Error:', error);
       throw error;
     }
   },
@@ -1491,11 +1491,11 @@ export const api = {
 
   async getCompanyById(id: string): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Fetching Company:', id);
+      console.log('📦 Fetching Company:', id);
       const response = await fetch(`${BASE_URL}/candidats/${id}/entreprise`, { method: 'GET', headers: { 'Accept': 'application/json' } });
       if (!response.ok) throw new Error('Company not found');
       const json = await response.json();
-      console.log('Ã°Å¸â€œÂ¥ Company Received:', json);
+      console.log('📤 Company Received:', json);
 
       // Return raw record (id, fields) directly for modal view compatibility
       return json.data || json;
@@ -1504,11 +1504,11 @@ export const api = {
 
   async getCompanyByStudentId(studentId: string): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Fetching Company for Student:', studentId);
+      console.log('📦 Fetching Company for Student:', studentId);
       const response = await fetch(`${BASE_URL}/candidats/${studentId}/entreprise`, { method: 'GET', headers: { 'Accept': 'application/json' } });
       if (!response.ok) throw new Error('Company not found for this student');
       const json = await response.json();
-      console.log('Ã°Å¸â€œÂ¥ Company for Student Received:', json);
+      console.log('📤 Company for Student Received:', json);
 
       // Return raw record (id, fields) directly for modal view compatibility
       return json.data || json;
@@ -1526,29 +1526,29 @@ export const api = {
         // Always include utilisateur and validation status for history tracking
         finalPayload.utilisateur = payload.utilisateur;
         finalPayload.validation = payload.validation;
-        console.log('Ã°Å¸â€â€ž Diff result with audit fields:', finalPayload);
+        console.log('🔄 Diff result with audit fields:', finalPayload);
 
         if (Object.keys(finalPayload).length === 0) {
-          console.log('Ã¢â€žÂ¹Ã¯Â¸Â No changes detected, skipping update.');
+          console.log('⏭️  No changes detected, skipping update.');
           return { success: true, message: "No changes detected" };
         }
       }
 
-      console.log('Ã°Å¸â€œÂ¤ Updating Company for Student ID:', studentId);
-      console.log('Ã°Å¸â€œÂ¤ Validation:', payload.validation, '| User:', payload.utilisateur);
-      console.log('Ã°Å¸â€œÂ¤ Updating Company Payload (Partial/Diff):', finalPayload);
+      console.log('📦 Updating Company for Student ID:', studentId);
+      console.log('📦 Validation:', payload.validation, '| User:', payload.utilisateur);
+      console.log('📦 Updating Company Payload (Partial/Diff):', finalPayload);
       const response = await fetch(`${BASE_URL}/entreprises/${studentId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(finalPayload),
       });
       if (!response.ok) {
-        console.error(`Ã¢ÂÅ’ Company Update Failed (${response.status}):`, response.statusText);
+        console.error(`❌ Company Update Failed (${response.status}):`, response.statusText);
         throw new Error('Update company failed');
       }
       return await response.json();
     } catch (error) {
-      console.error('Ã¢ÂÅ’ Company Update Error:', error);
+      console.error('❌ Company Update Error:', error);
       throw error;
     }
   },
@@ -1556,15 +1556,15 @@ export const api = {
   
   async deleteCompany(studentId: string): Promise<boolean> {
     try {
-      console.log('\ud83d\udce4 Deleting Company for Student:', studentId);
+      console.log('📤 Deleting Company for Student:', studentId);
       const response = await fetch(`${BASE_URL}/entreprises/${studentId}`, {
         method: 'DELETE',
         headers: { 'Accept': 'application/json' }
       });
-      console.log('\ud83d\udce5 Delete Company Status:', response.status);
+      console.log('📥 Delete Company Status:', response.status);
       return response.ok;
     } catch (error) {
-      console.error('\u274c Delete Company Error:', error);
+      console.error('❌ Delete Company Error:', error);
       return false;
     }
   },
@@ -1572,7 +1572,7 @@ export const api = {
   // --- HISTORY ---
   async getGlobalHistory(): Promise<any[]> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Fetching Global History');
+      console.log('📦 Fetching Global History');
       const response = await fetch(`${BASE_URL}/historique-utilisateurs`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
@@ -1591,8 +1591,8 @@ export const api = {
           group.eleves.forEach((e: any, idx: number) => {
             flattenedHistory.push({
               id: `e-${group.utilisateur}-${e.record_id}-${idx}`,
-              action: 'Modification Ãƒâ€°tudiant',
-              details: `Mise ÃƒÂ  jour du dossier de ${e.prenom || ''} ${e.nom || ''} (${e.email || 'Pas d\'email'})`,
+              action: 'Modification Étudiant',
+              details: `Mise à jour du dossier de ${e.prenom || ''} ${e.nom || ''} (${e.email || 'Pas d\'email'})`,
               date: e.date_action || new Date().toISOString(),
               utilisateur: user,
               studentId: e.record_id
@@ -1606,7 +1606,7 @@ export const api = {
             flattenedHistory.push({
               id: `ent-${group.utilisateur}-${ent.record_id}-${idx}`,
               action: 'Modification Entreprise',
-              details: `Mise ÃƒÂ  jour de la fiche de ${ent.raison_sociale || 'Entreprise inconnue'} (SIRET: ${ent.siret || 'N/A'})`,
+              details: `Mise à jour de la fiche de ${ent.raison_sociale || 'Entreprise inconnue'} (SIRET: ${ent.siret || 'N/A'})`,
               date: ent.date_action || new Date().toISOString(),
               utilisateur: user,
               studentId: ent.record_id_etudiant
@@ -1618,7 +1618,7 @@ export const api = {
       // Sort by date desc
       return flattenedHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     } catch (error) {
-      console.warn('Ã¢Å¡Â Ã¯Â¸Â Global History API error:', error);
+      console.warn('⚠️ Global History API error:', error);
       return [];
     }
   },
@@ -1629,7 +1629,7 @@ export const api = {
       // Filter for specific student if ID is provided
       return allHistory.filter(item => item.studentId === studentId);
     } catch (error) {
-      console.warn('Ã¢Å¡Â Ã¯Â¸Â Student History filter error:', error);
+      console.warn('⚠️ Student History filter error:', error);
       return [];
     }
   },
@@ -1652,7 +1652,7 @@ export const api = {
   // --- EVALUATIONS ---
   async saveInterviewEvaluation(data: any): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Saving Interview Evaluation:', data);
+      console.log('📦 Saving Interview Evaluation:', data);
       const response = await fetch(`${BASE_URL}/entretiens/evaluation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1661,14 +1661,14 @@ export const api = {
       if (!response.ok) throw new Error('Failed to save evaluation');
       return await response.json();
     } catch (error) {
-      console.error('Ã¢ÂÅ’ Error saving evaluation:', error);
+      console.error('❌ Error saving evaluation:', error);
       throw error;
     }
   },
 
   async submitAdmissionResult(email: string, file: Blob): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Submitting Admission Result PDF for:', email);
+      console.log('📦 Submitting Admission Result PDF for:', email);
       const formData = new FormData();
       formData.append('email', email);
       formData.append('file', file, `Admission_Result_${email.replace(/@/g, '_at_')}.pdf`);
@@ -1685,14 +1685,14 @@ export const api = {
 
       return await response.json();
     } catch (error) {
-      console.error('Ã¢ÂÅ’ Error submitting admission result:', error);
+      console.error('❌ Error submitting admission result:', error);
       throw error;
     }
   },
 
   async submitInterviewResult(email: string, file: Blob): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Submitting Interview Result PDF for:', email);
+      console.log('📦 Submitting Interview Result PDF for:', email);
       const formData = new FormData();
       formData.append('email', email);
       formData.append('file', file, `Entretien_${email.replace(/@/g, '_at_')}.pdf`);
@@ -1709,14 +1709,14 @@ export const api = {
 
       return await response.json();
     } catch (error) {
-      console.error('Ã¢ÂÅ’ Error submitting interview result:', error);
+      console.error('❌ Error submitting interview result:', error);
       throw error;
     }
   },
 
   async submitProjetPro(email: string, file: Blob): Promise<any> {
     try {
-      console.log('Ã°Å¸â€œÂ¤ Submitting Projet Pro PDF for:', email);
+      console.log('📦 Submitting Projet Pro PDF for:', email);
       const formData = new FormData();
       formData.append('email', email);
       formData.append('file', file, `Projet_Pro_${email.replace(/@/g, '_at_')}.pdf`);
@@ -1733,7 +1733,7 @@ export const api = {
 
       return await response.json();
     } catch (error) {
-      console.error('Ã¢ÂÅ’ Error submitting projet pro:', error);
+      console.error('❌ Error submitting projet pro:', error);
       throw error;
     }
     },
@@ -1871,7 +1871,7 @@ export const api = {
 
     const json = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(json?.error || 'Impossible de mettre Ã  jour le statut');
+      throw new Error(json?.error || 'Impossible de mettre à jour le statut');
     }
     return json;
   },
@@ -1894,7 +1894,7 @@ export const api = {
 
     const json = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(json?.error || 'Impossible de mettre � jour le ticket');
+      throw new Error(json?.error || 'Impossible de mettre à jour le ticket');
     }
     return json;
   },
