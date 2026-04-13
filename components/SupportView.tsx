@@ -693,7 +693,6 @@ const SupportView: React.FC = () => {
             Actualiser
           </button>
         </div>
-      </div>
 
       {/* ── LIGHTBOX MODAL ── */}
       {previewImage && (
