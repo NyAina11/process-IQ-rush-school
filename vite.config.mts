@@ -18,6 +18,10 @@ export default defineConfig(({ mode }) => {
           target: backendUrl,
           changeOrigin: true,
         },
+        '/api/support': {
+          target: backendUrl,
+          changeOrigin: true,
+        },
         '/api': {
           target: 'https://processiqfilegenerator.onrender.com',
           changeOrigin: true,
