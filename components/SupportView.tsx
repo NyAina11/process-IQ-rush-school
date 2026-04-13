@@ -641,9 +641,9 @@ const SupportView: React.FC = () => {
                           bug.screenshotUrl ? (
                             <div className="relative group w-8 h-8">
                               <img 
-                                src={bug.screenshotUrl} 
+                                src={bug.screenshotUrl.replace('https://processiq.duckdns.org', '')} 
                                 className="w-8 h-8 rounded-[4px] object-cover border border-[#e2e8f0] cursor-zoom-in group-hover:scale-110 transition-transform" 
-                                onClick={() => setPreviewImage(bug.screenshotUrl || null)}
+                                onClick={() => setPreviewImage(bug.screenshotUrl?.replace('https://processiq.duckdns.org', '') || null)}
                                 title="Agrandir"
                               />
                             </div>

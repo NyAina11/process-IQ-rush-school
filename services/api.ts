@@ -685,7 +685,7 @@ export const api = {
     let profileName = '';
 
     try {
-      const meResponse = await fetch(`${AUTH_API_URL}/me`, {
+      const meResponse = await fetch(`${AUTH_API_URL}/profile`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
