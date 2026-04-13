@@ -410,59 +410,53 @@ const SupportView: React.FC = () => {
     <div className="animate-fade-in pb-20">
 
       {/* ── HEADER ── */}
-      <div className="bg-white border border-[#e2e8f0] pb-0 mb-6">
-        <div className="px-6 py-5 flex items-center justify-between border-b border-[#e2e8f0]">
+      <div className="p-8 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-[4px] bg-[#ede9fe] text-[#7c3aed] flex items-center justify-center border border-[#c4b5fd]">
-              <Bug size={15} />
+            <div className="w-12 h-12 bg-white rounded-xl shadow-md border border-slate-100 flex items-center justify-center text-indigo-500">
+              <ShieldCheck size={28} />
             </div>
             <div>
-              <h1 className="text-[16px] font-black text-[#1e293b] tracking-tight flex items-center gap-3">
-                {isSuperAdmin ? 'Centre Support' : 'Support & Bugs'}
-                {isSuperAdmin && (
-                  <span className="inline-flex items-center gap-1 bg-[#d1fae5] border border-[#6ee7b7] px-2 py-0.5 rounded-[4px] text-[#065f46] text-[9px] font-bold uppercase tracking-widest">
-                    <ShieldCheck size={10} /> Admin
-                  </span>
-                )}
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                Centre de Support
+                <span className="px-2 py-0.5 bg-indigo-500 text-white text-[10px] rounded-md shadow-sm uppercase tracking-widest font-black">Admin</span>
               </h1>
-              <p className="text-[11px] text-[#8898aa] font-medium mt-0.5 uppercase tracking-widest">
-                {isSuperAdmin ? 'Gestion globale des tickets' : 'Signalez et suivez vos bugs'}
-              </p>
+              <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest mt-0.5">Gestion globale des tickets techniques</p>
             </div>
           </div>
-
-          <div className="flex items-center gap-0 border border-[#e2e8f0] bg-[#f4f6fb] overflow-hidden">
-            {statusTabs.map((tab) => (
+          <div className="flex items-center gap-2 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+            {['all', 'new', 'in_progress', 'resolved'].map((s) => (
               <button
-                key={tab.key}
-                onClick={() => setStatusFilter(tab.key)}
-                className={`px-4 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all border-r border-[#e2e8f0] last:border-r-0 ${
-                  statusFilter === tab.key ? 'bg-[#1a1f2e] text-white' : 'text-slate-500 hover:bg-white'
+                key={s}
+                onClick={() => setStatusFilter(s as any)}
+                className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
+                  statusFilter === s 
+                    ? 'bg-slate-900 text-white shadow-md' 
+                    : 'text-slate-500 hover:bg-slate-50'
                 }`}
               >
-                {tab.label}
-                <span className={`ml-2 text-[9px] font-black px-1.5 py-0.5 rounded-[4px] ${statusFilter === tab.key ? 'bg-white/20 text-white' : 'bg-white text-slate-400 border border-[#e2e8f0]'}`}>
-                  {tab.count}
+                {s === 'all' ? 'TOUS' : statusLabel[s as BugStatus]}
+                <span className={`ml-2 px-1.5 py-0.5 rounded ${statusFilter === s ? 'bg-white/20' : 'bg-slate-100'}`}>
+                  {stats[s as keyof typeof stats] || 0}
                 </span>
               </button>
             ))}
           </div>
         </div>
+      </div>
 
-        {/* ── TOOLBAR ── */}
-        <div className="px-5 py-2.5 flex items-center gap-3 bg-[#faf8ff] border-b border-[#e2e8f0]">
-          <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-white border border-[#e2e8f0] rounded-[4px]">
-            <Search size={13} className="text-slate-400 shrink-0" />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* ── SEARCH & TOOLS ── */}
+        <div className="px-8 py-4 bg-white/50 backdrop-blur-sm border-b border-slate-100 flex items-center justify-between">
+          <div className="relative group w-[400px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
             <input
+              type="text"
+              placeholder="Rechercher par titre, détails ou responsable..."
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all shadow-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && loadBugs()}
-              placeholder="Rechercher un ticket..."
-              className="bg-transparent text-[12px] font-medium outline-none w-full placeholder-slate-400 text-slate-700"
             />
-            {search && (
-              <button onClick={() => { setSearch(''); setTimeout(loadBugs, 0); }} className="text-slate-300 hover:text-slate-500"><X size={12} /></button>
-            )}
           </div>
         </div>
 
@@ -470,26 +464,26 @@ const SupportView: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[#f4f6fb] border-b border-[#e2e8f0]">
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[120px]">DATE</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 min-w-[180px]">PROBLÈME</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 min-w-[250px]">DÉTAILS</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[120px]">MODULE</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[130px]">PRIORITÉ</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[160px]">STATUT</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[160px]">REPORTEUR</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[130px]">ASSIGNÉ À</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[120px]">DEADLINE</th>
-                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[80px]">CAPTURE</th>
-                <th className="px-6 py-4 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] w-[100px]">ACTIONS</th>
+              <tr className="bg-slate-50 border-b border-slate-100">
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">DATE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">PROBLÈME</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">DÉTAILS</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">MODULE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">PRIORITÉ</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">STATUT</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">REPORTEUR</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">ASSIGNÉ À</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">DEADLINE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">CAPTURE</th>
+                <th className="px-6 py-4 text-center text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">ACTIONS</th>
               </tr>
             </thead>
             <tbody>
               {/* NEW ROW */}
               {newRow && (
-                <tr className="bg-[#f5f3ff] border-b border-[#c4b5fd]">
+                <tr className="bg-indigo-50/30 border-b border-indigo-100">
                   <td className={CELL}>
-                    <span className="text-[11px] text-[#7c3aed] font-black uppercase tracking-widest">Maintenant</span>
+                    <span className="text-[11px] text-indigo-600 font-black uppercase tracking-widest">Maintenant</span>
                   </td>
                   <td className={CELL}>
                     <input ref={titleRef} value={newRow.title} onChange={(e) => setNewRow({ ...newRow, title: e.target.value })} placeholder="Titre..." className={CELL_INPUT} onKeyDown={(e) => e.key === 'Enter' && handleSubmitRow()} />
@@ -543,9 +537,9 @@ const SupportView: React.FC = () => {
               )}
 
               {loading ? (
-                <tr><td colSpan={isSuperAdmin ? 11 : 9} className="px-6 py-20 text-center"><Loader2 size={30} className="animate-spin mx-auto text-[#3b7cf4]" /><p className="mt-4 text-xs font-black uppercase tracking-widest text-[#8898aa]">Chargement des tickets...</p></td></tr>
+                <tr><td colSpan={11} className="px-6 py-20 text-center"><Loader2 size={30} className="animate-spin mx-auto text-[#3b7cf4]" /><p className="mt-4 text-xs font-black uppercase tracking-widest text-[#8898aa]">Chargement des tickets...</p></td></tr>
               ) : bugs.length === 0 && !newRow ? (
-                <tr><td colSpan={isSuperAdmin ? 11 : 9} className="px-6 py-20 text-center text-slate-400 text-sm italic">Aucun ticket trouvé.</td></tr>
+                <tr><td colSpan={11} className="px-6 py-20 text-center text-slate-400 text-sm italic">Aucun ticket trouvé.</td></tr>
               ) : (
                 bugs.map((bug, i) => {
                   const isEditing = editingRow?.id === bug._id;
@@ -556,16 +550,13 @@ const SupportView: React.FC = () => {
                   const rName = fixEncoding(bug.reporterName || 'Utilisateur');
 
                   return (
-                    <tr key={bug._id} className={`hover:bg-[#f4f6fb] transition-colors ${isEditing ? 'bg-[#f0f7ff]' : ''} ${(isSaving || isDeleting) ? 'opacity-50' : ''}`}>
-                      <td className={CELL}>
-                        <div className="text-[11px] font-bold text-[#1e293b]">{new Date(bug.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</div>
-                        <div className="text-[10px] text-[#8898aa] font-mono">{new Date(bug.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
-                      </td>
+                    <tr key={bug._id} className="hover:bg-slate-50/50 transition-colors group border-b border-slate-100 last:border-0">
+                      <td className={CELL}><span className="text-[10px] font-black text-slate-400 font-mono tracking-tighter">{new Date(bug.createdAt).toLocaleDateString('fr-FR')}</span></td>
                       <td className={CELL}>
                         {isEditing ? (
                           <input value={editingRow.title} onChange={(e) => setEditingRow({ ...editingRow, title: e.target.value })} className={CELL_INPUT} autoFocus onKeyDown={handleKeyDown} />
                         ) : (
-                          <span className="font-bold text-[#1e293b]">{title}</span>
+                          <span className="font-bold text-slate-900">{title}</span>
                         )}
                       </td>
                       <td className={CELL}>
@@ -581,9 +572,10 @@ const SupportView: React.FC = () => {
                             <option value="admission">Admission</option><option value="rh">RH</option><option value="commercial">Commercial</option><option value="other">Autre</option>
                           </select>
                         ) : (
-                          <span className="inline-flex px-2.5 py-1 rounded-[4px] bg-[#f1f5f9] text-[#475569] text-[10px] font-black uppercase tracking-widest border border-[#e2e8f0]">
-                            {bug.module}
-                          </span>
+                          <div className="flex items-center gap-1.5 font-black text-[10px] uppercase tracking-widest text-slate-500">
+                            <Bug size={10} className="text-indigo-400" />
+                            {bug.module || 'AUTRE'}
+                          </div>
                         )}
                       </td>
                       <td className={CELL}>

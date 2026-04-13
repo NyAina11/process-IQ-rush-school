@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SupportService } from './support.service';
+import { CreateBugDto, UpdateBugDto } from './bug.dto';
 
 import { join } from 'path';
 
@@ -15,11 +16,8 @@ export class SupportController {
     // ── POST /api/support/bugs ──────────────────────────────────────────
     @Post('bugs')
     @HttpCode(HttpStatus.CREATED)
-    async createBug(@Body() body: any) {
+    async createBug(@Body() body: CreateBugDto) {
         try {
-            if (!body.title?.trim()) {
-                throw new BadRequestException('Le titre est requis');
-            }
             const bug = await this.supportService.create(body);
             return { success: true, data: bug };
         } catch (error) {
@@ -60,9 +58,10 @@ export class SupportController {
     @Patch('bugs/:id')
     async updateBug(
         @Param('id') id: string,
-        @Body() body: any,
+        @Body() body: UpdateBugDto,
     ) {
         try {
+            console.log(`[SupportController] Updating bug ${id} with:`, body);
             const bug = await this.supportService.update(id, body);
             if (!bug) throw new BadRequestException('Ticket introuvable');
             return { success: true, data: bug };
