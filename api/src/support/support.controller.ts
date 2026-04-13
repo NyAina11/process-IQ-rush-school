@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SupportService } from './support.service';
+import { CreateBugDto, UpdateBugDto, UpdateBugStatusDto } from './bug.dto';
 
 @Controller('support')
 export class SupportController {
@@ -13,19 +14,7 @@ export class SupportController {
     // ── POST /api/support/bugs ──────────────────────────────────────────
     @Post('bugs')
     @HttpCode(HttpStatus.CREATED)
-    async createBug(@Body() body: {
-        title: string;
-        description?: string;
-        module?: string;
-        priority?: string;
-        reporterRole?: string;
-        reporterName?: string;
-        reporterEmail?: string;
-        pagePath?: string;
-        screenshotUrl?: string;
-        assignee?: string;
-        deadline?: Date;
-    }) {
+    async createBug(@Body() body: CreateBugDto) {
         if (!body.title?.trim()) {
             throw new BadRequestException('Le titre est requis');
         }
@@ -53,7 +42,7 @@ export class SupportController {
     @Patch('bugs/:id/status')
     async updateStatus(
         @Param('id') id: string,
-        @Body() body: { status: string; requesterRole?: string },
+        @Body() body: UpdateBugStatusDto,
     ) {
         const bug = await this.supportService.updateStatus(id, body.status);
         if (!bug) throw new BadRequestException('Ticket introuvable');
@@ -64,15 +53,7 @@ export class SupportController {
     @Patch('bugs/:id')
     async updateBug(
         @Param('id') id: string,
-        @Body() body: {
-            title?: string;
-            description?: string;
-            module?: string;
-            priority?: string;
-            screenshotUrl?: string;
-            assignee?: string;
-            deadline?: Date;
-        },
+        @Body() body: UpdateBugDto,
     ) {
         const bug = await this.supportService.update(id, body);
         if (!bug) throw new BadRequestException('Ticket introuvable');
