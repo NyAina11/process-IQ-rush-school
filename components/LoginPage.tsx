@@ -123,7 +123,12 @@ const LoginPage: React.FC = () => {
             else if (finalRole === 'eleve') navigate('/etudiant/dashboard');
             else navigate('/admission');
         } catch (err: any) {
-            setError(err.message || 'Identifiants invalides');
+            const raw = err.message || '';
+            const isAuthError = raw.includes('Unauthorized')
+                || raw.includes('401')
+                || raw.includes('Identifiants invalides')
+                || raw.includes('invalide');
+            setError(isAuthError ? 'Adresse email ou mot de passe incorrect.' : raw || 'Une erreur est survenue, veuillez réessayer.');
         } finally {
             setLoading(false);
         }

@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
+    "dev:backend": "npx ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" api/src/main.ts",
     "build": "vite build",
     "preview": "vite preview"
   },

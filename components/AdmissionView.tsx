@@ -41,6 +41,7 @@ import { useAppStore } from '../store/useAppStore';
 import { useApi } from '../hooks/useApi';
 import { useCandidates, getC } from '../hooks/useCandidates';
 import { formatFormation } from '../utils/formatters';
+import ConfirmationModal from './ui/ConfirmationModal';
 
 // --- CONSTANTS ---
 
@@ -198,6 +199,8 @@ const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: ()
         commentaires: ''
     });
 
+    const [confirmReset, setConfirmReset] = useState(false);
+
     const [errors, setErrors] = useState<Record<string, boolean>>({});
     const [pdfUploadStatus, setPdfUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
     const [pdfUploadError, setPdfUploadError] = useState<string | null>(null);
@@ -253,21 +256,24 @@ const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: ()
     };
 
     const resetEvaluation = () => {
-        if (window.confirm("Voulez-vous vraiment réinitialiser la grille ?")) {
-            setEvalData({
-                candidatNom: '',
-                email: '',
-                heureEntretien: '',
-                chargeAdmission: '',
-                dateEntretien: '',
-                formation: '',
-                critere1: 0,
-                critere2: 0,
-                critere3: 0,
-                critere4: 0,
-                commentaires: ''
-            });
-        }
+        setConfirmReset(true);
+    };
+
+    const executeResetEvaluation = () => {
+        setConfirmReset(false);
+        setEvalData({
+            candidatNom: '',
+            email: '',
+            heureEntretien: '',
+            chargeAdmission: '',
+            dateEntretien: '',
+            formation: '',
+            critere1: 0,
+            critere2: 0,
+            critere3: 0,
+            critere4: 0,
+            commentaires: ''
+        });
     };
 
     const [isSaving, setIsSaving] = useState(false);
@@ -618,6 +624,15 @@ const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: ()
                     </div>
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={confirmReset}
+                title="Réinitialiser la grille ?"
+                message="Toutes les notes et observations saisies seront perdues."
+                confirmLabel="Réinitialiser"
+                onConfirm={executeResetEvaluation}
+                onCancel={() => setConfirmReset(false)}
+            />
         </div>
     );
 };
@@ -1022,8 +1037,8 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
         n.has(val) ? n.delete(val) : n.add(val);
         setFn(n);
     };
-    const setRating = (id: string, val: number) => setRatings(prev => ({ ...prev, [id]: val }));
     const setText = (id: string, val: string) => setTexts(prev => ({ ...prev, [id]: val }));
+    const [confirmReset, setConfirmReset] = useState(false);
 
     const qualitesList: [string, string][] = [
         ['Rigoureux(se)', 'Leader naturel(le)'],
@@ -1063,15 +1078,18 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
     const motivationActive = ['bg-rose-50 border-rose-300 text-rose-500', 'bg-orange-50 border-orange-300 text-orange-500', 'bg-amber-50 border-amber-300 text-amber-500', 'bg-lime-50 border-lime-300 text-lime-600', 'bg-emerald-50 border-emerald-300 text-emerald-600'];
 
     const handleReset = () => {
-        if (window.confirm('Réinitialiser le questionnaire ? Toutes les données saisies seront perdues.')) {
-            setQualites(new Set());
-            setAxes(new Set());
-            setStructures(new Set());
-            setTimeline('');
-            setRatings({});
-            setMotivation(null);
-            setTexts({ nom: '', email: '', formation: '', entreprise: '', date: '', annee: '', autresQualites: '', metier: '', pourquoi: '', specsAlternance: '', obj1: '', obj2: '', obj3: '', obstacles: '', actions: '', apport: '', succes: '', envie: '' });
-        }
+        setConfirmReset(true);
+    };
+
+    const executeReset = () => {
+        setConfirmReset(false);
+        setQualites(new Set());
+        setAxes(new Set());
+        setStructures(new Set());
+        setTimeline('');
+        setRatings({});
+        setMotivation(null);
+        setTexts({ nom: '', email: '', formation: '', entreprise: '', date: '', annee: '', autresQualites: '', metier: '', pourquoi: '', specsAlternance: '', obj1: '', obj2: '', obj3: '', obstacles: '', actions: '', apport: '', succes: '', envie: '' });
     };
 
     const generatePDF = (returnBlob = false): any => {
@@ -1420,7 +1438,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                 <RatingTable
                     title="Compétences commerciales & relationnelles"
                     ratings={ratings}
-                    onRate={setRating}
+                    onRate={(id, val) => setRatings(prev => ({ ...prev, [id]: val }))}
                     items={[
                         { label: 'Accueil et relation client', id: 'c1' },
                         { label: 'Argumentation et vente', id: 'c2' },
@@ -1433,7 +1451,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                 <RatingTable
                     title="Compétences digitales & marketing"
                     ratings={ratings}
-                    onRate={setRating}
+                    onRate={(id, val) => setRatings(prev => ({ ...prev, [id]: val }))}
                     items={[
                         { label: 'Réseaux sociaux (Instagram, LinkedIn…)', id: 'd1' },
                         { label: 'Création de contenu (visuels, vidéos)', id: 'd2' },
@@ -1445,7 +1463,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                 <RatingTable
                     title="Compétences en gestion & organisation"
                     ratings={ratings}
-                    onRate={setRating}
+                    onRate={(id, val) => setRatings(prev => ({ ...prev, [id]: val }))}
                     items={[
                         { label: 'Gestion du temps et des priorités', id: 'g1' },
                         { label: 'Suivi d\'indicateurs et tableaux de bord', id: 'g2' },
@@ -1578,14 +1596,14 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
             <div className="mt-8 flex items-center justify-end gap-3">
                 <button
                     onClick={handleReset}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-[4px] border-2 border-slate-200 text-slate-600 font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-[4px] bg-rose-50 border-2 border-rose-500 text-rose-700 font-black text-[10px] uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all active:scale-95 shadow-sm shadow-rose-100"
                 >
                     <RotateCcw size={14} />
                     Réinitialiser
                 </button>
                 <button
                     onClick={generatePDF}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-[4px] bg-emerald-600 text-white font-black text-[11px] uppercase tracking-widest hover:bg-emerald-700 transition-all active:scale-95 shadow-md shadow-emerald-200"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-[4px] bg-emerald-50 border-2 border-emerald-500 text-emerald-700 font-black text-[10px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all active:scale-95 shadow-sm shadow-emerald-100"
                 >
                     <Download size={14} />
                     Télécharger PDF
@@ -1610,15 +1628,15 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
                             setIsSubmitting(false);
                         }
                     }}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-[4px] font-black text-[11px] uppercase tracking-widest transition-all shadow-md ${isSubmitting
-                            ? 'bg-[#6B3CD2]/60 text-white/70 cursor-not-allowed shadow-none'
-                            : 'bg-[#6B3CD2] text-white hover:bg-[#5a2eb8] active:scale-95 shadow-[#6B3CD2]/20'
+                    className={`flex items-center gap-2 px-8 py-2.5 rounded-[4px] font-black text-[10px] uppercase tracking-widest transition-all shadow-sm border-2 ${isSubmitting
+                            ? 'bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed'
+                            : 'bg-[#f5f3ff] border-[#6B3CD2] text-[#6B3CD2] hover:bg-[#6B3CD2] hover:text-white active:scale-95 shadow-violet-100'
                         }`}
                 >
                     {isSubmitting ? (
                         <>
                             <Loader2 size={14} className="animate-spin" />
-                            Envoi en cours…
+                            Envoi...
                         </>
                     ) : (
                         <>

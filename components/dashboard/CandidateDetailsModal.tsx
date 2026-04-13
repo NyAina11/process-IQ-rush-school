@@ -623,12 +623,13 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                 <div className="p-6 border-t border-[#e2e8f0] bg-white flex justify-between items-center">
                     <div className="flex gap-3">
                         {!isEditing && (
-                            <button
+                            <Button
+                                variant="outline"
                                 onClick={() => onEdit ? onEdit() : setIsEditing(true)}
-                                className="px-5 py-2.5 bg-white border border-slate-200 text-slate-500 rounded-[4px] font-black text-[10px] uppercase tracking-widest hover:border-rose-500 hover:text-rose-500 transition-all flex items-center gap-2"
+                                leftIcon={<RefreshCw size={14} />}
                             >
-                                <RefreshCw size={14} /> Modifier
-                            </button>
+                                Modifier
+                            </Button>
                         )}
                         {isEditing && (
                             <Button
@@ -645,11 +646,11 @@ const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                     <div className="flex gap-3">
                         <Button variant="secondary" onClick={onClose}>Fermer</Button>
                         {isEditing ? (
-                            <Button variant="danger" onClick={handleSaveEdit} isLoading={isSaving} leftIcon={<Save size={18} />}>Enregistrer</Button>
+                            <Button variant="primary" onClick={handleSaveEdit} isLoading={isSaving} leftIcon={<Save size={14} />}>Enregistrer</Button>
                         ) : (
                             <Button
-                                variant="danger"
-                                leftIcon={<Mail size={18} />}
+                                variant="primary"
+                                leftIcon={<Mail size={14} />}
                                 onClick={() => onRelaunch && onRelaunch(candidate)}
                             >
                                 Relancer

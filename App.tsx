@@ -16,6 +16,7 @@ import AdminLoginPage from './components/AdminLoginPage';
 import AdminDashboard from './components/AdminDashboard';
 import TestPage from './components/TestPage';
 import SupportView from './components/SupportView';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentNotes from './pages/student/StudentNotes';
 import StudentDocuments from './pages/student/StudentDocuments';
@@ -104,8 +105,9 @@ const App = () => {
         {!isStandalonePage && <Header toggleSidebar={toggleSidebar} />}
 
         <main className={`${!isStandalonePage ? 'flex-1 overflow-y-auto p-6' : 'h-screen'}`} style={!isStandalonePage ? { background: '#f0f2f8' } : undefined}>
-          <Suspense fallback={null}>
-            <Routes>
+          <ErrorBoundary>
+            <Suspense fallback={null}>
+              <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/landing" element={<Navigate to="/" replace />} />
               <Route path="/login" element={<LoginPage />} />
@@ -180,7 +182,7 @@ const App = () => {
                 <Route
                   path="/classe-ntc"
                   element={
-                    <RequireAuth allowedRoles={['admission', 'commercial']}>
+                    <RequireAuth allowedRoles={['admission', 'commercial', 'super_admin', 'admin']}>
                       <ClassNTCView
                         onSelectStudent={(student, tab) => {
                           setSelectedStudent(student);
@@ -223,7 +225,7 @@ const App = () => {
                 <Route
                   path="/support"
                   element={
-                    <RequireAuth allowedRoles={['admission', 'rh']}>
+                    <RequireAuth allowedRoles={['admission', 'rh', 'commercial', 'super_admin', 'admin']}>
                       <SupportView />
                     </RequireAuth>
                   }
@@ -244,7 +246,8 @@ const App = () => {
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </Suspense>
+            </Suspense>
+          </ErrorBoundary>
         </main>
       </div>
     </div>

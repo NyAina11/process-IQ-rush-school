@@ -18,6 +18,7 @@ import { UsersModule } from './users/users.module';
                 }
                 return {
                     uri: uri || 'mongodb://localhost:27017/unused',
+                    dbName: configService.get<string>('DB_NAME') || 'processiq',
                     serverSelectionTimeoutMS: 5000, // 5 seconds timeout
                 };
             },
