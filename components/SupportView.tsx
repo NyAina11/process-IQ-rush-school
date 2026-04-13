@@ -281,7 +281,9 @@ const SupportView: React.FC = () => {
         pagePath: window.location.pathname,
         screenshotUrl: screenshotUrl || undefined,
         assignee: newRow.assignee || undefined,
-        deadline: newRow.deadline ? new Date(newRow.deadline).toISOString() : undefined,
+        deadline: (newRow.deadline && !isNaN(new Date(newRow.deadline).getTime())) 
+          ? new Date(newRow.deadline).toISOString() 
+          : undefined,
       });
       showToast('Ticket créé', 'success');
       handleCancelRow();
@@ -342,7 +344,9 @@ const SupportView: React.FC = () => {
         priority: editingRow.priority,
         screenshotUrl: screenshotUrl || editingRow.originalScreenshotUrl,
         assignee: editingRow.assignee,
-        deadline: editingRow.deadline ? new Date(editingRow.deadline).toISOString() : undefined,
+        deadline: (editingRow.deadline && !isNaN(new Date(editingRow.deadline).getTime())) 
+          ? new Date(editingRow.deadline).toISOString() 
+          : undefined,
       });
       showToast('Ticket mis à jour', 'success');
       cancelEditing();
@@ -472,8 +476,8 @@ const SupportView: React.FC = () => {
                 <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[130px]">PRIORITÉ</th>
                 <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[160px]">STATUT</th>
                 <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[160px]">SIGNALÉ PAR</th>
-                {isSuperAdmin && <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[130px]">ASSIGNÉ À</th>}
-                {isSuperAdmin && <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[120px]">DEADLINE</th>}
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[130px]">ASSIGNÉ À</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[120px]">DEADLINE</th>
                 <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[80px]">CAPTURE</th>
                 <th className="px-6 py-4 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] w-[100px]">ACTIONS</th>
               </tr>
@@ -503,16 +507,20 @@ const SupportView: React.FC = () => {
                   </td>
                   <td className={CELL}><span className="text-[10px] font-black text-slate-400">EN ATTENTE</span></td>
                   <td className={CELL}><span className="text-[11px] font-bold text-slate-600">{userName}</span></td>
-                  {isSuperAdmin && (
-                    <td className={CELL}>
+                  <td className={CELL}>
+                    {isSuperAdmin ? (
                       <input value={newRow.assignee} onChange={(e) => setNewRow({ ...newRow, assignee: e.target.value })} placeholder="Dév/Admin..." className={CELL_INPUT} onKeyDown={(e) => e.key === 'Enter' && handleSubmitRow()} />
-                    </td>
-                  )}
-                  {isSuperAdmin && (
-                    <td className={CELL}>
+                    ) : (
+                      <span className="text-[11px] font-bold text-slate-400">—</span>
+                    )}
+                  </td>
+                  <td className={CELL}>
+                    {isSuperAdmin ? (
                       <input type="date" value={newRow.deadline} onChange={(e) => setNewRow({ ...newRow, deadline: e.target.value })} className={CELL_INPUT} onKeyDown={(e) => e.key === 'Enter' && handleSubmitRow()} />
-                    </td>
-                  )}
+                    ) : (
+                      <span className="text-[11px] font-bold text-slate-400">—</span>
+                    )}
+                  </td>
                   <td className={CELL}>
                     <div className="flex items-center gap-2">
                        <input ref={fileRef} type="file" accept="image/*" onChange={handleScreenshot} className="hidden" />
@@ -607,18 +615,15 @@ const SupportView: React.FC = () => {
                           <span className="text-[11px] text-[#8898aa]">{bug.reporterEmail || bug.reporterRole}</span>
                         </div>
                       </td>
-                      {isSuperAdmin && (
                         <td className={CELL}>
-                          {isEditing ? (
+                          {isEditing && isSuperAdmin ? (
                             <input value={editingRow.assignee} onChange={(e) => setEditingRow({ ...editingRow, assignee: e.target.value })} placeholder="Assigner à..." className={CELL_INPUT} onKeyDown={handleKeyDown} />
                           ) : (
                             <span className="text-[11px] font-bold text-[#64748b]">{bug.assignee || '—'}</span>
                           )}
                         </td>
-                      )}
-                      {isSuperAdmin && (
                         <td className={CELL}>
-                          {isEditing ? (
+                          {isEditing && isSuperAdmin ? (
                             <input type="date" value={editingRow.deadline} onChange={(e) => setEditingRow({ ...editingRow, deadline: e.target.value })} className={CELL_INPUT} onKeyDown={handleKeyDown} />
                           ) : (
                             <span className={`text-[11px] font-bold ${bug.deadline && new Date(bug.deadline) < new Date() && bug.status !== 'resolved' ? 'text-rose-500' : 'text-[#64748b]'}`}>
@@ -626,7 +631,6 @@ const SupportView: React.FC = () => {
                             </span>
                           )}
                         </td>
-                      )}
                       <td className={CELL}>
                         {isEditing ? (
                           <div className="flex items-center gap-2">

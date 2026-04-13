@@ -38,6 +38,7 @@ export class SupportService {
             filter.$or = [
                 { title: { $regex: query.search, $options: 'i' } },
                 { description: { $regex: query.search, $options: 'i' } },
+                { assignee: { $regex: query.search, $options: 'i' } },
             ];
         }
 

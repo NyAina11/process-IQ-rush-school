@@ -1855,6 +1855,8 @@ export const api = {
     reporterEmail?: string;
     pagePath?: string;
     screenshotUrl?: string;
+    assignee?: string;
+    deadline?: string;
   }): Promise<any> {
     const response = await fetch(`${SUPPORT_URL}/bugs`, {
       method: 'POST',
