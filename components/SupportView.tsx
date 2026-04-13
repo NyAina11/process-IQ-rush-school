@@ -51,23 +51,23 @@ interface EditingRow {
 
 const statusLabel: Record<BugStatus, string> = { new: 'NOUVEAU', in_progress: 'EN COURS', resolved: 'RÉSOLU' };
 const statusStyle: Record<BugStatus, string> = {
-  new: 'bg-rose-50 text-rose-600 border-rose-200',
-  in_progress: 'bg-amber-50 text-amber-700 border-amber-300',
-  resolved: 'bg-emerald-50 text-emerald-700 border-emerald-300',
+  new: 'bg-indigo-50/80 text-indigo-700 border-indigo-200/50 shadow-sm',
+  in_progress: 'bg-amber-50/80 text-amber-700 border-amber-200/50 shadow-sm',
+  resolved: 'bg-teal-50/80 text-teal-700 border-teal-200/50 shadow-sm',
 };
 const statusDot: Record<BugStatus, string> = {
-  new: 'bg-rose-500',
-  in_progress: 'bg-amber-500',
-  resolved: 'bg-emerald-500',
+  new: 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]',
+  in_progress: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]',
+  resolved: 'bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]',
 };
-const priorityLabel: Record<BugPriority, string> = { low: 'Faible', medium: 'Moyenne', high: 'Haute', critical: 'Critique' };
+const priorityLabel: Record<BugPriority, string> = { low: 'Bas', medium: 'Moyen', high: 'Haut', critical: 'Critique' };
 const priorityStyle: Record<BugPriority, string> = {
-  low:      'bg-slate-100 text-slate-500 border-slate-200',
-  medium:   'bg-blue-50  text-blue-700  border-blue-200',
-  high:     'bg-orange-50 text-orange-700 border-orange-300',
-  critical: 'bg-rose-50  text-rose-700  border-rose-300',
+  low: 'bg-emerald-50/80 text-emerald-700 border-emerald-200/50 shadow-sm',
+  medium: 'bg-sky-50/80 text-sky-700 border-sky-200/50 shadow-sm',
+  high: 'bg-rose-50/80 text-rose-700 border-rose-200/50 shadow-sm',
+  critical: 'bg-slate-900 text-white border-slate-900 shadow-md animate-pulse',
 };
-const priorityDot: Record<BugPriority, string> = { low: 'bg-slate-400', medium: 'bg-blue-500', high: 'bg-orange-500', critical: 'bg-rose-600' };
+const priorityDot: Record<BugPriority, string> = { low: 'bg-emerald-400', medium: 'bg-sky-400', high: 'bg-rose-400', critical: 'bg-rose-100' };
 
 const CELL = "px-6 py-4 border-b border-[#e2e8f0] border-r border-[#e2e8f0] text-sm text-[#1e293b]";
 const CELL_INPUT = "w-full px-3 py-2.5 bg-white border border-[#e2e8f0] rounded-[4px] text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none focus:border-[#3b7cf4] transition-all";
@@ -348,11 +348,13 @@ const SupportView: React.FC = () => {
           ? new Date(editingRow.deadline).toISOString() 
           : undefined,
       });
-      showToast('Ticket mis à jour', 'success');
+      showToast('Ticket mis à jour avec succès', 'success');
       cancelEditing();
       await loadBugs();
     } catch (error: any) {
-      showToast(error?.message || 'Erreur lors de la mise à jour', 'error');
+      console.error('Update bug failed:', error);
+      const is404 = error.message?.includes('404') || error.status === 404;
+      showToast(is404 ? 'Erreur 404 : Route serveur introuvable. Veuillez redémarrer le backend (docker-compose up -d --build).' : (error?.message || 'Erreur lors de la mise à jour'), 'error');
     } finally {
       setSavingIds(prev => { const newSet = new Set(prev); newSet.delete(editingRow.id); return newSet; });
     }
@@ -469,15 +471,15 @@ const SupportView: React.FC = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-[#f4f6fb] border-b border-[#e2e8f0]">
-                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[120px]">DATE</th>
-                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] min-w-[180px]">TITRE</th>
-                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] min-w-[250px]">DESCRIPTION</th>
-                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[120px]">MODULE</th>
-                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[130px]">PRIORITÉ</th>
-                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[160px]">STATUT</th>
-                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[160px]">SIGNALÉ PAR</th>
-                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[130px]">ASSIGNÉ À</th>
-                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[120px]">DEADLINE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[120px]">DATE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 min-w-[180px]">PROBLÈME</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 min-w-[250px]">DÉTAILS</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[120px]">MODULE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[130px]">PRIORITÉ</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[160px]">STATUT</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[160px]">REPORTEUR</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[130px]">ASSIGNÉ À</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-[#64748b] border-r border-slate-100 w-[120px]">DEADLINE</th>
                 <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[80px]">CAPTURE</th>
                 <th className="px-6 py-4 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] w-[100px]">ACTIONS</th>
               </tr>
