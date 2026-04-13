@@ -8,7 +8,9 @@ import { SupportController } from './support.controller';
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: Bug.name, schema: BugSchema }]),
-        MulterModule.register({ dest: './uploads/screenshots' }),
+        MulterModule.register({
+            dest: require('path').join(process.cwd(), 'uploads', 'screenshots'),
+        }),
     ],
     controllers: [SupportController],
     providers: [SupportService],
