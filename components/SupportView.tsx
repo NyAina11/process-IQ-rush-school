@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react'; // Support View 
 import { AlertCircle, Bug, CheckCircle2, ChevronDown, Clock, Edit3, Image, Loader2, Plus, RefreshCw, Save, Search, ShieldCheck, Trash2, X, User } from 'lucide-react';
 import ConfirmationModal from './ui/ConfirmationModal';
 import { api } from '../services/api';
