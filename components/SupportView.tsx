@@ -20,6 +20,8 @@ interface BugItem {
   reporterEmail?: string;
   pagePath?: string;
   screenshotUrl?: string;
+  assignee?: string;
+  deadline?: string;
   createdAt: string;
 }
 
@@ -30,6 +32,8 @@ interface NewRow {
   priority: BugPriority;
   screenshotFile: File | null;
   screenshotPreview: string;
+  assignee: string;
+  deadline: string;
 }
 
 interface EditingRow {
@@ -41,6 +45,8 @@ interface EditingRow {
   screenshotFile: File | null;
   screenshotPreview: string;
   originalScreenshotUrl?: string;
+  assignee: string;
+  deadline: string;
 }
 
 const statusLabel: Record<BugStatus, string> = { new: 'NOUVEAU', in_progress: 'EN COURS', resolved: 'RÉSOLU' };
@@ -234,8 +240,15 @@ const SupportView: React.FC = () => {
     resolvedCount: bugs.filter((b) => b.status === 'resolved').length,
   }), [bugs]);
 
+  const resetNewRow = () => {
+    setNewRow({
+       title: '', description: '', module: 'other', priority: 'medium', 
+       screenshotFile: null, screenshotPreview: '', assignee: '', deadline: ''
+    });
+  };
+
   const handleAddRow = () => {
-    setNewRow({ title: '', description: '', module: role === 'rh' ? 'rh' : 'admission', priority: 'medium', screenshotFile: null, screenshotPreview: '' });
+    resetNewRow();
     setTimeout(() => titleRef.current?.focus(), 50);
   };
 
@@ -267,6 +280,8 @@ const SupportView: React.FC = () => {
         reporterEmail: email,
         pagePath: window.location.pathname,
         screenshotUrl: screenshotUrl || undefined,
+        assignee: newRow.assignee || undefined,
+        deadline: newRow.deadline ? new Date(newRow.deadline).toISOString() : undefined,
       });
       showToast('Ticket créé', 'success');
       handleCancelRow();
@@ -297,6 +312,8 @@ const SupportView: React.FC = () => {
       screenshotFile: null,
       screenshotPreview: '',
       originalScreenshotUrl: bug.screenshotUrl,
+      assignee: bug.assignee || '',
+      deadline: bug.deadline ? new Date(bug.deadline).toISOString().split('T')[0] : '',
     });
   };
 
@@ -323,7 +340,9 @@ const SupportView: React.FC = () => {
         description: editingRow.description.trim(),
         module: editingRow.module,
         priority: editingRow.priority,
-        screenshotUrl: screenshotUrl || undefined,
+        screenshotUrl: screenshotUrl || editingRow.originalScreenshotUrl,
+        assignee: editingRow.assignee,
+        deadline: editingRow.deadline ? new Date(editingRow.deadline).toISOString() : undefined,
       });
       showToast('Ticket mis à jour', 'success');
       cancelEditing();
@@ -453,6 +472,8 @@ const SupportView: React.FC = () => {
                 <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[130px]">PRIORITÉ</th>
                 <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[160px]">STATUT</th>
                 <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[160px]">SIGNALÉ PAR</th>
+                {isSuperAdmin && <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[130px]">ASSIGNÉ À</th>}
+                {isSuperAdmin && <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[120px]">DEADLINE</th>}
                 <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] border-r border-[#e2e8f0] w-[80px]">CAPTURE</th>
                 <th className="px-6 py-4 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#8898aa] w-[100px]">ACTIONS</th>
               </tr>
@@ -482,6 +503,16 @@ const SupportView: React.FC = () => {
                   </td>
                   <td className={CELL}><span className="text-[10px] font-black text-slate-400">EN ATTENTE</span></td>
                   <td className={CELL}><span className="text-[11px] font-bold text-slate-600">{userName}</span></td>
+                  {isSuperAdmin && (
+                    <td className={CELL}>
+                      <input value={newRow.assignee} onChange={(e) => setNewRow({ ...newRow, assignee: e.target.value })} placeholder="Dév/Admin..." className={CELL_INPUT} onKeyDown={(e) => e.key === 'Enter' && handleSubmitRow()} />
+                    </td>
+                  )}
+                  {isSuperAdmin && (
+                    <td className={CELL}>
+                      <input type="date" value={newRow.deadline} onChange={(e) => setNewRow({ ...newRow, deadline: e.target.value })} className={CELL_INPUT} onKeyDown={(e) => e.key === 'Enter' && handleSubmitRow()} />
+                    </td>
+                  )}
                   <td className={CELL}>
                     <div className="flex items-center gap-2">
                        <input ref={fileRef} type="file" accept="image/*" onChange={handleScreenshot} className="hidden" />
@@ -502,9 +533,9 @@ const SupportView: React.FC = () => {
               )}
 
               {loading ? (
-                <tr><td colSpan={9} className="px-6 py-20 text-center"><Loader2 size={30} className="animate-spin mx-auto text-[#3b7cf4]" /><p className="mt-4 text-xs font-black uppercase tracking-widest text-[#8898aa]">Chargement des tickets...</p></td></tr>
+                <tr><td colSpan={isSuperAdmin ? 11 : 9} className="px-6 py-20 text-center"><Loader2 size={30} className="animate-spin mx-auto text-[#3b7cf4]" /><p className="mt-4 text-xs font-black uppercase tracking-widest text-[#8898aa]">Chargement des tickets...</p></td></tr>
               ) : bugs.length === 0 && !newRow ? (
-                <tr><td colSpan={9} className="px-6 py-20 text-center text-slate-400 text-sm italic">Aucun ticket trouvé.</td></tr>
+                <tr><td colSpan={isSuperAdmin ? 11 : 9} className="px-6 py-20 text-center text-slate-400 text-sm italic">Aucun ticket trouvé.</td></tr>
               ) : (
                 bugs.map((bug, i) => {
                   const isEditing = editingRow?.id === bug._id;
@@ -576,6 +607,26 @@ const SupportView: React.FC = () => {
                           <span className="text-[11px] text-[#8898aa]">{bug.reporterEmail || bug.reporterRole}</span>
                         </div>
                       </td>
+                      {isSuperAdmin && (
+                        <td className={CELL}>
+                          {isEditing ? (
+                            <input value={editingRow.assignee} onChange={(e) => setEditingRow({ ...editingRow, assignee: e.target.value })} placeholder="Assigner à..." className={CELL_INPUT} onKeyDown={handleKeyDown} />
+                          ) : (
+                            <span className="text-[11px] font-bold text-[#64748b]">{bug.assignee || '—'}</span>
+                          )}
+                        </td>
+                      )}
+                      {isSuperAdmin && (
+                        <td className={CELL}>
+                          {isEditing ? (
+                            <input type="date" value={editingRow.deadline} onChange={(e) => setEditingRow({ ...editingRow, deadline: e.target.value })} className={CELL_INPUT} onKeyDown={handleKeyDown} />
+                          ) : (
+                            <span className={`text-[11px] font-bold ${bug.deadline && new Date(bug.deadline) < new Date() && bug.status !== 'resolved' ? 'text-rose-500' : 'text-[#64748b]'}`}>
+                              {bug.deadline ? new Date(bug.deadline).toLocaleDateString('fr-FR') : '—'}
+                            </span>
+                          )}
+                        </td>
+                      )}
                       <td className={CELL}>
                         {isEditing ? (
                           <div className="flex items-center gap-2">

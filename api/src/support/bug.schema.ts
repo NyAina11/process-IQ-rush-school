@@ -34,6 +34,12 @@ export class Bug {
 
     @Prop({ default: '' })
     screenshotUrl: string;
+
+    @Prop({ default: '' })
+    assignee: string;
+
+    @Prop({ default: null })
+    deadline: Date;
 }
 
 export const BugSchema = SchemaFactory.createForClass(Bug);

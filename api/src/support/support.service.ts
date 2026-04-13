@@ -63,8 +63,11 @@ export class SupportService {
     }
 
     async uploadScreenshot(_file: any): Promise<string> {
-        // Placeholder: retourne une URL fictive en dev
-        // En prod, intégrer un service de stockage (S3, Cloudinary, etc.)
-        return `https://processiq.duckdns.org/uploads/screenshots/${Date.now()}-${_file?.originalname || 'screenshot'}`;
+        // En prod/dev, retourne un chemin relatif pointant vers notre NestJS
+        // Note: Multer conserve le nom réel dans _file.filename si configuré avec diskStorage
+        // Sinon on utilise un nom généré pour retrouver le bon
+        const fallbackName = `${Date.now()}-${_file?.originalname || 'screenshot'}`;
+        const fileName = _file?.filename || fallbackName;
+        return `/api/uploads/screenshots/${fileName}`;
     }
 }

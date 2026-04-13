@@ -23,6 +23,8 @@ export class SupportController {
         reporterEmail?: string;
         pagePath?: string;
         screenshotUrl?: string;
+        assignee?: string;
+        deadline?: Date;
     }) {
         if (!body.title?.trim()) {
             throw new BadRequestException('Le titre est requis');
@@ -68,6 +70,8 @@ export class SupportController {
             module?: string;
             priority?: string;
             screenshotUrl?: string;
+            assignee?: string;
+            deadline?: Date;
         },
     ) {
         const bug = await this.supportService.update(id, body);

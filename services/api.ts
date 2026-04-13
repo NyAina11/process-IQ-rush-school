@@ -1949,6 +1949,8 @@ export const api = {
     module?: 'admission' | 'rh' | 'commercial' | 'other';
     priority?: 'low' | 'medium' | 'high' | 'critical';
     screenshotUrl?: string;
+    assignee?: string;
+    deadline?: string;
   }): Promise<any> {
     const response = await fetch(`${SUPPORT_URL}/bugs/${id}`, {
       method: 'PATCH',
