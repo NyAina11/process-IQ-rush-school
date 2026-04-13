@@ -21,11 +21,13 @@ export enum BugModule {
 }
 
 export class CreateBugDto {
+  @IsOptional()
   @IsString()
-  title: string;
+  title?: string;
 
+  @IsOptional()
   @IsString()
-  description: string;
+  description?: string;
 
   @IsOptional()
   @IsEnum(BugModule)
@@ -40,7 +42,7 @@ export class CreateBugDto {
   reporterName?: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsString()
   reporterEmail?: string;
 
   @IsOptional()
@@ -52,7 +54,7 @@ export class CreateBugDto {
   pagePath?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsString()
   screenshotUrl?: string;
 
   @IsOptional()

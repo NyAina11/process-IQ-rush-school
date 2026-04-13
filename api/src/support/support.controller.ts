@@ -18,6 +18,7 @@ export class SupportController {
     @HttpCode(HttpStatus.CREATED)
     async createBug(@Body() body: CreateBugDto) {
         try {
+            console.log('[SupportController] Creating bug:', body);
             const bug = await this.supportService.create(body);
             return { success: true, data: bug };
         } catch (error) {

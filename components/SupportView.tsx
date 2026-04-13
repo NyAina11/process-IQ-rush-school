@@ -51,23 +51,23 @@ interface EditingRow {
 
 const statusLabel: Record<BugStatus, string> = { new: 'NOUVEAU', in_progress: 'EN COURS', resolved: 'RÉSOLU' };
 const statusStyle: Record<BugStatus, string> = {
-  new: 'bg-indigo-50/80 text-indigo-700 border-indigo-200/50 shadow-sm',
-  in_progress: 'bg-amber-50/80 text-amber-700 border-amber-200/50 shadow-sm',
-  resolved: 'bg-teal-50/80 text-teal-700 border-teal-200/50 shadow-sm',
+  new: 'bg-rose-50 text-rose-600 border-rose-200',
+  in_progress: 'bg-amber-50 text-amber-700 border-amber-300',
+  resolved: 'bg-emerald-50 text-emerald-700 border-emerald-300',
 };
 const statusDot: Record<BugStatus, string> = {
-  new: 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]',
-  in_progress: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]',
-  resolved: 'bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]',
+  new: 'bg-rose-500',
+  in_progress: 'bg-amber-500',
+  resolved: 'bg-emerald-500',
 };
-const priorityLabel: Record<BugPriority, string> = { low: 'Bas', medium: 'Moyen', high: 'Haut', critical: 'Critique' };
+const priorityLabel: Record<BugPriority, string> = { low: 'Faible', medium: 'Moyenne', high: 'Haute', critical: 'Critique' };
 const priorityStyle: Record<BugPriority, string> = {
-  low: 'bg-emerald-50/80 text-emerald-700 border-emerald-200/50 shadow-sm',
-  medium: 'bg-sky-50/80 text-sky-700 border-sky-200/50 shadow-sm',
-  high: 'bg-rose-50/80 text-rose-700 border-rose-200/50 shadow-sm',
-  critical: 'bg-slate-900 text-white border-slate-900 shadow-md animate-pulse',
+  low:      'bg-slate-50 text-slate-500 border-slate-200',
+  medium:   'bg-blue-50  text-blue-700  border-blue-200',
+  high:     'bg-orange-50 text-orange-700 border-orange-300',
+  critical: 'bg-slate-900 text-white border-slate-900',
 };
-const priorityDot: Record<BugPriority, string> = { low: 'bg-emerald-400', medium: 'bg-sky-400', high: 'bg-rose-400', critical: 'bg-rose-100' };
+const priorityDot: Record<BugPriority, string> = { low: 'bg-slate-400', medium: 'bg-blue-500', high: 'bg-orange-500', critical: 'bg-rose-100' };
 
 const CELL = "px-6 py-4 border-b border-[#e2e8f0] border-r border-[#e2e8f0] text-sm text-[#1e293b]";
 const CELL_INPUT = "w-full px-3 py-2.5 bg-white border border-[#e2e8f0] rounded-[4px] text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none focus:border-[#3b7cf4] transition-all";
@@ -410,71 +410,72 @@ const SupportView: React.FC = () => {
     <div className="animate-fade-in pb-20">
 
       {/* ── HEADER ── */}
-      <div className="p-8 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+      <div className="p-6 border-b border-[#e2e8f0] bg-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white rounded-xl shadow-md border border-slate-100 flex items-center justify-center text-indigo-500">
-              <ShieldCheck size={28} />
+            <div className="w-10 h-10 bg-[#f8fafc] rounded-lg border border-[#e2e8f0] flex items-center justify-center text-[#3b7cf4]">
+              <ShieldCheck size={20} />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                Centre de Support
-                <span className="px-2 py-0.5 bg-indigo-500 text-white text-[10px] rounded-md shadow-sm uppercase tracking-widest font-black">Admin</span>
+              <h1 className="text-lg font-black text-[#1e293b] flex items-center gap-2 tracking-tight">
+                CENTRE DE SUPPORT
+                <span className="px-1.5 py-0.5 bg-[#10b981]/10 text-[#10b981] text-[9px] rounded uppercase tracking-widest font-black border border-[#10b981]/20">ADMIN</span>
               </h1>
-              <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest mt-0.5">Gestion globale des tickets techniques</p>
+              <p className="text-[#8898aa] text-[10px] font-bold uppercase tracking-[0.15em] mt-0.5">Gestion globale des tickets techniques</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-1 bg-[#f1f5f9] p-1 rounded-lg border border-[#e2e8f0]">
             {['all', 'new', 'in_progress', 'resolved'].map((s) => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s as any)}
-                className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
+                className={`px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
                   statusFilter === s 
-                    ? 'bg-slate-900 text-white shadow-md' 
-                    : 'text-slate-500 hover:bg-slate-50'
+                    ? 'bg-[#1a1f2e] text-white shadow-sm' 
+                    : 'text-[#64748b] hover:bg-white'
                 }`}
               >
                 {s === 'all' ? 'TOUS' : statusLabel[s as BugStatus]}
-                <span className={`ml-2 px-1.5 py-0.5 rounded ${statusFilter === s ? 'bg-white/20' : 'bg-slate-100'}`}>
+                <span className={`ml-2 px-1.5 py-0.5 rounded ${statusFilter === s ? 'bg-white/20' : 'bg-[#e2e8f0]'}`}>
                   {stats[s as keyof typeof stats] || 0}
                 </span>
               </button>
             ))}
           </div>
         </div>
-      </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* ── SEARCH & TOOLS ── */}
-        <div className="px-8 py-4 bg-white/50 backdrop-blur-sm border-b border-slate-100 flex items-center justify-between">
-          <div className="relative group w-[400px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
+        <div className="mt-6 flex items-center gap-3">
+          <div className="relative group flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] transition-colors group-focus-within:text-[#3b7cf4]" size={16} />
             <input
               type="text"
-              placeholder="Rechercher par titre, détails ou responsable..."
-              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all shadow-sm"
+              placeholder="Rechercher un ticket (titre, responsable...)"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e2e8f0] rounded-lg text-sm outline-none focus:border-[#3b7cf4] transition-all shadow-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+          <button onClick={() => loadBugs()} className="p-2.5 bg-white border border-[#e2e8f0] rounded-lg text-[#64748b] hover:bg-[#f8fafc] transition-all" title="Rafraîchir">
+            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+          </button>
         </div>
+      </div>
 
         {/* ── TABLE ── */}
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">DATE</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">PROBLÈME</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">DÉTAILS</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">MODULE</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">PRIORITÉ</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">STATUT</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">REPORTEUR</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">ASSIGNÉ À</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">DEADLINE</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">CAPTURE</th>
+              <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 border-r border-[#e2e8f0] w-[120px]">DATE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 border-r border-[#e2e8f0] min-w-[180px]">TITRE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 border-r border-[#e2e8f0] min-w-[250px]">DESCRIPTION</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 border-r border-[#e2e8f0] w-[120px]">MODULE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 border-r border-[#e2e8f0] w-[130px]">PRIORITÉ</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 border-r border-[#e2e8f0] w-[160px]">STATUT</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 border-r border-[#e2e8f0] w-[160px]">SIGNALÉ PAR</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 border-r border-[#e2e8f0] w-[130px]">ASSIGNÉ À</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 border-r border-[#e2e8f0] w-[120px]">DEADLINE</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 border-r border-[#e2e8f0] w-[80px]">PIÈCE JOINT</th>
                 <th className="px-6 py-4 text-center text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">ACTIONS</th>
               </tr>
             </thead>
