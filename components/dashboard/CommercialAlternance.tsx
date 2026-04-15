@@ -19,6 +19,7 @@ interface CommercialAlternanceProps {
     getC: (raw: any) => any;
     isPlaced: (raw: any) => boolean;
     statsPlaced: any;
+    opcoDossiers?: any[];
 }
 
 const formationColor = (f: string) => {
@@ -28,15 +29,40 @@ const formationColor = (f: string) => {
     return { bg: '#fff7ed', text: '#f97316', border: '#fed7aa' };
 };
 
+const opcoStatusStyles: Record<string, { bg: string; text: string; border: string }> = {
+    BROUILLON: { bg: '#f1f5f9', text: '#475569', border: '#cbd5e1' },
+    EN_PREPARATION: { bg: '#f1f5f9', text: '#64748b', border: '#cbd5e1' },
+    PRET_A_ENVOYER: { bg: '#f0f9ff', text: '#0369a1', border: '#bae6fd' },
+    ENVOYE: { bg: '#fef3c7', text: '#b45309', border: '#fde68a' },
+    EN_ATTENTE_VALIDATION: { bg: '#fef08a', text: '#ca8a04', border: '#facc15' },
+    COMPLEMENT_DEMANDE: { bg: '#fed7aa', text: '#c2410c', border: '#fdba74' },
+    ACCEPTE: { bg: '#dcfce7', text: '#166534', border: '#86efac' },
+    REFUSE: { bg: '#fce7f3', text: '#be185d', border: '#fbcfe8' },
+    REFUSE_DEFINITIF: { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },
+    ANNULE: { bg: '#f1f5f9', text: '#64748b', border: '#cbd5e1' },
+    CLOTURE: { bg: '#d1fae5', text: '#065f46', border: '#a7f3d0' },
+};
+
 const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
     candidates, searchQuery, setSearchQuery, filterFormation, setFilterFormation,
     viewMode, setViewMode, currentPage, setCurrentPage, itemsPerPage,
-    handleViewDetails, handleEdit, getC, isPlaced, statsPlaced
+    handleViewDetails, handleEdit, getC, isPlaced, statsPlaced, opcoDossiers = []
 }) => {
     const availableFormations = [
         'BTS MCO A', 'BTS MCO 2', 'BTS NDRC 1', 'BTS COM',
         'Titre Pro NTC', 'Titre Pro NTC B (rentrée decalée)', 'Bachelor RDC'
     ];
+
+    // Fonction pour récupérer le statut OPCO d'un candidat
+    const getOpcoStatus = (candidateId: string) => {
+        if (!candidateId || !opcoDossiers.length) return null;
+        const dossier = opcoDossiers.find(d => d.candidateId === candidateId);
+        if (!dossier) return null;
+        return {
+            status: dossier.status || 'BROUILLON',
+            opcoName: dossier.opcoName || 'OPCO',
+        };
+    };
 
     const filteredStudents = (candidates || []).filter(c => isPlaced(c)).filter(raw => {
         if (!raw) return false;
@@ -144,7 +170,7 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="border-b border-[#e5e0f5]">
-                                    {['Formation', 'Étudiant', 'Entreprise', 'Ville', 'Actions'].map(h => (
+                                    {['Formation', 'Étudiant', 'Entreprise', 'Statut OPCO', 'Ville', 'Actions'].map(h => (
                                         <th key={h} className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-[#9ca3af]">{h}</th>
                                     ))}
                                 </tr>
@@ -176,6 +202,20 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
                                                 <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] text-[11px] font-semibold">
                                                     {c.entreprise || '–'}
                                                 </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {(() => {
+                                                    const opcoStatus = getOpcoStatus(c.id);
+                                                    if (!opcoStatus) {
+                                                        return <span className="text-[11px] text-[#9ca3af] italic">—</span>;
+                                                    }
+                                                    const style = opcoStatusStyles[opcoStatus.status] || opcoStatusStyles.BROUILLON;
+                                                    return (
+                                                        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-semibold whitespace-nowrap" style={{ background: style.bg, color: style.text, border: `1px solid ${style.border}` }}>
+                                                            {opcoStatus.status}
+                                                        </span>
+                                                    );
+                                                })()}
                                             </td>
                                             <td className="px-6 py-4 text-[13px] font-medium text-[#374151]">{c.ville}</td>
                                             <td className="px-6 py-4">
@@ -227,6 +267,10 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
                                     {[
                                         { label: 'Entreprise', value: c.entreprise },
                                         { label: 'Localisation', value: c.ville },
+                                        { label: 'Statut OPCO', value: (() => {
+                                            const opcoStatus = getOpcoStatus(c.id);
+                                            return opcoStatus ? opcoStatus.status : '—';
+                                        })() },
                                     ].map(({ label, value }) => (
                                         <div key={label} className="flex justify-between items-center py-2 border-b border-[#f5f3ff] text-[12px]">
                                             <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9ca3af]">{label}</span>

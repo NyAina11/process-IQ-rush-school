@@ -77,6 +77,7 @@ const SettingsPage: React.FC = () => {
   const [integrationName, setIntegrationName] = useState('');
   const [integrationType, setIntegrationType] = useState<IntegrationTypeLabel>('API INSEE SIREN');
   const [apiKey, setApiKey] = useState('');
+  const [apiSecret, setApiSecret] = useState('');
 
   const [siret, setSiret] = useState('');
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -134,6 +135,7 @@ const SettingsPage: React.FC = () => {
     setIntegrationName('');
     setIntegrationType('API INSEE SIREN');
     setApiKey('');
+    setApiSecret('');
     setCreateError(null);
   };
 
@@ -158,6 +160,7 @@ const SettingsPage: React.FC = () => {
           name: integrationName,
           type: integrationType,
           apiKey: integrationType === 'API INSEE SIREN' ? apiKey : undefined,
+          apiSecret: integrationType === 'API INSEE SIREN' ? apiSecret : undefined,
         }),
       });
       const json = await readJsonSafely(response);
@@ -458,16 +461,27 @@ const SettingsPage: React.FC = () => {
               </div>
 
               {integrationType === 'API INSEE SIREN' && (
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">Clé API</label>
-                  <input
-                    value={apiKey}
-                    onChange={(event) => setApiKey(event.target.value)}
-                    placeholder="Collez ici votre clé API INSEE"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white"
-                    required
-                  />
-                </div>
+                <>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">Client ID / Clé API</label>
+                    <input
+                      value={apiKey}
+                      onChange={(event) => setApiKey(event.target.value)}
+                      placeholder="Collez ici votre client ID INSEE"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">Client Secret</label>
+                    <input
+                      value={apiSecret}
+                      onChange={(event) => setApiSecret(event.target.value)}
+                      placeholder="Collez ici votre client secret INSEE si fourni"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white"
+                    />
+                  </div>
+                </>
               )}
 
               {createError && (

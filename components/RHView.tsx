@@ -3,8 +3,9 @@ import { ViewId } from '../types';
 import {
     FileText, Users, Eye, Trash2, Search, Plus, CheckCircle2,
     AlertCircle, Clock, Briefcase, Save, Download, Building,
-    Loader2, Mail, Phone, RefreshCcw
+    Loader2, Mail, Phone, RefreshCcw, Calendar, DollarSign
 } from 'lucide-react';
+import OpcoDossierDetail from './OpcoDossierDetail';
 import { api } from '../services/api';
 import Button from './ui/Button';
 import { useAppStore } from '../store/useAppStore';
@@ -111,6 +112,43 @@ const ActionBtn = ({ onClick, icon: Icon, color = '#6d28d9', bg = '#f5f3ff', bor
     </button>
 );
 
+const opcoStatusStyles: Record<string, string> = {
+    BROUILLON: 'bg-slate-100 text-slate-600 border-slate-200',
+    EN_PREPARATION: 'bg-slate-200 text-slate-700 border-slate-300',
+    PRET_A_ENVOYER: 'bg-sky-50 text-sky-700 border-sky-200',
+    ENVOYE: 'bg-amber-50 text-amber-700 border-amber-200',
+    EN_ATTENTE_VALIDATION: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+    COMPLEMENT_DEMANDE: 'bg-orange-50 text-orange-700 border-orange-200',
+    ACCEPTE: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    REFUSE: 'bg-rose-50 text-rose-700 border-rose-200',
+    REFUSE_DEFINITIF: 'bg-red-100 text-red-800 border-red-300',
+    ANNULE: 'bg-slate-100 text-slate-500 border-slate-300 line-through',
+    CLOTURE: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+};
+
+const formatOpcoDate = (value?: string | null) => {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleDateString('fr-FR');
+};
+
+const getDeadlineLabel = (value?: string | null) => {
+    if (!value) return { text: '—', className: 'text-[#9ca3af]' };
+    const target = new Date(value);
+    if (Number.isNaN(target.getTime())) return { text: '—', className: 'text-[#9ca3af]' };
+
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    const end = new Date(target.getFullYear(), target.getMonth(), target.getDate()).getTime();
+    const diffDays = Math.round((end - start) / 86400000);
+
+    if (diffDays < 0) return { text: `${Math.abs(diffDays)} j de retard`, className: 'text-rose-600 font-semibold' };
+    if (diffDays === 0) return { text: 'Aujourd’hui', className: 'text-orange-600 font-semibold' };
+    if (diffDays < 2) return { text: `${diffDays} j restant`, className: 'text-orange-600 font-semibold' };
+    return { text: `${diffDays} j restants`, className: 'text-emerald-700' };
+};
+
 // ─────────────────────────────────────────────────────
 
 const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
@@ -136,6 +174,8 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
     const [isCompanyEditing, setIsCompanyEditing] = useState(false);
     const [companyEditForm, setCompanyEditForm] = useState<any>(null);
     const [isSavingCompany, setIsSavingCompany] = useState(false);
+    const [selectedOpcoDossier, setSelectedOpcoDossier] = useState<any>(null);
+    const [isOpcoDossierModalOpen, setIsOpcoDossierModalOpen] = useState(false);
 
     useEffect(() => {
         if (activeSubView === 'rh-cerfa') fetchFichesData();
@@ -208,7 +248,7 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
         try {
             const [config, dossiers, companyList] = await Promise.all([
                 api.getOpcoConfig(),
-                api.listOpcoDossiers(),
+                api.getOpcoDossiers(),
                 api.getAllCompanies(),
             ]);
             setOpcoConfig(config);
@@ -580,7 +620,7 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
     if (activeSubView === 'rh-pec') {
         const filteredDossiers = (opcoDossiers || []).filter(d => {
             const q = searchQuery.toLowerCase();
-            const hay = `${d.opcoName || ''} ${d._id || d.id || ''} ${d.status || ''} ${d.candidateId || ''}`.toLowerCase();
+            const hay = `${d.opcoName || ''} ${d.opcoCode || ''} ${d._id || d.id || ''} ${d.status || ''} ${d.candidateId || ''} ${d.apprentiNom || ''} ${d.employerName || ''} ${d.employerSiret || ''}`.toLowerCase();
             if (q && !hay.includes(q)) return false;
             if (opcoFilterStatus === 'all') return true;
             return d.status === opcoFilterStatus;
@@ -660,9 +700,20 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                 </div>
 
                 <FilterBar>
-                    <SearchInput value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} placeholder="Rechercher par ID ou OPCO..." />
+                    <SearchInput value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} placeholder="Rechercher par apprenti, employeur, SIRET ou OPCO..." />
                     <StyledSelect value={opcoFilterStatus} onChange={(e: any) => setOpcoFilterStatus(e.target.value)}>
                         <option value="all">Tous les statuts</option>
+                        <option value="BROUILLON">Brouillon</option>
+                        <option value="EN_PREPARATION">En préparation</option>
+                        <option value="PRET_A_ENVOYER">Prêt à envoyer</option>
+                        <option value="ENVOYE">Envoyé</option>
+                        <option value="EN_ATTENTE_VALIDATION">En attente validation</option>
+                        <option value="COMPLEMENT_DEMANDE">Complément demandé</option>
+                        <option value="ACCEPTE">Accepté</option>
+                        <option value="REFUSE">Refusé</option>
+                        <option value="REFUSE_DEFINITIF">Refus définitif</option>
+                        <option value="ANNULE">Annulé</option>
+                        <option value="CLOTURE">Clôturé</option>
                         <option value="draft">Brouillon</option>
                         <option value="pending_submission">En attente</option>
                         <option value="submitted">Envoyé</option>
@@ -677,41 +728,76 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                     <table className="w-full border-collapse">
                         <thead>
                             <tr>
-                                {["OPCO", "Statut", "Candidat", "Entreprise", "Dernière synchro", "Actions"].map(h => <Th key={h}>{h}</Th>)}
+                                {["OPCO", "Apprenti", "Employeur", "Montant", "Date envoi", "Délai", "Statut", "Actions"].map(h => <Th key={h}>{h}</Th>)}
                             </tr>
                         </thead>
                         <tbody>
                             {opcoLoading ? (
                                 <tr>
-                                    <td colSpan={6} className="py-16 text-center text-[#9ca3af]">
+                                    <td colSpan={8} className="py-16 text-center text-[#9ca3af]">
                                         <Loader2 className="animate-spin mx-auto mb-3 text-[#6d28d9]" size={28} />
                                         <div className="text-[13px]">Chargement...</div>
                                     </td>
                                 </tr>
                             ) : filteredDossiers.length === 0 ? (
-                                <tr><td colSpan={6} className="py-16 text-center text-[#9ca3af] text-[13px]">Aucun dossier OPCO</td></tr>
+                                <tr><td colSpan={8} className="py-16 text-center text-[#9ca3af] text-[13px]">Aucun dossier OPCO</td></tr>
                             ) : filteredDossiers.map((d: any) => {
                                 const company = companies.find(c => c.id === d.companyId);
                                 const companyName = company?.fields?.['Raison sociale'] || 'N/A';
-                                const candidateId = d.candidateId || 'N/A';
+                                const delayStatus = getDeadlineLabel(d.dateLimiteEnvoi);
+                                const statusColor = opcoStatusStyles[d.status || 'BROUILLON'] || opcoStatusStyles.BROUILLON;
+
                                 return (
-                                    <tr key={d._id || d.id} className="hover:bg-[#fafafa] transition-colors group">
+                                    <tr 
+                                        key={d._id || d.id} 
+                                        className="hover:bg-[#fafafa] transition-colors group cursor-pointer"
+                                        onClick={() => {
+                                            setSelectedOpcoDossier(d);
+                                            setIsOpcoDossierModalOpen(true);
+                                        }}
+                                    >
                                         <Td>
                                             <div className="text-[13px] font-semibold text-[#1e1b2e]">{d.opcoName || 'OPCO'}</div>
-                                            <div className="text-[10px] text-[#9ca3af]">ID: {d._id || d.id}</div>
+                                            {d.opcoCode && <div className="text-[10px] text-[#9ca3af]">Code: {d.opcoCode}</div>}
                                         </Td>
                                         <Td>
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] text-[10px] font-semibold">
-                                                {d.status || 'draft'}
+                                            <div className="text-[13px] font-semibold text-[#1e1b2e]">{d.apprentiNom || 'N/A'}</div>
+                                            {d.formationLabel && <div className="text-[10px] text-[#9ca3af]">{d.formationLabel}</div>}
+                                        </Td>
+                                        <Td>
+                                            <div className="text-[13px] font-semibold text-[#1e1b2e]">{companyName}</div>
+                                            {d.employerSiret && <div className="text-[10px] text-[#9ca3af]">SIRET: {d.employerSiret}</div>}
+                                        </Td>
+                                        <Td>
+                                            <div className="text-[13px] font-bold text-[#1e1b2e]">
+                                                {d.montantAnnuel ? `€${(d.montantAnnuel).toLocaleString('fr-FR')}` : 'N/A'}
+                                            </div>
+                                            {d.montantMensuel && <div className="text-[10px] text-[#9ca3af]">{`€${(d.montantMensuel).toLocaleString('fr-FR')}/mois`}</div>}
+                                        </Td>
+                                        <Td>
+                                            <div className="text-[12px] font-semibold text-[#1e1b2e]">
+                                                {formatOpcoDate(d.dateEnvoiOpco) || 'Non envoyé'}
+                                            </div>
+                                            {d.dateLimiteEnvoi && <div className="text-[10px] text-[#9ca3af]">Limite: {formatOpcoDate(d.dateLimiteEnvoi)}</div>}
+                                        </Td>
+                                        <Td>
+                                            <div className={`text-[12px] font-semibold ${delayStatus.className}`}>
+                                                {delayStatus.text}
+                                            </div>
+                                        </Td>
+                                        <Td>
+                                            <span className={`inline-flex items-center px-2.5 py-1.5 rounded-lg border text-[10px] font-semibold ${statusColor}`}>
+                                                {d.status || 'BROUILLON'}
                                             </span>
                                         </Td>
-                                        <Td className="text-[12px] text-[#374151]">{candidateId}</Td>
-                                        <Td className="text-[12px] text-[#374151]">{companyName}</Td>
-                                        <Td className="text-[12px] text-[#9ca3af]">{d.lastSyncedAt ? new Date(d.lastSyncedAt).toLocaleString() : '—'}</Td>
-                                        <Td>
+                                        <Td onClick={(e) => e.stopPropagation()}>
                                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <ActionBtn icon={RefreshCcw} onClick={() => handleSync(d._id || d.id)} />
-                                                <ActionBtn icon={CheckCircle2} onClick={() => handleResubmit(d._id || d.id)} />
+                                                <ActionBtn icon={RefreshCcw} onClick={() => handleSync(d._id || d.id)} color="#6d28d9" />
+                                                <ActionBtn icon={CheckCircle2} onClick={() => handleResubmit(d._id || d.id)} color="#22c55e" bg="#f0fdf4" border="#d1fae5" />
+                                                <ActionBtn icon={Eye} onClick={() => {
+                                                    setSelectedOpcoDossier(d);
+                                                    setIsOpcoDossierModalOpen(true);
+                                                }} />
                                             </div>
                                         </Td>
                                     </tr>
@@ -720,6 +806,18 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                         </tbody>
                     </table>
                 </TableWrapper>
+
+                {/* Modal Détail OPCO */}
+                <OpcoDossierDetail
+                    dossier={selectedOpcoDossier}
+                    isOpen={isOpcoDossierModalOpen}
+                    onClose={() => {
+                        setIsOpcoDossierModalOpen(false);
+                        setSelectedOpcoDossier(null);
+                    }}
+                    onSync={handleSync}
+                    onResubmit={handleResubmit}
+                />
             </div>
         );
     }
