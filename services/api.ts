@@ -1970,8 +1970,9 @@ export const api = {
     return json;
   },
 
-  async deleteBugReport(id: string): Promise<any> {
-    const response = await fetch(`${SUPPORT_URL}/bugs/${id}`, {
+  async deleteBugReport(id: string, requesterRole?: string): Promise<any> {
+    const query = requesterRole ? `?requesterRole=${encodeURIComponent(requesterRole)}` : '';
+    const response = await fetch(`${SUPPORT_URL}/bugs/${id}${query}`, {
       method: 'DELETE',
       headers: withAuthHeaders({
         Accept: 'application/json',
