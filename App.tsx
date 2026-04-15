@@ -23,6 +23,7 @@ import StudentPlanning from './pages/student/StudentPlanning';
 import StudentAppointments from './pages/student/StudentAppointments';
 import StudentAttendance from './pages/student/StudentAttendance';
 import StudentQuestionnaires from './pages/student/StudentQuestionnaires';
+import SettingsPage from './pages/SettingsPage';
 import { decodeJwtPayload, getAuthToken, isAuthenticated } from './services/session';
 
 const getEffectiveRole = (): string | null => {
@@ -231,12 +232,9 @@ const App = () => {
                 <Route
                   path="/parametres"
                   element={
-                    <div className="p-8">
-                      <div className="rounded-2xl border border-slate-200 bg-white p-6">
-                        <h2 className="mb-4 text-xl font-bold">Parametres</h2>
-                        <p className="text-slate-500">Configuration de l'application (Section en construction)</p>
-                      </div>
-                    </div>
+                    <RequireAuth allowedRoles={['admin']}>
+                      <SettingsPage />
+                    </RequireAuth>
                   }
                 />
               </Route>

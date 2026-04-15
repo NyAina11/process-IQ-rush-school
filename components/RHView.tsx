@@ -3,7 +3,7 @@ import { ViewId } from '../types';
 import {
     FileText, Users, Eye, Trash2, Search, Plus, CheckCircle2,
     AlertCircle, Clock, Briefcase, Save, Download, Building,
-    Loader2, Mail, Phone
+    Loader2, Mail, Phone, RefreshCcw
 } from 'lucide-react';
 import { api } from '../services/api';
 import Button from './ui/Button';
@@ -119,6 +119,13 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
     const [candidates, setCandidates] = useState<any[]>([]);
     const [rhStats, setRhStats] = useState<any>(null);
     const [companies, setCompanies] = useState<any[]>([]);
+    const [opcoConfig, setOpcoConfig] = useState<any>(null);
+    const [opcoDossiers, setOpcoDossiers] = useState<any[]>([]);
+    const [opcoLoading, setOpcoLoading] = useState(false);
+    const [opcoError, setOpcoError] = useState<string | null>(null);
+    const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
+    const [isCreatingOpco, setIsCreatingOpco] = useState(false);
+    const [opcoFilterStatus, setOpcoFilterStatus] = useState<string>('all');
     const [loading, setLoading] = useState(false);
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -134,6 +141,7 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
         if (activeSubView === 'rh-cerfa') fetchFichesData();
         else if (activeSubView === 'rh-dashboard') fetchRHStats();
         else if (activeSubView === 'rh-fiche') fetchCompanies();
+        else if (activeSubView === 'rh-pec') fetchOpcoData();
     }, [activeSubView]);
 
     const initializeCompanyForm = (data: any) => {
@@ -193,6 +201,88 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
     const fetchFichesData = async () => { setLoading(true); try { const data = await api.getStudentsList({ avecFicheUniquement: false, avecCerfaUniquement: false, dossierCompletUniquement: false }); setFichesData(data); setCandidates(data.etudiants || []); } catch { } finally { setLoading(false); } };
     const fetchRHStats = async () => { setLoading(true); try { const data = await api.getRHStats(); setRhStats(data); } catch { } finally { setLoading(false); } };
     const fetchCompanies = async () => { setLoading(true); try { const data = await api.getAllCompanies(); setCompanies(data); } catch { } finally { setLoading(false); } };
+
+    const fetchOpcoData = async () => {
+        setOpcoLoading(true);
+        setOpcoError(null);
+        try {
+            const [config, dossiers, companyList] = await Promise.all([
+                api.getOpcoConfig(),
+                api.listOpcoDossiers(),
+                api.getAllCompanies(),
+            ]);
+            setOpcoConfig(config);
+            setOpcoDossiers(Array.isArray(dossiers) ? dossiers : []);
+            setCompanies(Array.isArray(companyList) ? companyList : []);
+        } catch (error: any) {
+            setOpcoError(error?.message || "Impossible de charger les dossiers OPCO");
+        } finally {
+            setOpcoLoading(false);
+        }
+    };
+
+    const handleCreateOpcoDossier = async () => {
+        if (!selectedCompanyId) {
+            showToast("Veuillez sélectionner une entreprise", "info");
+            return;
+        }
+        const company = companies.find(c => c.id === selectedCompanyId);
+        if (!company || !company.fields) {
+            showToast("Entreprise introuvable", "error");
+            return;
+        }
+        const candidateId = company.fields?.recordIdetudiant || null;
+        if (!candidateId) {
+            showToast("Cette entreprise n'est pas liée à un candidat", "error");
+            return;
+        }
+
+        const payload = {
+            candidateId,
+            companyId: company.id,
+            opcoName: company.fields?.['Nom OPCO'] || '',
+            company: company.fields,
+        };
+
+        setIsCreatingOpco(true);
+        try {
+            await api.createOpcoDossier({
+                opcoName: payload.opcoName,
+                candidateId,
+                companyId: company.id,
+                payload,
+                metadata: { source: 'rh-pec-ui' },
+                documents: [],
+            });
+            showToast("Dossier OPCO créé", "success");
+            setSelectedCompanyId('');
+            fetchOpcoData();
+        } catch (error: any) {
+            showToast(error?.message || "Erreur création dossier OPCO", "error");
+        } finally {
+            setIsCreatingOpco(false);
+        }
+    };
+
+    const handleResubmit = async (id: string) => {
+        try {
+            await api.resubmitOpcoDossier(id);
+            showToast("Renvoi OPCO effectué", "success");
+            fetchOpcoData();
+        } catch (error: any) {
+            showToast(error?.message || "Erreur lors du renvoi OPCO", "error");
+        }
+    };
+
+    const handleSync = async (id: string) => {
+        try {
+            await api.syncOpcoDossier(id);
+            showToast("Synchronisation OPCO effectuée", "success");
+            fetchOpcoData();
+        } catch (error: any) {
+            showToast(error?.message || "Erreur lors de la synchronisation OPCO", "error");
+        }
+    };
 
     // ── CERFA ──
     if (activeSubView === 'rh-cerfa') {
@@ -482,6 +572,154 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                         </button>
                     </div>
                 </div>
+            </div>
+        );
+    }
+
+    // ── PRISES EN CHARGE OPCO ──
+    if (activeSubView === 'rh-pec') {
+        const filteredDossiers = (opcoDossiers || []).filter(d => {
+            const q = searchQuery.toLowerCase();
+            const hay = `${d.opcoName || ''} ${d._id || d.id || ''} ${d.status || ''} ${d.candidateId || ''}`.toLowerCase();
+            if (q && !hay.includes(q)) return false;
+            if (opcoFilterStatus === 'all') return true;
+            return d.status === opcoFilterStatus;
+        });
+
+        return (
+            <div className="animate-fade-in pb-20" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                <Hero
+                    title="Prises en charge OPCO"
+                    subtitle="Suivi des dossiers OPCO et envoi aux organismes"
+                    action={
+                        <div className="flex gap-2 shrink-0">
+                            <button
+                                className="flex items-center gap-2 px-4 py-2.5 bg-white/15 border border-white/30 rounded-xl text-white text-[12px] font-semibold hover:bg-white/25 transition-all"
+                                onClick={fetchOpcoData}
+                            >
+                                <RefreshCcw size={14} /> Actualiser
+                            </button>
+                        </div>
+                    }
+                />
+
+                {opcoError && (
+                    <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[12px] font-semibold text-rose-700">
+                        {opcoError}
+                    </div>
+                )}
+
+                <div className="bg-white border border-[#e5e0f5] rounded-2xl p-5 mb-5 shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        <div className="flex-1">
+                            <div className="text-[12px] font-bold text-[#1e1b2e]">Configuration OPCO</div>
+                            <div className="text-[11px] text-[#9ca3af]">
+                                {opcoConfig?.configured ? `Connecté à ${opcoConfig?.opcoName || 'OPCO'}` : "Non configuré"}
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 text-[11px] font-semibold">
+                            <span className={`px-3 py-1 rounded-lg border ${opcoConfig?.configured ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
+                                {opcoConfig?.configured ? 'Actif' : 'Inactif'}
+                            </span>
+                            <span className="text-[#9ca3af]">
+                                {opcoConfig?.baseUrl ? `API: ${opcoConfig.baseUrl}` : 'API non renseignée'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white border border-[#e5e0f5] rounded-2xl p-5 mb-5 shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        <div className="flex-1">
+                            <div className="text-[12px] font-bold text-[#1e1b2e]">Créer un dossier OPCO</div>
+                            <div className="text-[11px] text-[#9ca3af]">Sélectionnez une entreprise liée à un candidat.</div>
+                        </div>
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                            <select
+                                value={selectedCompanyId}
+                                onChange={(e) => setSelectedCompanyId(e.target.value)}
+                                className="flex-1 md:w-[320px] px-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[12px] font-medium text-[#374151] outline-none focus:border-[#6d28d9]/40"
+                            >
+                                <option value="">Choisir une entreprise</option>
+                                {companies.map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                        {c?.fields?.['Raison sociale'] || c.id}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                className="flex items-center gap-2 px-5 py-2.5 bg-[#6d28d9] text-white rounded-xl text-[12px] font-semibold hover:bg-[#5831ad] transition-all disabled:opacity-50"
+                                onClick={handleCreateOpcoDossier}
+                                disabled={isCreatingOpco}
+                            >
+                                {isCreatingOpco ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                                Créer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <FilterBar>
+                    <SearchInput value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} placeholder="Rechercher par ID ou OPCO..." />
+                    <StyledSelect value={opcoFilterStatus} onChange={(e: any) => setOpcoFilterStatus(e.target.value)}>
+                        <option value="all">Tous les statuts</option>
+                        <option value="draft">Brouillon</option>
+                        <option value="pending_submission">En attente</option>
+                        <option value="submitted">Envoyé</option>
+                        <option value="in_review">En revue</option>
+                        <option value="accepted">Accepté</option>
+                        <option value="rejected">Refusé</option>
+                        <option value="error">Erreur</option>
+                    </StyledSelect>
+                </FilterBar>
+
+                <TableWrapper>
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                {["OPCO", "Statut", "Candidat", "Entreprise", "Dernière synchro", "Actions"].map(h => <Th key={h}>{h}</Th>)}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {opcoLoading ? (
+                                <tr>
+                                    <td colSpan={6} className="py-16 text-center text-[#9ca3af]">
+                                        <Loader2 className="animate-spin mx-auto mb-3 text-[#6d28d9]" size={28} />
+                                        <div className="text-[13px]">Chargement...</div>
+                                    </td>
+                                </tr>
+                            ) : filteredDossiers.length === 0 ? (
+                                <tr><td colSpan={6} className="py-16 text-center text-[#9ca3af] text-[13px]">Aucun dossier OPCO</td></tr>
+                            ) : filteredDossiers.map((d: any) => {
+                                const company = companies.find(c => c.id === d.companyId);
+                                const companyName = company?.fields?.['Raison sociale'] || 'N/A';
+                                const candidateId = d.candidateId || 'N/A';
+                                return (
+                                    <tr key={d._id || d.id} className="hover:bg-[#fafafa] transition-colors group">
+                                        <Td>
+                                            <div className="text-[13px] font-semibold text-[#1e1b2e]">{d.opcoName || 'OPCO'}</div>
+                                            <div className="text-[10px] text-[#9ca3af]">ID: {d._id || d.id}</div>
+                                        </Td>
+                                        <Td>
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] text-[10px] font-semibold">
+                                                {d.status || 'draft'}
+                                            </span>
+                                        </Td>
+                                        <Td className="text-[12px] text-[#374151]">{candidateId}</Td>
+                                        <Td className="text-[12px] text-[#374151]">{companyName}</Td>
+                                        <Td className="text-[12px] text-[#9ca3af]">{d.lastSyncedAt ? new Date(d.lastSyncedAt).toLocaleString() : '—'}</Td>
+                                        <Td>
+                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <ActionBtn icon={RefreshCcw} onClick={() => handleSync(d._id || d.id)} />
+                                                <ActionBtn icon={CheckCircle2} onClick={() => handleResubmit(d._id || d.id)} />
+                                            </div>
+                                        </Td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </TableWrapper>
             </div>
         );
     }
