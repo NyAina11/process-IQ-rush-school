@@ -373,7 +373,7 @@ const SupportView: React.FC = () => {
     
     setDeletingIds(prev => new Set([...prev, id]));
     try {
-      await api.deleteBugReport(id);
+      await api.deleteBugReport(id, role);
       showToast('Ticket supprimé', 'success');
       await loadBugs();
     } catch (error: any) {
