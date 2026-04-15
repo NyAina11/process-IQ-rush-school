@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ViewId, AdmissionTab } from '../types';
 import { useAppStore } from '../store/useAppStore';
+import { api } from '../services/api';
 
 import CandidateDetailsModal from './dashboard/CandidateDetailsModal';
 import CommercialOverview from './dashboard/CommercialOverview';
@@ -25,6 +26,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ activeSubView, onSelectSt
     const { candidates, loading, refresh } = useCandidates();
     const navigate = useNavigate();
     const { showToast } = useAppStore();
+    const [opcoDossiers, setOpcoDossiers] = useState<any[]>([]);
 
     const {
         searchQuery,
@@ -62,6 +64,20 @@ const DashboardView: React.FC<DashboardViewProps> = ({ activeSubView, onSelectSt
     useEffect(() => {
         setCurrentPage(1);
     }, [activeSubView, searchQuery, filterFormation, setCurrentPage]);
+
+    // Load OPCO Dossiers
+    useEffect(() => {
+        const loadOpcoDossiers = async () => {
+            try {
+                const dossiers = await api.getOpcoDossiers();
+                setOpcoDossiers(Array.isArray(dossiers) ? dossiers : []);
+            } catch (error) {
+                console.error("Erreur chargement dossiers OPCO:", error);
+                setOpcoDossiers([]);
+            }
+        };
+        loadOpcoDossiers();
+    }, []);
 
     const studentsToPlace = candidates.filter(c => !isPlaced(c));
     const studentsPlaced = candidates.filter(c => isPlaced(c));
@@ -137,6 +153,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ activeSubView, onSelectSt
                     getC={getC}
                     isPlaced={isPlaced}
                     statsPlaced={statsPlaced}
+                    opcoDossiers={opcoDossiers}
                 />
             );
         }
