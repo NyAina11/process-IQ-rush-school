@@ -265,7 +265,9 @@ const SupportView: React.FC = () => {
   };
 
   const handleSubmitRow = async () => {
-    if (!newRow || !newRow.title.trim()) { showToast('Le titre est requis', 'error'); titleRef.current?.focus(); return; }
+    if (!newRow) return;
+    if (newRow.title.trim().length < 5) { showToast('Le titre doit contenir au moins 5 caractères', 'error'); titleRef.current?.focus(); return; }
+    if (newRow.description.trim().length < 10) { showToast('La description doit contenir au moins 10 caractères', 'error'); return; }
     setSubmitting(true);
     try {
       let screenshotUrl = '';
@@ -332,7 +334,9 @@ const SupportView: React.FC = () => {
   };
 
   const saveEditing = async () => {
-    if (!editingRow || !editingRow.title.trim()) { showToast('Le titre est requis', 'error'); return; }
+    if (!editingRow) return;
+    if (editingRow.title.trim().length < 5) { showToast('Le titre doit contenir au moins 5 caractères', 'error'); return; }
+    if (editingRow.description.trim().length < 10) { showToast('La description doit contenir au moins 10 caractères', 'error'); return; }
     setSavingIds(prev => new Set([...prev, editingRow.id]));
     try {
       let screenshotUrl = editingRow.originalScreenshotUrl || '';
