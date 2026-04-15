@@ -446,7 +446,7 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
 
     const handleCreateFullOpcoDossier = async () => {
         if (!selectedCompanyId) {
-            showToast("Veuillez sÃ©lectionner une entreprise", "info");
+            showToast("Veuillez sélectionner une entreprise", "info");
             return;
         }
         const company = companies.find(c => c.id === selectedCompanyId);
@@ -456,7 +456,7 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
         }
         const candidateId = company.fields?.recordIdetudiant || null;
         if (!candidateId) {
-            showToast("Cette entreprise n'est pas liÃ©e Ã  un candidat", "error");
+            showToast("Cette entreprise n'est pas liée à un candidat", "error");
             return;
         }
 
@@ -508,11 +508,11 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                 },
                 documents,
             });
-            showToast(generatedDocuments.length > 0 ? "Dossier OPCO crÃ©Ã© avec gÃ©nÃ©ration automatique des piÃ¨ces" : "Dossier OPCO crÃ©Ã©", "success");
+            showToast(generatedDocuments.length > 0 ? "Dossier OPCO créé avec génération automatique des pièces" : "Dossier OPCO créé", "success");
             setSelectedCompanyId('');
             fetchOpcoData();
         } catch (error: any) {
-            showToast(error?.message || "Erreur crÃ©ation dossier OPCO", "error");
+            showToast(error?.message || "Erreur création dossier OPCO", "error");
         } finally {
             setIsCreatingOpco(false);
         }
@@ -790,276 +790,149 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
         ];
 
         return (
-            <div className="animate-fade-in pb-20 space-y-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                <Hero title="Tableau de Bord RH" subtitle="Vue d'ensemble du recrutement et de l'alternance"
-                    action={
-                        <button className="flex items-center gap-2 px-5 py-3 bg-white/15 border border-white/30 rounded-xl text-white text-[13px] font-semibold hover:bg-white/25 transition-all shrink-0">
-                            <Download size={15} /> Rapport Complet
-                        </button>
-                    }
-                />
+            <div className="animate-fade-in pb-20">
+                <Hero title="Dashboard RH" subtitle="Indicateurs clés et performance administrative" />
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     {dashStats.map((s, i) => <StatCard key={i} {...s} />)}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {/* Taux de complétion */}
-                    <div className="bg-white border border-[#e5e0f5] rounded-2xl p-6 shadow-sm">
-                        <div className="flex items-center gap-2 mb-6">
-                            <CheckCircle2 size={16} color="#6d28d9" />
-                            <span className="text-[13px] font-bold text-[#1e1b2e] uppercase tracking-wider">Taux de Complétion</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {rates.map((r, i) => (
+                        <div key={i} className="bg-white border border-[#e5e0f5] rounded-3xl p-8 shadow-sm">
+                            <div className="flex justify-between items-end mb-4">
+                                <div className="text-[13px] font-bold text-[#9ca3af] uppercase tracking-widest">{r.label}</div>
+                                <div className="text-3xl font-black" style={{ color: r.color }}>{r.value}%</div>
+                            </div>
+                            <div className="h-2 w-full bg-[#f5f3ff] rounded-full overflow-hidden">
+                                <div className="h-full transition-all duration-1000" style={{ width: `${r.value}%`, background: r.color }}></div>
+                            </div>
                         </div>
-                        <div className="space-y-6">
-                            {rates.map((r, i) => (
-                                <div key={i}>
-                                    <div className="flex justify-between items-end mb-2">
-                                        <span className="text-[13px] font-medium text-[#374151]">{r.label}</span>
-                                        <span className="text-[15px] font-black text-[#1e1b2e]">{r.value}%</span>
-                                    </div>
-                                    <div className="h-2 bg-[#f1f5f9] rounded-full overflow-hidden">
-                                        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${r.value}%`, background: r.color }} />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Attention requise */}
-                    <div className="bg-white border border-[#e5e0f5] rounded-2xl p-6 shadow-sm flex flex-col items-center justify-center text-center">
-                        <div className="w-14 h-14 bg-[#fff1f2] border border-[#fecdd3] rounded-2xl flex items-center justify-center mb-4">
-                            <AlertCircle size={26} color="#f43f5e" />
-                        </div>
-                        <h3 className="text-[18px] font-bold text-[#1e1b2e] mb-2">Attention Requise</h3>
-                        <p className="text-[13px] text-[#9ca3af] mb-6 max-w-xs leading-relaxed">
-                            <span className="font-semibold text-[#1e1b2e]">{rhStats?.etudiants_sans_documents || 0} étudiants</span> n'ont pas encore transmis leurs documents obligatoires.
-                        </p>
-                        <button className="flex items-center gap-2 px-6 py-3 bg-[#f43f5e] text-white rounded-xl text-[13px] font-semibold hover:bg-[#e11d48] transition-all shadow-sm shadow-[#f43f5e]/20">
-                            Relancer les étudiants
-                        </button>
-                    </div>
+                    ))}
                 </div>
             </div>
         );
     }
 
-    // ── PRISES EN CHARGE OPCO ──
+    // ── PRISES EN CHARGE (OPCO) ──
     if (activeSubView === 'rh-pec') {
-        const filteredDossiers = (opcoDossiers || []).filter(d => {
+        const filteredDossiers = opcoDossiers.filter(d => {
             const q = searchQuery.toLowerCase();
-            const hay = `${d.opcoName || ''} ${d.opcoCode || ''} ${d._id || d.id || ''} ${d.status || ''} ${d.candidateId || ''} ${d.apprentiNom || ''} ${d.employerName || ''} ${d.employerSiret || ''}`.toLowerCase();
-            if (q && !hay.includes(q)) return false;
-            if (opcoFilterStatus === 'all') return true;
-            return d.status === opcoFilterStatus;
+            const matchSearch = (d.candidateName || '').toLowerCase().includes(q) || (d.employerName || '').toLowerCase().includes(q);
+            const matchStatus = opcoFilterStatus === 'all' || d.status === opcoFilterStatus;
+            return matchSearch && matchStatus;
         });
 
         return (
-            <div className="animate-fade-in pb-20" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                <Hero
-                    title="Prises en charge OPCO"
-                    subtitle="Suivi des dossiers OPCO et envoi aux organismes"
+            <div className="animate-fade-in pb-20">
+                <Hero title="Prises en Charge (PEC)" subtitle="Suivi des dossiers de financement OPCO"
                     action={
-                        <div className="flex gap-2 shrink-0">
+                        <div className="flex gap-2">
+                            <button onClick={() => fetchOpcoData()} className="p-2.5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all">
+                                <RefreshCcw size={16} className={opcoLoading ? 'animate-spin' : ''} />
+                            </button>
+                            <StyledSelect value={selectedCompanyId} onChange={(e: any) => setSelectedCompanyId(e.target.value)}>
+                                <option value="">Sélectionner une entreprise...</option>
+                                {companies.map(c => <option key={c.id} value={c.id}>{c.fields?.['Raison sociale']} ({c.fields?.['Nom OPCO']})</option>)}
+                            </StyledSelect>
                             <button
-                                className="flex items-center gap-2 px-4 py-2.5 bg-white/15 border border-white/30 rounded-xl text-white text-[12px] font-semibold hover:bg-white/25 transition-all"
-                                onClick={fetchOpcoData}
+                                onClick={handleCreateFullOpcoDossier}
+                                disabled={isCreatingOpco || !selectedCompanyId}
+                                className="flex items-center gap-2 px-5 py-2.5 bg-white text-[#6d28d9] rounded-xl text-[13px] font-bold hover:bg-white/90 disabled:opacity-50 transition-all shadow-sm"
                             >
-                                <RefreshCcw size={14} /> Actualiser
+                                {isCreatingOpco ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} strokeWidth={2.5} />}
+                                Créer Dossier
                             </button>
                         </div>
                     }
                 />
 
-                {opcoError && (
-                    <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[12px] font-semibold text-rose-700">
-                        {opcoError}
-                    </div>
-                )}
-
-                <div className="bg-white border border-[#e5e0f5] rounded-2xl p-5 mb-5 shadow-sm">
-                    <div className="flex flex-col md:flex-row md:items-center gap-4">
-                        <div className="flex-1">
-                            <div className="text-[12px] font-bold text-[#1e1b2e]">Configuration OPCO</div>
-                            <div className="text-[11px] text-[#9ca3af]">
-                                {opcoConfig?.configured ? `Connecté à ${opcoConfig?.opcoName || 'OPCO'}` : "Non configuré"}
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3 text-[11px] font-semibold">
-                            <span className={`px-3 py-1 rounded-lg border ${opcoConfig?.configured ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
-                                {opcoConfig?.configured ? 'Actif' : 'Inactif'}
-                            </span>
-                            <span className="text-[#9ca3af]">
-                                {opcoConfig?.baseUrl ? `API: ${opcoConfig.baseUrl}` : 'API non renseignée'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white border border-[#e5e0f5] rounded-2xl p-5 mb-5 shadow-sm">
-                    <div className="flex flex-col md:flex-row md:items-center gap-4">
-                        <div className="flex-1">
-                            <div className="text-[12px] font-bold text-[#1e1b2e]">Créer un dossier OPCO</div>
-                            <div className="text-[11px] text-[#9ca3af]">Sélectionnez une entreprise liée à un candidat.</div>
-                        </div>
-                        <div className="flex items-center gap-3 w-full md:w-auto">
-                            <select
-                                value={selectedCompanyId}
-                                onChange={(e) => setSelectedCompanyId(e.target.value)}
-                                className="flex-1 md:w-[320px] px-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[12px] font-medium text-[#374151] outline-none focus:border-[#6d28d9]/40"
-                            >
-                                <option value="">Choisir une entreprise</option>
-                                {companies.map((c) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c?.fields?.['Raison sociale'] || c.id}
-                                    </option>
-                                ))}
-                            </select>
-                            <button
-                                className="flex items-center gap-2 px-5 py-2.5 bg-[#6d28d9] text-white rounded-xl text-[12px] font-semibold hover:bg-[#5831ad] transition-all disabled:opacity-50"
-                                onClick={handleCreateFullOpcoDossier}
-                                disabled={isCreatingOpco}
-                            >
-                                {isCreatingOpco ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                                Créer
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <FilterBar>
-                    <SearchInput value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} placeholder="Rechercher par apprenti, employeur, SIRET ou OPCO..." />
+                    <SearchInput value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} placeholder="Rechercher par candidat ou employeur..." />
                     <StyledSelect value={opcoFilterStatus} onChange={(e: any) => setOpcoFilterStatus(e.target.value)}>
                         <option value="all">Tous les statuts</option>
-                        <option value="BROUILLON">Brouillon</option>
-                        <option value="EN_PREPARATION">En préparation</option>
-                        <option value="PRET_A_ENVOYER">Prêt à envoyer</option>
-                        <option value="ENVOYE">Envoyé</option>
-                        <option value="EN_ATTENTE_VALIDATION">En attente validation</option>
-                        <option value="COMPLEMENT_DEMANDE">Complément demandé</option>
-                        <option value="ACCEPTE">Accepté</option>
-                        <option value="REFUSE">Refusé</option>
-                        <option value="REFUSE_DEFINITIF">Refus définitif</option>
-                        <option value="ANNULE">Annulé</option>
-                        <option value="CLOTURE">Clôturé</option>
-                        <option value="draft">Brouillon</option>
-                        <option value="pending_submission">En attente</option>
-                        <option value="submitted">Envoyé</option>
-                        <option value="in_review">En revue</option>
-                        <option value="accepted">Accepté</option>
-                        <option value="rejected">Refusé</option>
-                        <option value="error">Erreur</option>
+                        {Object.keys(opcoStatusStyles).map(s => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
                     </StyledSelect>
                 </FilterBar>
+
+                {opcoError && (
+                    <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl mb-6 flex items-center gap-3 text-sm font-medium">
+                        <AlertCircle size={18} /> {opcoError}
+                    </div>
+                )}
 
                 <TableWrapper>
                     <table className="w-full border-collapse">
                         <thead>
                             <tr>
-                                {["OPCO", "Apprenti", "Employeur", "Montant", "Date envoi", "Délai", "Statut", "Actions"].map(h => <Th key={h}>{h}</Th>)}
+                                {["Candidat", "Employeur", "OPCO", "Statut", "Dernière Sync", "Actions"].map(h => <Th key={h}>{h}</Th>)}
                             </tr>
                         </thead>
                         <tbody>
-                            {opcoLoading ? (
-                                <tr>
-                                    <td colSpan={8} className="py-16 text-center text-[#9ca3af]">
-                                        <Loader2 className="animate-spin mx-auto mb-3 text-[#6d28d9]" size={28} />
-                                        <div className="text-[13px]">Chargement...</div>
-                                    </td>
-                                </tr>
+                            {opcoLoading && opcoDossiers.length === 0 ? (
+                                <tr><td colSpan={6} className="py-16 text-center text-[#9ca3af]"><Loader2 className="animate-spin mx-auto mb-3 text-[#6d28d9]" size={28} /><div className="text-[13px]">Chargement des dossiers...</div></td></tr>
                             ) : filteredDossiers.length === 0 ? (
-                                <tr><td colSpan={8} className="py-16 text-center text-[#9ca3af] text-[13px]">Aucun dossier OPCO</td></tr>
-                            ) : filteredDossiers.map((d: any) => {
-                                const company = companies.find(c => c.id === d.companyId);
-                                const companyName = company?.fields?.['Raison sociale'] || d.employerName || 'N/A';
-                                const delayStatus = getDeadlineLabel(d.dateLimiteEnvoi);
-                                const statusColor = opcoStatusStyles[d.status || 'BROUILLON'] || opcoStatusStyles.BROUILLON;
-
-                                return (
-                                    <tr 
-                                        key={d._id || d.id} 
-                                        className="hover:bg-[#fafafa] transition-colors group cursor-pointer"
-                                        onClick={() => {
-                                            setSelectedOpcoDossier(d);
-                                            setIsOpcoDossierModalOpen(true);
-                                        }}
-                                    >
-                                        <Td>
-                                            <div className="text-[13px] font-semibold text-[#1e1b2e]">{d.opcoName || 'OPCO'}</div>
-                                            {d.opcoCode && <div className="text-[10px] text-[#9ca3af]">Code: {d.opcoCode}</div>}
-                                        </Td>
-                                        <Td>
-                                            <div className="text-[13px] font-semibold text-[#1e1b2e]">{d.apprentiNom || 'N/A'}</div>
-                                            {d.formationLabel && <div className="text-[10px] text-[#9ca3af]">{d.formationLabel}</div>}
-                                        </Td>
-                                        <Td>
-                                            <div className="text-[13px] font-semibold text-[#1e1b2e]">{companyName}</div>
-                                            {d.employerSiret && <div className="text-[10px] text-[#9ca3af]">SIRET: {d.employerSiret}</div>}
-                                        </Td>
-                                        <Td>
-                                            <div className="text-[13px] font-bold text-[#1e1b2e]">
-                                                {d.montantAnnuel ? `€${(d.montantAnnuel).toLocaleString('fr-FR')}` : 'N/A'}
-                                            </div>
-                                            {d.montantMensuel && <div className="text-[10px] text-[#9ca3af]">{`€${(d.montantMensuel).toLocaleString('fr-FR')}/mois`}</div>}
-                                        </Td>
-                                        <Td>
-                                            <div className="text-[12px] font-semibold text-[#1e1b2e]">
-                                                {formatOpcoDate(d.dateEnvoiOpco) || 'Non envoyé'}
-                                            </div>
-                                            {d.dateLimiteEnvoi && <div className="text-[10px] text-[#9ca3af]">Limite: {formatOpcoDate(d.dateLimiteEnvoi)}</div>}
-                                        </Td>
-                                        <Td>
-                                            <div className={`text-[12px] font-semibold ${delayStatus.className}`}>
-                                                {delayStatus.text}
-                                            </div>
-                                        </Td>
-                                        <Td>
-                                            <span className={`inline-flex items-center px-2.5 py-1.5 rounded-lg border text-[10px] font-semibold ${statusColor}`}>
-                                                {d.status || 'BROUILLON'}
-                                            </span>
-                                        </Td>
-                                        <Td onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <ActionBtn icon={RefreshCcw} onClick={() => handleSync(d._id || d.id)} color="#6d28d9" />
-                                                <ActionBtn icon={CheckCircle2} onClick={() => handleResubmit(d._id || d.id)} color="#22c55e" bg="#f0fdf4" border="#d1fae5" />
-                                                <ActionBtn icon={Eye} onClick={() => {
-                                                    setSelectedOpcoDossier(d);
-                                                    setIsOpcoDossierModalOpen(true);
-                                                }} />
-                                            </div>
-                                        </Td>
-                                    </tr>
-                                );
-                            })}
+                                <tr><td colSpan={6} className="py-16 text-center text-[#9ca3af] text-[13px]">Aucun dossier trouvé</td></tr>
+                            ) : filteredDossiers.map((d: any) => (
+                                <tr key={d._id} className="hover:bg-[#fafafa] transition-colors group">
+                                    <Td>
+                                        <div className="text-[13px] font-bold text-[#1e1b2e]">{d.candidateName || 'N/A'}</div>
+                                    </Td>
+                                    <Td>
+                                        <div className="text-[13px] font-medium text-[#374151]">{d.employerName || 'N/A'}</div>
+                                    </Td>
+                                    <Td>
+                                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-black border border-slate-200">
+                                            {d.opcoName || 'N/A'}
+                                        </span>
+                                    </Td>
+                                    <Td>
+                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black border ${opcoStatusStyles[d.status] || 'bg-slate-50'}`}>
+                                            {(d.status || 'INCONNU').replace(/_/g, ' ')}
+                                        </span>
+                                    </Td>
+                                    <Td>
+                                        <div className="text-[11px] text-[#9ca3af]">{formatOpcoDate(d.lastSyncAt)}</div>
+                                    </Td>
+                                    <Td>
+                                        <div className="flex gap-2">
+                                            <ActionBtn icon={Eye} onClick={() => { setSelectedOpcoDossier(d); setIsOpcoDossierModalOpen(true); }} />
+                                            <ActionBtn icon={RefreshCcw} onClick={() => handleSync(d._id)} color="#3b82f6" bg="#eff6ff" border="#dbeafe" />
+                                        </div>
+                                    </Td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </TableWrapper>
 
-                {/* Modal Détail OPCO */}
-                <OpcoDossierDetail
-                    dossier={selectedOpcoDossier}
-                    isOpen={isOpcoDossierModalOpen}
-                    onClose={() => {
-                        setIsOpcoDossierModalOpen(false);
-                        setSelectedOpcoDossier(null);
-                    }}
-                    onSync={handleSync}
-                    onResubmit={handleResubmit}
-                />
+                {isOpcoDossierModalOpen && selectedOpcoDossier && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+                        <div className="bg-white rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+                            <div className="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900">Détails Dossier OPCO</h2>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{selectedOpcoDossier.candidateName} • {selectedOpcoDossier.employerName}</p>
+                                </div>
+                                <button onClick={() => setIsOpcoDossierModalOpen(false)} className="p-2 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100">
+                                    <Clock size={20} className="rotate-45" />
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-8">
+                                <OpcoDossierDetail 
+                                    dossier={selectedOpcoDossier} 
+                                    onRefresh={() => { fetchOpcoData(); setIsOpcoDossierModalOpen(false); }} 
+                                    onResubmit={() => handleResubmit(selectedOpcoDossier._id)} 
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
 
-    return (
-        <div className="animate-fade-in" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            <div className="bg-white border border-[#e5e0f5] rounded-2xl p-12 text-center shadow-sm">
-                <div className="w-14 h-14 bg-[#f5f3ff] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Users size={26} color="#6d28d9" />
-                </div>
-                <h3 className="text-[16px] font-semibold text-[#1e1b2e] mb-1">Sélectionnez une section</h3>
-                <p className="text-[13px] text-[#9ca3af]">Utilisez le menu de gauche pour naviguer dans le module RH</p>
-            </div>
-        </div>
-    );
+    return null;
 };
 
 export default RHView;
