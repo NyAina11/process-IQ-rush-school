@@ -1953,6 +1953,7 @@ export const api = {
     screenshotUrl?: string;
     assignee?: string;
     deadline?: string;
+    requesterRole?: string;
   }): Promise<any> {
     const response = await fetch(`${SUPPORT_URL}/bugs/${id}`, {
       method: 'PATCH',
