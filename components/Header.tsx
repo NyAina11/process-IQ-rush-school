@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, onExecuteApproved }) => 
   const userRole = localStorage.getItem('userRole') || 'Guest';
   const userEmail = localStorage.getItem('userEmail') || '';
   const userName = localStorage.getItem('userName') || '';
-  const isSuperAdmin = userRole === 'super_admin';
+  const isSuperAdmin = userRole === 'super_admin' || userRole === 'admin';
 
   const {
     requests,

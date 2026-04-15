@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # Base de données MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: processiq-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  # Backend NestJS
+  backend:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    container_name: processiq-backend
+    restart: always
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    environment:
+      - PORT=8001
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/processiq}
+      - JWT_SECRET=${JWT_SECRET:-dev_secret_key}
+      - NODE_ENV=production
+    depends_on:
+      - mongodb
+    volumes:
+      - uploads_data:/app/uploads
+
+  # Frontend React + Nginx (Entry Point)
+  frontend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - VITE_BASE_API_URL=${VITE_BASE_API_URL:-/api}
+    container_name: processiq-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongodb_data:
+  uploads_data:

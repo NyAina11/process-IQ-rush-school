@@ -45,6 +45,7 @@ import { useCandidates, getC, isPlaced } from '../hooks/useCandidates';
 import { usePagination } from '../hooks/usePagination';
 import Pagination from './ui/Pagination';
 import { formatFormation, decimalToTime } from '../utils/formatters';
+import ConfirmationModal from './ui/ConfirmationModal';
 
 interface ClassNTCViewProps {
     onSelectStudent: (student: any, tab: AdmissionTab) => void;
@@ -114,8 +115,21 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
     const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
     const [isCompanyEditing, setIsCompanyEditing] = useState(false);
     const [companyEditForm, setCompanyEditForm] = useState<any>(null);
-    const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
     const [isRegenerating, setIsRegenerating] = useState<string | null>(null);
+    const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'danger' | 'info';
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'danger',
+        onConfirm: () => { }
+    });
 
     const { showToast } = useAppStore();
     const navigate = useNavigate();
@@ -459,10 +473,18 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
         }
     };
 
-    const handleDeleteStudent = async (id: string, name: string) => {
-        if (!window.confirm(`Êtes-vous sûr de vouloir supprimer l'étudiant ${name} ? Cette action est irréversible.`)) {
-            return;
-        }
+    const handleDeleteStudent = (id: string, name: string) => {
+        setConfirmModal({
+            isOpen: true,
+            title: "Supprimer l'étudiant ?",
+            message: `Êtes-vous sûr de vouloir supprimer l'étudiant ${name} ? Cette action est irréversible et supprimera également l'entreprise associée.`,
+            type: 'danger',
+            onConfirm: () => executeDeleteStudent(id, name)
+        });
+    };
+
+    const executeDeleteStudent = async (id: string, name: string) => {
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
 
         try {
             // Automatically delete associated company if it exists
@@ -484,10 +506,18 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
         }
     };
 
-    const handleDeleteCompany = async (studentId: string, companyName: string) => {
-        if (!window.confirm(`Êtes-vous sûr de vouloir supprimer l'entreprise ${companyName} pour cet étudiant ?`)) {
-            return;
-        }
+    const handleDeleteCompany = (studentId: string, companyName: string) => {
+        setConfirmModal({
+            isOpen: true,
+            title: "Supprimer l'entreprise ?",
+            message: `Êtes-vous sûr de vouloir supprimer l'entreprise ${companyName} pour cet étudiant ?`,
+            type: 'danger',
+            onConfirm: () => executeDeleteCompany(studentId)
+        });
+    };
+
+    const executeDeleteCompany = async (studentId: string) => {
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
 
         try {
             const success = await api.deleteCompany(studentId);
@@ -566,12 +596,21 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
         await updateCandidate(selectedCandidate.record_id || selectedCandidate.id, editForm, userRole);
     };
 
-    const handleDelete = async () => {
+    const handleDelete = () => {
         const id = selectedCandidate?.record_id || selectedCandidate?.id;
+        const name = getC(selectedCandidate).nom || 'cet étudiant';
         if (!id) return;
-        if (window.confirm("Êtes-vous sûr de vouloir supprimer cet étudiant ?")) {
-            await deleteCandidate(id);
-        }
+        
+        setConfirmModal({
+            isOpen: true,
+            title: "Supprimer cet étudiant ?",
+            message: `Êtes-vous sûr de vouloir supprimer ${name} ? Cette action est irréversible.`,
+            type: 'danger',
+            onConfirm: () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                deleteCandidate(id);
+            }
+        });
     };
 
     const docFileName = (student: any, docType: string) => {
@@ -1270,7 +1309,7 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
 
                                                         <button
                                                             onClick={() => handleViewDetails(student.id)}
-                                                            className="px-3 py-1.5 rounded-[4px] bg-[#fee2e2] text-[#b91c1c] text-[10px] font-bold uppercase tracking-widest border border-[#fca5a5] hover:bg-[#b91c1c] hover:text-white transition-all"
+                                                            className="px-3 py-1.5 rounded-[4px] bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest border border-rose-400 hover:bg-rose-500 hover:text-white transition-all active:scale-95 shadow-sm shadow-rose-100"
                                                         >
                                                             Fiche Étudiant
                                                         </button>
@@ -1278,9 +1317,9 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
                                                     <td className="px-6 py-4 text-center">
                                                         <button
                                                             onClick={() => isPlaced(rawStudent) ? handleViewCompanyDetails(rawStudent) : handleFillForm(rawStudent)}
-                                                            className={`px-3 py-1.5 rounded-[4px] text-[10px] font-bold uppercase tracking-widest border transition-all ${isPlaced(rawStudent)
-                                                                ? 'bg-[#d1fae5] text-[#065f46] border-[#6ee7b7] hover:bg-[#065f46] hover:text-white'
-                                                                : 'bg-[#ffedd5] text-[#c2410c] border-[#fdba74] hover:bg-[#c2410c] hover:text-white'
+                                                            className={`px-3 py-1.5 rounded-[4px] text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 shadow-sm ${isPlaced(rawStudent)
+                                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-400 hover:bg-emerald-500 hover:text-white shadow-emerald-100'
+                                                                : 'bg-orange-50 text-orange-600 border-orange-400 hover:bg-orange-500 hover:text-white shadow-orange-100'
                                                                 }`}
                                                         >
                                                             {isPlaced(rawStudent) ? 'Voir Entreprise' : 'Lier Entreprise'}
@@ -1764,20 +1803,30 @@ const ClassNTCView = ({ onSelectStudent }: ClassNTCViewProps) => {
             )}
 
             {currentTab === 'history' && (
-                <div className="bg-white border border-[#e5e0f5] rounded-2xl p-6 min-h-[500px]">
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6d28d9] to-[#4338ca] flex items-center justify-center shadow-md shadow-violet-200">
-                            <HistoryIcon size={18} className="text-white" />
+                <div className="space-y-2">
+                    <div className="flex items-center gap-4 mb-2">
+                        <div className="w-8 h-8 rounded-[4px] bg-[#ede9fe] text-[#7c3aed] flex items-center justify-center border border-[#c4b5fd]">
+                            <HistoryIcon size={15} />
                         </div>
                         <div>
-                            <h2 className="text-[18px] font-extrabold text-[#1e1b2e] tracking-tight">Historique des actions</h2>
-                            <p className="text-[12px] text-slate-400 font-medium mt-0.5">Toutes les activités récentes de la classe</p>
+                            <h2 className="text-[16px] font-black text-[#1e293b] tracking-tight">Historique des actions</h2>
+                            <p className="text-[11px] text-[#8898aa] font-medium mt-0.5 uppercase tracking-widest">Toutes les activités récentes de la classe</p>
                         </div>
                     </div>
                     <HistoryTimeline history={globalHistory} loading={loadingHistory} />
                 </div>
             )}
             </div>
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                confirmLabel="Confirmer"
+                cancelLabel="Annuler"
+            />
         </div>
     );
 };

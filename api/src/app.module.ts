@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { SupportModule } from './support/support.module';
+import { AdmissionModule } from './admission/admission.module';
 
 @Module({
     imports: [
@@ -18,6 +20,7 @@ import { UsersModule } from './users/users.module';
                 }
                 return {
                     uri: uri || 'mongodb://localhost:27017/unused',
+                    dbName: configService.get<string>('DB_NAME') || 'processiq',
                     serverSelectionTimeoutMS: 5000, // 5 seconds timeout
                 };
             },
@@ -25,6 +28,8 @@ import { UsersModule } from './users/users.module';
         }),
         AuthModule,
         UsersModule,
+        SupportModule,
+        AdmissionModule,
     ],
     controllers: [],
     providers: [],

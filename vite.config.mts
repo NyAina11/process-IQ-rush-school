@@ -10,8 +10,24 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       host: '0.0.0.0',
       proxy: {
-        '/api': {
+        '/api/auth': {
           target: backendUrl,
+          changeOrigin: true,
+        },
+        '/api/users': {
+          target: backendUrl,
+          changeOrigin: true,
+        },
+        '/api/support': {
+          target: backendUrl,
+          changeOrigin: true,
+        },
+        '/api/uploads': {
+          target: backendUrl,
+          changeOrigin: true,
+        },
+        '/api': {
+          target: 'https://processiqfilegenerator.onrender.com',
           changeOrigin: true,
         }
       }

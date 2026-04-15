@@ -87,12 +87,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <nav className="flex-1 overflow-y-auto scrollbar-hide py-2 space-y-0.5">
 
         {/* ── GESTION ── */}
-        {(userRole === 'admin' || userRole === 'admission' || userRole === 'commercial' || userRole === 'super_admin' || !userRole) && (
+        {(userRole === 'admission' || userRole === 'commercial' || userRole === 'super_admin' || userRole === 'admin' || !userRole) && (
           <SectionLabel label="Gestion" />
         )}
 
         {/* Admissions Group */}
-        {(userRole === 'admin' || userRole === 'admission' || userRole === 'super_admin' || !userRole) && (
+        {(userRole === 'admission' || userRole === 'super_admin' || userRole === 'admin' || !userRole) && (
           <div className="px-3">
             <div
               onClick={() => setAdmissionOpen(!admissionOpen)}
@@ -132,7 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         )}
 
         {/* Commercial Group */}
-        {(userRole === 'admin' || userRole === 'commercial' || userRole === 'super_admin' || !userRole) && (
+        {(userRole === 'commercial' || userRole === 'super_admin' || userRole === 'admin' || !userRole) && (
           <div className="px-3">
             <div
               onClick={() => setCommercialOpen(!commercialOpen)}
@@ -177,12 +177,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         )}
 
         {/* ── ESPACE ── */}
-        {(userRole === 'admin' || userRole === 'rh' || userRole === 'super_admin' || !userRole) && (
+        {(userRole === 'rh' || userRole === 'super_admin' || userRole === 'admin' || !userRole) && (
           <SectionLabel label="Espace" />
         )}
 
         {/* RH Group */}
-        {(userRole === 'admin' || userRole === 'rh' || userRole === 'super_admin' || !userRole) && (
+        {(userRole === 'rh' || userRole === 'super_admin' || userRole === 'admin' || !userRole) && (
           <div className="px-3">
             <div
               onClick={() => setRhOpen(!rhOpen)}
@@ -240,7 +240,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         )}
 
         {/* Étudiant */}
-        {(userRole === 'admin' || userRole === 'eleve' || userRole === 'super_admin' || !userRole) && (
+        {(userRole === 'eleve' || userRole === 'super_admin' || userRole === 'admin' || !userRole) && (
           <div className="px-3">
             <NavLink
               to="/etudiant"
@@ -258,7 +258,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </div>
         )}
 
-        {(userRole === 'admin' || userRole === 'admission' || userRole === 'rh' || userRole === 'super_admin') && (
+        {(userRole === 'admission' || userRole === 'rh' || userRole === 'super_admin' || userRole === 'admin') && (
           <div className="px-3">
             <NavLink
               to="/support"
@@ -276,7 +276,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </div>
         )}
         {/* Paramètres */}
-        {(userRole === 'admin' || userRole === 'super_admin' || !userRole) && (
+        {(userRole === 'super_admin' || userRole === 'admin' || !userRole) && (
           <div className="px-3">
             <NavLink
               to="/parametres"

@@ -792,7 +792,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                             </div>
                             <div className="fiche-field">
                                 <Input
-                                    label="Diplôme ou titre le plus élevé obtenu"
+                                    label="DiplÃ´me ou titre le plus Ã©levÃ© obtenu"
                                     placeholder="Ex: BTS MCO"
                                     error={errors.maitre_apprentissage?.diplome_plus_eleve?.message}
                                     {...register('maitre_apprentissage.diplome_plus_eleve')}
@@ -800,7 +800,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                             </div>
                             <div className="fiche-field">
                                 <Select
-                                    label="Niveau du diplôme ou titre le plus élevé obtenu"
+                                    label="Niveau du diplÃ´me ou titre le plus Ã©levÃ© obtenu"
                                     error={errors.maitre_apprentissage?.diplome?.message}
                                     {...register('maitre_apprentissage.diplome')}
                                     options={MAITRE_DIPLOMA_OPTIONS}
