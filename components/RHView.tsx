@@ -818,9 +818,10 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
     if (activeSubView === 'rh-pec') {
         const filteredDossiers = opcoDossiers.filter(d => {
             const q = searchQuery.toLowerCase();
-            const matchSearch = (d.candidateName || '').toLowerCase().includes(q) || (d.employerName || '').toLowerCase().includes(q);
-            const matchStatus = opcoFilterStatus === 'all' || d.status === opcoFilterStatus;
-            return matchSearch && matchStatus;
+            const hay = `${d.opcoName || ''} ${d.opcoCode || ''} ${d._id || d.id || ''} ${d.status || ''} ${d.candidateId || ''} ${d.apprentiNom || ''} ${d.employerName || ''} ${d.employerSiret || ''}`.toLowerCase();
+            if (q && !hay.includes(q)) return false;
+            if (opcoFilterStatus === 'all') return true;
+            return d.status === opcoFilterStatus;
         });
 
         return (
@@ -848,10 +849,27 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                 />
 
                 <FilterBar>
-                    <SearchInput value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} placeholder="Rechercher par candidat ou employeur..." />
+                    <SearchInput value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} placeholder="Rechercher par apprenti, employeur, SIRET ou OPCO..." />
                     <StyledSelect value={opcoFilterStatus} onChange={(e: any) => setOpcoFilterStatus(e.target.value)}>
                         <option value="all">Tous les statuts</option>
-                        {Object.keys(opcoStatusStyles).map(s => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
+                        <option value="BROUILLON">Brouillon</option>
+                        <option value="EN_PREPARATION">En préparation</option>
+                        <option value="PRET_A_ENVOYER">Prêt à envoyer</option>
+                        <option value="ENVOYE">Envoyé</option>
+                        <option value="EN_ATTENTE_VALIDATION">En attente validation</option>
+                        <option value="COMPLEMENT_DEMANDE">Complément demandé</option>
+                        <option value="ACCEPTE">Accepté</option>
+                        <option value="REFUSE">Refusé</option>
+                        <option value="REFUSE_DEFINITIF">Refus définitif</option>
+                        <option value="ANNULE">Annulé</option>
+                        <option value="CLOTURE">Clôturé</option>
+                        <option value="draft">Brouillon (alias)</option>
+                        <option value="pending_submission">En attente (alias)</option>
+                        <option value="submitted">Envoyé (alias)</option>
+                        <option value="in_review">En revue (alias)</option>
+                        <option value="accepted">Accepté (alias)</option>
+                        <option value="rejected">Refusé (alias)</option>
+                        <option value="error">Erreur</option>
                     </StyledSelect>
                 </FilterBar>
 
@@ -865,43 +883,73 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                     <table className="w-full border-collapse">
                         <thead>
                             <tr>
-                                {["Candidat", "Employeur", "OPCO", "Statut", "Dernière Sync", "Actions"].map(h => <Th key={h}>{h}</Th>)}
+                                {["OPCO", "Apprenti", "Employeur", "Montant", "Date envoi", "Délai", "Statut", "Actions"].map(h => <Th key={h}>{h}</Th>)}
                             </tr>
                         </thead>
                         <tbody>
                             {opcoLoading && opcoDossiers.length === 0 ? (
-                                <tr><td colSpan={6} className="py-16 text-center text-[#9ca3af]"><Loader2 className="animate-spin mx-auto mb-3 text-[#6d28d9]" size={28} /><div className="text-[13px]">Chargement des dossiers...</div></td></tr>
+                                <tr><td colSpan={8} className="py-16 text-center text-[#9ca3af]"><Loader2 className="animate-spin mx-auto mb-3 text-[#6d28d9]" size={28} /><div className="text-[13px]">Chargement des dossiers...</div></td></tr>
                             ) : filteredDossiers.length === 0 ? (
-                                <tr><td colSpan={6} className="py-16 text-center text-[#9ca3af] text-[13px]">Aucun dossier trouvé</td></tr>
-                            ) : filteredDossiers.map((d: any) => (
-                                <tr key={d._id} className="hover:bg-[#fafafa] transition-colors group">
-                                    <Td>
-                                        <div className="text-[13px] font-bold text-[#1e1b2e]">{d.candidateName || 'N/A'}</div>
-                                    </Td>
-                                    <Td>
-                                        <div className="text-[13px] font-medium text-[#374151]">{d.employerName || 'N/A'}</div>
-                                    </Td>
-                                    <Td>
-                                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-black border border-slate-200">
-                                            {d.opcoName || 'N/A'}
-                                        </span>
-                                    </Td>
-                                    <Td>
-                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black border ${opcoStatusStyles[d.status] || 'bg-slate-50'}`}>
-                                            {(d.status || 'INCONNU').replace(/_/g, ' ')}
-                                        </span>
-                                    </Td>
-                                    <Td>
-                                        <div className="text-[11px] text-[#9ca3af]">{formatOpcoDate(d.lastSyncAt)}</div>
-                                    </Td>
-                                    <Td>
-                                        <div className="flex gap-2">
-                                            <ActionBtn icon={Eye} onClick={() => { setSelectedOpcoDossier(d); setIsOpcoDossierModalOpen(true); }} />
-                                            <ActionBtn icon={RefreshCcw} onClick={() => handleSync(d._id)} color="#3b82f6" bg="#eff6ff" border="#dbeafe" />
-                                        </div>
-                                    </Td>
-                                </tr>
-                            ))}
+                                <tr><td colSpan={8} className="py-16 text-center text-[#9ca3af] text-[13px]">Aucun dossier trouvé</td></tr>
+                            ) : filteredDossiers.map((d: any) => {
+                                const company = companies.find(c => c.id === d.companyId);
+                                const companyName = d.employerName || company?.fields?.['Raison sociale'] || 'N/A';
+                                const delayStatus = getDeadlineLabel(d.dateLimiteEnvoi);
+                                const statusColor = opcoStatusStyles[d.status] || 'bg-slate-50 border-slate-200 text-slate-600';
+
+                                return (
+                                    <tr 
+                                        key={d._id || d.id} 
+                                        className="hover:bg-[#fafafa] transition-colors group cursor-pointer"
+                                        onClick={() => {
+                                            setSelectedOpcoDossier(d);
+                                            setIsOpcoDossierModalOpen(true);
+                                        }}
+                                    >
+                                        <Td>
+                                            <div className="text-[13px] font-bold text-[#1e1b2e]">{d.opcoName || 'OPCO'}</div>
+                                            {d.opcoCode && <div className="text-[10px] text-[#9ca3af]">Code: {d.opcoCode}</div>}
+                                        </Td>
+                                        <Td>
+                                            <div className="text-[13px] font-bold text-[#1e1b2e]">{d.apprentiNom || d.candidateName || 'N/A'}</div>
+                                            {d.formationLabel && <div className="text-[10px] text-[#9ca3af]">{d.formationLabel}</div>}
+                                        </Td>
+                                        <Td>
+                                            <div className="text-[13px] font-medium text-[#374151]">{companyName}</div>
+                                            {d.employerSiret && <div className="text-[10px] text-[#9ca3af]">SIRET: {d.employerSiret}</div>}
+                                        </Td>
+                                        <Td>
+                                            <div className="text-[13px] font-bold text-[#1e1b2e]">
+                                                {d.montantAnnuel ? `${(d.montantAnnuel).toLocaleString('fr-FR')} €` : 'N/A'}
+                                            </div>
+                                            {d.montantMensuel && <div className="text-[10px] text-[#9ca3af]">{`${(d.montantMensuel).toLocaleString('fr-FR')} €/mois`}</div>}
+                                        </Td>
+                                        <Td>
+                                            <div className="text-[12px] font-semibold text-[#1e1b2e]">
+                                                {formatOpcoDate(d.dateEnvoiOpco) || 'Non envoyé'}
+                                            </div>
+                                            {d.dateLimiteEnvoi && <div className="text-[10px] text-[#9ca3af]">Limite: {formatOpcoDate(d.dateLimiteEnvoi)}</div>}
+                                        </Td>
+                                        <Td>
+                                            <div className={`text-[12px] font-semibold ${delayStatus.className}`}>
+                                                {delayStatus.text}
+                                            </div>
+                                        </Td>
+                                        <Td>
+                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black border ${statusColor}`}>
+                                                {(d.status || 'INCONNU').replace(/_/g, ' ')}
+                                            </span>
+                                        </Td>
+                                        <Td onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex gap-2">
+                                                <ActionBtn icon={Eye} onClick={() => { setSelectedOpcoDossier(d); setIsOpcoDossierModalOpen(true); }} />
+                                                <ActionBtn icon={RefreshCcw} onClick={() => handleSync(d._id || d.id)} color="#3b82f6" bg="#eff6ff" border="#dbeafe" />
+                                                <ActionBtn icon={CheckCircle2} onClick={() => handleResubmit(d._id || d.id)} color="#22c55e" bg="#f0fdf4" border="#d1fae5" />
+                                            </div>
+                                        </Td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </TableWrapper>
@@ -912,7 +960,7 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                             <div className="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                 <div>
                                     <h2 className="text-xl font-black text-slate-900">Détails Dossier OPCO</h2>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{selectedOpcoDossier.candidateName} • {selectedOpcoDossier.employerName}</p>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{selectedOpcoDossier.apprentiNom || selectedOpcoDossier.candidateName} • {selectedOpcoDossier.employerName}</p>
                                 </div>
                                 <button onClick={() => setIsOpcoDossierModalOpen(false)} className="p-2 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100">
                                     <Clock size={20} className="rotate-45" />
@@ -921,8 +969,10 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                             <div className="flex-1 overflow-y-auto p-8">
                                 <OpcoDossierDetail 
                                     dossier={selectedOpcoDossier} 
-                                    onRefresh={() => { fetchOpcoData(); setIsOpcoDossierModalOpen(false); }} 
-                                    onResubmit={() => handleResubmit(selectedOpcoDossier._id)} 
+                                    isOpen={true}
+                                    onClose={() => setIsOpcoDossierModalOpen(false)}
+                                    onSync={handleSync}
+                                    onResubmit={handleResubmit}
                                 />
                             </div>
                         </div>

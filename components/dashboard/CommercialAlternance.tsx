@@ -64,6 +64,7 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = memo(({
         };
     };
 
+
     const { filteredStudents, paginated, totalPages } = useMemo(() => {
         const filtered = (candidates || []).filter(c => isPlaced(c)).map(raw => ({
             raw,
