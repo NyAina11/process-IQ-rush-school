@@ -347,6 +347,7 @@ const SupportView: React.FC = () => {
         deadline: (editingRow.deadline && !isNaN(new Date(editingRow.deadline).getTime())) 
           ? new Date(editingRow.deadline).toISOString() 
           : undefined,
+        requesterRole: role,
       });
       showToast('Ticket mis à jour avec succès', 'success');
       cancelEditing();
