@@ -116,7 +116,8 @@ const LoginPage: React.FC = () => {
             localStorage.setItem('userEmail', data.email || formData.email);
             localStorage.setItem('userName', data.name || '');
 
-            if (finalRole === 'super_admin' || finalRole === 'admin') navigate('/admission');
+            if (finalRole === 'super_admin') navigate('/parametres');
+            else if (finalRole === 'admin') navigate('/admission');
             else if (finalRole === 'commercial') navigate('/commercial/dashboard');
             else if (finalRole === 'admission') navigate('/admission');
             else if (finalRole === 'rh') navigate('/rh/dashboard');
