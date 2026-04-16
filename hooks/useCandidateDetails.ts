@@ -43,13 +43,13 @@ export const useCandidateDetails = (candidates: any[], onUpdate: () => void) => 
         }
     });
 
-    const handleViewDetails = async (id: string) => {
+    const handleViewDetails = useCallback(async (id: string) => {
         setIsModalOpen(true);
         setIsEditing(false);
         await fetchDetails(id);
-    };
+    }, [fetchDetails]);
 
-    const handleEdit = async (id: string) => {
+    const handleEdit = useCallback(async (id: string) => {
         // Find candidate in local state first for instant pre-fill
         const localRaw = candidates.find(cand => {
             const c = getC(cand);
@@ -85,9 +85,9 @@ export const useCandidateDetails = (candidates: any[], onUpdate: () => void) => 
                 entreprise_d_accueil: c.entreprise || "Non",
             });
         }
-    };
+    }, [candidates, fetchDetails]);
 
-    const handleSaveEdit = async () => {
+    const handleSaveEdit = useCallback(async () => {
         if (!selectedCandidate || !editForm) return;
 
         const userRole = localStorage.getItem('userRole') || 'admission';
@@ -107,9 +107,9 @@ export const useCandidateDetails = (candidates: any[], onUpdate: () => void) => 
         };
 
         await updateApi(selectedCandidate.id, updatedCandidate, userRole);
-    };
+    }, [selectedCandidate, editForm, updateApi]);
 
-    const handleDelete = async () => {
+    const handleDelete = useCallback(async () => {
         if (!selectedCandidate) return;
 
         const c = getC(selectedCandidate);
@@ -124,7 +124,7 @@ export const useCandidateDetails = (candidates: any[], onUpdate: () => void) => 
         if (!confirmDelete) return;
 
         await deleteApi(candidateId);
-    };
+    }, [selectedCandidate, deleteApi, showToast]);
 
     return {
         selectedCandidate,
