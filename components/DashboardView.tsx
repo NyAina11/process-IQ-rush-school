@@ -79,7 +79,6 @@ const DashboardView: React.FC<DashboardViewProps> = ({ activeSubView, onSelectSt
         loadOpcoDossiers();
     }, []);
 
-
     const { studentsToPlace, studentsPlaced, statsToPlace, statsPlaced } = useMemo(() => {
         const toPlace = candidates.filter(c => !isPlaced(c));
         const placed = candidates.filter(c => isPlaced(c));
