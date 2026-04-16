@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Users, ArrowUpRight, CheckCircle2, Plus, FileText, Download, Calendar, Clock, TrendingUp } from 'lucide-react';
 import { formatFormation } from '../../utils/formatters';
 
@@ -9,7 +9,7 @@ interface CommercialOverviewProps {
     getC: (raw: any) => any;
 }
 
-const CommercialOverview: React.FC<CommercialOverviewProps> = ({ candidates, studentsToPlace, studentsPlaced, getC }) => {
+const CommercialOverview: React.FC<CommercialOverviewProps> = memo(({ candidates, studentsToPlace, studentsPlaced, getC }) => {
     const placedPct = candidates.length ? Math.round((studentsPlaced.length / candidates.length) * 100) : 0;
     const toPlacePct = candidates.length ? Math.round((studentsToPlace.length / candidates.length) * 100) : 0;
 
@@ -149,6 +149,6 @@ const CommercialOverview: React.FC<CommercialOverviewProps> = ({ candidates, stu
             </div>
         </div>
     );
-};
+});
 
 export default CommercialOverview;

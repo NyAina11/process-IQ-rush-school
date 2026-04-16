@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
     Loader2
 } from 'lucide-react';
@@ -79,30 +79,39 @@ const DashboardView: React.FC<DashboardViewProps> = ({ activeSubView, onSelectSt
         loadOpcoDossiers();
     }, []);
 
-    const studentsToPlace = candidates.filter(c => !isPlaced(c));
-    const studentsPlaced = candidates.filter(c => isPlaced(c));
+    const { studentsToPlace, studentsPlaced, statsToPlace, statsPlaced } = useMemo(() => {
+        const toPlace = candidates.filter(c => !isPlaced(c));
+        const placed = candidates.filter(c => isPlaced(c));
 
-    const statsToPlace = {
-        total: studentsToPlace.length,
-        enCours: studentsToPlace.filter(s => getC(s).entreprise === 'En recherche').length,
-        cvAActualiser: studentsToPlace.filter(s => !getC(s).has_cv).length
-    };
+        const sToPlace = {
+            total: toPlace.length,
+            enCours: toPlace.filter(s => getC(s).entreprise === 'En recherche').length,
+            cvAActualiser: toPlace.filter(s => !getC(s).has_cv).length
+        };
 
-    const statsPlaced = {
-        total: studentsPlaced.length,
-        contratsSignes: studentsPlaced.filter(s => getC(s).has_cerfa).length,
-        missionsValidees: studentsPlaced.filter(s => getC(s).has_fiche_renseignement).length,
-        entreprisesPartenaires: new Set(studentsPlaced.map(s => getC(s).entreprise)).size
-    };
+        const sPlaced = {
+            total: placed.length,
+            contratsSignes: placed.filter(s => getC(s).has_cerfa).length,
+            missionsValidees: placed.filter(s => getC(s).has_fiche_renseignement).length,
+            entreprisesPartenaires: new Set(placed.map(s => getC(s).entreprise)).size
+        };
 
-    const handleRedirectionToForm = (student: any) => {
+        return {
+            studentsToPlace: toPlace,
+            studentsPlaced: placed,
+            statsToPlace: sToPlace,
+            statsPlaced: sPlaced
+        };
+    }, [candidates]);
+
+    const handleRedirectionToForm = useCallback((student: any) => {
         if (!onSelectStudent) {
             showToast("Navigation non disponible", "error");
             return;
         }
         onSelectStudent(student, AdmissionTab.ENTREPRISE);
         navigate('/admission');
-    };
+    }, [onSelectStudent, navigate, showToast]);
 
     const renderMainContent = () => {
         if (loading) {
