@@ -651,7 +651,6 @@ const EvaluationGrid = React.memo(({ studentData, onNext }: { studentData: any, 
 
 // --- INTERVIEWS TRACKING COMPONENT ---
 
-
 // --- STATUS SELECTOR COMPONENT ---
 
 const STATUS_OPTIONS = [
@@ -667,7 +666,7 @@ const STATUS_OPTIONS = [
 const StatusSelector = ({ value, onChange }: { value: string; onChange: (val: string) => void }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = React.useRef<HTMLDivElement>(null);
-    const currentStatus = STATUS_OPTIONS.find(o => o.value === value) || STATUS_OPTIONS[1]; // default to injoignable if not found or Pending
+    const currentStatus = STATUS_OPTIONS.find(o => o.value === value) || STATUS_OPTIONS[3]; // default to injoignable if not found
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -794,6 +793,7 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
             return !(c.has_interview_tracking || !!(raw.has_interview_tracking));
         }).length
     }), [candidates]);
+
 
     return (
         <div className="animate-fade-in space-y-6 pb-10">
@@ -1823,11 +1823,11 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
             setMainTabAnimKey(k => k + 1);
         }, 180);
     }, [mainTab]);
-
     useEffect(() => {
         const nextTab = searchParams.get('tab') === 'interviews' ? 'interviews' : 'dashboard';
         setMainTab(nextTab);
     }, [searchParams]);
+
 
     const [activeTab, setActiveTab] = useState<AdmissionTab>(selectedTab || AdmissionTab.TESTS);
     const [prefilledStudent, setPrefilledStudent] = useState<any>(null);
