@@ -183,7 +183,7 @@ const StepLine = ({ isCompleted }: { isCompleted: boolean }) => (
     </div>
 );
 
-const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: () => void }) => {
+const EvaluationGrid = React.memo(({ studentData, onNext }: { studentData: any, onNext?: () => void }) => {
     const { showToast } = useAppStore();
     const [evalData, setEvalData] = useState({
         candidatNom: '',
@@ -635,15 +635,15 @@ const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: ()
             />
         </div>
     );
-};
+});
 
 // --- INTERVIEWS TRACKING COMPONENT ---
 
-const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (candidate: any) => void }) => {
+const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInterview: (candidate: any) => void }) => {
     const { candidates, loading: isLoading } = useCandidates();
     const [searchQuery, setSearchQuery] = useState('');
 
-    const filtered = (candidates || []).map((raw, _index) => {
+    const filtered = useMemo(() => (candidates || []).map((raw) => {
         const c = getC(raw);
         const hasTracking = c.has_interview_tracking || !!(raw.has_interview_tracking);
 
@@ -669,13 +669,13 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
         return fullName.includes(searchLower) ||
             formation.includes(searchLower) ||
             email.includes(searchLower);
-    });
+    }), [candidates, searchQuery]);
 
-    const stats = {
+    const stats = useMemo(() => ({
         total: candidates.length,
         completed: filtered.filter(item => item.interviewStatus === 'Completed').length,
         pending: filtered.filter(item => item.interviewStatus === 'Pending').length
-    };
+    }), [candidates.length, filtered]);
 
     return (
         <div className="animate-fade-in space-y-8 pb-10">
@@ -849,7 +849,7 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
             </div>
         </div>
     );
-};
+});
 
 // --- PROJET PROFESSIONNEL QUESTIONNAIRE ---
 
@@ -1001,7 +1001,7 @@ const TextareaField = ({ id, value, onChange, placeholder, rows = 3 }: { id: str
     />
 );
 
-const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNext?: () => void }) => {
+const ProjetProfessionnel = React.memo(({ studentData, onNext }: { studentData?: any; onNext?: () => void }) => {
     const { showToast } = useAppStore();
     const [qualites, setQualites] = useState<Set<string>>(new Set());
     const [axes, setAxes] = useState<Set<string>>(new Set());
@@ -1648,7 +1648,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
             </div>
         </div>
     );
-};
+});
 
 
 // --- MAIN ADMISSION VIEW ---
@@ -1663,14 +1663,14 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
     const [mainTabAnimKey, setMainTabAnimKey] = useState(0);
     const pageTopRef = React.useRef<HTMLDivElement>(null);
 
-    const handleMainTabChange = (tab: 'dashboard' | 'interviews') => {
+    const handleMainTabChange = useCallback((tab: 'dashboard' | 'interviews') => {
         if (tab === mainTab) return;
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(() => {
             setMainTab(tab);
             setMainTabAnimKey(k => k + 1);
         }, 180);
-    };
+    }, [mainTab]);
 
     const [activeTab, setActiveTab] = useState<AdmissionTab>(selectedTab || AdmissionTab.TESTS);
     const [prefilledStudent, setPrefilledStudent] = useState<any>(null);
@@ -1767,12 +1767,12 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
         errorMessage: "Erreur lors de la génération du livret d'apprentissage."
     });
 
-    const handleFinishTest = () => {
+    const handleFinishTest = useCallback(() => {
         setTestCompleted(true);
         setActiveTab(AdmissionTab.ENTRETIEN);
-    };
+    }, []);
 
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, docId: string) => {
+    const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, docId: string) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
@@ -1792,9 +1792,9 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
         } finally {
             setUploadingFiles(prev => ({ ...prev, [docId]: false }));
         }
-    };
+    }, [studentData, showToast, uploadApi]);
 
-    const handleDocAction = async (doc: any) => {
+    const handleDocAction = useCallback(async (doc: any) => {
         const recordId = studentData?.record_id || studentData?.id || localStorage.getItem('candidateRecordId');
 
         if (!recordId && (['renseignements', 'cerfa', 'atre'].includes(doc.id))) {
@@ -1817,10 +1817,43 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
         } else {
             console.log("Action pour le document:", doc.title);
         }
-    };
+    }, [studentData, showToast, generateFicheApi, generateCerfaApi, generateAtreApi, generateCompteRenduApi, generateConventionApprentissageApi, generateLivretApi]);
 
     const uploadedCount = Object.keys(uploadedFiles).length;
     const progressPercent = (uploadedCount / REQUIRED_DOCUMENTS.length) * 100;
+
+    const handleLaunchInterview = useCallback((c: any) => {
+        setStudentData(c);
+        handleMainTabChange('dashboard');
+        setActiveTab(AdmissionTab.ENTRETIEN);
+    }, [handleMainTabChange]);
+
+    const handleQuestionnaireNext = useCallback((data: any) => {
+        setStudentData(data);
+        setActiveTab(AdmissionTab.DOCUMENTS);
+    }, []);
+
+    const handleEntrepriseNext = useCallback((response?: any) => {
+        if (response?.entreprise_info) {
+            setStudentData((prev: any) => ({
+                ...prev,
+                id_entreprise: response.entreprise_info.id,
+                entreprise_raison_sociale: response.entreprise_info.raison_sociale
+            }));
+        }
+        setEntrepriseCompleted(true);
+        setActiveTab(AdmissionTab.ADMINISTRATIF);
+    }, []);
+
+    const handleEvaluationNext = useCallback(() => {
+        setInterviewCompleted(true);
+        setActiveTab(AdmissionTab.PROJET_PROFESSIONNEL);
+    }, []);
+
+    const handleProjetProNext = useCallback(() => {
+        setProjetProCompleted(true);
+        setActiveTab(AdmissionTab.QUESTIONNAIRE);
+    }, []);
 
     return (
         <div className="animate-fade-in max-w-6xl mx-auto pb-20 relative" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -1904,11 +1937,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
             <div key={mainTabAnimKey} className="admission-rise">
                 {mainTab === 'interviews' ? (
                     <InterviewsTrackingView
-                        onLaunchInterview={(c) => {
-                            setStudentData(c);
-                            handleMainTabChange('dashboard');
-                            setActiveTab(AdmissionTab.ENTRETIEN);
-                        }}
+                        onLaunchInterview={handleLaunchInterview}
                     />
                 ) : (
                     <>
@@ -2004,10 +2033,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                             <div className="animate-slide-in">
                                 <QuestionnaireForm
                                     initialData={studentData}
-                                    onNext={(data) => {
-                                        setStudentData(data);
-                                        setActiveTab(AdmissionTab.DOCUMENTS);
-                                    }} />
+                                    onNext={handleQuestionnaireNext} />
                             </div>
                         )}
 
@@ -2139,17 +2165,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                         {activeTab === AdmissionTab.ENTREPRISE && (
                             <div className="animate-slide-in">
                                 <EntrepriseForm
-                                    onNext={(response?: any) => {
-                                        if (response?.entreprise_info) {
-                                            setStudentData((prev: any) => ({
-                                                ...prev,
-                                                id_entreprise: response.entreprise_info.id,
-                                                entreprise_raison_sociale: response.entreprise_info.raison_sociale
-                                            }));
-                                        }
-                                        setEntrepriseCompleted(true);
-                                        setActiveTab(AdmissionTab.ADMINISTRATIF);
-                                    }}
+                                    onNext={handleEntrepriseNext}
                                     studentRecordId={studentData?.record_id || studentData?.id || localStorage.getItem('candidateRecordId')}
                                     studentDateNaissance={studentData ? getC(studentData).date_naissance : undefined}
                                 />
@@ -2284,10 +2300,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                             <div className="animate-slide-in">
                                 <EvaluationGrid
                                     studentData={studentData}
-                                    onNext={() => {
-                                        setInterviewCompleted(true);
-                                        setActiveTab(AdmissionTab.PROJET_PROFESSIONNEL);
-                                    }}
+                                    onNext={handleEvaluationNext}
                                 />
                             </div>
                         )}
@@ -2296,10 +2309,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                             <div className="animate-slide-in">
                                 <ProjetProfessionnel
                                     studentData={studentData}
-                                    onNext={() => {
-                                        setProjetProCompleted(true);
-                                        setActiveTab(AdmissionTab.QUESTIONNAIRE);
-                                    }}
+                                    onNext={handleProjetProNext}
                                 />
                             </div>
                         )}
