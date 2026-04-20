@@ -83,6 +83,7 @@ export interface StudentFormData {
   entreprise_d_accueil?: string;
   connaissance_rush_how?: string;
   motivation_projet_professionnel?: string;
+  validation?: string;
   agreement?: boolean;
 
   // Représentant légal (Champs à plat)

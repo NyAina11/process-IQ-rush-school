@@ -640,8 +640,25 @@ const EvaluationGrid = React.memo(({ studentData, onNext }: { studentData: any, 
 // --- INTERVIEWS TRACKING COMPONENT ---
 
 const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInterview: (candidate: any) => void }) => {
-    const { candidates, loading: isLoading } = useCandidates();
+    const { showToast } = useAppStore();
+    const { candidates, loading: isLoading, refresh } = useCandidates();
     const [searchQuery, setSearchQuery] = useState('');
+    const [validatingCandidateId, setValidatingCandidateId] = useState<string | null>(null);
+    const rawUserRole = (localStorage.getItem('userRole') || '').trim().toLowerCase();
+    const isSuperAdmin = rawUserRole === 'super_admin' || rawUserRole === 'superadmin' || rawUserRole === 'admin';
+
+    const handleValidateCandidate = useCallback(async (candidateId: string) => {
+        try {
+            setValidatingCandidateId(candidateId);
+            await api.validateCandidate(candidateId);
+            await refresh();
+            showToast('Étudiant validé avec succès.', 'success');
+        } catch (error: any) {
+            showToast(error?.message || 'Erreur lors de la validation du dossier.', 'error');
+        } finally {
+            setValidatingCandidateId(null);
+        }
+    }, [refresh, showToast]);
 
     const filtered = useMemo(() => (candidates || []).map((raw) => {
         const c = getC(raw);
@@ -658,7 +675,8 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
             testResultsUrl: c.test_results_url || raw.test_results_url || "",
             testResultsName: c.test_results_name || raw.test_results_name || "",
             allTestResultsPdfs: c.all_test_results_pdfs || raw.all_test_results_pdfs || [],
-            interviewDate: hasTracking ? '—' : 'À définir'
+            interviewDate: hasTracking ? '—' : 'À définir',
+            validationStatus: c.validation || 'En attente'
         };
     }).filter(item => {
         const searchLower = (searchQuery || '').toLowerCase();
@@ -699,11 +717,11 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                     <div className="grid grid-cols-2 gap-4 w-full md:w-auto shrink-0">
                         <div className="bg-white/80 border border-[#ddd6fe] p-6 rounded-[4px] text-center">
                             <div className="text-3xl font-black text-[#3b7cf4] mb-1">{stats.completed}</div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Validés</div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entretiens faits</div>
                         </div>
                         <div className="bg-white/80 border border-[#ddd6fe] p-6 rounded-[4px] text-center">
                             <div className="text-3xl font-black text-[#1e293b] mb-1">{stats.pending}</div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">En attente</div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entretiens à faire</div>
                         </div>
                     </div>
                 </div>
@@ -737,15 +755,16 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Test</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Date Session</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
+                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Validation</th>
                                 <th className="px-8 py-5 text-center text-[11px] font-black text-slate-400 uppercase tracking-widest">Évaluation</th>
                                 <th className="px-8 py-5 text-right text-[11px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {isLoading ? (
-                                <tr><td colSpan={6} className="px-8 py-20 text-center text-slate-400 font-bold animate-pulse">Chargement des données...</td></tr>
+                                <tr><td colSpan={8} className="px-8 py-20 text-center text-slate-400 font-bold animate-pulse">Chargement des données...</td></tr>
                             ) : filtered.length === 0 ? (
-                                <tr><td colSpan={6} className="px-8 py-20 text-center text-slate-400 font-bold">Aucun candidat ne correspond à votre recherche.</td></tr>
+                                <tr><td colSpan={8} className="px-8 py-20 text-center text-slate-400 font-bold">Aucun candidat ne correspond à votre recherche.</td></tr>
                             ) : filtered.map((item) => (
                                 <tr key={item.c.id} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="px-8 py-6">
@@ -799,6 +818,33 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                                                 <span className="text-[10px] font-black uppercase tracking-wider">En attente</span>
                                             </div>
                                         )}
+                                    </td>
+                                    <td className="px-8 py-6">
+                                        <div className="flex flex-col gap-2">
+                                            {item.validationStatus === 'Validé' ? (
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                                    <CheckCircle2 size={13} />
+                                                    <span className="text-[10px] font-black uppercase tracking-wider">Validé</span>
+                                                </div>
+                                            ) : (
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-amber-50 text-amber-600 border border-amber-100">
+                                                    <div className="w-1.5 h-1.5 bg-amber-500 animate-pulse"></div>
+                                                    <span className="text-[10px] font-black uppercase tracking-wider">En attente</span>
+                                                </div>
+                                            )}
+
+                                            {isSuperAdmin && item.validationStatus !== 'Validé' && (
+                                                <Button
+                                                    variant="success"
+                                                    size="sm"
+                                                    className="w-fit rounded-[4px] shadow-none"
+                                                    isLoading={validatingCandidateId === item.c.id}
+                                                    onClick={() => handleValidateCandidate(item.c.id)}
+                                                >
+                                                    Valider
+                                                </Button>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="flex flex-col items-center">

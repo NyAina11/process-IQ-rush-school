@@ -15,6 +15,8 @@ export const getC = (c: any) => {
     const raw_id_ent = c.id_entreprise || c.record_id_entreprise || d.id_entreprise || d.record_id_entreprise || d['ID Entreprise'] || d['record_id_entreprise'] || d['Entreprise'];
     const id_ent = Array.isArray(raw_id_ent) ? raw_id_ent[0] : raw_id_ent;
     const nom_ent = c.entreprise_raison_sociale || d.entreprise_raison_sociale || d['Raison sociale (from Entreprise)'] || d['Entreprise d\'accueil'] || d['Entreprise daccueil'] || info.entreprise_d_accueil || d.entreprise;
+    const rawValidation = c.validation || d.validation || d['Validation'] || info.validation || c['Validation'];
+    const validation = ['validé', 'valide', 'approved'].includes(String(rawValidation || '').trim().toLowerCase()) ? 'Validé' : 'En attente';
 
     return {
         id: c.record_id || c.id || d.id || d.record_id,
@@ -24,6 +26,7 @@ export const getC = (c: any) => {
         formation: info.formation_souhaitee || d['Formation'] || d.formation_souhaitee || d.formation || c.formation || "Non renseigné",
         ville: info.ville || d['Commune de naissance'] || d.ville || d.commune_naissance || c.ville || "Non renseigné",
         entreprise: nom_ent || "En recherche",
+        validation,
         telephone: info.telephone || d['Téléphone'] || d.telephone || c.telephone || "",
         sexe: info.sexe || d['Sexe'] || d.sexe || c.sexe || "",
         date_naissance: info.date_naissance || d['Date de naissance'] || d.date_naissance || c.date_naissance || "",

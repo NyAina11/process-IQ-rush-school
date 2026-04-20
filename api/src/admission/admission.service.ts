@@ -11,6 +11,18 @@ export class AdmissionService {
         @InjectModel(Company.name) private companyModel: Model<CompanyDocument>,
     ) {}
 
+    private normalizeCandidatePayload(data: any): any {
+        if (!data || typeof data !== 'object') return data;
+        const normalized = { ...data };
+
+        if (normalized.Validation !== undefined && normalized.validation === undefined) {
+            normalized.validation = normalized.Validation;
+        }
+
+        delete normalized.Validation;
+        return normalized;
+    }
+
     // --- CANDIDATES ---
 
     async findAllCandidates(): Promise<CandidateDocument[]> {
@@ -24,12 +36,12 @@ export class AdmissionService {
     }
 
     async createCandidate(data: any): Promise<CandidateDocument> {
-        const created = new this.candidateModel(data);
+        const created = new this.candidateModel(this.normalizeCandidatePayload(data));
         return created.save();
     }
 
     async updateCandidate(id: string, data: any): Promise<CandidateDocument> {
-        return this.candidateModel.findByIdAndUpdate(id, data, { new: true }).exec();
+        return this.candidateModel.findByIdAndUpdate(id, this.normalizeCandidatePayload(data), { new: true }).exec();
     }
 
     // --- COMPANIES ---
