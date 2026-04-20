@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { CheckCircle2, Download, Search, List, LayoutGrid, Eye, Edit, Users, FileCheck, Building, GraduationCap, MapPin, ArrowUpRight } from 'lucide-react';
 import Pagination from '../ui/Pagination';
 import { formatFormation } from '../../utils/formatters';
@@ -43,7 +43,7 @@ const opcoStatusStyles: Record<string, { bg: string; text: string; border: strin
     CLOTURE: { bg: '#d1fae5', text: '#065f46', border: '#a7f3d0' },
 };
 
-const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
+const CommercialAlternance: React.FC<CommercialAlternanceProps> = memo(({
     candidates, searchQuery, setSearchQuery, filterFormation, setFilterFormation,
     viewMode, setViewMode, currentPage, setCurrentPage, itemsPerPage,
     handleViewDetails, handleEdit, getC, isPlaced, statsPlaced, opcoDossiers = []
@@ -64,20 +64,26 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
         };
     };
 
-    const filteredStudents = (candidates || []).filter(c => isPlaced(c)).filter(raw => {
-        if (!raw) return false;
-        const c = getC(raw);
-        if (!c) return false;
-        const q = (searchQuery || '').toLowerCase();
-        const match = `${c.nom || ''} ${c.prenom || ''} ${c.email || ''} ${c.telephone || ''}`.toLowerCase();
-        const matchesSearch = match.includes(q);
-        const formation = String(c.formation || '').toLowerCase();
-        const matchesFormation = filterFormation === 'all' || !filterFormation || formation === filterFormation.toLowerCase() || formation.includes(filterFormation.toLowerCase());
-        return matchesSearch && matchesFormation;
-    });
+    const { filteredStudents, paginated, totalPages } = useMemo(() => {
+        const filtered = (candidates || []).filter(c => isPlaced(c)).map(raw => ({
+            raw,
+            normalized: getC(raw)
+        })).filter(({ normalized: c }) => {
+            if (!c) return false;
+            const q = (searchQuery || '').toLowerCase();
+            const match = `${c.nom || ''} ${c.prenom || ''} ${c.email || ''} ${c.telephone || ''}`.toLowerCase();
+            const matchesSearch = match.includes(q);
+            const formation = String(c.formation || '').toLowerCase();
+            const matchesFormation = filterFormation === 'all' || !filterFormation || formation === filterFormation.toLowerCase() || formation.includes(filterFormation.toLowerCase());
+            return matchesSearch && matchesFormation;
+        });
 
-    const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
-    const paginated = filteredStudents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+        return {
+            filteredStudents: filtered,
+            totalPages: Math.ceil(filtered.length / itemsPerPage),
+            paginated: filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+        };
+    }, [candidates, searchQuery, filterFormation, currentPage, itemsPerPage, getC, isPlaced]);
 
     const stats = [
         { label: 'Total Alternants', value: statsPlaced.total, icon: Users, bg: '#f5f3ff', color: '#6d28d9', trend: 'Actif', trendIcon: CheckCircle2 },
@@ -176,8 +182,7 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
                                 </tr>
                             </thead>
                             <tbody>
-                                {paginated.map(raw => {
-                                    const c = getC(raw);
+                                {paginated.map(({ raw, normalized: c }) => {
                                     const fc = formationColor(c.formation);
                                     return (
                                         <tr key={c.id} className="border-b border-[#f5f3ff] hover:bg-[#fafafa] transition-colors group">
@@ -243,8 +248,7 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
             ) : (
                 /* ── CARDS ── */
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {paginated.map(raw => {
-                        const c = getC(raw);
+                    {paginated.map(({ raw, normalized: c }) => {
                         const fc = formationColor(c.formation);
                         return (
                             <div key={c.id} className="bg-white border border-[#e5e0f5] rounded-2xl p-6 hover:shadow-md hover:border-[#6d28d9]/20 transition-all flex flex-col">
@@ -298,6 +302,6 @@ const CommercialAlternance: React.FC<CommercialAlternanceProps> = ({
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
     );
-};
+});
 
 export default CommercialAlternance;

@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, memo, useMemo } from 'react';
 import { Search, List, LayoutGrid, Eye, CheckCircle2, FileUser, FileText, ChevronLeft, ChevronRight, HeartPulse, Phone, Cake } from 'lucide-react';
 import Pagination from '../ui/Pagination';
 import { formatFormation } from '../../utils/formatters';
@@ -31,7 +31,7 @@ const calculateAge = (birthDate: string) => {
     return age;
 };
 
-const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
+const CommercialToPlace: React.FC<CommercialToPlaceProps> = memo(({
     candidates, searchQuery, setSearchQuery, filterFormation, setFilterFormation,
     viewMode, setViewMode, currentPage, setCurrentPage, itemsPerPage,
     handleViewDetails, getC, isPlaced, onPlacer
@@ -61,24 +61,30 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
         'Titre Pro NTC', 'Titre Pro NTC B (rentrée decalée)', 'Bachelor RDC'
     ];
 
-    const filteredStudents = (candidates || []).filter(c => !isPlaced(c)).filter(raw => {
-        if (!raw) return false;
-        const s = getC(raw);
-        if (!s) return false;
-        const q = (searchQuery || '').toLowerCase();
-        const match = `${s.nom || ''} ${s.prenom || ''} ${s.email || ''} ${s.formation || ''} ${s.telephone || ''} ${s.numero_inscription || ''}`.toLowerCase();
-        if (!match.includes(q)) return false;
-        if (filterFormation && filterFormation !== 'all' && s.formation !== filterFormation) return false;
-        return true;
-    }).sort((a, b) => {
-        const nA = parseInt(getC(a).numero_inscription || '0', 10);
-        const nB = parseInt(getC(b).numero_inscription || '0', 10);
-        if (!isNaN(nA) && !isNaN(nB)) return nA - nB;
-        return (getC(a).numero_inscription || '').localeCompare(getC(b).numero_inscription || '');
-    });
+    const { filteredStudents, paginated, totalPages } = useMemo(() => {
+        const filtered = (candidates || []).filter(c => !isPlaced(c)).map(raw => ({
+            raw,
+            normalized: getC(raw)
+        })).filter(({ normalized: s }) => {
+            if (!s) return false;
+            const q = (searchQuery || '').toLowerCase();
+            const match = `${s.nom || ''} ${s.prenom || ''} ${s.email || ''} ${s.formation || ''} ${s.telephone || ''} ${s.numero_inscription || ''}`.toLowerCase();
+            if (!match.includes(q)) return false;
+            if (filterFormation && filterFormation !== 'all' && s.formation !== filterFormation) return false;
+            return true;
+        }).sort((a, b) => {
+            const nA = parseInt(a.normalized.numero_inscription || '0', 10);
+            const nB = parseInt(b.normalized.numero_inscription || '0', 10);
+            if (!isNaN(nA) && !isNaN(nB)) return nA - nB;
+            return (a.normalized.numero_inscription || '').localeCompare(b.normalized.numero_inscription || '');
+        });
 
-    const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
-    const paginated = filteredStudents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+        return {
+            filteredStudents: filtered,
+            totalPages: Math.ceil(filtered.length / itemsPerPage),
+            paginated: filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+        };
+    }, [candidates, searchQuery, filterFormation, currentPage, itemsPerPage, getC, isPlaced]);
 
     const DocBtn = ({ has, url, name, icon: Icon, color, label }: any) => (
         <div className="flex flex-col items-center gap-1">
@@ -260,8 +266,7 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
                                 </tr>
                             </thead>
                             <tbody>
-                                {paginated.map(raw => {
-                                    const c = getC(raw);
+                                {paginated.map(({ raw, normalized: c }) => {
                                     return (
                                         <tr key={c.id} className="group" style={{ borderBottom: '1px solid #f0f2f8', transition: 'background 150ms ease' }}
                                             onMouseEnter={e => (e.currentTarget.style.background = '#f9fafb')}
@@ -374,8 +379,7 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
             ) : (
                 /* CARDS VIEW */
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {paginated.map(raw => {
-                        const c = getC(raw);
+                    {paginated.map(({ raw, normalized: c }) => {
                         return (
                             <div key={c.id}
                                 className="flex flex-col transition-all"
@@ -483,6 +487,6 @@ const CommercialToPlace: React.FC<CommercialToPlaceProps> = ({
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
     );
-};
+});
 
 export default CommercialToPlace;
