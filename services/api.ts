@@ -66,6 +66,12 @@ const looksLikeBackendRecord = (data: any): boolean => {
   return !!(data.fields || data.informations_personnelles || data.id || data.record_id);
 };
 
+const normalizeValidationStatus = (value: any): string => {
+  const raw = String(value || '').trim().toLowerCase();
+  if (raw === 'validé' || raw === 'valide' || raw === 'approved') return 'Validé';
+  return 'En attente';
+};
+
 // Mapper: Backend (Airtable fields) -> Frontend (StudentFormData)
 const mapBackendToStudent = (backendData: any): any => {
   const fields = getRecordFields(backendData);
@@ -129,6 +135,7 @@ const mapBackendToStudent = (backendData: any): any => {
     entreprise_d_accueil: fields["Entreprise d'accueil"] || fields["entreprise_d_accueil"] || "",
     connaissance_rush_how: fields["Comment avez-vous connu Rush School?"] || fields["connaissance_rush_how"] || "",
     motivation_projet_professionnel: fields["Motivation et projet professionnel"] || fields["motivation_projet_professionnel"] || "",
+    validation: normalizeValidationStatus(fields["Validation"] || fields["validation"] || backendData?.Validation || backendData?.validation),
 
     // Représentant Légal 1
     nom_representant_legal: fields["Nom du représentant légal"] || fields["nom_representant_legal"] || "",
@@ -905,6 +912,29 @@ export const api = {
       console.log('📤 Update Candidate Success:', json);
       return json;
     } catch (error) { throw error; }
+  },
+
+  async validateCandidate(id: string): Promise<any> {
+    try {
+      const payload = {
+        Validation: 'Validé'
+      };
+      const response = await fetch(`${BASE_URL}/candidats/${id}`, {
+        method: 'PATCH',
+        headers: withAuthHeaders({
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }),
+        body: JSON.stringify(payload),
+      });
+      const json = await readJsonSafely(response);
+      if (!response.ok) {
+        throw new Error(getApiErrorMessage(json, `Échec de la validation (${response.status})`));
+      }
+      return json;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async deleteCandidate(id: string): Promise<boolean> {
@@ -1987,4 +2017,3 @@ export const api = {
     return json;
   }
 };
-
