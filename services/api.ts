@@ -917,7 +917,7 @@ export const api = {
   async validateCandidate(id: string): Promise<any> {
     try {
       const payload = {
-        Validation: 'Validé'
+        validation: 'Validé'
       };
       const response = await fetch(`${BASE_URL}/candidats/${id}`, {
         method: 'PATCH',
