@@ -782,6 +782,17 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
         setCurrentPage(1);
     }, [searchQuery, statusFilter, candidates.length, setCurrentPage]);
 
+    const {
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        paginatedItems
+    } = usePagination(filtered, 10);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, candidates.length, setCurrentPage]);
+
     const stats = useMemo(() => ({
         total: candidates.length,
         completed: (candidates || []).filter(raw => {
