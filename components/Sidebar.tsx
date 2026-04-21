@@ -15,6 +15,7 @@ import {
   Box,
   CheckCircle2,
   Monitor,
+  CalendarCheck2,
 } from 'lucide-react';
 import { useCandidates } from '../hooks/useCandidates';
 
@@ -62,6 +63,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     if (onClose) onClose();
   };
 
+  const isAdmissionDashboardActive = location.pathname === '/admission' && !new URLSearchParams(location.search).get('tab');
+  const isAdmissionInterviewsActive = location.pathname === '/admission' && new URLSearchParams(location.search).get('tab') === 'interviews';
+
   const parentCls = (active: boolean) =>
     `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-150 font-medium text-[13px] ${active ? 'text-white' : 'hover:text-white'
     }`;
@@ -108,10 +112,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <NavLink
                 to="/admission"
                 onClick={handleLinkClick}
-                className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
+                className={() => `nav-subitem ${isAdmissionDashboardActive ? 'active' : ''}`}
               >
                 <LayoutDashboard size={15} />
                 <span>Inscription des eleves</span>
+              </NavLink>
+              <NavLink
+                to="/admission?tab=interviews"
+                onClick={handleLinkClick}
+                className={() => `nav-subitem ${isAdmissionInterviewsActive ? 'active' : ''}`}
+              >
+                <CalendarCheck2 size={15} />
+                <span>Suivi Entretiens</span>
               </NavLink>
               <NavLink
                 to="/classe-ntc"
@@ -313,4 +325,3 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 };
 
 export default Sidebar;
-

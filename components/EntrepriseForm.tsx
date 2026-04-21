@@ -221,6 +221,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
     const [activeSection, setActiveSection] = useState<string | null>('id');
     const [inseeLookupLoading, setInseeLookupLoading] = useState(false);
     const [inseeLookupError, setInseeLookupError] = useState<string | null>(null);
+    const [isEditingSalary, setIsEditingSalary] = useState(false);
 
     const toggleSection = (section: string) => {
         setActiveSection(prev => prev === section ? null : section);
@@ -1120,7 +1121,16 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsEditingSalary(!isEditingSalary)}
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${isEditingSalary ? 'bg-emerald-400 text-white shadow-lg' : 'bg-white/15 text-white hover:bg-white/25'}`}
+                                        >
+                                            {isEditingSalary ? <CheckCircle2 size={14} /> : <div className="w-3.5 h-3.5 border-2 border-white/40 rounded-full" />}
+                                            {isEditingSalary ? 'Terminer' : 'Modifier'}
+                                        </button>
+                                        <div className="flex items-center gap-1.5">
                                         {["1", "2", "3", "4"].map(y => {
                                             const p1Value = (computedPeriods as any)[`y${y}p1`];
                                             return (
@@ -1132,6 +1142,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                         </span>
                                     </div>
                                 </div>
+                            </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-[#e5e0f5] rounded-b-2xl overflow-hidden mt-4">
                                     {["1", "2", "3", "4"].map((year, idx) => {
@@ -1181,16 +1192,31 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                     </span>
                                                                 </div>
                                                                 <div className="grid grid-cols-2 gap-2">
-                                                                    <Input
-                                                                        type="date"
-                                                                        label="Début"
-                                                                        {...register(`contrat.date_debut_1periode_${suffix}_annee` as any)}
-                                                                    />
-                                                                    <Input
-                                                                        type="date"
-                                                                        label="Fin"
-                                                                        {...register(`contrat.date_fin_1periode_${suffix}_annee` as any)}
-                                                                    />
+                                                                    {isEditingSalary ? (
+                                                                        <>
+                                                                            <Input
+                                                                                type="date"
+                                                                                label="Début"
+                                                                                {...register(`contrat.date_debut_1periode_${suffix}_annee` as any)}
+                                                                            />
+                                                                            <Input
+                                                                                type="date"
+                                                                                label="Fin"
+                                                                                {...register(`contrat.date_fin_1periode_${suffix}_annee` as any)}
+                                                                            />
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <div className="flex flex-col gap-1 px-3 py-2 bg-white/50 rounded-lg border border-slate-100">
+                                                                                <span className="text-[9px] font-bold text-slate-400 uppercase">Début</span>
+                                                                                <span className="text-[11px] font-bold text-slate-700">{watch(`contrat.date_debut_1periode_${suffix}_annee` as any) ? new Date(watch(`contrat.date_debut_1periode_${suffix}_annee` as any)).toLocaleDateString('fr-FR') : '--/--/----'}</span>
+                                                                            </div>
+                                                                            <div className="flex flex-col gap-1 px-3 py-2 bg-white/50 rounded-lg border border-slate-100">
+                                                                                <span className="text-[9px] font-bold text-slate-400 uppercase">Fin</span>
+                                                                                <span className="text-[11px] font-bold text-slate-700">{watch(`contrat.date_fin_1periode_${suffix}_annee` as any) ? new Date(watch(`contrat.date_fin_1periode_${suffix}_annee` as any)).toLocaleDateString('fr-FR') : '--/--/----'}</span>
+                                                                            </div>
+                                                                        </>
+                                                                    )}
                                                                 </div>
                                                                 <div className="flex justify-between items-center px-1 mt-1">
                                                                     <span className="text-[10px] font-medium text-slate-400">
@@ -1216,16 +1242,31 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                                                                 <span className="text-[12px] font-bold text-[#6d28d9] bg-[#6d28d9]/10 px-3 py-1 rounded-lg">{results.p2}% SMIC</span>
                                                             </div>
                                                             <div className="grid grid-cols-2 gap-2">
-                                                                <Input
-                                                                    type="date"
-                                                                    label="Début"
-                                                                    {...register(`contrat.date_debut_2periode_${suffix}_annee` as any)}
-                                                                />
-                                                                <Input
-                                                                    type="date"
-                                                                    label="Fin"
-                                                                    {...register(`contrat.date_fin_2periode_${suffix}_annee` as any)}
-                                                                />
+                                                                {isEditingSalary ? (
+                                                                    <>
+                                                                        <Input
+                                                                            type="date"
+                                                                            label="Début"
+                                                                            {...register(`contrat.date_debut_2periode_${suffix}_annee` as any)}
+                                                                        />
+                                                                        <Input
+                                                                            type="date"
+                                                                            label="Fin"
+                                                                            {...register(`contrat.date_fin_2periode_${suffix}_annee` as any)}
+                                                                        />
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <div className="flex flex-col gap-1 px-3 py-2 bg-white/50 rounded-lg border border-slate-100">
+                                                                            <span className="text-[9px] font-bold text-slate-400 uppercase">Début</span>
+                                                                            <span className="text-[11px] font-bold text-slate-700">{watch(`contrat.date_debut_2periode_${suffix}_annee` as any) ? new Date(watch(`contrat.date_debut_2periode_${suffix}_annee` as any)).toLocaleDateString('fr-FR') : '--/--/----'}</span>
+                                                                        </div>
+                                                                        <div className="flex flex-col gap-1 px-3 py-2 bg-white/50 rounded-lg border border-slate-100">
+                                                                            <span className="text-[9px] font-bold text-slate-400 uppercase">Fin</span>
+                                                                            <span className="text-[11px] font-bold text-slate-700">{watch(`contrat.date_fin_2periode_${suffix}_annee` as any) ? new Date(watch(`contrat.date_fin_2periode_${suffix}_annee` as any)).toLocaleDateString('fr-FR') : '--/--/----'}</span>
+                                                                        </div>
+                                                                    </>
+                                                                )}
                                                             </div>
                                                             <div className="flex justify-between items-center px-1 mt-1">
                                                                 <span className="text-[10px] font-medium text-[#6d28d9]/60">

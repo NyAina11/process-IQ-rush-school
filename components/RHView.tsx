@@ -11,6 +11,7 @@ import Button from './ui/Button';
 import { useAppStore } from '../store/useAppStore';
 import CompanyDetailsModal from './dashboard/CompanyDetailsModal';
 import { formatFormation, decimalToTime } from '../utils/formatters';
+import DocDownloadBtn from './ui/DocDownloadBtn';
 
 const HERO_STYLE = {
     background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%)',
@@ -283,6 +284,7 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
     const [isCreatingOpco, setIsCreatingOpco] = useState(false);
     const [opcoFilterStatus, setOpcoFilterStatus] = useState<string>('all');
     const [loading, setLoading] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [filterFormation, setFilterFormation] = useState('Toutes formations');
@@ -332,8 +334,28 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
 
     const handleDownload = async (url: string, filename: string) => {
         if (!url) { showToast("Document non disponible.", "info"); return; }
-        const link = document.createElement('a'); link.href = url; link.download = filename || 'document'; link.target = '_blank'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        showToast('Téléchargement démarré', 'success');
+        if (isDownloading) return;
+
+        try {
+            setIsDownloading(true);
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Fetch failed');
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = objectUrl;
+            link.download = filename || 'document';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(objectUrl);
+            showToast('Téléchargement démarré', 'success');
+        } catch (error) {
+            window.open(url, '_blank');
+            showToast('Document ouvert dans un nouvel onglet', 'info');
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     const handleSaveCompanyEdit = async (id: string, data: any) => {
@@ -602,18 +624,24 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                                     <Td><Badge ok={c.has_cerfa} okLabel="Généré" koLabel="À faire" /></Td>
                                     <Td>
                                         {c.cerfa ? (
-                                            <a href={c.cerfa.url} target="_blank" rel="noopener noreferrer"
-                                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] rounded-lg text-[10px] font-semibold hover:bg-[#6d28d9] hover:text-white transition-all">
-                                                <Download size={12} /> <span className="truncate max-w-[80px]">{c.cerfa.filename}</span>
-                                            </a>
+                                            <button 
+                                                onClick={() => handleDownload(c.cerfa.url, c.cerfa.filename)}
+                                                disabled={isDownloading}
+                                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] rounded-lg text-[10px] font-semibold hover:bg-[#6d28d9] hover:text-white transition-all disabled:opacity-50 disabled:cursor-wait">
+                                                {isDownloading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                                                <span className="truncate max-w-[80px]">{c.cerfa.filename}</span>
+                                            </button>
                                         ) : <span className="text-[11px] text-[#d1d5db]">Indisponible</span>}
                                     </Td>
                                     <Td>
                                         {c.convention ? (
-                                            <a href={c.convention.url} target="_blank" rel="noopener noreferrer"
-                                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] rounded-lg text-[10px] font-semibold hover:bg-[#6d28d9] hover:text-white transition-all">
-                                                <Download size={12} /> <span className="truncate max-w-[80px]">{c.convention.filename}</span>
-                                            </a>
+                                            <button 
+                                                onClick={() => handleDownload(c.convention.url, c.convention.filename)}
+                                                disabled={isDownloading}
+                                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] rounded-lg text-[10px] font-semibold hover:bg-[#6d28d9] hover:text-white transition-all disabled:opacity-50 disabled:cursor-wait">
+                                                {isDownloading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                                                <span className="truncate max-w-[80px]">{c.convention.filename}</span>
+                                            </button>
                                         ) : <span className="text-[11px] text-[#d1d5db]">Indisponible</span>}
                                     </Td>
                                     <Td className="text-center">
@@ -724,7 +752,14 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                                         <Td>
                                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <ActionBtn icon={Eye} onClick={() => handleViewCompany(c.id)} />
-                                                <ActionBtn icon={FileText} onClick={() => handleDownload(f['Fiche entreprise']?.[0]?.url, f['Fiche entreprise']?.[0]?.filename)} />
+                                                <DocDownloadBtn
+                                                    label=""
+                                                    url={f['Fiche entreprise']?.[0]?.url}
+                                                    filename={f['Fiche entreprise']?.[0]?.filename}
+                                                    has={!!f['Fiche entreprise']?.[0]?.url}
+                                                    showLabel={false}
+                                                    icon={FileText}
+                                                />
                                             </div>
                                         </Td>
                                     </tr>

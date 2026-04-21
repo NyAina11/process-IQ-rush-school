@@ -183,7 +183,7 @@ const StepLine = ({ isCompleted }: { isCompleted: boolean }) => (
     </div>
 );
 
-const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: () => void }) => {
+const EvaluationGrid = React.memo(({ studentData, onNext }: { studentData: any, onNext?: () => void }) => {
     const { showToast } = useAppStore();
     const [evalData, setEvalData] = useState({
         candidatNom: '',
@@ -635,15 +635,32 @@ const EvaluationGrid = ({ studentData, onNext }: { studentData: any, onNext?: ()
             />
         </div>
     );
-};
+});
 
 // --- INTERVIEWS TRACKING COMPONENT ---
 
-const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (candidate: any) => void }) => {
-    const { candidates, loading: isLoading } = useCandidates();
+const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInterview: (candidate: any) => void }) => {
+    const { showToast } = useAppStore();
+    const { candidates, loading: isLoading, refresh } = useCandidates();
     const [searchQuery, setSearchQuery] = useState('');
+    const [validatingCandidateId, setValidatingCandidateId] = useState<string | null>(null);
+    const rawUserRole = (localStorage.getItem('userRole') || '').trim().toLowerCase();
+    const isSuperAdmin = rawUserRole === 'super_admin' || rawUserRole === 'superadmin' || rawUserRole === 'admin';
 
-    const filtered = (candidates || []).map((raw, _index) => {
+    const handleValidateCandidate = useCallback(async (candidateId: string) => {
+        try {
+            setValidatingCandidateId(candidateId);
+            await api.validateCandidate(candidateId);
+            await refresh();
+            showToast('Étudiant validé avec succès.', 'success');
+        } catch (error: any) {
+            showToast(error?.message || 'Erreur lors de la validation du dossier.', 'error');
+        } finally {
+            setValidatingCandidateId(null);
+        }
+    }, [refresh, showToast]);
+
+    const filtered = useMemo(() => (candidates || []).map((raw) => {
         const c = getC(raw);
         const hasTracking = c.has_interview_tracking || !!(raw.has_interview_tracking);
 
@@ -658,7 +675,8 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
             testResultsUrl: c.test_results_url || raw.test_results_url || "",
             testResultsName: c.test_results_name || raw.test_results_name || "",
             allTestResultsPdfs: c.all_test_results_pdfs || raw.all_test_results_pdfs || [],
-            interviewDate: hasTracking ? '—' : 'À définir'
+            interviewDate: hasTracking ? '—' : 'À définir',
+            validationStatus: c.validation || 'En attente'
         };
     }).filter(item => {
         const searchLower = (searchQuery || '').toLowerCase();
@@ -669,13 +687,13 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
         return fullName.includes(searchLower) ||
             formation.includes(searchLower) ||
             email.includes(searchLower);
-    });
+    }), [candidates, searchQuery]);
 
-    const stats = {
+    const stats = useMemo(() => ({
         total: candidates.length,
         completed: filtered.filter(item => item.interviewStatus === 'Completed').length,
         pending: filtered.filter(item => item.interviewStatus === 'Pending').length
-    };
+    }), [candidates.length, filtered]);
 
     return (
         <div className="animate-fade-in space-y-8 pb-10">
@@ -699,11 +717,11 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                     <div className="grid grid-cols-2 gap-4 w-full md:w-auto shrink-0">
                         <div className="bg-white/80 border border-[#ddd6fe] p-6 rounded-[4px] text-center">
                             <div className="text-3xl font-black text-[#3b7cf4] mb-1">{stats.completed}</div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Validés</div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entretiens faits</div>
                         </div>
                         <div className="bg-white/80 border border-[#ddd6fe] p-6 rounded-[4px] text-center">
                             <div className="text-3xl font-black text-[#1e293b] mb-1">{stats.pending}</div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">En attente</div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entretiens à faire</div>
                         </div>
                     </div>
                 </div>
@@ -737,15 +755,16 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Test</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Date Session</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
+                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Validation</th>
                                 <th className="px-8 py-5 text-center text-[11px] font-black text-slate-400 uppercase tracking-widest">Évaluation</th>
                                 <th className="px-8 py-5 text-right text-[11px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {isLoading ? (
-                                <tr><td colSpan={6} className="px-8 py-20 text-center text-slate-400 font-bold animate-pulse">Chargement des données...</td></tr>
+                                <tr><td colSpan={8} className="px-8 py-20 text-center text-slate-400 font-bold animate-pulse">Chargement des données...</td></tr>
                             ) : filtered.length === 0 ? (
-                                <tr><td colSpan={6} className="px-8 py-20 text-center text-slate-400 font-bold">Aucun candidat ne correspond à votre recherche.</td></tr>
+                                <tr><td colSpan={8} className="px-8 py-20 text-center text-slate-400 font-bold">Aucun candidat ne correspond à votre recherche.</td></tr>
                             ) : filtered.map((item) => (
                                 <tr key={item.c.id} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="px-8 py-6">
@@ -801,6 +820,33 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
                                         )}
                                     </td>
                                     <td className="px-8 py-6">
+                                        <div className="flex flex-col gap-2">
+                                            {item.validationStatus === 'Validé' ? (
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                                    <CheckCircle2 size={13} />
+                                                    <span className="text-[10px] font-black uppercase tracking-wider">Validé</span>
+                                                </div>
+                                            ) : (
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-amber-50 text-amber-600 border border-amber-100">
+                                                    <div className="w-1.5 h-1.5 bg-amber-500 animate-pulse"></div>
+                                                    <span className="text-[10px] font-black uppercase tracking-wider">En attente</span>
+                                                </div>
+                                            )}
+
+                                            {isSuperAdmin && item.validationStatus !== 'Validé' && (
+                                                <Button
+                                                    variant="success"
+                                                    size="sm"
+                                                    className="w-fit rounded-[4px] shadow-none"
+                                                    isLoading={validatingCandidateId === item.c.id}
+                                                    onClick={() => handleValidateCandidate(item.c.id)}
+                                                >
+                                                    Valider
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-6">
                                         <div className="flex flex-col items-center">
                                             {item.interviewStatus === 'Completed' ? (
                                                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
@@ -849,7 +895,7 @@ const InterviewsTrackingView = ({ onLaunchInterview }: { onLaunchInterview: (can
             </div>
         </div>
     );
-};
+});
 
 // --- PROJET PROFESSIONNEL QUESTIONNAIRE ---
 
@@ -1001,7 +1047,7 @@ const TextareaField = ({ id, value, onChange, placeholder, rows = 3 }: { id: str
     />
 );
 
-const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNext?: () => void }) => {
+const ProjetProfessionnel = React.memo(({ studentData, onNext }: { studentData?: any; onNext?: () => void }) => {
     const { showToast } = useAppStore();
     const [qualites, setQualites] = useState<Set<string>>(new Set());
     const [axes, setAxes] = useState<Set<string>>(new Set());
@@ -1648,7 +1694,7 @@ const ProjetProfessionnel = ({ studentData, onNext }: { studentData?: any; onNex
             </div>
         </div>
     );
-};
+});
 
 
 // --- MAIN ADMISSION VIEW ---
@@ -1663,14 +1709,14 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
     const [mainTabAnimKey, setMainTabAnimKey] = useState(0);
     const pageTopRef = React.useRef<HTMLDivElement>(null);
 
-    const handleMainTabChange = (tab: 'dashboard' | 'interviews') => {
+    const handleMainTabChange = useCallback((tab: 'dashboard' | 'interviews') => {
         if (tab === mainTab) return;
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(() => {
             setMainTab(tab);
             setMainTabAnimKey(k => k + 1);
         }, 180);
-    };
+    }, [mainTab]);
 
     const [activeTab, setActiveTab] = useState<AdmissionTab>(selectedTab || AdmissionTab.TESTS);
     const [prefilledStudent, setPrefilledStudent] = useState<any>(null);
@@ -1767,12 +1813,12 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
         errorMessage: "Erreur lors de la génération du livret d'apprentissage."
     });
 
-    const handleFinishTest = () => {
+    const handleFinishTest = useCallback(() => {
         setTestCompleted(true);
         setActiveTab(AdmissionTab.ENTRETIEN);
-    };
+    }, []);
 
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, docId: string) => {
+    const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, docId: string) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
@@ -1792,9 +1838,9 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
         } finally {
             setUploadingFiles(prev => ({ ...prev, [docId]: false }));
         }
-    };
+    }, [studentData, showToast, uploadApi]);
 
-    const handleDocAction = async (doc: any) => {
+    const handleDocAction = useCallback(async (doc: any) => {
         const recordId = studentData?.record_id || studentData?.id || localStorage.getItem('candidateRecordId');
 
         if (!recordId && (['renseignements', 'cerfa', 'atre'].includes(doc.id))) {
@@ -1817,10 +1863,43 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
         } else {
             console.log("Action pour le document:", doc.title);
         }
-    };
+    }, [studentData, showToast, generateFicheApi, generateCerfaApi, generateAtreApi, generateCompteRenduApi, generateConventionApprentissageApi, generateLivretApi]);
 
     const uploadedCount = Object.keys(uploadedFiles).length;
     const progressPercent = (uploadedCount / REQUIRED_DOCUMENTS.length) * 100;
+
+    const handleLaunchInterview = useCallback((c: any) => {
+        setStudentData(c);
+        handleMainTabChange('dashboard');
+        setActiveTab(AdmissionTab.ENTRETIEN);
+    }, [handleMainTabChange]);
+
+    const handleQuestionnaireNext = useCallback((data: any) => {
+        setStudentData(data);
+        setActiveTab(AdmissionTab.DOCUMENTS);
+    }, []);
+
+    const handleEntrepriseNext = useCallback((response?: any) => {
+        if (response?.entreprise_info) {
+            setStudentData((prev: any) => ({
+                ...prev,
+                id_entreprise: response.entreprise_info.id,
+                entreprise_raison_sociale: response.entreprise_info.raison_sociale
+            }));
+        }
+        setEntrepriseCompleted(true);
+        setActiveTab(AdmissionTab.ADMINISTRATIF);
+    }, []);
+
+    const handleEvaluationNext = useCallback(() => {
+        setInterviewCompleted(true);
+        setActiveTab(AdmissionTab.PROJET_PROFESSIONNEL);
+    }, []);
+
+    const handleProjetProNext = useCallback(() => {
+        setProjetProCompleted(true);
+        setActiveTab(AdmissionTab.QUESTIONNAIRE);
+    }, []);
 
     return (
         <div className="animate-fade-in max-w-6xl mx-auto pb-20 relative" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -1904,11 +1983,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
             <div key={mainTabAnimKey} className="admission-rise">
                 {mainTab === 'interviews' ? (
                     <InterviewsTrackingView
-                        onLaunchInterview={(c) => {
-                            setStudentData(c);
-                            handleMainTabChange('dashboard');
-                            setActiveTab(AdmissionTab.ENTRETIEN);
-                        }}
+                        onLaunchInterview={handleLaunchInterview}
                     />
                 ) : (
                     <>
@@ -2004,10 +2079,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                             <div className="animate-slide-in">
                                 <QuestionnaireForm
                                     initialData={studentData}
-                                    onNext={(data) => {
-                                        setStudentData(data);
-                                        setActiveTab(AdmissionTab.DOCUMENTS);
-                                    }} />
+                                    onNext={handleQuestionnaireNext} />
                             </div>
                         )}
 
@@ -2139,17 +2211,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                         {activeTab === AdmissionTab.ENTREPRISE && (
                             <div className="animate-slide-in">
                                 <EntrepriseForm
-                                    onNext={(response?: any) => {
-                                        if (response?.entreprise_info) {
-                                            setStudentData((prev: any) => ({
-                                                ...prev,
-                                                id_entreprise: response.entreprise_info.id,
-                                                entreprise_raison_sociale: response.entreprise_info.raison_sociale
-                                            }));
-                                        }
-                                        setEntrepriseCompleted(true);
-                                        setActiveTab(AdmissionTab.ADMINISTRATIF);
-                                    }}
+                                    onNext={handleEntrepriseNext}
                                     studentRecordId={studentData?.record_id || studentData?.id || localStorage.getItem('candidateRecordId')}
                                     studentDateNaissance={studentData ? getC(studentData).date_naissance : undefined}
                                 />
@@ -2284,10 +2346,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                             <div className="animate-slide-in">
                                 <EvaluationGrid
                                     studentData={studentData}
-                                    onNext={() => {
-                                        setInterviewCompleted(true);
-                                        setActiveTab(AdmissionTab.PROJET_PROFESSIONNEL);
-                                    }}
+                                    onNext={handleEvaluationNext}
                                 />
                             </div>
                         )}
@@ -2296,10 +2355,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
                             <div className="animate-slide-in">
                                 <ProjetProfessionnel
                                     studentData={studentData}
-                                    onNext={() => {
-                                        setProjetProCompleted(true);
-                                        setActiveTab(AdmissionTab.QUESTIONNAIRE);
-                                    }}
+                                    onNext={handleProjetProNext}
                                 />
                             </div>
                         )}
