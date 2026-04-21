@@ -152,6 +152,124 @@ const getDeadlineLabel = (value?: string | null) => {
 
 // ─────────────────────────────────────────────────────
 
+const isMongoId = (value?: string | null) => /^[a-f\d]{24}$/i.test(String(value || '').trim());
+
+const buildAttachment = (type: string, item: any, fallbackName?: string) => {
+    if (!item || typeof item !== 'object') return null;
+    const url = String(item.url || '').trim();
+    const filename = String(item.filename || fallbackName || type).trim();
+    if (!url) return null;
+    return { type, url, filename };
+};
+
+const findAttachmentInFields = (fields: Record<string, any>, matcher: (key: string) => boolean) => {
+    const match = Object.entries(fields || {}).find(([key, value]) => matcher(key) && Array.isArray(value) && value.length > 0);
+    return Array.isArray(match?.[1]) ? match?.[1]?.[0] || null : null;
+};
+
+const collectOpcoDocuments = (candidate: any, company: any) => {
+    const candidateFields = candidate?.fields || {};
+    const companyFields = company?.fields || {};
+    const documents = [
+        buildAttachment('cerfa', candidate?.cerfa, 'CERFA.pdf'),
+        buildAttachment('convention_apprentissage', candidate?.convention, 'Convention apprentissage.pdf'),
+        buildAttachment('fiche_entreprise', candidate?.fiche_entreprise, 'Fiche entreprise.pdf'),
+        candidate?.livret_apprentissage_url ? { type: 'livret_apprentissage', url: candidate.livret_apprentissage_url, filename: candidate.livret_apprentissage_name || 'Livret apprentissage.pdf' } : null,
+        candidate?.certificat_scolarite_url ? { type: 'certificat_scolarite', url: candidate.certificat_scolarite_url, filename: candidate.certificat_scolarite_name || 'Certificat de scolarite.pdf' } : null,
+        candidate?.cv_url ? { type: 'cv', url: candidate.cv_url, filename: candidate.cv_name || 'CV.pdf' } : null,
+        candidate?.cni_url ? { type: 'cni', url: candidate.cni_url, filename: candidate.cni_name || 'CNI.pdf' } : null,
+        candidate?.diplome_url ? { type: 'diplome', url: candidate.diplome_url, filename: candidate.diplome_name || 'Diplome.pdf' } : null,
+        candidate?.lettre_motivation_url ? { type: 'lettre_motivation', url: candidate.lettre_motivation_url, filename: candidate.lettre_motivation_name || 'Lettre de motivation.pdf' } : null,
+        candidate?.vitale_url ? { type: 'vitale', url: candidate.vitale_url, filename: candidate.vitale_name || 'Carte vitale.pdf' } : null,
+        buildAttachment(
+            'facture',
+            findAttachmentInFields(candidateFields, (key) => /facture|invoice|billing/i.test(key)) ||
+                findAttachmentInFields(companyFields, (key) => /facture|invoice|billing/i.test(key)),
+            'Facture.pdf'
+        ),
+    ].filter(Boolean) as Array<{ type: string; url: string; filename: string }>;
+
+    const seen = new Set<string>();
+    return documents.filter((document) => {
+        const key = `${document.type}|${document.url}|${document.filename}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+};
+
+const buildOpcoPayload = (company: any, candidate: any) => {
+    const companyFields = company?.fields || {};
+    const candidateFields = candidate?.fields || {};
+    const apprenticeLastName = candidate?.nom_usage || candidate?.nom_naissance || '';
+    const apprenticeFullName = `${candidate?.prenom || ''} ${apprenticeLastName}`.trim();
+    const employerName = company?.identification?.raison_sociale || companyFields['Raison sociale'] || '';
+    const employerSiret = company?.identification?.siret || companyFields['Numéro SIRET'] || '';
+    const codeNaf = company?.identification?.code_ape_naf || companyFields['Code APE/NAF'] || '';
+    const formationLabel = company?.formation?.choisie || candidate?.formation_souhaitee || companyFields['Formation'] || '';
+    const rncp = company?.formation?.code_rncp || companyFields['Code Rncp'] || '';
+
+    return {
+        source: 'rh-pec-ui',
+        companyId: company?.id || '',
+        employeur_id: company?.id || '',
+        record_id_etudiant: companyFields?.recordIdetudiant || candidate?.id || '',
+        candidateName: apprenticeFullName,
+        apprentiNom: apprenticeFullName,
+        identification: {
+            ...company?.identification,
+            raison_sociale: employerName,
+            siret: employerSiret,
+            code_ape_naf: codeNaf,
+            num: company?.adresse?.num || companyFields['Numéro entreprise'] || '',
+            voie: company?.adresse?.voie || companyFields['Voie entreprise'] || '',
+            complement: company?.adresse?.complement || companyFields['Complément dadresse entreprise'] || '',
+            code_postal: company?.adresse?.code_postal || companyFields['Code postal entreprise'] || '',
+            ville: company?.adresse?.ville || companyFields['Ville entreprise'] || '',
+            telephone: company?.adresse?.telephone || companyFields['Téléphone entreprise'] || '',
+            email: company?.adresse?.email || companyFields['Email entreprise'] || '',
+        },
+        employeur: {
+            raison_sociale: employerName,
+            siret: employerSiret,
+            code_naf: codeNaf,
+            telephone: company?.adresse?.telephone || companyFields['Téléphone entreprise'] || '',
+            email: company?.adresse?.email || companyFields['Email entreprise'] || '',
+        },
+        apprenti: {
+            prenom: candidate?.prenom || '',
+            nom: apprenticeLastName,
+            nom_complet: apprenticeFullName,
+            email: candidate?.email || '',
+            telephone: candidate?.telephone || '',
+            date_naissance: candidate?.date_naissance || '',
+        },
+        contrat: {
+            ...company?.contrat,
+            type_contrat: company?.contrat?.type_contrat || companyFields['Type de contrat'] || '',
+            date_conclusion: company?.contrat?.date_conclusion || companyFields['Date de conclusion'] || '',
+            date_debut_execution: company?.contrat?.date_debut_execution || company?.contrat?.date_debut || companyFields['Date de début exécution'] || '',
+            date_fin: company?.contrat?.date_fin || company?.formation?.date_fin || companyFields['Fin du contrat apprentissage'] || '',
+            intitule_diplome: formationLabel,
+            code_rncp: rncp,
+            statut: companyFields['Statut contrat'] || candidateFields['Statut contrat'] || '',
+        },
+        formation: {
+            ...company?.formation,
+            choisie: formationLabel,
+            code_rncp: rncp,
+        },
+        opco: {
+            nom_opco: companyFields['Nom OPCO'] || company?.opco?.nom || '',
+        },
+        cfa: company?.cfa || {},
+        metadata_source: {
+            companyRecordId: company?.id || '',
+            candidateRecordId: candidate?.id || '',
+        },
+    };
+};
+
 const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
     const { showToast } = useAppStore();
     const [fichesData, setFichesData] = useState<any>(null);
@@ -321,6 +439,80 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
             fetchOpcoData();
         } catch (error: any) {
             showToast(error?.message || "Erreur création dossier OPCO", "error");
+        } finally {
+            setIsCreatingOpco(false);
+        }
+    };
+
+    const handleCreateFullOpcoDossier = async () => {
+        if (!selectedCompanyId) {
+            showToast("Veuillez sÃ©lectionner une entreprise", "info");
+            return;
+        }
+        const company = companies.find(c => c.id === selectedCompanyId);
+        if (!company || !company.fields) {
+            showToast("Entreprise introuvable", "error");
+            return;
+        }
+        const candidateId = company.fields?.recordIdetudiant || null;
+        if (!candidateId) {
+            showToast("Cette entreprise n'est pas liÃ©e Ã  un candidat", "error");
+            return;
+        }
+
+        setIsCreatingOpco(true);
+        try {
+            let candidate = await api.getCandidateById(candidateId);
+            const generatedDocuments: string[] = [];
+
+            if (!candidate?.has_cerfa) {
+                try {
+                    await api.generateCerfa(candidateId);
+                    generatedDocuments.push('CERFA');
+                } catch (error) {
+                    console.error('CERFA generation failed before OPCO submission:', error);
+                }
+            }
+
+            if (!candidate?.has_convention) {
+                try {
+                    await api.generateConventionApprentissage(candidateId);
+                    generatedDocuments.push('convention');
+                } catch (error) {
+                    console.error('Convention generation failed before OPCO submission:', error);
+                }
+            }
+
+            if (generatedDocuments.length > 0) {
+                candidate = await api.getCandidateById(candidateId);
+            }
+
+            const payload = buildOpcoPayload(company, candidate);
+            const documents = collectOpcoDocuments(candidate, company);
+            const codeNaf = payload.identification?.code_ape_naf || payload.employeur?.code_naf || '';
+
+            await api.createOpcoDossier({
+                opcoName: company.fields?.['Nom OPCO'] || '',
+                candidateId: isMongoId(candidateId) ? candidateId : undefined,
+                companyId: isMongoId(company.id) ? company.id : undefined,
+                codeNaf,
+                payload,
+                metadata: {
+                    source: 'rh-pec-ui',
+                    generatedDocuments,
+                    sourceIds: {
+                        candidateRecordId: candidateId,
+                        companyRecordId: company.id,
+                    },
+                    attachedDocumentTypes: documents.map((document) => document.type),
+                },
+                documents,
+            });
+            showToast(generatedDocuments.length > 0 ? "Dossier OPCO crÃ©Ã© avec gÃ©nÃ©ration automatique des piÃ¨ces" : "Dossier OPCO crÃ©Ã©", "success");
+            setSelectedCompanyId('');
+            fetchOpcoData();
+        } catch (error: any) {
+            showToast(error?.message || "Erreur crÃ©ation dossier OPCO", "error");
         } finally {
             setIsCreatingOpco(false);
         }
@@ -724,7 +916,7 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                             </select>
                             <button
                                 className="flex items-center gap-2 px-5 py-2.5 bg-[#6d28d9] text-white rounded-xl text-[12px] font-semibold hover:bg-[#5831ad] transition-all disabled:opacity-50"
-                                onClick={handleCreateOpcoDossier}
+                                onClick={handleCreateFullOpcoDossier}
                                 disabled={isCreatingOpco}
                             >
                                 {isCreatingOpco ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
@@ -778,7 +970,7 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                                 <tr><td colSpan={8} className="py-16 text-center text-[#9ca3af] text-[13px]">Aucun dossier OPCO</td></tr>
                             ) : filteredDossiers.map((d: any) => {
                                 const company = companies.find(c => c.id === d.companyId);
-                                const companyName = company?.fields?.['Raison sociale'] || 'N/A';
+                                const companyName = company?.fields?.['Raison sociale'] || d.employerName || 'N/A';
                                 const delayStatus = getDeadlineLabel(d.dateLimiteEnvoi);
                                 const statusColor = opcoStatusStyles[d.status || 'BROUILLON'] || opcoStatusStyles.BROUILLON;
 
