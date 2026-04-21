@@ -110,35 +110,28 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
             <div className={`overflow-hidden transition-all duration-300 ${admissionOpen ? 'max-h-[400px]' : 'max-h-0'}`}>
               <NavLink
-                to="/classe-ntc"
-                onClick={handleLinkClick}
-                className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
-              >
-                <LayoutDashboard size={15} />
-                <span>Tableau de bord</span>
-              </NavLink>
-              
-              <NavLink
                 to="/admission"
                 onClick={handleLinkClick}
                 className={() => `nav-subitem ${isAdmissionDashboardActive ? 'active' : ''}`}
               >
-                <Users size={15} />
-                <span className="flex-1">Classe NTC</span>
-                {candidates.length > 0 && (
-                  <span className="ml-auto bg-[#6c63ff] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                    {candidates.length}
-                  </span>
-                )}
+                <LayoutDashboard size={15} />
+                <span>Inscription des eleves</span>
               </NavLink>
-
               <NavLink
                 to="/admission?tab=interviews"
                 onClick={handleLinkClick}
                 className={() => `nav-subitem ${isAdmissionInterviewsActive ? 'active' : ''}`}
               >
-                <FileText size={15} />
-                <span>Suivi des entretiens</span>
+                <CalendarCheck2 size={15} />
+                <span>Suivi Entretiens</span>
+              </NavLink>
+              <NavLink
+                to="/classe-ntc"
+                onClick={handleLinkClick}
+                className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
+              >
+                <LayoutDashboard size={15} />
+                <span>Classe NTC</span>
               </NavLink>
             </div>
           </div>
