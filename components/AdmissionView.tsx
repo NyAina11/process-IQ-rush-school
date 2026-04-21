@@ -42,6 +42,8 @@ import { useApi } from '../hooks/useApi';
 import { useCandidates, getC } from '../hooks/useCandidates';
 import { formatFormation } from '../utils/formatters';
 import ConfirmationModal from './ui/ConfirmationModal';
+import { usePagination } from '../hooks/usePagination';
+import Pagination from './ui/Pagination';
 
 // --- CONSTANTS ---
 
@@ -689,6 +691,17 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
             email.includes(searchLower);
     }), [candidates, searchQuery]);
 
+    const {
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        paginatedItems
+    } = usePagination(filtered, 10);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, candidates.length, setCurrentPage]);
+
     const stats = useMemo(() => ({
         total: candidates.length,
         completed: filtered.filter(item => item.interviewStatus === 'Completed').length,
@@ -765,7 +778,7 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                                 <tr><td colSpan={8} className="px-8 py-20 text-center text-slate-400 font-bold animate-pulse">Chargement des données...</td></tr>
                             ) : filtered.length === 0 ? (
                                 <tr><td colSpan={8} className="px-8 py-20 text-center text-slate-400 font-bold">Aucun candidat ne correspond à votre recherche.</td></tr>
-                            ) : filtered.map((item) => (
+                            ) : paginatedItems.map((item) => (
                                 <tr key={item.c.id} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-4">
@@ -892,6 +905,14 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                         </tbody>
                     </table>
                 </div>
+                {!isLoading && filtered.length > 0 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        className="border-t border-slate-100"
+                    />
+                )}
             </div>
         </div>
     );
@@ -1717,6 +1738,11 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
             setMainTabAnimKey(k => k + 1);
         }, 180);
     }, [mainTab]);
+
+    useEffect(() => {
+        const nextTab = searchParams.get('tab') === 'interviews' ? 'interviews' : 'dashboard';
+        setMainTab(nextTab);
+    }, [searchParams]);
 
     const [activeTab, setActiveTab] = useState<AdmissionTab>(selectedTab || AdmissionTab.TESTS);
     const [prefilledStudent, setPrefilledStudent] = useState<any>(null);
