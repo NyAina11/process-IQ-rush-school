@@ -110,35 +110,36 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
             <div className={`overflow-hidden transition-all duration-300 ${admissionOpen ? 'max-h-[400px]' : 'max-h-0'}`}>
               <NavLink
-                to="/admission"
-                onClick={handleLinkClick}
-                className={() => `nav-subitem ${isAdmissionDashboardActive ? 'active' : ''}`}
-              >
-                <LayoutDashboard size={15} />
-                <span>Inscription des eleves</span>
-              </NavLink>
-              <NavLink
-                to="/admission?tab=interviews"
-                onClick={handleLinkClick}
-                className={() => `nav-subitem ${isAdmissionInterviewsActive ? 'active' : ''}`}
-              >
-                <CalendarCheck2 size={15} />
-                <span>Suivi Entretiens</span>
-              </NavLink>
-              <NavLink
                 to="/classe-ntc"
                 onClick={handleLinkClick}
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
+                <LayoutDashboard size={15} />
+                <span>Tableau de bord</span>
+              </NavLink>
+              
+              <NavLink
+                to="/admission"
+                onClick={handleLinkClick}
+                className={() => `nav-subitem ${isAdmissionDashboardActive ? 'active' : ''}`}
+              >
                 <Users size={15} />
-                <span className="flex-1">Tableau de bord</span>
+                <span className="flex-1">Classe NTC</span>
                 {candidates.length > 0 && (
-                  <span className="ml-auto" style={{ background: '#6c63ff', color: '#ffffff', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>
+                  <span className="ml-auto bg-[#6c63ff] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
                     {candidates.length}
                   </span>
                 )}
               </NavLink>
 
+              <NavLink
+                to="/admission?tab=interviews"
+                onClick={handleLinkClick}
+                className={() => `nav-subitem ${isAdmissionInterviewsActive ? 'active' : ''}`}
+              >
+                <FileText size={15} />
+                <span>Suivi des entretiens</span>
+              </NavLink>
             </div>
           </div>
         )}
@@ -287,6 +288,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </NavLink>
           </div>
         )}
+
+        {/* Formateur */}
+        <div className="px-3">
+          <NavLink
+            to="/formateur"
+            onClick={handleLinkClick}
+            className={({ isActive }) => `flex items-center gap-[14px] px-[18px] py-[13px] rounded-[4px] cursor-pointer transition-all duration-150 font-medium text-[13px] ${isActive ? 'text-white' : 'hover:text-white'}`}
+            style={({ isActive }: { isActive: boolean }) => ({ background: isActive ? '#2d3154' : 'transparent', borderLeft: isActive ? '3px solid #6c63ff' : '3px solid transparent', color: isActive ? '#ffffff' : '#8b92a9' }) as React.CSSProperties}
+          >
+            {({ isActive }) => (
+              <>
+                <BookOpen size={16} className={isActive ? 'text-white' : ''} />
+                <span>Formateur</span>
+              </>
+            )}
+          </NavLink>
+        </div>
         {/* Paramètres */}
         {(userRole === 'super_admin' || userRole === 'admin' || !userRole) && (
           <div className="px-3">

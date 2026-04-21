@@ -26,7 +26,17 @@ import {
     Activity,
     ChevronDown,
     ChevronUp,
-    Target
+    Target,
+    Trash2,
+    Phone,
+    XCircle,
+    Ban,
+    Clock,
+    PhoneOff,
+    UserX,
+    MoreHorizontal,
+    LayoutDashboard,
+    Plus
 } from 'lucide-react';
 import Button from './ui/Button';
 import Card from './ui/Card';
@@ -641,10 +651,75 @@ const EvaluationGrid = React.memo(({ studentData, onNext }: { studentData: any, 
 
 // --- INTERVIEWS TRACKING COMPONENT ---
 
+
+// --- STATUS SELECTOR COMPONENT ---
+
+const STATUS_OPTIONS = [
+    { value: 'retenu', label: 'Retenu', icon: CheckCircle2, color: 'bg-emerald-500' },
+    { value: 'non_retenu', label: 'Non Retenu', icon: XCircle, color: 'bg-rose-500' },
+    { value: 'recontacter', label: 'À Recontacter', icon: Phone, color: 'bg-slate-700' },
+    { value: 'injoignable', label: 'Injoignable', icon: PhoneOff, color: 'bg-orange-500' },
+    { value: 'absent', label: 'Absent', icon: UserX, color: 'bg-rose-500' },
+    { value: 'annule', label: 'Annulé', icon: Ban, color: 'bg-rose-400' },
+    { value: 'reprogramme', label: 'Reprogrammé', icon: RotateCcw, color: 'bg-blue-500' },
+];
+
+const StatusSelector = ({ value, onChange }: { value: string; onChange: (val: string) => void }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
+    const currentStatus = STATUS_OPTIONS.find(o => o.value === value) || STATUS_OPTIONS[1]; // default to injoignable if not found or Pending
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative min-w-[180px]" ref={dropdownRef}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-full flex items-center justify-between pl-3 pr-3 py-2.5 rounded-[0.5rem] text-[10px] font-black uppercase tracking-wider text-white shadow-sm transition-all ${currentStatus.color}`}
+            >
+                <div className="flex items-center gap-2">
+                    <currentStatus.icon size={14} strokeWidth={2.5} />
+                    <span>{currentStatus.label}</span>
+                </div>
+                <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-1">
+                    {STATUS_OPTIONS.map((opt) => (
+                        <button
+                            key={opt.value}
+                            onClick={() => {
+                                onChange(opt.value);
+                                setIsOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-left"
+                        >
+                            <opt.icon size={14} className={opt.value === value ? 'text-brand' : 'text-slate-400'} />
+                            <span className={`text-[11px] font-bold ${opt.value === value ? 'text-slate-900' : 'text-slate-500'}`}>
+                                {opt.label}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInterview: (candidate: any) => void }) => {
     const { showToast } = useAppStore();
     const { candidates, loading: isLoading, refresh } = useCandidates();
     const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'upcoming' | 'past' | 'all'>('upcoming');
     const [validatingCandidateId, setValidatingCandidateId] = useState<string | null>(null);
     const rawUserRole = (localStorage.getItem('userRole') || '').trim().toLowerCase();
     const isSuperAdmin = rawUserRole === 'super_admin' || rawUserRole === 'superadmin' || rawUserRole === 'admin';
@@ -686,10 +761,16 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
         const formation = (item.c.formation).toLowerCase();
         const email = (item.c.email).toLowerCase();
 
-        return fullName.includes(searchLower) ||
+        const matchesSearch = fullName.includes(searchLower) ||
             formation.includes(searchLower) ||
             email.includes(searchLower);
-    }), [candidates, searchQuery]);
+
+        if (!matchesSearch) return false;
+
+        if (statusFilter === 'upcoming') return item.interviewStatus === 'Pending';
+        if (statusFilter === 'past') return item.interviewStatus === 'Completed';
+        return true;
+    }), [candidates, searchQuery, statusFilter]);
 
     const {
         currentPage,
@@ -700,205 +781,199 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, candidates.length, setCurrentPage]);
+    }, [searchQuery, statusFilter, candidates.length, setCurrentPage]);
 
     const stats = useMemo(() => ({
         total: candidates.length,
-        completed: filtered.filter(item => item.interviewStatus === 'Completed').length,
-        pending: filtered.filter(item => item.interviewStatus === 'Pending').length
-    }), [candidates.length, filtered]);
+        completed: (candidates || []).filter(raw => {
+            const c = getC(raw);
+            return c.has_interview_tracking || !!(raw.has_interview_tracking);
+        }).length,
+        pending: (candidates || []).filter(raw => {
+            const c = getC(raw);
+            return !(c.has_interview_tracking || !!(raw.has_interview_tracking));
+        }).length
+    }), [candidates]);
 
     return (
-        <div className="animate-fade-in space-y-8 pb-10">
+        <div className="animate-fade-in space-y-6 pb-10">
             {/* Header / Hero */}
-            <div className="bg-white border border-[#e2e8f0] rounded-[4px] p-10 overflow-hidden relative" style={{ background: 'linear-gradient(120deg, #f5f3ff 0%, #ede9fe 50%, #f3f0ff 100%)' }}>
-                <div className="absolute top-0 right-0 w-1/3 h-full bg-slate-50 border-l border-slate-100 hidden md:block"></div>
-
-                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
+            <div className="rounded-[1.5rem] mb-6 overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%)', minHeight: 180 }}>
+                {/* noise grain overlay */}
+                <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }}></div>
+                {/* mesh blobs */}
+                <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #a78bfa, transparent 70%)' }}></div>
+                <div className="absolute right-1/4 -bottom-10 w-48 h-48 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #c4b5fd, transparent 70%)' }}></div>
+                
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center h-full px-12 py-10">
                     <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-4">
-                            <span className="px-3 py-1 bg-white/80 text-[#3b7cf4] rounded-[4px] text-[10px] font-black uppercase tracking-widest border border-[#ddd6fe]">Management</span>
-                            <div className="w-1.5 h-1.5 bg-slate-300 rounded-[4px]"></div>
-                            <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Temps réel</span>
+                        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-1.5 rounded-lg mb-5">
+                            <Briefcase size={14} className="text-white/80" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.08em] text-white/90">Processus d'admission</span>
                         </div>
-                        <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Suivi des Entretiens</h2>
-                        <p className="text-slate-500 text-lg leading-relaxed max-w-xl font-medium">
-                            Gérez le flux d'admission des candidats, consultez les scores des évaluations et lancez les entretiens en attente.
+                        <h2 className="text-[32px] font-black text-white tracking-tight mb-2 leading-tight">Admission Rush School</h2>
+                        <p className="text-white/70 text-[15px] font-medium max-w-xl">
+                            Complétez votre dossier d'admission : tests, documents et formalités administratives.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 w-full md:w-auto shrink-0">
-                        <div className="bg-white/80 border border-[#ddd6fe] p-6 rounded-[4px] text-center">
-                            <div className="text-3xl font-black text-[#3b7cf4] mb-1">{stats.completed}</div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entretiens faits</div>
-                        </div>
-                        <div className="bg-white/80 border border-[#ddd6fe] p-6 rounded-[4px] text-center">
-                            <div className="text-3xl font-black text-[#1e293b] mb-1">{stats.pending}</div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entretiens à faire</div>
+                    <div className="shrink-0 hidden lg:block">
+                        <div className="w-24 h-24 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/90 shadow-2xl">
+                            <GraduationCap size={48} strokeWidth={1.5} />
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Controls */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div className="relative w-full md:w-[450px] group">
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={20} />
-                    <input
-                        type="text"
-                        placeholder="Rechercher un candidat ou une formation..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-14 pr-6 py-4 bg-white border border-[#e2e8f0] rounded-[4px] focus:border-[#3b7cf4] outline-none transition-all font-bold text-slate-700 placeholder:text-slate-300"
-                    />                </div>
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                    <Button variant="outline" className="flex-1 md:flex-none h-[56px] px-6" leftIcon={<Download size={18} />}>Exporter</Button>
-                    <Button variant="primary" className="flex-1 md:flex-none h-[56px] px-8" leftIcon={<Calendar size={18} />}>Planifier</Button>
+            {/* Secondary Nav Bar */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-center gap-20 mb-6 shadow-sm">
+                <div className="flex items-center gap-2 text-slate-400 group cursor-pointer hover:text-slate-600 transition-colors">
+                    <LayoutDashboard size={18} />
+                    <span className="text-[11px] font-black uppercase tracking-widest">Tableau de bord</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-800">
+                    <Users size={18} />
+                    <span className="text-[11px] font-black uppercase tracking-widest">Classe NTC {candidates.length}</span>
                 </div>
             </div>
 
+            {/* Suivi des entretiens Header Card */}
+            <div className="rounded-[1.5rem] p-8 mb-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6366f1 100%)' }}>
+                <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }}></div>
+                
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/30">
+                            <Calendar size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h2 className="text-[24px] font-black text-white leading-tight">Suivi des entretiens</h2>
+                            <p className="text-white/80 text-[13px] font-bold mt-0.5">Gestion et planification des entretiens — Classe NTC</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button className="flex items-center gap-2 px-6 py-3 bg-white text-[#6366f1] rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-lg active:scale-95">
+                            <Plus size={16} strokeWidth={3} />
+                            Ajouter un entretien
+                        </button>
+                        <button className="flex items-center gap-2 px-6 py-3 bg-white/10 border border-white/20 text-white rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-white/20 transition-all backdrop-blur-sm active:scale-95">
+                            <Upload size={16} />
+                            Exporter CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Filters Bar */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="md:col-span-3 relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#6366f1] transition-colors">
+                        <Search size={18} />
+                    </div>
+                    <input 
+                        type="text"
+                        placeholder="Rechercher un étudiant..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-6 py-4 bg-white border border-slate-200 rounded-2xl text-[13px] font-medium text-slate-600 outline-none focus:border-[#6366f1] focus:ring-4 focus:ring-[#6366f1]/5 transition-all"
+                    />
+                </div>
+                <div className="relative group">
+                    <select className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl text-[13px] font-bold text-slate-600 outline-none focus:border-[#6366f1] appearance-none cursor-pointer transition-all">
+                        <option>Tous les statuts</option>
+                        <option>Approuvé</option>
+                        <option>En attente</option>
+                        <option>Refusé</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none transition-transform group-focus-within:rotate-180 duration-300">
+                        <ChevronDown size={18} />
+                    </div>
+                </div>
+            </div>
+
+
+            {/* Quick Filters */}
+            <div className="flex flex-wrap gap-2 bg-slate-100/50 p-1.5 rounded-2xl w-fit">
+                <button 
+                    onClick={() => setStatusFilter('upcoming')}
+                    className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${statusFilter === 'upcoming' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-transparent text-slate-500 hover:text-brand'}`}
+                >
+                    <Calendar size={14} strokeWidth={3} /> Entretiens à venir
+                </button>
+                <button 
+                    onClick={() => setStatusFilter('past')}
+                    className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${statusFilter === 'past' ? 'bg-[#22c55e] text-white shadow-lg shadow-[#22c55e]/20' : 'bg-white text-slate-500 hover:text-[#22c55e] shadow-sm'}`}
+                >
+                    <CheckCircle2 size={14} className={statusFilter === 'past' ? 'text-white' : 'text-[#22c55e]'} strokeWidth={3} /> Entretiens passés
+                </button>
+                <button 
+                    onClick={() => setStatusFilter('all')}
+                    className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${statusFilter === 'all' ? 'bg-slate-700 text-white shadow-lg shadow-slate-700/20' : 'bg-white text-slate-500 hover:text-slate-700 shadow-sm'}`}
+                >
+                    <MoreHorizontal size={14} strokeWidth={3} /> Tous
+                </button>
+            </div>
+
             {/* Table */}
-            <div className="bg-white border border-[#e2e8f0] rounded-[4px] overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
+            <div className="bg-white border border-slate-200 rounded-[1.5rem] overflow-hidden shadow-sm">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-track-slate-50 scrollbar-thumb-slate-200">
+                    <table className="w-full border-collapse min-w-[1300px]">
                         <thead>
-                            <tr className="bg-slate-50/50 border-b border-slate-100">
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Candidat</th>
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Formation</th>
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Test</th>
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Date Session</th>
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Validation</th>
-                                <th className="px-8 py-5 text-center text-[11px] font-black text-slate-400 uppercase tracking-widest">Évaluation</th>
-                                <th className="px-8 py-5 text-right text-[11px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                            <tr className="bg-slate-50/80 border-b border-slate-100">
+                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Nom</th>
+                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Prénom</th>
+                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">Chargé(e) RE</th>
+                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">Date Placement</th>
+                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Entreprise</th>
+                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Manager</th>
+                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Ville</th>
+                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">N° Employeur</th>
+                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Statut</th>
+                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Notes</th>
+                                <th className="px-6 py-5 text-right text-[10px] font-black text-slate-800 uppercase tracking-widest">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {isLoading ? (
-                                <tr><td colSpan={8} className="px-8 py-20 text-center text-slate-400 font-bold animate-pulse">Chargement des données...</td></tr>
+                                <tr><td colSpan={11} className="px-8 py-20 text-center text-slate-400 font-bold animate-pulse">Chargement des données...</td></tr>
                             ) : filtered.length === 0 ? (
-                                <tr><td colSpan={8} className="px-8 py-20 text-center text-slate-400 font-bold">Aucun candidat ne correspond à votre recherche.</td></tr>
+                                <tr><td colSpan={11} className="px-8 py-20 text-center text-slate-400 font-bold">Aucun candidat ne correspond à votre recherche.</td></tr>
                             ) : paginatedItems.map((item) => (
                                 <tr key={item.c.id} className="hover:bg-slate-50/50 transition-colors group">
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-[4px] bg-slate-100 flex items-center justify-center text-slate-500 font-black text-sm group-hover:bg-[#3b7cf4] group-hover:text-white transition-all">
-                                                {item.c.prenom?.[0]}{item.c.nom?.[0]}
-                                            </div>
-                                            <div className="font-black text-slate-800 text-base">{item.c.nom?.toUpperCase()} {item.c.prenom}</div>
-                                        </div>
+                                    <td className="px-6 py-4 font-black text-slate-800 text-sm uppercase">{item.c.nom}</td>
+                                    <td className="px-6 py-4 font-medium text-slate-600 text-sm">{item.c.prenom}</td>
+                                    <td className="px-6 py-4">
+                                        <input type="text" defaultValue="Sophie Martin" className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1]" />
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#ede9fe] text-[#3b7cf4] border border-[#ddd6fe]">
-                                            <Briefcase size={14} />
-                                            <span className="text-[11px] font-bold uppercase tracking-tight">{formatFormation(item.c.formation) || 'Non spécifiée'}</span>
-                                        </div>
+                                    <td className="px-6 py-4">
+                                        <input type="date" className="w-36 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1]" />
                                     </td>
-                                    <td className="px-8 py-6">
-                                        {item.hasTestResults ? (
-                                            <a
-                                                href={item.testResultsUrl}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 transition-all"
-                                                title={item.testResultsName || 'Voir les résultats du test'}
-                                            >
-                                                <Target size={14} />
-                                                <span className="text-[10px] font-black uppercase tracking-wider">Résultats</span>
-                                            </a>
-                                        ) : (
-                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-400 border border-slate-100">
-                                                <Target size={14} className="opacity-40" />
-                                                <span className="text-[10px] font-bold uppercase tracking-tight opacity-60">Non effectué</span>
-                                            </div>
-                                        )}
+                                    <td className="px-6 py-4">
+                                        <input type="text" placeholder="Entreprise..." className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-slate-700">{item.interviewDate}</span>
-                                            <span className="text-[10px] text-slate-400 font-medium">Session admission</span>
-                                        </div>
+                                    <td className="px-6 py-4">
+                                        <input type="text" placeholder="Manager..." className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
                                     </td>
-                                    <td className="px-8 py-6">
-                                        {item.interviewStatus === 'Completed' ? (
-                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                                <div className="w-1.5 h-1.5 bg-emerald-500"></div>
-                                                <span className="text-[10px] font-black uppercase tracking-wider">Terminé</span>
-                                            </div>
-                                        ) : (
-                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-amber-50 text-amber-600 border border-amber-100">
-                                                <div className="w-1.5 h-1.5 bg-amber-500 animate-pulse"></div>
-                                                <span className="text-[10px] font-black uppercase tracking-wider">En attente</span>
-                                            </div>
-                                        )}
+                                    <td className="px-6 py-4">
+                                        <input type="text" placeholder="Ville..." className="w-24 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex flex-col gap-2">
-                                            {item.validationStatus === 'Validé' ? (
-                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                                    <CheckCircle2 size={13} />
-                                                    <span className="text-[10px] font-black uppercase tracking-wider">Validé</span>
-                                                </div>
-                                            ) : (
-                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-amber-50 text-amber-600 border border-amber-100">
-                                                    <div className="w-1.5 h-1.5 bg-amber-500 animate-pulse"></div>
-                                                    <span className="text-[10px] font-black uppercase tracking-wider">En attente</span>
-                                                </div>
-                                            )}
-
-                                            {isSuperAdmin && item.validationStatus !== 'Validé' && (
-                                                <Button
-                                                    variant="success"
-                                                    size="sm"
-                                                    className="w-fit rounded-[4px] shadow-none"
-                                                    isLoading={validatingCandidateId === item.c.id}
-                                                    onClick={() => handleValidateCandidate(item.c.id)}
-                                                >
-                                                    Valider
-                                                </Button>
-                                            )}
-                                        </div>
+                                    <td className="px-6 py-4">
+                                        <input type="text" placeholder="N°..." className="w-20 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex flex-col items-center">
-                                            {item.interviewStatus === 'Completed' ? (
-                                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                                    <CheckCircle2 size={13} />
-                                                    <span className="text-[10px] font-black uppercase tracking-wide">Évalué</span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-slate-300 font-bold">—</span>
-                                            )}
-                                        </div>
+                                    <td className="px-6 py-4">
+                                        <StatusSelector 
+                                            value={item.interviewStatus === 'Completed' ? 'injoignable' : 'retenu'} 
+                                            onChange={(val) => console.log('Status changed:', val)} 
+                                        />
                                     </td>
-                                    <td className="px-8 py-6 text-right">
-                                        {item.interviewStatus === 'Completed' ? (
-                                            <div className="flex items-center justify-end gap-2">
-                                                {item.interviewPdfUrl && (
-                                                    <a
-                                                        href={item.interviewPdfUrl}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-[#ede9fe] text-[#3b7cf4] hover:bg-[#3b7cf4] hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide border border-[#ddd6fe] hover:border-[#3b7cf4]"
-                                                        title={item.interviewPdfName || 'Voir le compte rendu'}
-                                                    >
-                                                        <Download size={13} /> CR
-                                                    </a>
-                                                )}
-                                                {item.allInterviewPdfs.length > 1 && (
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase">{item.allInterviewPdfs.length} docs</span>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <Button
-                                                variant="primary"
-                                                size="sm"
-                                                className="rounded-[4px] shadow-none"
-                                                onClick={() => onLaunchInterview(item.raw)}
-                                            >
-                                                Lancer
-                                            </Button>
-                                        )}
+                                    <td className="px-6 py-4">
+                                        <input type="text" placeholder="Notes..." className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <button className="w-9 h-9 flex items-center justify-center bg-[#ef4444] text-white rounded-lg hover:bg-rose-600 transition-colors shadow-sm mx-auto">
+                                            <Trash2 size={16} />
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -906,14 +981,24 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                     </table>
                 </div>
                 {!isLoading && filtered.length > 0 && (
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={setCurrentPage}
-                        className="border-t border-slate-100"
-                    />
+                    <div className="px-8 py-5 flex justify-between items-center bg-slate-50/50">
+                        <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                            Affichage de {paginatedItems.length} sur {filtered.length} étudiants
+                        </div>
+                        <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                            Mise à jour : {new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        </div>
+                    </div>
                 )}
             </div>
+            
+            {!isLoading && filtered.length > 0 && totalPages > 1 && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+            )}
         </div>
     );
 });

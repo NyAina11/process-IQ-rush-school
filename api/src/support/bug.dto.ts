@@ -63,7 +63,7 @@ export class CreateBugDto {
 
   @IsOptional()
   @IsDateString()
-  deadline?: string;
+  deadline?: Date;
 }
 
 export class UpdateBugDto {
@@ -97,5 +97,5 @@ export class UpdateBugDto {
 
   @IsOptional()
   @IsDateString()
-  deadline?: string;
+  deadline?: Date;
 }

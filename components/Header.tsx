@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Menu, Bell, Globe, BellOff, Check, X, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Menu, Bell, Globe, BellOff, Check, X, Clock, CheckCircle2, XCircle, Briefcase, Users, Monitor, GraduationCap } from 'lucide-react';
 import { useValidationStore, ValidationRequest } from '../store/useValidationStore';
 import { useAppStore } from '../store/useAppStore';
 
@@ -135,7 +135,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, onExecuteApproved }) => 
   const allNotifs = isSuperAdmin ? notifications : [...notifications, ...pendingForUser];
 
   return (
-    <header className="sticky top-0 z-30 px-6 flex items-center justify-between" style={{ height: 56, background: '#ffffff', borderBottom: '1px solid #e8eaf0', fontFamily: "'Inter', sans-serif" }}>
+    <header className="sticky top-0 z-30 px-6 flex items-center justify-between" style={{ height: 68, background: '#ffffff', borderBottom: '1px solid #e8eaf0', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <div className="flex items-center gap-4">
         <button
           onClick={toggleSidebar}
@@ -148,13 +148,30 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, onExecuteApproved }) => 
         </button>
 
         <div className="flex flex-col">
-          <h1 className="leading-none" style={{ fontSize: 18, fontWeight: 700, color: '#1a1d2e' }}>
-            {moduleTitle}
+          <h1 className="leading-none text-brand" style={{ fontSize: 18, fontWeight: 800, color: '#1a1d2e' }}>
+            PROCESSIQ
           </h1>
-          <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6c63ff', marginTop: 2 }}>
-            Rush School
-          </span>
         </div>
+      </div>
+
+      {/* Module Switcher (Center) */}
+      <div className="hidden lg:flex items-center gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/60 shadow-sm">
+        <button className="flex items-center gap-2.5 px-5 py-2.5 bg-brand text-white rounded-lg font-black text-[11px] uppercase tracking-widest shadow-lg shadow-brand/20 transition-all active:scale-95">
+          <Briefcase size={15} strokeWidth={2.5} />
+          Admissions
+        </button>
+        <button className="flex items-center gap-2.5 px-5 py-2.5 text-slate-400 hover:text-brand transition-all font-black text-[11px] uppercase tracking-widest active:scale-95">
+          <Monitor size={15} />
+          Commercial
+        </button>
+        <button className="flex items-center gap-2.5 px-5 py-2.5 text-slate-400 hover:text-brand transition-all font-black text-[11px] uppercase tracking-widest active:scale-95">
+          <Users size={15} />
+          RH
+        </button>
+        <button className="flex items-center gap-2.5 px-5 py-2.5 text-slate-400 hover:text-brand transition-all font-black text-[11px] uppercase tracking-widest active:scale-95">
+          <GraduationCap size={15} />
+          Étudiant
+        </button>
       </div>
 
       <div className="flex items-center gap-2">
