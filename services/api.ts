@@ -1474,7 +1474,7 @@ export const api = {
     return json?.data || json;
   },
 
-  async createOpcoDossier(payload: { opcoName?: string; candidateId?: string; studentId?: string; companyId?: string; payload: any; metadata?: any; documents?: any[]; autoSubmit?: boolean }): Promise<any> {
+  async createOpcoDossier(payload: { opcoName?: string; candidateId?: string; studentId?: string; companyId?: string; codeNaf?: string; payload: any; metadata?: any; documents?: any[]; autoSubmit?: boolean }): Promise<any> {
     const response = await fetch(`${BASE_API_URL}/opco/dossiers`, {
       method: 'POST',
       headers: withAuthHeaders({ 'Content-Type': 'application/json', Accept: 'application/json' }),
