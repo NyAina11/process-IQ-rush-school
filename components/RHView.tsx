@@ -848,6 +848,61 @@ const RHView: React.FC<{ activeSubView: ViewId }> = ({ activeSubView }) => {
                     }
                 />
 
+                {opcoError && (
+                    <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[12px] font-semibold text-rose-700">
+                        {opcoError}
+                    </div>
+                )}
+
+                <div className="bg-white border border-[#e5e0f5] rounded-2xl p-5 mb-5 shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        <div className="flex-1">
+                            <div className="text-[12px] font-bold text-[#1e1b2e]">Configuration OPCO</div>
+                            <div className="text-[11px] text-[#9ca3af]">
+                                {opcoConfig?.configured ? `Connecté à ${opcoConfig?.opcoName || 'OPCO'}` : "Non configuré"}
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 text-[11px] font-semibold">
+                            <span className={`px-3 py-1 rounded-lg border ${opcoConfig?.configured ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
+                                {opcoConfig?.configured ? 'Actif' : 'Inactif'}
+                            </span>
+                            <span className="text-[#9ca3af]">
+                                {opcoConfig?.baseUrl ? `API: ${opcoConfig.baseUrl}` : 'API non renseignée'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white border border-[#e5e0f5] rounded-2xl p-5 mb-5 shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        <div className="flex-1">
+                            <div className="text-[12px] font-bold text-[#1e1b2e]">Créer un dossier OPCO</div>
+                            <div className="text-[11px] text-[#9ca3af]">Sélectionnez une entreprise liée à un candidat.</div>
+                        </div>
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                            <select
+                                value={selectedCompanyId}
+                                onChange={(e) => setSelectedCompanyId(e.target.value)}
+                                className="flex-1 md:w-[320px] px-4 py-2.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[12px] font-medium text-[#374151] outline-none focus:border-[#6d28d9]/40"
+                            >
+                                <option value="">Choisir une entreprise</option>
+                                {companies.map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                        {c?.fields?.['Raison sociale'] || c.id}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                className="flex items-center gap-2 px-5 py-2.5 bg-[#6d28d9] text-white rounded-xl text-[12px] font-semibold hover:bg-[#5831ad] transition-all disabled:opacity-50"
+                                onClick={handleCreateFullOpcoDossier}
+                                disabled={isCreatingOpco}
+                            >
+                                {isCreatingOpco ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                                Créer
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <FilterBar>
                     <SearchInput value={searchQuery} onChange={(e: any) => setSearchQuery(e.target.value)} placeholder="Rechercher par apprenti, employeur, SIRET ou OPCO..." />
                     <StyledSelect value={opcoFilterStatus} onChange={(e: any) => setOpcoFilterStatus(e.target.value)}>
