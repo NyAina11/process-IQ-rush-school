@@ -765,7 +765,6 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                             <tr className="bg-slate-50/50 border-b border-slate-100">
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Candidat</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Formation</th>
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Test</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Date Session</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
                                 <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Validation</th>
@@ -793,25 +792,6 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                                             <Briefcase size={14} />
                                             <span className="text-[11px] font-bold uppercase tracking-tight">{formatFormation(item.c.formation) || 'Non spécifiée'}</span>
                                         </div>
-                                    </td>
-                                    <td className="px-8 py-6">
-                                        {item.hasTestResults ? (
-                                            <a
-                                                href={item.testResultsUrl}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 transition-all"
-                                                title={item.testResultsName || 'Voir les résultats du test'}
-                                            >
-                                                <Target size={14} />
-                                                <span className="text-[10px] font-black uppercase tracking-wider">Résultats</span>
-                                            </a>
-                                        ) : (
-                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-slate-50 text-slate-400 border border-slate-100">
-                                                <Target size={14} className="opacity-40" />
-                                                <span className="text-[10px] font-bold uppercase tracking-tight opacity-60">Non effectué</span>
-                                            </div>
-                                        )}
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="flex flex-col">
@@ -873,7 +853,22 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                                     </td>
                                     <td className="px-8 py-6 text-right">
                                         {item.interviewStatus === 'Completed' ? (
-                                            <div className="flex items-center justify-end gap-2">
+                                            <div className="flex items-center justify-end gap-2 flex-wrap">
+                                                {item.hasTestResults ? (
+                                                    <a
+                                                        href={item.testResultsUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all text-[10px] font-bold uppercase tracking-wide border border-emerald-100"
+                                                        title={item.testResultsName || 'Voir les résultats du test'}
+                                                    >
+                                                        <Target size={13} /> Résultats
+                                                    </a>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wide border border-slate-100">
+                                                        <Target size={13} className="opacity-50" /> Test manquant
+                                                    </span>
+                                                )}
                                                 {item.interviewPdfUrl && (
                                                     <a
                                                         href={item.interviewPdfUrl}
@@ -885,19 +880,44 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                                                         <Download size={13} /> CR
                                                     </a>
                                                 )}
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="rounded-[4px] shadow-none"
+                                                    onClick={() => onLaunchInterview(item.raw)}
+                                                >
+                                                    Relancer
+                                                </Button>
                                                 {item.allInterviewPdfs.length > 1 && (
                                                     <span className="text-[9px] font-black text-slate-400 uppercase">{item.allInterviewPdfs.length} docs</span>
                                                 )}
                                             </div>
                                         ) : (
-                                            <Button
-                                                variant="primary"
-                                                size="sm"
-                                                className="rounded-[4px] shadow-none"
-                                                onClick={() => onLaunchInterview(item.raw)}
-                                            >
-                                                Lancer
-                                            </Button>
+                                            <div className="flex items-center justify-end gap-2 flex-wrap">
+                                                {item.hasTestResults ? (
+                                                    <a
+                                                        href={item.testResultsUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all text-[10px] font-bold uppercase tracking-wide border border-emerald-100"
+                                                        title={item.testResultsName || 'Voir les résultats du test'}
+                                                    >
+                                                        <Target size={13} /> Résultats
+                                                    </a>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wide border border-slate-100">
+                                                        <Target size={13} className="opacity-50" /> Test manquant
+                                                    </span>
+                                                )}
+                                                <Button
+                                                    variant="primary"
+                                                    size="sm"
+                                                    className="rounded-[4px] shadow-none"
+                                                    onClick={() => onLaunchInterview(item.raw)}
+                                                >
+                                                    Lancer
+                                                </Button>
+                                            </div>
                                         )}
                                     </td>
                                 </tr>
