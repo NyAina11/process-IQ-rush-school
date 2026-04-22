@@ -931,60 +931,151 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                 <div className="overflow-x-auto scrollbar-thin scrollbar-track-slate-50 scrollbar-thumb-slate-200">
                     <table className="w-full border-collapse min-w-[1300px]">
                         <thead>
-                            <tr className="bg-slate-50/80 border-b border-slate-100">
-                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Nom</th>
-                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Prénom</th>
-                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">Chargé(e) RE</th>
-                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">Date Placement</th>
-                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Entreprise</th>
-                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Manager</th>
-                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Ville</th>
-                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">N° Employeur</th>
-                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Statut</th>
-                                <th className="px-6 py-5 text-left text-[10px] font-black text-slate-800 uppercase tracking-widest">Notes</th>
-                                <th className="px-6 py-5 text-right text-[10px] font-black text-slate-800 uppercase tracking-widest">Actions</th>
+                            <tr className="bg-slate-50/50 border-b border-slate-100">
+                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Candidat</th>
+                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Formation</th>
+                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Date Session</th>
+                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
+                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Validation</th>
+                                <th className="px-8 py-5 text-center text-[11px] font-black text-slate-400 uppercase tracking-widest">Évaluation</th>
+                                <th className="px-8 py-5 text-right text-[11px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {isLoading ? (
-                                <tr><td colSpan={11} className="px-8 py-20 text-center text-slate-400 font-bold animate-pulse">Chargement des données...</td></tr>
+                                <tr><td colSpan={7} className="px-8 py-20 text-center text-slate-400 font-bold animate-pulse">Chargement des données...</td></tr>
                             ) : filtered.length === 0 ? (
-                                <tr><td colSpan={11} className="px-8 py-20 text-center text-slate-400 font-bold">Aucun candidat ne correspond à votre recherche.</td></tr>
+                                <tr><td colSpan={7} className="px-8 py-20 text-center text-slate-400 font-bold">Aucun candidat ne correspond à votre recherche.</td></tr>
                             ) : paginatedItems.map((item) => (
                                 <tr key={item.c.id} className="hover:bg-slate-50/50 transition-colors group">
-                                    <td className="px-6 py-4 font-black text-slate-800 text-sm uppercase">{item.c.nom}</td>
-                                    <td className="px-6 py-4 font-medium text-slate-600 text-sm">{item.c.prenom}</td>
-                                    <td className="px-6 py-4">
-                                        <input type="text" defaultValue="Sophie Martin" className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1]" />
+                                    <td className="px-8 py-6">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-black text-slate-900 uppercase tracking-tight">{item.c.nom} {item.c.prenom}</span>
+                                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.c.email}</span>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <input type="date" className="w-36 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1]" />
+                                    <td className="px-8 py-6">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-bold text-slate-600">{item.c.formation}</span>
+                                            <span className="text-[10px] text-slate-400 font-medium">Rush School</span>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <input type="text" placeholder="Entreprise..." className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
+                                    <td className="px-8 py-6">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold text-slate-700">{item.interviewDate}</span>
+                                            <span className="text-[10px] text-slate-400 font-medium">Session admission</span>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <input type="text" placeholder="Manager..." className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
+                                    <td className="px-8 py-6">
+                                        <div className="flex flex-col gap-2">
+                                            {item.interviewStatus === 'Completed' ? (
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                                    <CheckCircle2 size={13} />
+                                                    <span className="text-[10px] font-black uppercase tracking-wider">Entretien fait</span>
+                                                </div>
+                                            ) : (
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-amber-50 text-amber-600 border border-amber-100">
+                                                    <div className="w-1.5 h-1.5 bg-amber-500 animate-pulse"></div>
+                                                    <span className="text-[10px] font-black uppercase tracking-wider">À planifier</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <input type="text" placeholder="Ville..." className="w-24 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
+                                    <td className="px-8 py-6">
+                                        <div className="flex flex-col gap-2">
+                                            {item.validationStatus === 'Validé' ? (
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                                    <CheckCircle2 size={13} />
+                                                    <span className="text-[10px] font-black uppercase tracking-wider">Validé</span>
+                                                </div>
+                                            ) : (
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-amber-50 text-amber-600 border border-amber-100">
+                                                    <div className="w-1.5 h-1.5 bg-amber-500 animate-pulse"></div>
+                                                    <span className="text-[10px] font-black uppercase tracking-wider">En attente</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <input type="text" placeholder="N°..." className="w-20 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
+                                    <td className="px-8 py-6">
+                                        <div className="flex flex-col items-center">
+                                            {item.interviewStatus === 'Completed' ? (
+                                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                                    <CheckCircle2 size={13} />
+                                                    <span className="text-[10px] font-black uppercase tracking-wide">Évalué</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-slate-300 font-bold">—</span>
+                                            )}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <StatusSelector 
-                                            value={item.interviewStatus === 'Completed' ? 'injoignable' : 'retenu'} 
-                                            onChange={(val) => console.log('Status changed:', val)} 
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <input type="text" placeholder="Notes..." className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button className="w-9 h-9 flex items-center justify-center bg-[#ef4444] text-white rounded-lg hover:bg-rose-600 transition-colors shadow-sm mx-auto">
-                                            <Trash2 size={16} />
-                                        </button>
+                                    <td className="px-8 py-6 text-right">
+                                        {item.interviewStatus === 'Completed' ? (
+                                            <div className="flex items-center justify-end gap-2 flex-wrap">
+                                                {item.hasTestResults ? (
+                                                    <a
+                                                        href={item.testResultsUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all text-[10px] font-bold uppercase tracking-wide border border-emerald-100"
+                                                        title={item.testResultsName || 'Voir les résultats du test'}
+                                                    >
+                                                        <Target size={13} /> Résultats
+                                                    </a>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wide border border-slate-100">
+                                                        <Target size={13} className="opacity-50" /> Test manquant
+                                                    </span>
+                                                )}
+                                                {item.interviewPdfUrl && (
+                                                    <a
+                                                        href={item.interviewPdfUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-[#ede9fe] text-[#3b7cf4] hover:bg-[#3b7cf4] hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide border border-[#ddd6fe] hover:border-[#3b7cf4]"
+                                                        title={item.interviewPdfName || 'Voir le compte rendu'}
+                                                    >
+                                                        <Download size={13} /> CR
+                                                    </a>
+                                                )}
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="rounded-[4px] shadow-none"
+                                                    onClick={() => onLaunchInterview(item.raw)}
+                                                >
+                                                    Relancer
+                                                </Button>
+                                                {item.allInterviewPdfs.length > 1 && (
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase">{item.allInterviewPdfs.length} docs</span>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center justify-end gap-2 flex-wrap">
+                                                {item.hasTestResults ? (
+                                                    <a
+                                                        href={item.testResultsUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all text-[10px] font-bold uppercase tracking-wide border border-emerald-100"
+                                                        title={item.testResultsName || 'Voir les résultats du test'}
+                                                    >
+                                                        <Target size={13} /> Résultats
+                                                    </a>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wide border border-slate-100">
+                                                        <Target size={13} className="opacity-50" /> Test manquant
+                                                    </span>
+                                                )}
+                                                <Button
+                                                    variant="primary"
+                                                    size="sm"
+                                                    className="rounded-[4px] shadow-none"
+                                                    onClick={() => onLaunchInterview(item.raw)}
+                                                >
+                                                    Lancer
+                                                </Button>
+                                            </div>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
