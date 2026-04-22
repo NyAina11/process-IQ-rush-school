@@ -20,7 +20,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           # Clone the parent monorepo
-          git clone https://x-access-token:${{ secrets.PARENT_REPO_TOKEN }}@github.com/NyAina11/processiq.git parent_repo
+          git clone https://x-access-token:${{ secrets.PARENT_REPO_TOKEN }}@github.com/josephnguyen111/EduIQ.git parent_repo
           cd parent_repo
 
           # Update the submodule reference to the latest commit on this push
