@@ -23,6 +23,9 @@ import {
     RotateCcw,
     PenTool,
     Info,
+    Clock,
+    Mail,
+    RefreshCcw,
     Activity,
     ChevronDown,
     ChevronUp,
@@ -705,219 +708,218 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
     const stats = useMemo(() => ({
         total: candidates.length,
         completed: filtered.filter(item => item.interviewStatus === 'Completed').length,
-        pending: filtered.filter(item => item.interviewStatus === 'Pending').length
+        pending: filtered.filter(item => item.interviewStatus === 'Pending').length,
+        validated: filtered.filter(item => item.validationStatus === 'Validé').length
     }), [candidates.length, filtered]);
 
     return (
-        <div className="animate-fade-in space-y-8 pb-10">
-            {/* Header / Hero */}
-            <div className="bg-white border border-[#e2e8f0] rounded-[4px] p-10 overflow-hidden relative" style={{ background: 'linear-gradient(120deg, #f5f3ff 0%, #ede9fe 50%, #f3f0ff 100%)' }}>
-                <div className="absolute top-0 right-0 w-1/3 h-full bg-slate-50 border-l border-slate-100 hidden md:block"></div>
+        <div className="animate-fade-in space-y-8 pb-12" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
 
-                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-4">
-                            <span className="px-3 py-1 bg-white/80 text-[#3b7cf4] rounded-[4px] text-[10px] font-black uppercase tracking-widest border border-[#ddd6fe]">Management</span>
-                            <div className="w-1.5 h-1.5 bg-slate-300 rounded-[4px]"></div>
-                            <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Temps réel</span>
+            {/* Premium Hero Section */}
+            <div className="relative overflow-hidden rounded-2xl min-h-[220px] flex items-center px-10 py-10 shadow-xl shadow-indigo-500/10" style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #4338ca 50%, #6d28d9 100%)' }}>
+                {/* Decorative Elements */}
+                <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }} />
+                <div className="absolute top-[-40px] right-[-40px] w-64 h-64 rounded-full opacity-20 blur-3xl" style={{ background: '#a78bfa' }} />
+                <div className="absolute bottom-[-30px] left-[20%] w-56 h-56 rounded-full opacity-15 blur-3xl" style={{ background: '#c4b5fd' }} />
+
+                <div className="relative z-10 flex flex-col xl:flex-row justify-between w-full gap-10 xl:gap-6 items-start xl:items-center">
+                    <div className="max-w-2xl">
+                        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-1 rounded-lg mb-4 backdrop-blur-md">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/90">Temps Réel</span>
                         </div>
-                        <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Suivi des Entretiens</h2>
-                        <p className="text-slate-500 text-lg leading-relaxed max-w-xl font-medium">
-                            Gérez le flux d'admission des candidats, consultez les scores des évaluations et lancez les entretiens en attente.
+                        <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-white md:text-4xl">Suivi des entretiens</h2>
+                        <p className="text-[15px] font-medium leading-relaxed text-indigo-100 max-w-xl">
+                            Pilotez les candidats en un coup d’œil : tests, comptes rendus d’entretien, validation finale et relances.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 w-full md:w-auto shrink-0">
-                        <div className="bg-white/80 border border-[#ddd6fe] p-6 rounded-[4px] text-center">
-                            <div className="text-3xl font-black text-[#3b7cf4] mb-1">{stats.completed}</div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entretiens faits</div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full xl:w-auto shrink-0">
+                        <div className="rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur-md transform transition-all hover:-translate-y-1 hover:bg-white/15">
+                            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-indigo-100 flex items-center gap-2"><Users size={12} /> Dossiers</div>
+                            <div className="text-3xl font-black text-white">{stats.total}</div>
+                            <div className="mt-1 text-[11px] font-medium text-indigo-200">candidats</div>
                         </div>
-                        <div className="bg-white/80 border border-[#ddd6fe] p-6 rounded-[4px] text-center">
-                            <div className="text-3xl font-black text-[#1e293b] mb-1">{stats.pending}</div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entretiens à faire</div>
+                        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-5 backdrop-blur-md transform transition-all hover:-translate-y-1 hover:bg-emerald-500/20">
+                            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-200 flex items-center gap-2"><CheckCircle2 size={12} /> Traités</div>
+                            <div className="text-3xl font-black text-white">{stats.completed}</div>
+                            <div className="mt-1 text-[11px] font-medium text-emerald-200/70">entretiens faits</div>
+                        </div>
+                        <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 p-5 backdrop-blur-md transform transition-all hover:-translate-y-1 hover:bg-amber-500/20">
+                            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200 flex items-center gap-2"><Clock size={12} /> En attente</div>
+                            <div className="text-3xl font-black text-white">{stats.pending}</div>
+                            <div className="mt-1 text-[11px] font-medium text-amber-200/70">à traiter</div>
+                        </div>
+                        <div className="rounded-2xl border border-indigo-400/20 bg-indigo-500/10 p-5 backdrop-blur-md transform transition-all hover:-translate-y-1 hover:bg-indigo-500/20">
+                            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-indigo-200 flex items-center gap-2"><UserCheck size={12} /> Validés</div>
+                            <div className="text-3xl font-black text-white">{stats.validated}</div>
+                            <div className="mt-1 text-[11px] font-medium text-indigo-200/70">dossiers finalisés</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Controls */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div className="relative w-full md:w-[450px] group">
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={20} />
+            {/* Filter and Controls */}
+            <div className="bg-white border border-[#e5e0f5] rounded-2xl p-4 shadow-sm flex flex-col lg:flex-row lg:items-center gap-4">
+                <div className="relative flex-1 min-w-[280px] group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#6d28d9] transition-colors" size={18} />
                     <input
                         type="text"
-                        placeholder="Rechercher un candidat ou une formation..."
+                        placeholder="Rechercher un candidat, une formation ou un email..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-14 pr-6 py-4 bg-white border border-[#e2e8f0] rounded-[4px] focus:border-[#3b7cf4] outline-none transition-all font-bold text-slate-700 placeholder:text-slate-300"
-                    />                </div>
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                    <Button variant="outline" className="flex-1 md:flex-none h-[56px] px-6" leftIcon={<Download size={18} />}>Exporter</Button>
-                    <Button variant="primary" className="flex-1 md:flex-none h-[56px] px-8" leftIcon={<Calendar size={18} />}>Planifier</Button>
+                        className="w-full pl-12 pr-4 py-3.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[14px] font-medium text-slate-800 placeholder:text-slate-400 outline-none focus:border-[#6d28d9]/40 focus:ring-4 focus:ring-[#6d28d9]/10 focus:bg-white transition-all shadow-sm"
+                    />
+                </div>
+                <div className="flex items-center gap-3 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 hide-scrollbar">
+                    <div className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[12px] font-bold text-slate-500 mx-1 shrink-0">
+                        <Users size={16} className="text-slate-400" />
+                        {filtered.length} Résultat{filtered.length > 1 ? 's' : ''}
+                    </div>
+                    <button className="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 text-[13px] font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm shrink-0">
+                        <Download size={16} className="text-slate-400" /> Exporter listes
+                    </button>
+                    <button className="flex items-center gap-2 px-6 py-3 bg-[#6d28d9] text-white rounded-xl text-[13px] font-semibold hover:bg-[#5b21b6] hover:shadow-lg hover:shadow-indigo-500/20 transition-all shrink-0">
+                        <Calendar size={16} /> Planifier session
+                    </button>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="bg-white border border-[#e2e8f0] rounded-[4px] overflow-hidden">
+            {/* Main Table Card */}
+            <div className="bg-white border border-[#e5e0f5] rounded-2xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                         <thead>
-                            <tr className="bg-slate-50/50 border-b border-slate-100">
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Candidat</th>
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Formation</th>
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Date Session</th>
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
-                                <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Validation</th>
-                                <th className="px-8 py-5 text-center text-[11px] font-black text-slate-400 uppercase tracking-widest">Évaluation</th>
-                                <th className="px-8 py-5 text-right text-[11px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                            <tr className="bg-slate-50/50 border-b border-[#e5e0f5]">
+                                <th className="px-6 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Candidat</th>
+                                <th className="px-6 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Formation / Profil</th>
+                                <th className="px-6 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
+                                <th className="px-6 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Validation</th>
+                                <th className="px-6 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Documents</th>
+                                <th className="px-6 py-5 text-right text-[11px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-50">
+                        <tbody className="divide-y divide-[#f5f3ff]">
                             {isLoading ? (
-                                <tr><td colSpan={8} className="px-8 py-20 text-center text-slate-400 font-bold animate-pulse">Chargement des données...</td></tr>
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-24 text-center">
+                                        <Loader2 className="animate-spin mx-auto mb-4 text-[#6d28d9]" size={36} />
+                                        <div className="text-[14px] font-medium text-slate-500">Chargement des dossiers en cours...</div>
+                                    </td>
+                                </tr>
                             ) : filtered.length === 0 ? (
-                                <tr><td colSpan={8} className="px-8 py-20 text-center text-slate-400 font-bold">Aucun candidat ne correspond à votre recherche.</td></tr>
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-24 text-center">
+                                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                                            <Search size={24} className="text-slate-300" />
+                                        </div>
+                                        <div className="text-[15px] font-bold text-slate-700 mb-1">Aucun résultat</div>
+                                        <div className="text-[13px] text-slate-400">Aucun candidat ne correspond à votre recherche.</div>
+                                    </td>
+                                </tr>
                             ) : paginatedItems.map((item) => (
-                                <tr key={item.c.id} className="hover:bg-slate-50/50 transition-colors group">
-                                    <td className="px-8 py-6">
+                                <tr key={item.c.id} className="group hover:bg-[#faf9ff] transition-all relative">
+                                    <td className="px-6 py-5 relative">
+                                        {/* Row hover highlight indicator */}
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#6d28d9] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-[4px] bg-slate-100 flex items-center justify-center text-slate-500 font-black text-sm group-hover:bg-[#3b7cf4] group-hover:text-white transition-all">
+                                            <div className="h-11 w-11 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md flex-shrink-0" 
+                                                 style={{ background: 'linear-gradient(135deg, #a78bfa 0%, #6d28d9 100%)' }}>
                                                 {item.c.prenom?.[0]}{item.c.nom?.[0]}
                                             </div>
-                                            <div className="font-black text-slate-800 text-base">{item.c.nom?.toUpperCase()} {item.c.prenom}</div>
+                                            <div>
+                                                <div className="text-[14px] font-bold text-slate-800">{item.c.nom?.toUpperCase()} {item.c.prenom}</div>
+                                                <div className="mt-1 text-[12px] font-medium text-slate-500 flex items-center gap-1.5"><Mail size={12}/> {item.c.email || '—'}</div>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#ede9fe] text-[#3b7cf4] border border-[#ddd6fe]">
-                                            <Briefcase size={14} />
-                                            <span className="text-[11px] font-bold uppercase tracking-tight">{formatFormation(item.c.formation) || 'Non spécifiée'}</span>
-                                        </div>
+                                    <td className="px-6 py-5">
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] text-[11px] font-bold uppercase tracking-wider">
+                                            <Briefcase size={12} />
+                                            {formatFormation(item.c.formation) || 'Non spécifiée'}
+                                        </span>
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-slate-700">{item.interviewDate}</span>
-                                            <span className="text-[10px] text-slate-400 font-medium">Session admission</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-6">
+                                    <td className="px-6 py-5">
                                         {item.interviewStatus === 'Completed' ? (
-                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                                <div className="w-1.5 h-1.5 bg-emerald-500"></div>
-                                                <span className="text-[10px] font-black uppercase tracking-wider">Terminé</span>
-                                            </div>
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[11px] font-bold uppercase tracking-wider border border-emerald-100">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Évalué
+                                            </span>
                                         ) : (
-                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-amber-50 text-amber-600 border border-amber-100">
-                                                <div className="w-1.5 h-1.5 bg-amber-500 animate-pulse"></div>
-                                                <span className="text-[10px] font-black uppercase tracking-wider">En attente</span>
-                                            </div>
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600 text-[11px] font-bold uppercase tracking-wider border border-amber-100">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> À évaluer
+                                            </span>
                                         )}
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex flex-col gap-2">
+                                    <td className="px-6 py-5">
+                                        <div className="flex items-center gap-2">
                                             {item.validationStatus === 'Validé' ? (
-                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                                    <CheckCircle2 size={13} />
-                                                    <span className="text-[10px] font-black uppercase tracking-wider">Validé</span>
-                                                </div>
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[11px] font-bold uppercase tracking-wider border border-emerald-100">
+                                                   <CheckCircle2 size={12} /> Validé
+                                                </span>
                                             ) : (
-                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-amber-50 text-amber-600 border border-amber-100">
-                                                    <div className="w-1.5 h-1.5 bg-amber-500 animate-pulse"></div>
-                                                    <span className="text-[10px] font-black uppercase tracking-wider">En attente</span>
-                                                </div>
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 text-red-600 text-[11px] font-bold uppercase tracking-wider border border-red-100">
+                                                    <AlertCircle size={12} /> En attente
+                                                </span>
                                             )}
 
                                             {isSuperAdmin && item.validationStatus !== 'Validé' && (
-                                                <Button
-                                                    variant="success"
-                                                    size="sm"
-                                                    className="w-fit rounded-[4px] shadow-none"
-                                                    isLoading={validatingCandidateId === item.c.id}
+                                                <button
                                                     onClick={() => handleValidateCandidate(item.c.id)}
+                                                    disabled={validatingCandidateId === item.c.id}
+                                                    className="ml-2 w-7 h-7 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50"
+                                                    title="Valider la candidature"
                                                 >
-                                                    Valider
-                                                </Button>
+                                                    {validatingCandidateId === item.c.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                                                </button>
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex flex-col items-center">
+                                    <td className="px-6 py-5">
+                                        <div className="flex gap-2">
                                             {item.interviewStatus === 'Completed' ? (
-                                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                                    <CheckCircle2 size={13} />
-                                                    <span className="text-[10px] font-black uppercase tracking-wide">Évalué</span>
-                                                </div>
+                                                <>
+                                                    {item.hasTestResults ? (
+                                                        <a href={item.testResultsUrl} target="_blank" rel="noreferrer" title="Résultats du test"
+                                                           className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#f0fdf4] text-emerald-600 border border-emerald-100 hover:bg-emerald-500 hover:text-white transition-all shadow-sm">
+                                                            <Target size={15} />
+                                                        </a>
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-50 text-slate-300 border border-slate-100" title="Pas de test">
+                                                            <Target size={15} />
+                                                        </div>
+                                                    )}
+                                                    {item.interviewPdfUrl ? (
+                                                        <a href={item.interviewPdfUrl} target="_blank" rel="noreferrer" title="CR Entretien"
+                                                           className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#eff6ff] text-[#3b82f6] border border-blue-100 hover:bg-[#3b82f6] hover:text-white transition-all shadow-sm">
+                                                            <FileText size={15} />
+                                                        </a>
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-50 text-slate-300 border border-slate-100" title="Pas de CR">
+                                                            <FileText size={15} />
+                                                        </div>
+                                                    )}
+                                                </>
                                             ) : (
-                                                <span className="text-slate-300 font-bold">—</span>
+                                                <span className="text-[13px] font-bold text-slate-300">Aucun document</span>
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6 text-right">
+                                    <td className="px-6 py-5 text-right">
                                         {item.interviewStatus === 'Completed' ? (
-                                            <div className="flex items-center justify-end gap-2 flex-wrap">
-                                                {item.hasTestResults ? (
-                                                    <a
-                                                        href={item.testResultsUrl}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all text-[10px] font-bold uppercase tracking-wide border border-emerald-100"
-                                                        title={item.testResultsName || 'Voir les résultats du test'}
-                                                    >
-                                                        <Target size={13} /> Résultats
-                                                    </a>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wide border border-slate-100">
-                                                        <Target size={13} className="opacity-50" /> Test manquant
-                                                    </span>
-                                                )}
-                                                {item.interviewPdfUrl && (
-                                                    <a
-                                                        href={item.interviewPdfUrl}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-[#ede9fe] text-[#3b7cf4] hover:bg-[#3b7cf4] hover:text-white transition-all text-[10px] font-bold uppercase tracking-wide border border-[#ddd6fe] hover:border-[#3b7cf4]"
-                                                        title={item.interviewPdfName || 'Voir le compte rendu'}
-                                                    >
-                                                        <Download size={13} /> CR
-                                                    </a>
-                                                )}
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="rounded-[4px] shadow-none"
-                                                    onClick={() => onLaunchInterview(item.raw)}
-                                                >
-                                                    Relancer
-                                                </Button>
-                                                {item.allInterviewPdfs.length > 1 && (
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase">{item.allInterviewPdfs.length} docs</span>
-                                                )}
-                                            </div>
+                                            <button
+                                                onClick={() => onLaunchInterview(item.raw)}
+                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#e5e0f5] bg-white text-slate-600 font-semibold text-[12px] hover:text-[#6d28d9] hover:border-[#6d28d9]/30 hover:bg-[#faf9ff] transition-all shadow-sm"
+                                            >
+                                                <RefreshCcw size={14} /> Relancer
+                                            </button>
                                         ) : (
-                                            <div className="flex items-center justify-end gap-2 flex-wrap">
-                                                {item.hasTestResults ? (
-                                                    <a
-                                                        href={item.testResultsUrl}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all text-[10px] font-bold uppercase tracking-wide border border-emerald-100"
-                                                        title={item.testResultsName || 'Voir les résultats du test'}
-                                                    >
-                                                        <Target size={13} /> Résultats
-                                                    </a>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[4px] bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wide border border-slate-100">
-                                                        <Target size={13} className="opacity-50" /> Test manquant
-                                                    </span>
-                                                )}
-                                                <Button
-                                                    variant="primary"
-                                                    size="sm"
-                                                    className="rounded-[4px] shadow-none"
-                                                    onClick={() => onLaunchInterview(item.raw)}
-                                                >
-                                                    Lancer
-                                                </Button>
-                                            </div>
+                                            <button
+                                                onClick={() => onLaunchInterview(item.raw)}
+                                                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#6d28d9] to-[#4338ca] text-white font-semibold text-[12px] hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-105 transition-all shadow-sm"
+                                            >
+                                                Lancer l'évaluation <ArrowRight size={14} />
+                                            </button>
                                         )}
                                     </td>
                                 </tr>
@@ -926,12 +928,13 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                     </table>
                 </div>
                 {!isLoading && filtered.length > 0 && (
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={setCurrentPage}
-                        className="border-t border-slate-100"
-                    />
+                    <div className="bg-slate-50/50 border-t border-[#e5e0f5] px-6 py-3">
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                        />
+                    </div>
                 )}
             </div>
         </div>
