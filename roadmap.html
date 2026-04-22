@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>ROADMAP</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* Uniquement pour masquer la scrollbar comme demandé */
+        html, body, * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+        *::-webkit-scrollbar { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="capture">
+        <h1 align="center">ROADMAP</h1>
+
+        <table border="1" cellpadding="10" cellspacing="0" width="100%">
+            <thead>
+                <tr bgcolor="#cccccc">
+                    <th>Sprint</th>
+                    <th>Rôle / Responsabilité</th>
+                    <th>Tâche Principale</th>
+                    <th>Objectif</th>
+                    <th>Assigné à</th>
+                    <th>Deadline</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- SPRINT 1 -->
+                <tr>
+                    <td rowspan="5" align="center"><b>SPRINT 1</b><br>Stabilisation</td>
+                    <td bgcolor="#f0f0f0">Backend (Bug Fix)</td>
+                    <td>Résolution bugs critiques</td>
+                    <td>Correction Auth et Uploads (CNI/CV).</td>
+                    <td>Liantsoa</td>
+                    <td align="center">17/04/2026</td>
+                </tr>
+                <tr>
+                    <td bgcolor="#f0f0f0">Backend</td>
+                    <td>Architecture API OPCO</td>
+                    <td>Mise en place de la liaison financeurs.</td>
+                    <td>Jocelyn</td>
+                    <td align="center">29/04/2026</td>
+                </tr>
+                <tr>
+                    <td bgcolor="#f0f0f0">Frontend</td>
+                    <td>Mapping des données</td>
+                    <td>Connexion des formulaires au nouveau Backend.</td>
+                    <td>Aina</td>
+                    <td align="center">17/04/2026</td>
+                </tr>
+                <tr>
+                    <td bgcolor="#f0f0f0">Frontdev UI</td>
+                    <td>Refonte Header/Sidebar</td>
+                    <td>Amélioration de la navigation et du responsive.</td>
+                    <td>Fitia</td>
+                    <td align="center">17/04/2026</td>
+                </tr>
+                <tr>
+                    <td bgcolor="#f0f0f0">Coordination / QA</td>
+                    <td>Audit des données</td>
+                    <td>Validation de la cohérence base de données.</td>
+                    <td>Dola</td>
+                    <td align="center">17/04/2026</td>
+                </tr>
+
+                <tr bgcolor="#000000"><td colspan="6" style="padding: 1px;"></td></tr>
+
+                <!-- SPRINT 2 -->
+                <tr>
+                    <td rowspan="5" align="center"><b>SPRINT 2</b><br>Module RH</td>
+                    <td>Backend (Bug Fix)</td>
+                    <td>Système d'Historique</td>
+                    <td>Tracking des modifications.</td>
+                    <td>Liantsoa</td>
+                    <td align="center">23/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Backend</td>
+                    <td>Moteur PDF automatique</td>
+                    <td>Génération des CERFA et Conventions.</td>
+                    <td>Jocelyn</td>
+                    <td align="center">23/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Frontend</td>
+                    <td>Logique Dashboard RH</td>
+                    <td>Calcul des statistiques et filtres.</td>
+                    <td>Aina</td>
+                    <td align="center">23/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Frontdev UI</td>
+                    <td>Design des Templates PDF</td>
+                    <td>Mise en page pro des documents.</td>
+                    <td>Fitia</td>
+                    <td align="center">23/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Coordination / QA</td>
+                    <td>Tests de génération</td>
+                    <td>Vérification de la conformité PDF.</td>
+                    <td>Dola</td>
+                    <td align="center">23/04/2026</td>
+                </tr>
+
+                <tr bgcolor="#000000"><td colspan="6" style="padding: 1px;"></td></tr>
+
+                <!-- SPRINT 3 -->
+                <tr>
+                    <td rowspan="5" align="center"><b>SPRINT 3</b><br>Étudiant</td>
+                    <td>Backend (Bug Fix)</td>
+                    <td>API Notes & Présences</td>
+                    <td>Endpoints pour le suivi pédagogique.</td>
+                    <td>Liantsoa</td>
+                    <td align="center">28/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Backend</td>
+                    <td>Moteur de Tests Admission</td>
+                    <td>Backend pour les examens en ligne.</td>
+                    <td>Jocelyn</td>
+                    <td align="center">28/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Frontend</td>
+                    <td>Espace Perso Étudiant</td>
+                    <td>Interface de consultation des résultats.</td>
+                    <td>Aina</td>
+                    <td align="center">28/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Frontdev UI</td>
+                    <td>UI Calendrier Interactif</td>
+                    <td>Design du planning et rendez-vous.</td>
+                    <td>Fitia</td>
+                    <td align="center">28/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Coordination / QA</td>
+                    <td>Parcours Utilisateur</td>
+                    <td>Test complet du tunnel d'admission.</td>
+                    <td>Dola</td>
+                    <td align="center">28/04/2026</td>
+                </tr>
+
+                <tr bgcolor="#000000"><td colspan="6" style="padding: 1px;"></td></tr>
+
+                <!-- SPRINT 4 -->
+                <tr>
+                    <td rowspan="5" align="center"><b>SPRINT 4</b><br>Lancement</td>
+                    <td>Backend (Bug Fix)</td>
+                    <td>API Support & Tickets</td>
+                    <td>Gestion des signalements d'anomalies.</td>
+                    <td>Liantsoa</td>
+                    <td align="center">30/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Backend</td>
+                    <td>Sécurité & Rôles Admin</td>
+                    <td>Gestion fine des accès et permissions.</td>
+                    <td>Jocelyn</td>
+                    <td align="center">30/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Frontend</td>
+                    <td>Module de Support UI</td>
+                    <td>Interface de signalement.</td>
+                    <td>Aina</td>
+                    <td align="center">30/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Frontdev UI</td>
+                    <td>Audit UI Final</td>
+                    <td>Polissage final.</td>
+                    <td>Fitia</td>
+                    <td align="center">30/04/2026</td>
+                </tr>
+                <tr>
+                    <td>Coordination / QA</td>
+                    <td>Déploiement Prod</td>
+                    <td>Mise en ligne finale.</td>
+                    <td>Dola</td>
+                    <td align="center">30/04/2026</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p align="right">
+        <button onclick="html2pdf(document.getElementById('capture'), {margin:0.5, filename:'ROADMAP.pdf', jsPDF:{orientation:'landscape'}})">Télécharger PDF</button>
+    </p>
+
+</body>
+</html>
