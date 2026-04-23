@@ -879,12 +879,6 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                             <Users size={16} className="text-slate-400" />
                             {filtered.length} Résultat{filtered.length > 1 ? 's' : ''}
                         </div>
-                        <button className="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 text-[13px] font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm shrink-0">
-                            <Download size={16} className="text-slate-400" /> Exporter listes
-                        </button>
-                        <button className="flex items-center gap-2 px-6 py-3 bg-[#6d28d9] text-white rounded-xl text-[13px] font-semibold hover:bg-[#5b21b6] hover:shadow-lg hover:shadow-indigo-500/20 transition-all shrink-0">
-                            <Calendar size={16} /> Planifier session
-                        </button>
                     </div>
                 </div>
             </div>
