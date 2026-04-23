@@ -733,6 +733,62 @@ export const api = {
     console.log('📤 Mock Register Success:', mockData);
     return mockData;
   },
+  async updateProfile(updateData: any): Promise<any> {
+    const response = await fetch(`${AUTH_API_URL}/profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify(updateData)
+    });
+    if (!response.ok) throw new Error('Erreur lors de la mise à jour du profil');
+    return response.json();
+  },
+  async changePassword(oldPassword: string, newPassword: string): Promise<any> {
+    const response = await fetch(`${AUTH_API_URL}/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify({ oldPassword, newPassword })
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || 'Erreur lors du changement de mot de passe');
+    }
+    return response.json();
+  },
+
+  // --- USER MANAGEMENT (Admin Only) ---
+  async getAllUsers(): Promise<any[]> {
+    const response = await fetch(`${BASE_API_URL}/users`, {
+      headers: { 'Authorization': `Bearer ${getAuthToken()}` }
+    });
+    if (!response.ok) throw new Error('Erreur lors de la récupération des utilisateurs');
+    return response.json();
+  },
+  async updateUserInfo(email: string, updateData: any): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/users/${email}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify(updateData)
+    });
+    if (!response.ok) throw new Error('Erreur lors de la mise à jour de l\'utilisateur');
+    return response.json();
+  },
+  async deleteUser(email: string): Promise<any> {
+    const response = await fetch(`${BASE_API_URL}/users/${email}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${getAuthToken()}` }
+    });
+    if (!response.ok) throw new Error('Erreur lors de la suppression de l\'utilisateur');
+    return response.json();
+  },
 
   // --- HEALTH ---
   async checkHealth(): Promise<boolean> {

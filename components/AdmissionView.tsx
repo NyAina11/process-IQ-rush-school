@@ -34,7 +34,6 @@ import {
     Phone,
     XCircle,
     Ban,
-    Clock,
     PhoneOff,
     UserX,
     MoreHorizontal,

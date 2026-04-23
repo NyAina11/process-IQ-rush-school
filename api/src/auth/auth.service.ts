@@ -35,4 +35,22 @@ export class AuthService {
         const user = await this.usersService.create(userData);
         return this.login(user);
     }
+
+    async updateProfile(email: string, updateData: any) {
+        const user = await this.usersService.update(email, updateData);
+        return {
+            email: user.email,
+            name: user.name,
+            role: user.role
+        };
+    }
+
+    async changePassword(email: string, oldPass: string, newPass: string) {
+        const user = await this.usersService.findOne(email);
+        if (user && verifyPassword(oldPass, user.password)) {
+            await this.usersService.update(email, { password: newPass });
+            return { success: true };
+        }
+        throw new Error('Ancien mot de passe incorrect');
+    }
 }
