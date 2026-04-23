@@ -34,7 +34,6 @@ import {
     Phone,
     XCircle,
     Ban,
-    Clock,
     PhoneOff,
     UserX,
     MoreHorizontal,
@@ -722,6 +721,7 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
     const { showToast } = useAppStore();
     const { candidates, loading: isLoading, refresh } = useCandidates();
     const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'past'>('all');
     const [validatingCandidateId, setValidatingCandidateId] = useState<string | null>(null);
     const rawUserRole = (localStorage.getItem('userRole') || '').trim().toLowerCase();
     const isSuperAdmin = rawUserRole === 'super_admin' || rawUserRole === 'superadmin' || rawUserRole === 'admin';
@@ -763,10 +763,15 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
         const formation = (item.c.formation).toLowerCase();
         const email = (item.c.email).toLowerCase();
 
-        return fullName.includes(searchLower) ||
+        const matchesSearch = fullName.includes(searchLower) ||
             formation.includes(searchLower) ||
             email.includes(searchLower);
-    }), [candidates, searchQuery]);
+
+        if (!matchesSearch) return false;
+        if (statusFilter === 'upcoming') return item.interviewStatus === 'Pending';
+        if (statusFilter === 'past') return item.interviewStatus === 'Completed';
+        return true;
+    }), [candidates, searchQuery, statusFilter]);
 
     const {
         currentPage,
@@ -1911,6 +1916,7 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
         }
     }, [selectedStudent, selectedTab, onClearSelection]);
     const [selectedFormation, setSelectedFormation] = useState<string | null>(null);
+    const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'past'>('all');
 
     const [testCompleted, setTestCompleted] = useState(false);
     const [studentData, setStudentData] = useState<any>(null);
