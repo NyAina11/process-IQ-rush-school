@@ -13,6 +13,21 @@ const BASE_API_URL = (import.meta.env.VITE_BASE_API_URL || '/api').replace(/\/+$
 const AUTH_API_URL = `${BASE_API_URL}/auth`;
 const BASE_URL = `${BASE_API_URL}/admission`;
 const SUPPORT_URL = `${BASE_API_URL}/support`;
+const inFlightJsonRequests = new Map<string, Promise<any>>();
+
+const dedupeJsonRequest = <T>(key: string, loader: () => Promise<T>): Promise<T> => {
+  const existingRequest = inFlightJsonRequests.get(key);
+  if (existingRequest) {
+    return existingRequest as Promise<T>;
+  }
+
+  const request = loader().finally(() => {
+    inFlightJsonRequests.delete(key);
+  });
+
+  inFlightJsonRequests.set(key, request);
+  return request;
+};
 
 const withAuthHeaders = (headers: Record<string, string> = {}): Record<string, string> => {
   const token = getAuthToken();
@@ -763,11 +778,12 @@ export const api = {
 
   // --- USER MANAGEMENT (Admin Only) ---
   async getAllUsers(): Promise<any[]> {
-    const response = await fetch(`${BASE_API_URL}/users`, {
+    const response = await fetch(`${BASE_API_URL}/settings/users`, {
       headers: { 'Authorization': `Bearer ${getAuthToken()}` }
     });
     if (!response.ok) throw new Error('Erreur lors de la récupération des utilisateurs');
-    return response.json();
+    const json = await response.json();
+    return json.data || [];
   },
   async updateUserInfo(email: string, updateData: any): Promise<any> {
     const response = await fetch(`${BASE_API_URL}/users/${email}`, {

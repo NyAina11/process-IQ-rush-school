@@ -93,7 +93,7 @@ const SettingsPage: React.FC = () => {
   const loadUsers = async () => {
     setLoadingUsers(true);
     try {
-      const response = await fetch(`${BASE_API_URL}/users`, {
+      const response = await fetch(`${BASE_API_URL}/settings/users`, {
         method: 'GET',
         headers: withAuthHeaders({ Accept: 'application/json' }),
       });
