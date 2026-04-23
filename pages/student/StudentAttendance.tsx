@@ -1,436 +1,259 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import {
-  AlertTriangle,
-  Calendar,
-  CheckCircle,
+  User,
+  GraduationCap,
+  CheckCircle2,
+  XCircle,
   Clock,
-  Download,
+  Calendar,
   FileText,
-  Target,
-  TrendingUp,
   Upload,
-  XCircle
+  ChevronDown,
+  Download,
+  Check
 } from 'lucide-react';
 import StudentNavbar from '../../components/StudentNavbar';
-import { api } from '../../services/api';
-
-type AttendanceType = 'absence' | 'delay' | 'present';
-type AttendanceStatus = 'pending' | 'justified' | 'unjustified';
-type PeriodFilter = 'this-month' | 'this-semester' | 'this-year';
-
-interface AttendanceRecord {
-  id: string;
-  date: Date;
-  type: AttendanceType;
-  course: string;
-  duration: number;
-  reason: string;
-  status: AttendanceStatus;
-}
-
-const formatDuration = (minutes: number): string => {
-  if (!minutes || minutes <= 0) return '-';
-  if (minutes < 60) return `${minutes} min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
-};
-
-const isInPeriod = (date: Date, period: PeriodFilter): boolean => {
-  const now = new Date();
-  if (period === 'this-month') {
-    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-  }
-  if (period === 'this-year') {
-    return date.getFullYear() === now.getFullYear();
-  }
-  // this-semester: Jan-Jun or Jul-Dec
-  const currentSemester = now.getMonth() < 6 ? 1 : 2;
-  const dateSemester = date.getMonth() < 6 ? 1 : 2;
-  return date.getFullYear() === now.getFullYear() && currentSemester === dateSemester;
-};
 
 const StudentAttendance: React.FC = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('this-semester');
-  const [showJustificationModal, setShowJustificationModal] = useState<boolean>(false);
-  const [records, setRecords] = useState<AttendanceRecord[]>([]);
-  const [selectedAttendanceId, setSelectedAttendanceId] = useState<string>('');
-  const [justificationReason, setJustificationReason] = useState<string>('Medical appointment');
-  const [justificationFile, setJustificationFile] = useState<File | null>(null);
-
-  const loadAttendances = async (): Promise<void> => {
-    try {
-      const studentId = await api.getCurrentStudentId();
-      const attendances = await api.getAttendances(studentId ? String(studentId) : undefined);
-
-      const mapped: AttendanceRecord[] = (Array.isArray(attendances) ? attendances : [])
-        .map((a: any, idx: number) => ({
-          id: String(a._id || a.id || `att-${idx}`),
-          date: a.date ? new Date(a.date) : new Date(),
-          type: (a.type || 'present') as AttendanceType,
-          course: a.course || 'Course',
-          duration: Number(a.duration || 0),
-          reason: a.reason || '-',
-          status: (a.status || 'pending') as AttendanceStatus
-        }))
-        .sort((a, b) => b.date.getTime() - a.date.getTime());
-
-      setRecords(mapped);
-    } catch (err) {
-      console.error('Failed to fetch attendance records', err);
-    }
-  };
-
-  useEffect(() => {
-    loadAttendances();
-  }, []);
-
-  const filteredRecords = useMemo(
-    () => records.filter((r) => isInPeriod(r.date, selectedPeriod)),
-    [records, selectedPeriod]
-  );
-
-  const stats = useMemo(() => {
-    const present = filteredRecords.filter((r) => r.type === 'present').length;
-    const absences = filteredRecords.filter((r) => r.type === 'absence').length;
-    const delays = filteredRecords.filter((r) => r.type === 'delay').length;
-    const totalTracked = present + absences + delays;
-    const presenceRate = totalTracked > 0 ? Math.round((present / totalTracked) * 100) : 0;
-    const totalHours = Math.round(filteredRecords.reduce((sum, r) => sum + r.duration, 0) / 60);
-    const pendingItems = filteredRecords.filter((r) => r.status === 'pending' && r.type !== 'present');
-    const unjustified = filteredRecords.filter((r) => r.status === 'unjustified').length;
-    return { present, absences, delays, totalHours, presenceRate, totalTracked, pendingItems, unjustified };
-  }, [filteredRecords]);
-
-  const allRecordsCount = records.length;
-  const pendingRecords = useMemo(
-    () => records.filter((r) => r.status === 'pending' && r.type !== 'present'),
-    [records]
-  );
-
-  const submitJustification = async (): Promise<void> => {
-    try {
-      if (!selectedAttendanceId) {
-        alert('Select an attendance record first.');
-        return;
-      }
-
-      await api.updateAttendance(selectedAttendanceId, {
-        status: 'justified',
-        reason: justificationReason
-      });
-
-      if (justificationFile) {
-        const studentId = await api.getCurrentStudentId();
-        if (studentId) {
-          await api.uploadStudentDocument({
-            studentId,
-            file: justificationFile,
-            title: `Justification-${new Date().toISOString().slice(0, 10)}-${justificationFile.name}`,
-            description: `Supporting document for attendance record ${selectedAttendanceId}`,
-            category: 'medical',
-            status: 'valid'
-          });
-        }
-      }
-
-      setShowJustificationModal(false);
-      setSelectedAttendanceId('');
-      setJustificationFile(null);
-      await loadAttendances();
-    } catch (error: any) {
-      alert(error.message || 'Unable to submit supporting document');
-    }
-  };
-
-  const periods: Array<{ id: PeriodFilter; label: string }> = [
-    { id: 'this-month', label: 'This month' },
-    { id: 'this-semester', label: 'This semester' },
-    { id: 'this-year', label: 'This year' }
-  ];
-
-  const getStatusBadge = (status: AttendanceStatus): JSX.Element => {
-    if (status === 'pending') return <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Pending</span>;
-    if (status === 'justified') return <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Justified</span>;
-    return <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">Unjustified</span>;
-  };
-
-  const getTypeBadge = (type: AttendanceType): JSX.Element => {
-    if (type === 'absence') return <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">Absence</span>;
-    if (type === 'delay') return <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Delay</span>;
-    return <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Present</span>;
-  };
-
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-8 space-y-6 bg-[#f4f7f9] min-h-screen font-sans">
       <StudentNavbar />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
-          <div className="relative w-64 h-64 mx-auto mb-6">
-            <svg className="w-full h-full" viewBox="0 0 36 36">
-              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#E5E7EB" strokeWidth="3" />
-              <path
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="url(#attendanceGradient)"
-                strokeWidth="3"
-                strokeDasharray={`${stats.presenceRate}, 100`}
-                strokeLinecap="round"
+      {/* Header */}
+      <div className="flex flex-col gap-1 mb-8">
+        <h1 className="text-[28px] font-extrabold text-[#111827]">Mon Espace Étudiant</h1>
+        <div className="flex items-center gap-6 text-[13px] text-[#6b7280] font-medium mt-1">
+          <div className="flex items-center gap-2">
+            <User size={16} className="text-[#8898aa]" />
+            <span>Marie LAMBERT</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <GraduationCap size={16} className="text-[#8898aa]" />
+            <span>BTS NDRC - 1ère année</span>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Top Section */}
+      <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-6 mb-8">
+        {/* Main Presence Chart */}
+        <div className="bg-white rounded-[24px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center">
+          <div className="relative w-48 h-48 mb-6">
+            <svg className="w-full h-full rotate-[-90deg]" viewBox="0 0 100 100">
+              {/* Background circle */}
+              <circle 
+                cx="50" cy="50" r="42" 
+                fill="none" 
+                stroke="#f3f4f6" 
+                strokeWidth="8" 
               />
-              <defs>
-                <linearGradient id="attendanceGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#10B981" />
-                  <stop offset="100%" stopColor="#34D399" />
-                </linearGradient>
-              </defs>
+              {/* Progress circle */}
+              <circle 
+                cx="50" cy="50" r="42" 
+                fill="none" 
+                stroke="#10b981" 
+                strokeWidth="8" 
+                strokeDasharray="263.8" 
+                strokeDashoffset={263.8 * (1 - 0.94)}
+                strokeLinecap="round" 
+              />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="text-5xl font-bold text-green-600">{stats.presenceRate}%</div>
-              <div className="text-gray-600 mt-2">Presence rate</div>
+              <span className="text-[42px] font-extrabold text-[#111827] leading-none">94%</span>
+              <span className="text-[13px] font-bold text-gray-400 mt-1">Présence</span>
             </div>
           </div>
-          <div className="flex justify-center gap-3 flex-wrap">
-            <span className="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold flex items-center gap-2">
-              <Target size={16} />
-              Target: 90%
-            </span>
-            <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold flex items-center gap-2">
-              <TrendingUp size={16} />
-              {stats.presenceRate >= 90 ? 'On target' : 'Below target'}
-            </span>
+          <div className="bg-[#ecfdf5] text-[#10b981] px-5 py-2 rounded-full text-[13px] font-extrabold shadow-sm border border-[#d1fae5]">
+            Objectif: 90% ✓
           </div>
         </div>
 
-        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-green-100 rounded-xl text-green-600"><CheckCircle size={24} /></div>
+        {/* Smaller Metrics Grid (Right side) */}
+        <div className="grid grid-rows-2 gap-6 col-span-2">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-white rounded-[24px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-start gap-5">
+              <div className="bg-[#f0fdf4] text-[#10b981] p-4 rounded-2xl">
+                <CheckCircle2 size={28} />
+              </div>
               <div>
-                <div className="text-3xl font-bold text-green-600">{stats.present}</div>
-                <div className="text-sm text-gray-600">Presences</div>
+                <div className="text-[32px] font-extrabold text-[#111827] leading-none mb-1">47</div>
+                <div className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Présences</div>
+                <div className="text-[12px] font-bold text-[#10b981] mt-2">Sur 50 cours programmés</div>
               </div>
             </div>
-            <div className="text-sm text-green-600 font-medium">Out of {stats.totalTracked} tracked records</div>
+            <div className="bg-white rounded-[24px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-start gap-5">
+              <div className="bg-[#fef2f2] text-[#ef4444] p-4 rounded-2xl">
+                <XCircle size={28} />
+              </div>
+              <div>
+                <div className="text-[32px] font-extrabold text-[#111827] leading-none mb-1">3</div>
+                <div className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Absences</div>
+                <div className="text-[12px] font-bold text-[#ef4444] mt-2">1 non justifiée</div>
+              </div>
+            </div>
           </div>
-
-          <div className="bg-white border border-gray-200 rounded-2xl p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-red-100 rounded-xl text-red-600"><XCircle size={24} /></div>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-white rounded-[24px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-start gap-5">
+              <div className="bg-[#fffbeb] text-[#f59e0b] p-4 rounded-2xl">
+                <Clock size={28} />
+              </div>
               <div>
-                <div className="text-3xl font-bold text-red-600">{stats.absences}</div>
-                <div className="text-sm text-gray-600">Absences</div>
+                <div className="text-[32px] font-extrabold text-[#111827] leading-none mb-1">2</div>
+                <div className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Retards</div>
+                <div className="text-[12px] font-bold text-[#f59e0b] mt-2">35 min cumulées</div>
               </div>
             </div>
-            <div className="text-sm text-red-600 font-medium">{stats.unjustified} unjustified</div>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-2xl p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-yellow-100 rounded-xl text-yellow-600"><Clock size={24} /></div>
+            <div className="bg-white rounded-[24px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-start gap-5">
+              <div className="bg-[#eff6ff] text-[#3b82f6] p-4 rounded-2xl">
+                <Calendar size={28} />
+              </div>
               <div>
-                <div className="text-3xl font-bold text-yellow-600">{stats.delays}</div>
-                <div className="text-sm text-gray-600">Delays</div>
+                <div className="text-[32px] font-extrabold text-[#111827] leading-none mb-1">420h</div>
+                <div className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Heures effectuées</div>
+                <div className="text-[12px] font-bold text-[#3b82f6] mt-2">Sur 1680h prévues</div>
               </div>
             </div>
-            <div className="text-sm text-yellow-700 font-medium">Pending: {stats.pendingItems.length}</div>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-2xl p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-blue-100 rounded-xl text-blue-600"><Calendar size={24} /></div>
-              <div>
-                <div className="text-3xl font-bold text-blue-600">{stats.totalHours}h</div>
-                <div className="text-sm text-gray-600">Tracked hours</div>
-              </div>
-            </div>
-            <div className="text-sm text-blue-700 font-medium">From filtered records</div>
           </div>
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200 rounded-2xl p-6 mb-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-yellow-500 rounded-xl flex items-center justify-center">
-              <FileText size={28} className="text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-yellow-900 text-lg mb-1">{stats.pendingItems.length} supporting document(s) pending</h3>
-              <p className="text-yellow-700 text-sm">
-                {stats.pendingItems.length > 0
-                  ? `Latest pending date: ${stats.pendingItems[0].date.toLocaleDateString('fr-FR')}`
-                  : 'No pending justification.'}
-              </p>
-            </div>
+      {/* Yellow Alert Banner */}
+      <div className="bg-gradient-to-r from-[#fff9c4] to-[#fffde7] rounded-[24px] p-6 shadow-sm flex items-center justify-between border border-[#fef08a]">
+        <div className="flex items-center gap-5">
+          <div className="bg-[#f59e0b] text-white p-3.5 rounded-2xl shadow-md">
+            <FileText size={24} strokeWidth={2.5} />
           </div>
-
-          <button
-            onClick={() => {
-              setSelectedAttendanceId(stats.pendingItems[0]?.id || '');
-              setShowJustificationModal(true);
-            }}
-            className="px-6 py-3 bg-yellow-500 text-white rounded-xl font-semibold flex items-center gap-3 hover:bg-yellow-600 transition-colors"
-          >
-            <Upload size={20} />
-            Send supporting document
-          </button>
+          <div>
+            <div className="text-[16px] font-extrabold text-[#854d0e]">1 justificatif en attente</div>
+            <div className="text-[13px] font-bold text-[#a16207] opacity-80 mt-0.5">Absence du 20/01/2026 • Deadline: 27/01</div>
+          </div>
         </div>
+        <button className="flex items-center gap-2 px-6 py-3 bg-[#f59e0b] text-white rounded-[14px] text-[14px] font-extrabold shadow-md hover:bg-[#d97706] transition-colors">
+          <Upload size={18} /> Envoyer un justificatif
+        </button>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-        <div className="p-6 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      {/* History Table Section */}
+      <div className="bg-white rounded-[24px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Calendar size={20} className="text-blue-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">History of attendance</h3>
-              <p className="text-sm text-gray-600">Fetched from MongoDB attendance records</p>
-            </div>
+            <div className="text-[20px]">📋</div>
+            <h3 className="text-[18px] font-extrabold text-[#111827]">Historique des absences et retards</h3>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value as PeriodFilter)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {periods.map((period) => (
-                <option key={period.id} value={period.id}>{period.label}</option>
-              ))}
-            </select>
-
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg font-medium flex items-center gap-2 hover:bg-blue-600 transition-colors">
-              <Download size={16} />
-              Attendance certificate
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-100 rounded-xl text-[13px] font-extrabold text-[#111827] bg-[#f8fafc] hover:bg-gray-100 transition-colors">
+              Ce mois <ChevronDown size={14} />
+            </button>
+            <button className="flex items-center gap-2 px-6 py-2.5 bg-[#3b82f6] text-white rounded-xl text-[13px] font-extrabold shadow-md shadow-blue-100 hover:bg-blue-600 transition-colors">
+              <Download size={16} /> Attestation de présence
             </button>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="p-4 text-left text-sm font-semibold text-gray-600">Date</th>
-                <th className="p-4 text-left text-sm font-semibold text-gray-600">Type</th>
-                <th className="p-4 text-left text-sm font-semibold text-gray-600">Course</th>
-                <th className="p-4 text-left text-sm font-semibold text-gray-600">Duration</th>
-                <th className="p-4 text-left text-sm font-semibold text-gray-600">Reason</th>
-                <th className="p-4 text-center text-sm font-semibold text-gray-600">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRecords.length === 0 && (
-                <tr>
-                  <td className="p-6 text-center text-gray-500" colSpan={6}>
-                    {allRecordsCount > 0
-                      ? 'Aucune donnee pour ce filtre. Change la periode pour voir les autres presences.'
-                      : 'Aucune donnee de presence trouvee pour cet etudiant.'}
-                  </td>
-                </tr>
-              )}
-              {filteredRecords.map((record) => (
-                <tr key={record.id} className={`border-b border-gray-200 hover:bg-gray-50 ${record.status === 'pending' ? 'bg-yellow-50' : ''}`}>
-                  <td className="p-4 font-medium">{record.date.toLocaleDateString('fr-FR')}</td>
-                  <td className="p-4">{getTypeBadge(record.type)}</td>
-                  <td className="p-4 font-medium">{record.course}</td>
-                  <td className="p-4">{formatDuration(record.duration)}</td>
-                  <td className="p-4 text-gray-600">{record.reason || '-'}</td>
-                  <td className="p-4 text-center">{getStatusBadge(record.status)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Date</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Type</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Cours concerné</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Durée</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Motif</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Statut</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Row 1 - Pending */}
+            <tr className="bg-[#fffcf0] border-b border-[#fef9c3] hover:bg-[#fff9e0] transition-colors">
+              <td className="py-5 px-4 text-[14px] font-extrabold text-[#111827]">20/01/2026</td>
+              <td className="py-5 px-4">
+                <span className="bg-[#fee2e2] text-[#ef4444] px-3 py-1 rounded-full text-[10px] font-extrabold">Absence</span>
+              </td>
+              <td className="py-5 px-4 text-[14px] font-extrabold text-[#111827]">Marketing digital</td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-500">3h00</td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-300">-</td>
+              <td className="py-5 px-4">
+                <span className="flex items-center gap-1.5 text-[#f59e0b] text-[13px] font-extrabold">
+                  <Clock size={14} /> En attente
+                </span>
+              </td>
+              <td className="py-5 px-4">
+                <button className="bg-[#f59e0b] text-white px-5 py-2 rounded-xl text-[12px] font-extrabold shadow-sm hover:bg-[#d97706] transition-colors">
+                  Justifier
+                </button>
+              </td>
+            </tr>
 
-        <div className="p-4 bg-gray-50 border-t border-gray-200">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <div className="text-gray-600">
-              Showing <span className="font-semibold">{filteredRecords.length}</span> records
-            </div>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span className="text-gray-600">Justified</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <span className="text-gray-600">Pending</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <span className="text-gray-600">Unjustified</span>
-              </div>
-            </div>
-            <div className="text-blue-600 font-medium flex items-center gap-2">
-              <AlertTriangle size={16} />
-              Pending justifications: {stats.pendingItems.length}
-            </div>
-          </div>
-        </div>
+            {/* Row 2 - Justified */}
+            <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+              <td className="py-5 px-4 text-[14px] font-extrabold text-[#111827]">15/01/2026</td>
+              <td className="py-5 px-4">
+                <span className="bg-[#fef3c7] text-[#f59e0b] px-3 py-1 rounded-full text-[10px] font-extrabold">Retard</span>
+              </td>
+              <td className="py-5 px-4 text-[14px] font-extrabold text-[#111827]">Négociation commerciale</td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-500">20 min</td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-400">Transport</td>
+              <td className="py-5 px-4">
+                <span className="flex items-center gap-1.5 text-[#22c55e] text-[13px] font-extrabold">
+                  <Check size={14} strokeWidth={3} /> Justifié
+                </span>
+              </td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-300">-</td>
+            </tr>
+
+            {/* Row 3 - Justified */}
+            <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+              <td className="py-5 px-4 text-[14px] font-extrabold text-[#111827]">08/01/2026</td>
+              <td className="py-5 px-4">
+                <span className="bg-[#fee2e2] text-[#ef4444] px-3 py-1 rounded-full text-[10px] font-extrabold">Absence</span>
+              </td>
+              <td className="py-5 px-4 text-[14px] font-extrabold text-[#111827]">Anglais professionnel</td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-500">2h00</td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-400">Maladie</td>
+              <td className="py-5 px-4">
+                <span className="flex items-center gap-1.5 text-[#22c55e] text-[13px] font-extrabold">
+                  <Check size={14} strokeWidth={3} /> Justifié
+                </span>
+              </td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-300">-</td>
+            </tr>
+
+            {/* Row 4 - Justified */}
+            <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+              <td className="py-5 px-4 text-[14px] font-extrabold text-[#111827]">18/12/2025</td>
+              <td className="py-5 px-4">
+                <span className="bg-[#fef3c7] text-[#f59e0b] px-3 py-1 rounded-full text-[10px] font-extrabold">Retard</span>
+              </td>
+              <td className="py-5 px-4 text-[14px] font-extrabold text-[#111827]">Culture générale</td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-500">15 min</td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-400">Personnel</td>
+              <td className="py-5 px-4">
+                <span className="flex items-center gap-1.5 text-[#22c55e] text-[13px] font-extrabold">
+                  <Check size={14} strokeWidth={3} /> Justifié
+                </span>
+              </td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-300">-</td>
+            </tr>
+
+            {/* Row 5 - Justified */}
+            <tr className="hover:bg-gray-50/50 transition-colors">
+              <td className="py-5 px-4 text-[14px] font-extrabold text-[#111827]">02/12/2025</td>
+              <td className="py-5 px-4">
+                <span className="bg-[#fee2e2] text-[#ef4444] px-3 py-1 rounded-full text-[10px] font-extrabold">Absence</span>
+              </td>
+              <td className="py-5 px-4 text-[14px] font-extrabold text-[#111827]">GRC - Relation client</td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-500">3h00</td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-400">RDV médical</td>
+              <td className="py-5 px-4">
+                <span className="flex items-center gap-1.5 text-[#22c55e] text-[13px] font-extrabold">
+                  <Check size={14} strokeWidth={3} /> Justifié
+                </span>
+              </td>
+              <td className="py-5 px-4 text-[14px] font-bold text-gray-300">-</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
-      {showJustificationModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">Justify an absence</h3>
-              <button onClick={() => setShowJustificationModal(false)} className="text-gray-400 hover:text-gray-600">X</button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Attendance record</label>
-                <select
-                  value={selectedAttendanceId}
-                  onChange={(e) => setSelectedAttendanceId(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select a pending item</option>
-                  {pendingRecords.map((record) => (
-                    <option key={record.id} value={record.id}>
-                      {record.date.toLocaleDateString('fr-FR')} - {record.course}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Reason</label>
-                <select
-                  value={justificationReason}
-                  onChange={(e) => setJustificationReason(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="Medical appointment">Medical appointment</option>
-                  <option value="Transportation issue">Transportation issue</option>
-                  <option value="Family emergency">Family emergency</option>
-                  <option value="Other reason">Other reason</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Supporting document</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="mx-auto text-gray-400 mb-2" size={24} />
-                  <p className="text-sm text-gray-600 mb-2">Upload your file</p>
-                  <input type="file" onChange={(e) => setJustificationFile(e.target.files?.[0] || null)} className="mx-auto text-sm" />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button onClick={() => setShowJustificationModal(false)} className="flex-1 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-                  Cancel
-                </button>
-                <button onClick={submitJustification} className="flex-1 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors">
-                  Send
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

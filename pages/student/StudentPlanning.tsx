@@ -1,481 +1,201 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, Download, Building, BookOpen, Plus } from 'lucide-react';
+import React from 'react';
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  User,
+  GraduationCap
+} from 'lucide-react';
 import StudentNavbar from '../../components/StudentNavbar';
-import { useApi } from '../../hooks/useApi';
-import { api } from '../../services/api';
-import { getAuthUserId } from '../../services/session';
-
-type PlanningType = 'course' | 'company' | 'exam' | 'meeting';
-
-interface PlanningEvent {
-  id: string;
-  title: string;
-  location: string;
-  teacher: string;
-  type: PlanningType;
-  color: string;
-  start: Date | null;
-  end: Date | null;
-  allDay: boolean;
-}
-
-interface Day {
-  date: Date;
-  key: string;
-  dayName: string;
-  dayNumber: string;
-  month: string;
-}
-
-const TYPE_GRADIENT: Record<PlanningType, string> = {
-  course: 'from-blue-500 to-blue-600',
-  company: 'from-green-500 to-green-600',
-  exam: 'from-red-500 to-red-600',
-  meeting: 'from-yellow-500 to-yellow-600'
-};
-
-const TYPE_LABEL: Record<PlanningType, string> = {
-  course: 'Course',
-  company: 'Company',
-  exam: 'Exam',
-  meeting: 'Meeting'
-};
-
-const asPlanningType = (value: string): PlanningType => {
-  if (value === 'course' || value === 'company' || value === 'exam' || value === 'meeting') return value;
-  return 'meeting';
-};
-
-const startOfWeekMonday = (date: Date): Date => {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
-
-const formatTimeRange = (start: Date | null, end: Date | null, allDay: boolean): string => {
-  if (!start || !end) return '';
-  if (allDay) return 'Full day';
-  return `${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-};
 
 const StudentPlanning: React.FC = () => {
-  const [weekStart, setWeekStart] = useState<Date>(() => startOfWeekMonday(new Date()));
-  const [activeFilter, setActiveFilter] = useState<'all' | PlanningType>('all');
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [remoteEvents, setRemoteEvents] = useState<PlanningEvent[]>([]);
-  const [studentResolved, setStudentResolved] = useState<boolean>(false);
-  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
-  const [meetingTitle, setMeetingTitle] = useState<string>('Student follow-up meeting');
-  const [meetingDate, setMeetingDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [meetingTime, setMeetingTime] = useState<string>('14:00');
-  const [meetingDuration, setMeetingDuration] = useState<number>(30);
-  const [meetingLocation, setMeetingLocation] = useState<string>('Office 105');
-  const { execute: fetchEvents, loading } = useApi(api.getEvents, { silentLoading: true });
-
-  const loadEvents = useCallback(async () => {
-    try {
-      const studentId = await api.getCurrentStudentId();
-      setStudentResolved(Boolean(studentId));
-      if (!studentId) {
-        setRemoteEvents([]);
-        return;
-      }
-      const raw = await fetchEvents(studentId);
-      const mapped: PlanningEvent[] = (Array.isArray(raw) ? raw : []).map((e: any, idx: number) => ({
-        id: e._id || e.id || `event-${idx}`,
-        title: e.title || 'Event',
-        location: e.location || '',
-        teacher: e.teacher || '',
-        type: asPlanningType(String(e.type || 'meeting')),
-        color: e.color || '#3B82F6',
-        start: e.start ? new Date(e.start) : null,
-        end: e.end ? new Date(e.end) : null,
-        allDay: Boolean(e.allDay)
-      }));
-      setRemoteEvents(mapped);
-    } catch (err) {
-      console.error('Failed to fetch events', err);
-      setRemoteEvents([]);
-    }
-  }, [fetchEvents]);
-
-  useEffect(() => {
-    (async () => {
-      await loadEvents();
-    })();
-  }, [loadEvents]);
-
-  const weekDays: Day[] = useMemo(() => {
-    return Array.from({ length: 5 }).map((_, i) => {
-      const d = new Date(weekStart);
-      d.setDate(weekStart.getDate() + i);
-      return {
-        date: d,
-        key: d.toISOString(),
-        dayName: d.toLocaleDateString('en', { weekday: 'short' }),
-        dayNumber: d.toLocaleDateString('en', { day: '2-digit' }),
-        month: d.toLocaleDateString('en', { month: 'short' })
-      };
-    });
-  }, [weekStart]);
-
-  const weekEnd = useMemo(() => {
-    const d = new Date(weekStart);
-    d.setDate(weekStart.getDate() + 5);
-    return d;
-  }, [weekStart]);
-
-  const eventsInWeek = useMemo(() => {
-    return remoteEvents.filter((e) => {
-      if (!e.start) return false;
-      return e.start >= weekStart && e.start < weekEnd;
-    });
-  }, [remoteEvents, weekStart, weekEnd]);
-
-  const filteredEvents = useMemo(() => {
-    if (activeFilter === 'all') return eventsInWeek;
-    return eventsInWeek.filter((e) => e.type === activeFilter);
-  }, [eventsInWeek, activeFilter]);
-
-  const morningColumns: PlanningEvent[][] = useMemo(() => {
-    const cols: PlanningEvent[][] = Array.from({ length: 5 }, () => []);
-    filteredEvents.forEach((e) => {
-      if (!e.start) return;
-      const jsDay = e.start.getDay();
-      const idx = jsDay === 0 ? -1 : jsDay - 1;
-      if (idx < 0 || idx > 4) return;
-      if (e.allDay || e.start.getHours() < 12) cols[idx].push(e);
-    });
-    cols.forEach((col) => col.sort((a, b) => (a.start?.getTime() || 0) - (b.start?.getTime() || 0)));
-    return cols;
-  }, [filteredEvents]);
-
-  const afternoonColumns: PlanningEvent[][] = useMemo(() => {
-    const cols: PlanningEvent[][] = Array.from({ length: 5 }, () => []);
-    filteredEvents.forEach((e) => {
-      if (!e.start) return;
-      const jsDay = e.start.getDay();
-      const idx = jsDay === 0 ? -1 : jsDay - 1;
-      if (idx < 0 || idx > 4) return;
-      if (!e.allDay && e.start.getHours() >= 12) cols[idx].push(e);
-    });
-    cols.forEach((col) => col.sort((a, b) => (a.start?.getTime() || 0) - (b.start?.getTime() || 0)));
-    return cols;
-  }, [filteredEvents]);
-
-  const allVisibleEvents = useMemo(
-    () => [...morningColumns.flat(), ...afternoonColumns.flat()],
-    [morningColumns, afternoonColumns]
-  );
-
-  const selectedEvent = allVisibleEvents.find((e) => e.id === selectedEventId) || null;
-
-  const navigateWeek = (direction: -1 | 1): void => {
-    setWeekStart((prev) => {
-      const next = new Date(prev);
-      next.setDate(prev.getDate() + direction * 7);
-      return next;
-    });
-  };
-
-  const filters: Array<{ id: 'all' | PlanningType; label: string }> = [
-    { id: 'all', label: 'All' },
-    { id: 'course', label: 'Course' },
-    { id: 'company', label: 'Company' },
-    { id: 'exam', label: 'Exam' },
-    { id: 'meeting', label: 'Meeting' }
-  ];
-
-  const formatIcsDate = (date: Date): string => {
-    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  };
-
-  const exportIcal = (): void => {
-    const lines = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//ProcessIQ//StudentPlanning//EN'
-    ];
-    filteredEvents.forEach((event) => {
-      if (!event.start || !event.end) return;
-      lines.push('BEGIN:VEVENT');
-      lines.push(`UID:${event.id}@processiq.local`);
-      lines.push(`DTSTAMP:${formatIcsDate(new Date())}`);
-      lines.push(`DTSTART:${formatIcsDate(event.start)}`);
-      lines.push(`DTEND:${formatIcsDate(event.end)}`);
-      lines.push(`SUMMARY:${event.title}`);
-      lines.push(`LOCATION:${event.location || ''}`);
-      lines.push(`DESCRIPTION:${event.teacher || ''}`);
-      lines.push('END:VEVENT');
-    });
-    lines.push('END:VCALENDAR');
-    const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `planning-${weekStart.toISOString().slice(0, 10)}.ics`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const createMeeting = async (): Promise<void> => {
-    try {
-      const studentId = await api.getCurrentStudentId();
-      const ownerId = getAuthUserId();
-      if (!studentId) {
-        alert('No student linked to this session.');
-        return;
-      }
-      if (!ownerId) {
-        alert('No authenticated user found. Please sign in again.');
-        return;
-      }
-
-      const start = new Date(`${meetingDate}T${meetingTime}:00`);
-      const end = new Date(start.getTime() + meetingDuration * 60 * 1000);
-      await api.createEvent({
-        title: meetingTitle,
-        start: start.toISOString(),
-        end: end.toISOString(),
-        allDay: false,
-        location: meetingLocation,
-        teacher: 'Pedagogy team',
-        type: 'meeting',
-        color: '#F59E0B',
-        description: 'Meeting created from student interface',
-        attendees: [{ studentId, status: 'confirmed' }],
-        ownerId,
-        ownerType: 'student',
-        source: 'student'
-      });
-      setShowCreateModal(false);
-      await loadEvents();
-    } catch (error: any) {
-      alert(error.message || 'Unable to create meeting');
-    }
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="p-8 space-y-6 bg-[#f4f7f9] min-h-screen font-sans">
       <StudentNavbar />
 
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigateWeek(-1)}
-            className="w-10 h-10 border border-gray-300 bg-white rounded-xl flex items-center justify-center hover:bg-gray-50 transition-colors"
-          >
-            <ChevronLeft size={20} className="text-gray-600" />
-          </button>
+      {/* Header */}
+      <div className="flex flex-col gap-1 mb-8">
+        <h1 className="text-[28px] font-extrabold text-[#111827]">Mon Espace Étudiant</h1>
+        <div className="flex items-center gap-6 text-[13px] text-[#6b7280] font-medium mt-1">
+          <div className="flex items-center gap-2">
+            <User size={16} className="text-[#8898aa]" />
+            <span>Marie LAMBERT</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <GraduationCap size={16} className="text-[#8898aa]" />
+            <span>BTS NDRC - 1ère année</span>
+          </div>
+        </div>
+      </div>
 
-          <div className="text-center">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">
-              Week of {weekDays[0].month} {weekDays[0].dayNumber}, {weekDays[0].date.getFullYear()}
-            </h2>
-            <div className="flex items-center gap-3 justify-center">
-              <span className="text-sm text-gray-600">
-                {weekStart.toLocaleDateString('en', { month: 'short', day: '2-digit' })} -{' '}
-                {weekDays[4].date.toLocaleDateString('en', { month: 'short', day: '2-digit', year: 'numeric' })}
-              </span>
-              <span className="text-sm text-gray-400">-</span>
-              <span className="text-sm text-gray-600">{loading ? 'Loading...' : `${filteredEvents.length} events`}</span>
+      {/* Planning Card */}
+      <div className="bg-white rounded-[24px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        
+        {/* Top Controls */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-6">
+            <button className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 transition-colors">
+              <ChevronLeft size={18} strokeWidth={2.5} />
+            </button>
+            <div className="text-center">
+              <h2 className="text-[20px] font-extrabold text-[#111827]">Semaine du 27 Janvier 2026</h2>
+              <div className="text-[13px] font-medium text-gray-400 mt-0.5">Semaine 5 • Janvier 2026</div>
+            </div>
+            <button className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 transition-colors">
+              <ChevronRight size={18} strokeWidth={2.5} />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-[12px] text-[14px] font-extrabold text-[#111827] hover:bg-gray-50 transition-colors">
+              <CalendarIcon size={18} />
+              Mois
+            </button>
+            <button className="flex items-center gap-2 px-5 py-2.5 bg-[#3b82f6] text-white rounded-[12px] text-[14px] font-extrabold shadow-md shadow-blue-200 hover:bg-blue-600 transition-colors">
+              <Download size={18} strokeWidth={2.5} />
+              Exporter iCal
+            </button>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-3 mb-8">
+          <button className="px-6 py-2 bg-[#3b82f6] text-white rounded-[10px] text-[13px] font-extrabold">Tout</button>
+          <button className="px-5 py-2 border border-gray-200 text-gray-700 rounded-[10px] text-[13px] font-extrabold flex items-center gap-2.5 hover:bg-gray-50">
+            <div className="w-2 h-2 rounded-full bg-[#3b82f6]"></div> Cours
+          </button>
+          <button className="px-5 py-2 border border-gray-200 text-gray-700 rounded-[10px] text-[13px] font-extrabold flex items-center gap-2.5 hover:bg-gray-50">
+            <div className="w-2 h-2 rounded-full bg-[#22c55e]"></div> Entreprise
+          </button>
+          <button className="px-5 py-2 border border-gray-200 text-gray-700 rounded-[10px] text-[13px] font-extrabold flex items-center gap-2.5 hover:bg-gray-50">
+            <div className="w-2 h-2 rounded-full bg-[#ec4899]"></div> Examens
+          </button>
+          <button className="px-5 py-2 border border-gray-200 text-gray-700 rounded-[10px] text-[13px] font-extrabold flex items-center gap-2.5 hover:bg-gray-50">
+            <div className="w-2 h-2 rounded-full bg-[#6366f1]"></div> RDV
+          </button>
+        </div>
+
+        {/* The Grid */}
+        <div className="border border-gray-100 rounded-[20px] overflow-hidden">
+          {/* Header Row */}
+          <div className="grid grid-cols-[100px_1fr_1fr_1fr_1fr_1fr] border-b border-gray-100 bg-white">
+            <div className="p-4 flex flex-col items-center justify-center border-r border-gray-100">
+              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">HORAIRE</span>
+            </div>
+            <div className="p-4 flex flex-col items-center justify-center border-r border-gray-100">
+              <span className="text-[16px] font-extrabold text-[#1f2937]">Lun. 27</span>
+              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">JANVIER</span>
+            </div>
+            <div className="p-4 flex flex-col items-center justify-center border-r border-gray-100">
+              <span className="text-[16px] font-extrabold text-[#1f2937]">Mar. 28</span>
+              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">JANVIER</span>
+            </div>
+            <div className="p-4 flex flex-col items-center justify-center border-r border-gray-100">
+              <span className="text-[16px] font-extrabold text-[#1f2937]">Mer. 29</span>
+              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">JANVIER</span>
+            </div>
+            <div className="p-4 flex flex-col items-center justify-center border-r border-gray-100">
+              <span className="text-[16px] font-extrabold text-[#1f2937]">Jeu. 30</span>
+              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">JANVIER</span>
+            </div>
+            <div className="p-4 flex flex-col items-center justify-center">
+              <span className="text-[16px] font-extrabold text-[#1f2937]">Ven. 31</span>
+              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">JANVIER</span>
             </div>
           </div>
 
-          <button
-            onClick={() => navigateWeek(1)}
-            className="w-10 h-10 border border-gray-300 bg-white rounded-xl flex items-center justify-center hover:bg-gray-50 transition-colors"
-          >
-            <ChevronRight size={20} className="text-gray-600" />
-          </button>
-        </div>
+          {/* Body */}
+          <div className="grid grid-cols-[100px_1fr_1fr_1fr_1fr_1fr] grid-rows-[minmax(160px,auto)_minmax(160px,auto)] bg-white">
+            
+            {/* HORAIRE col */}
+            <div className="col-start-1 row-start-1 flex flex-col items-center justify-center border-r border-b border-gray-100">
+              <span className="text-[12px] font-extrabold text-gray-400">9h00 -</span>
+              <span className="text-[12px] font-extrabold text-gray-400">12h00</span>
+            </div>
+            <div className="col-start-1 row-start-2 flex flex-col items-center justify-center border-r border-gray-100">
+              <span className="text-[12px] font-extrabold text-gray-400">14h00 -</span>
+              <span className="text-[12px] font-extrabold text-gray-400">17h00</span>
+            </div>
 
-        <div className="flex gap-3">
-          <button
-            onClick={() => setWeekStart(startOfWeekMonday(new Date()))}
-            className="px-4 py-2 border border-gray-300 bg-white rounded-lg font-medium flex items-center gap-2 hover:bg-gray-50 transition-colors"
-          >
-            <Calendar size={16} />
-            Month
-          </button>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 border border-blue-300 bg-white text-blue-600 rounded-lg font-medium flex items-center gap-2 hover:bg-blue-50 transition-colors"
-          >
-            <Plus size={16} />
-            New meeting
-          </button>
-          <button onClick={exportIcal} className="px-4 py-2 bg-blue-500 text-white rounded-lg font-medium flex items-center gap-2 hover:bg-blue-600 transition-colors">
-            <Download size={16} />
-            Export iCal
-          </button>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2 mb-6">
-        {filters.map((filter) => (
-          <button
-            key={filter.id}
-            onClick={() => setActiveFilter(filter.id)}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
-              activeFilter === filter.id ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {filter.label}
-          </button>
-        ))}
-      </div>
-      {!studentResolved && (
-        <div className="mb-6 rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
-          Aucun etudiant associe a cette session. Reconnecte-toi avec un compte etudiant lie.
-        </div>
-      )}
-      {studentResolved && filteredEvents.length === 0 && (
-        <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
-          Aucun evenement pour cet etudiant sur cette periode.
-        </div>
-      )}
-
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="grid grid-cols-6 bg-gray-50 border-b border-gray-200">
-          <div className="p-4 font-semibold text-gray-500 text-center border-r border-gray-200">Hourly</div>
-          {weekDays.map((day) => (
-            <div key={day.key} className="p-4 text-center border-r border-gray-200 last:border-r-0">
-              <div className="font-bold text-gray-900">
-                {day.dayName} {day.dayNumber}
+            {/* Lundi */}
+            <div className="col-start-2 row-start-1 p-3 border-r border-b border-gray-100">
+              <div className="bg-[#3b82f6] h-full rounded-[14px] p-4 text-white flex flex-col justify-between shadow-sm hover:scale-[1.01] transition-transform cursor-pointer">
+                <div className="font-extrabold text-[15px]">Négociation</div>
+                <div>
+                  <div className="text-[12px] font-extrabold opacity-90">9h00 - 12h00</div>
+                  <div className="text-[12px] font-medium opacity-80 mt-0.5">Salle 201</div>
+                </div>
               </div>
-              <div className="text-sm text-gray-500">{day.month}</div>
             </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-6 min-h-[170px] border-b border-gray-200">
-          <div className="p-4 font-semibold text-gray-500 text-center border-r border-gray-200 flex flex-col justify-center">
-            <div>09:00</div>
-            <div className="text-sm">12:00</div>
-          </div>
-          {morningColumns.map((dayEvents, dayIndex) => (
-            <div key={`m-${dayIndex}`} className="p-2 border-r border-gray-200 last:border-r-0 space-y-2">
-              {dayEvents.map((event) => (
-                <button
-                  key={event.id}
-                  onClick={() => setSelectedEventId(event.id)}
-                  className={`w-full text-left bg-gradient-to-br ${TYPE_GRADIENT[event.type]} text-white p-3 rounded-xl transition-transform hover:scale-[1.01]`}
-                >
-                  <div className="font-semibold text-sm">{event.title}</div>
-                  <div className="text-xs opacity-90">{formatTimeRange(event.start, event.end, event.allDay)}</div>
-                  {event.location ? <div className="text-xs opacity-80 mt-1">{event.location}</div> : null}
-                  {event.teacher ? <div className="text-xs opacity-80">{event.teacher}</div> : null}
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-6 min-h-[170px]">
-          <div className="p-4 font-semibold text-gray-500 text-center border-r border-gray-200 flex flex-col justify-center">
-            <div>14:00</div>
-            <div className="text-sm">17:00</div>
-          </div>
-          {afternoonColumns.map((dayEvents, dayIndex) => (
-            <div key={`a-${dayIndex}`} className="p-2 border-r border-gray-200 last:border-r-0 space-y-2">
-              {dayEvents.map((event) => (
-                <button
-                  key={event.id}
-                  onClick={() => setSelectedEventId(event.id)}
-                  className={`w-full text-left bg-gradient-to-br ${TYPE_GRADIENT[event.type]} text-white p-3 rounded-xl transition-transform hover:scale-[1.01]`}
-                >
-                  <div className="font-semibold text-sm">{event.title}</div>
-                  <div className="text-xs opacity-90">{formatTimeRange(event.start, event.end, event.allDay)}</div>
-                  {event.location ? <div className="text-xs opacity-80 mt-1">{event.location}</div> : null}
-                  {event.teacher ? <div className="text-xs opacity-80">{event.teacher}</div> : null}
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-6 mt-6">
-        {(['course', 'company', 'exam', 'meeting'] as PlanningType[]).map((type) => (
-          <div key={type} className="flex items-center gap-2">
-            <div className={`w-4 h-4 rounded bg-gradient-to-r ${TYPE_GRADIENT[type]}`}></div>
-            <span className="text-sm text-gray-600">{TYPE_LABEL[type]}</span>
-          </div>
-        ))}
-      </div>
-
-      {selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">{selectedEvent.title}</h3>
-              <button onClick={() => setSelectedEventId(null)} className="text-gray-400 hover:text-gray-600">
-                X
-              </button>
-            </div>
-            <div className="space-y-2 text-sm">
-              <p>
-                <strong>Type:</strong> {TYPE_LABEL[selectedEvent.type]}
-              </p>
-              <p>
-                <strong>Time:</strong> {formatTimeRange(selectedEvent.start, selectedEvent.end, selectedEvent.allDay)}
-              </p>
-              <p>
-                <strong>Location:</strong> {selectedEvent.location || '-'}
-              </p>
-              <p>
-                <strong>Teacher:</strong> {selectedEvent.teacher || '-'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4">Create meeting</h3>
-            <div className="space-y-3">
-              <input value={meetingTitle} onChange={(e) => setMeetingTitle(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Meeting title" />
-              <div className="grid grid-cols-2 gap-3">
-                <input type="date" value={meetingDate} onChange={(e) => setMeetingDate(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                <input type="time" value={meetingTime} onChange={(e) => setMeetingTime(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+            <div className="col-start-2 row-start-2 p-3 border-r border-gray-100">
+              <div className="bg-[#ec4899] h-full rounded-[14px] p-4 text-white flex flex-col justify-between shadow-sm hover:scale-[1.01] transition-transform cursor-pointer">
+                <div className="font-extrabold text-[15px]">Marketing</div>
+                <div>
+                  <div className="text-[12px] font-extrabold opacity-90">14h00 - 17h00</div>
+                </div>
               </div>
-              <input type="number" min={15} step={15} value={meetingDuration} onChange={(e) => setMeetingDuration(Number(e.target.value))} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Duration (min)" />
-              <input value={meetingLocation} onChange={(e) => setMeetingLocation(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Location" />
             </div>
-            <div className="flex gap-3 mt-5">
-              <button onClick={() => setShowCreateModal(false)} className="flex-1 py-2 border border-gray-300 rounded-lg">Cancel</button>
-              <button onClick={createMeeting} className="flex-1 py-2 bg-blue-600 text-white rounded-lg">Create</button>
+
+            {/* Mardi */}
+            <div className="col-start-3 row-start-1 p-3 border-r border-b border-gray-100">
+              <div className="bg-[#b15cf4] h-full rounded-[14px] p-4 text-white flex flex-col justify-between shadow-sm hover:scale-[1.01] transition-transform cursor-pointer">
+                <div className="font-extrabold text-[15px]">Anglais</div>
+                <div>
+                  <div className="text-[12px] font-extrabold opacity-90">9h00 - 11h00</div>
+                  <div className="text-[12px] font-medium opacity-80 mt-0.5">Salle 105</div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+            <div className="col-start-3 row-start-2 p-3 border-r border-gray-100">
+              <div className="bg-[#6366f1] h-full rounded-[14px] p-4 text-white flex flex-col justify-between shadow-sm hover:scale-[1.01] transition-transform cursor-pointer">
+                <div className="font-extrabold text-[15px]">Culture gén.</div>
+                <div>
+                  <div className="text-[12px] font-extrabold opacity-90">14h00 - 16h00</div>
+                </div>
+              </div>
+            </div>
 
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <BookOpen size={18} className="text-blue-600" />
-            <h4 className="font-semibold text-blue-800">Course Summary</h4>
-          </div>
-          <p className="text-sm text-blue-700">
-            This week: <strong>{eventsInWeek.filter((e) => e.type === 'course').length}</strong> classes,{' '}
-            <strong>{eventsInWeek.filter((e) => e.type === 'company').length}</strong> company slots
-          </p>
-        </div>
+            {/* Mercredi (ROW SPAN 2) */}
+            <div className="col-start-4 row-start-1 row-span-2 p-3 border-r border-gray-100">
+              <div className="bg-[#22c55e] h-full rounded-[14px] p-4 text-white flex flex-col justify-between relative overflow-hidden shadow-sm hover:scale-[1.01] transition-transform cursor-pointer">
+                <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,1) 10px, rgba(0,0,0,1) 20px)'}}></div>
+                <div className="font-extrabold text-[15px] relative z-10">Entreprise</div>
+                <div className="text-[12px] font-extrabold opacity-90 relative z-10">Journée complète</div>
+              </div>
+            </div>
 
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Building size={18} className="text-green-600" />
-            <h4 className="font-semibold text-green-800">Company Information</h4>
+            {/* Jeudi */}
+            <div className="col-start-5 row-start-1 p-3 border-r border-b border-gray-100 flex flex-col justify-end pb-8">
+              <div className="bg-[#22c55e] rounded-full px-5 py-2.5 text-white inline-flex max-w-max shadow-sm hover:scale-[1.02] transition-transform cursor-pointer">
+                <div className="font-extrabold text-[13px]">Entreprise</div>
+              </div>
+            </div>
+            <div className="col-start-5 row-start-2 p-3 border-r border-gray-100 flex flex-col justify-start pt-8">
+              <div className="bg-[#f97316] rounded-full px-5 py-2.5 text-white inline-flex max-w-max shadow-sm hover:scale-[1.02] transition-transform cursor-pointer">
+                <div className="font-extrabold text-[13px]">Point pédago.</div>
+              </div>
+            </div>
+
+            {/* Vendredi */}
+            <div className="col-start-6 row-start-1 p-3 border-b border-gray-100">
+              <div className="bg-[#f97316] h-full rounded-[14px] p-4 text-white flex flex-col justify-between shadow-sm hover:scale-[1.01] transition-transform cursor-pointer">
+                <div className="font-extrabold text-[15px]">GRC client</div>
+                <div>
+                  <div className="text-[12px] font-extrabold opacity-90">9h00 - 12h00</div>
+                </div>
+              </div>
+            </div>
+            <div className="col-start-6 row-start-2 p-3">
+              <div className="bg-[#14b8a6] h-full rounded-[14px] p-4 text-white flex flex-col justify-between shadow-sm hover:scale-[1.01] transition-transform cursor-pointer">
+                <div className="font-extrabold text-[15px]">Projet prof.</div>
+                <div>
+                  <div className="text-[12px] font-extrabold opacity-90">14h00 - 17h00</div>
+                </div>
+              </div>
+            </div>
+
           </div>
-          <p className="text-sm text-green-700">
-            Company events this week: <strong>{eventsInWeek.filter((e) => e.type === 'company').length}</strong>
-          </p>
         </div>
       </div>
     </div>

@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
         '/api': {
-          target: 'https://processiqfilegenerator.onrender.com',
+          target: backendUrl,
           changeOrigin: true,
         }
       }

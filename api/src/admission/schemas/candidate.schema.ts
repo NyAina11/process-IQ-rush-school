@@ -5,8 +5,8 @@ export type CandidateDocument = Candidate & Document;
 
 @Schema({ 
     timestamps: true, 
-    collection: 'candidates', // Explicitly naming it 'candidates'
-    strict: false // Allow Airtable-style raw fields if they exist
+    collection: 'candidats', 
+    strict: false 
 })
 export class Candidate {
     @Prop({ required: true })

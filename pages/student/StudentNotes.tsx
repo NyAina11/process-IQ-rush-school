@@ -1,494 +1,321 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  TrendingUp, Download, Calculator, BarChart3, 
-  Trophy, Activity, Eye, Filter
+import React from 'react';
+import {
+  Download,
+  Calculator,
+  User,
+  GraduationCap,
+  LineChart,
+  BarChart,
+  ChevronDown
 } from 'lucide-react';
 import StudentNavbar from '../../components/StudentNavbar';
-import { api } from '../../services/api';
-
-interface Grade {
-  subject: string;
-  type: string;
-  grade: number;
-  coefficient: number;
-  classAverage: number;
-  date: string;
-  appreciation: string;
-  color: string;
-}
-
-interface Skill {
-  name: string;
-  score: number;
-  maxScore: number;
-  percentage: number;
-  color: string;
-}
 
 const StudentNotes: React.FC = () => {
-  const [selectedSubject, setSelectedSubject] = useState<string>('all');
-  const [showEvolution, setShowEvolution] = useState<boolean>(true);
-  const [remoteGrades, setRemoteGrades] = useState<Grade[]>([]);
-  const [studentResolved, setStudentResolved] = useState<boolean>(false);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const studentId = await api.getCurrentStudentId();
-        setStudentResolved(Boolean(studentId));
-        if (!studentId) {
-          setRemoteGrades([]);
-          return;
-        }
-        const grades = await api.getGrades(studentId);
-        const mapped: Grade[] = (Array.isArray(grades) ? grades : []).map((g: any) => ({
-          subject: g.subject || 'N/A',
-          type: g.type || 'exam',
-          grade: Number(g.grade ?? 0),
-          coefficient: Number(g.coefficient ?? 1),
-          classAverage: Number(g.classAverage ?? 0),
-          date: g.date ? new Date(g.date).toLocaleDateString('fr-FR') : '',
-          appreciation: g.appreciation || '',
-          color: Number(g.grade ?? 0) >= 15 ? 'text-green-600' : Number(g.grade ?? 0) >= 12 ? 'text-blue-600' : 'text-yellow-600'
-        }));
-        setRemoteGrades(mapped);
-      } catch (err) {
-        console.error('StudentNotes - error fetching grades:', err);
-        setRemoteGrades([]);
-      }
-    })();
-  }, []);
-
-  const subjectOptions = useMemo(() => {
-    const unique = Array.from(new Set(remoteGrades.map((g) => g.subject).filter(Boolean)));
-    return ['all', ...unique];
-  }, [remoteGrades]);
-
-  const displayedGrades = useMemo(() => {
-    if (selectedSubject === 'all') return remoteGrades;
-    return remoteGrades.filter((grade) => grade.subject === selectedSubject);
-  }, [remoteGrades, selectedSubject]);
-  const weightedTotal = displayedGrades.reduce((acc, g) => acc + (g.grade * g.coefficient), 0);
-  const totalCoef = displayedGrades.reduce((acc, g) => acc + g.coefficient, 0);
-  const overallAverage = totalCoef > 0 ? weightedTotal / totalCoef : 0;
-  const overallAverageLabel = displayedGrades.length > 0 ? overallAverage.toFixed(2) : '-';
-  const bestGrade = displayedGrades.length > 0 ? Math.max(...displayedGrades.map((g) => g.grade)) : null;
-  const lowestGrade = displayedGrades.length > 0 ? Math.min(...displayedGrades.map((g) => g.grade)) : null;
-  const classAverage = displayedGrades.length > 0
-    ? displayedGrades.reduce((acc, g) => acc + (Number.isFinite(g.classAverage) ? g.classAverage : 0), 0) / displayedGrades.length
-    : 0;
-
-  const quickStats = [
-    { value: bestGrade !== null ? bestGrade.toFixed(1) : '-', label: 'Best rating', subLabel: 'From your evaluations', color: 'text-green-600' },
-    { value: lowestGrade !== null ? lowestGrade.toFixed(1) : '-', label: 'Lowest rating', subLabel: 'From your evaluations', color: 'text-yellow-600' },
-    { value: displayedGrades.length > 0 ? classAverage.toFixed(1) : '-', label: 'Middle class', subLabel: 'Average class', color: 'text-blue-600' },
-    { value: `${displayedGrades.length}`, label: 'Evaluations', subLabel: 'Loaded from API', color: 'text-purple-600' }
-  ];
-
-  const bySubject: Record<string, { total: number; count: number }> = {};
-  displayedGrades.forEach((g) => {
-    const key = g.subject || 'N/A';
-    if (!bySubject[key]) bySubject[key] = { total: 0, count: 0 };
-    bySubject[key].total += g.grade;
-    bySubject[key].count += 1;
-  });
-
-  const skills: Skill[] = Object.entries(bySubject)
-    .map(([name, data]) => {
-      const avg = data.count > 0 ? data.total / data.count : 0;
-      return {
-        name,
-        score: Number(avg.toFixed(1)),
-        maxScore: 20,
-        percentage: Math.max(0, Math.min(100, (avg / 20) * 100)),
-        color: avg >= 15 ? 'bg-green-500' : avg >= 12 ? 'bg-blue-500' : 'bg-yellow-500'
-      };
-    })
-    .slice(0, 5);
-
-  // Données de l'évolution des notes
-  const monthlyEvolution = (() => {
-    const map = new Map<string, { sum: number; count: number; date: Date }>();
-    displayedGrades.forEach((g) => {
-      const parsed = new Date(g.date.split('/').reverse().join('-'));
-      if (Number.isNaN(parsed.getTime())) return;
-      const key = "" + parsed.getFullYear() + '-' + String(parsed.getMonth() + 1).padStart(2, '0');
-      const current = map.get(key) || { sum: 0, count: 0, date: parsed };
-      current.sum += g.grade;
-      current.count += 1;
-      map.set(key, current);
-    });
-    const sorted = Array.from(map.values()).sort((a, b) => a.date.getTime() - b.date.getTime()).slice(-5);
-    return sorted.map((item, index) => {
-      const avg = item.count > 0 ? item.sum / item.count : 0;
-      return {
-        month: item.date.toLocaleString('en', { month: 'short' }),
-        value: Math.round((avg / 20) * 100),
-        label: item.date.toLocaleString('en', { month: 'short' }),
-        isCurrent: index === sorted.length - 1
-      };
-    });
-  })();
-
-  // Fonction pour simuler la moyenne
-  const simulateAverage = () => {
-    const weighted = displayedGrades.reduce((acc, g) => acc + (g.grade * g.coefficient), 0);
-    const totalCoef = displayedGrades.reduce((acc, g) => acc + g.coefficient, 0);
-    const avg = totalCoef > 0 ? (weighted / totalCoef).toFixed(2) : '0.00';
-    alert(`Current weighted average: ${avg}/20`);
-  };
-
-  // Fonction pour télécharger le bulletin
-  const downloadReport = () => {
-    const header = 'Subject,Type,Grade,Coefficient,ClassAverage,Date,Appreciation';
-    const rows = displayedGrades.map((g) =>
-      [
-        g.subject,
-        g.type,
-        g.grade,
-        g.coefficient,
-        g.classAverage,
-        g.date,
-        `"${String(g.appreciation || '').replace(/"/g, '""')}"`
-      ].join(',')
-    );
-    const csv = [header, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'student-newsletter.csv';
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-8 space-y-6 bg-[#f4f7f9] min-h-screen font-sans">
       <StudentNavbar />
-      
-      {/* Header avec moyenne et actions */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-start gap-6 mb-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          <div className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-2xl text-center text-white">
-            <div className="text-4xl font-bold mb-1">{overallAverageLabel}</div>
-            <div className="text-sm opacity-90">Overall average</div>
+
+      {/* Header */}
+      <div className="flex flex-col gap-1 mb-8">
+        <h1 className="text-[28px] font-extrabold text-[#111827]">Mon Espace Étudiant</h1>
+        <div className="flex items-center gap-6 text-[13px] text-[#6b7280] font-medium mt-1">
+          <div className="flex items-center gap-2">
+            <User size={16} className="text-[#8898aa]" />
+            <span>Marie LAMBERT</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <GraduationCap size={16} className="text-[#8898aa]" />
+            <span>BTS NDRC - 1ère année</span>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Section */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-8">
+          <div className="bg-[#5b52f1] rounded-[24px] px-8 py-6 flex flex-col items-center justify-center text-white shadow-lg w-36 h-36">
+            <span className="text-[42px] font-extrabold leading-none tracking-tight">14.2</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-widest mt-2 opacity-90 text-center">Moyenne<br/>générale</span>
+          </div>
+          <div className="flex flex-col justify-center">
+            <h2 className="text-[24px] font-extrabold text-[#111827]">Mes résultats</h2>
+            <div className="text-[13px] text-gray-400 font-extrabold uppercase tracking-widest mt-1 mb-4">SEMESTRE 1 - 2025/2026</div>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 bg-[#dcfce7] text-[#16a34a] rounded-lg text-[12px] font-extrabold shadow-sm">+0.8 VS S1</span>
+              <span className="px-3 py-1 bg-[#f3f4f6] text-[#6b7280] rounded-lg text-[12px] font-extrabold shadow-sm">RANG: 5/28</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <button className="flex items-center gap-2 px-6 py-3 border border-gray-200 rounded-[14px] text-[14px] font-extrabold text-[#111827] bg-white hover:bg-gray-50 transition-colors shadow-sm">
+            <Calculator size={18} /> Simuler ma moyenne
+          </button>
+          <button className="flex items-center gap-2 px-6 py-3 bg-[#3b82f6] text-white rounded-[14px] text-[14px] font-extrabold shadow-md shadow-blue-200 hover:bg-blue-600 transition-colors">
+            <Download size={18} /> Télécharger le bulletin
+          </button>
+        </div>
+      </div>
+
+      {/* 4 Stats Cards */}
+      <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-[24px] p-6 text-center shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col justify-center items-center h-32 hover:scale-[1.02] transition-transform">
+          <div className="text-[28px] font-extrabold text-[#22c55e] leading-none mb-2">16.5</div>
+          <div className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest">Meilleure note</div>
+          <div className="text-[10px] font-extrabold text-gray-300 uppercase tracking-widest mt-1">Marketing digital</div>
+        </div>
+        <div className="bg-white rounded-[24px] p-6 text-center shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col justify-center items-center h-32 hover:scale-[1.02] transition-transform">
+          <div className="text-[28px] font-extrabold text-[#f97316] leading-none mb-2">11.0</div>
+          <div className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest">Note la plus basse</div>
+          <div className="text-[10px] font-extrabold text-gray-300 uppercase tracking-widest mt-1">Anglais</div>
+        </div>
+        <div className="bg-white rounded-[24px] p-6 text-center shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col justify-center items-center h-32 hover:scale-[1.02] transition-transform">
+          <div className="text-[28px] font-extrabold text-[#3b82f6] leading-none mb-2">13.8</div>
+          <div className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest">Moyenne classe</div>
+          <div className="text-[10px] font-extrabold text-gray-300 uppercase tracking-widest mt-1">+0.4 vs vous</div>
+        </div>
+        <div className="bg-white rounded-[24px] p-6 text-center shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col justify-center items-center h-32 hover:scale-[1.02] transition-transform">
+          <div className="text-[28px] font-extrabold text-[#ec4899] leading-none mb-2">8</div>
+          <div className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest">Évaluations</div>
+          <div className="text-[10px] font-extrabold text-gray-300 uppercase tracking-widest mt-1">Ce semestre</div>
+        </div>
+      </div>
+
+      {/* Middle Section: Chart & Skills */}
+      <div className="grid grid-cols-[2fr_1fr] gap-6 mb-8">
+        
+        {/* Evolution Chart */}
+        <div className="bg-white rounded-[24px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="bg-[#eff6ff] text-[#3b82f6] p-2 rounded-lg">
+              <LineChart size={20} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-[18px] font-extrabold text-[#111827]">Évolution de vos résultats</h3>
           </div>
           
-          <div>
-            <h2 className="text-2xl font-bold mb-2">My results</h2>
-            <p className="text-gray-600 mb-4">Semester 1 - 2025/2026</p>
-            <div className="flex flex-wrap gap-3">
-              <span className="px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                {displayedGrades.length > 0 ? 'Data loaded' : 'No grades yet'}
-              </span>
-              <span className="px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
-                {displayedGrades.length} evaluation(s)
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={simulateAverage}
-            className="px-5 py-3 border border-gray-300 bg-white rounded-xl font-medium flex items-center gap-3 hover:bg-gray-50 transition-colors"
-          >
-            <Calculator size={18} />
-            Simulate my average
-          </button>
-          <button
-            onClick={downloadReport}
-            className="px-5 py-3 bg-blue-500 text-white rounded-xl font-medium flex items-center gap-3 hover:bg-blue-600 transition-colors"
-          >
-            <Download size={18} />
-            Download the newsletter
-          </button>
-        </div>
-      </div>
-
-      {/* Stats rapides */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {quickStats.map((stat, index) => (
-          <div key={index} className="bg-white border border-gray-200 rounded-xl p-5 text-center">
-            <div className={`text-3xl font-bold ${stat.color} mb-2`}>
-              {stat.value}
-            </div>
-            <div className="text-sm text-gray-600 mb-1">{stat.label}</div>
-            <div className={`text-xs ${stat.color.replace('text-', 'text-').replace('-600', '-500')} font-medium`}>
-              {stat.subLabel}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Graphique d'évolution + Radar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Évolution des notes */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                <BarChart3 size={20} className="text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold">Evolution of your results</h3>
-            </div>
-            <button
-              onClick={() => setShowEvolution(!showEvolution)}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-            >
-              {showEvolution ? 'Hide details' : 'Show details'}
-            </button>
-          </div>
-
-          {showEvolution && (
-            <>
-              <div className="relative h-48 flex items-end gap-3 pb-8">
-                {/* Lignes de référence */}
-                <div className="absolute top-0 left-0 right-0 h-px bg-gray-200"></div>
-                <div className="absolute top-1/4 left-0 right-0 h-px bg-gray-200"></div>
-                <div className="absolute top-1/2 left-0 right-0 h-px bg-green-300 border-dashed"></div>
-                <div className="absolute top-3/4 left-0 right-0 h-px bg-gray-200"></div>
-                
-                {/* Étiquettes des valeurs */}
-                <div className="absolute left-0 top-0 text-xs text-gray-500">20</div>
-                <div className="absolute left-0 top-1/4 text-xs text-gray-500">15</div>
-                <div className="absolute left-0 top-1/2 text-xs text-green-600 font-medium">10</div>
-                <div className="absolute left-0 top-3/4 text-xs text-gray-500">5</div>
-                <div className="absolute left-0 bottom-8 text-xs text-gray-500">0</div>
-                
-                {/* Barres */}
-                {monthlyEvolution.map((item, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                    <div 
-                      className={`w-3/4 max-w-12 rounded-t-lg transition-all duration-500 ${
-                        item.isCurrent 
-                          ? 'bg-gradient-to-t from-green-500 to-green-400 shadow-lg shadow-green-200' 
-                          : 'bg-gradient-to-t from-blue-500 to-blue-400'
-                      }`}
-                      style={{ height: `${item.value}%` }}
-                    ></div>
-                    <span className={`text-sm ${item.isCurrent ? 'font-semibold text-blue-600' : 'text-gray-500'}`}>
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
+          <div className="flex-1 relative min-h-[160px] mb-8 mx-2">
+            {/* SVG for the line only */}
+            <svg className="w-full h-full absolute inset-0 overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+              {/* Horizontal dashed reference line */}
+              <line x1="0" y1="75" x2="100" y2="75" stroke="#f3f4f6" strokeWidth="1" strokeDasharray="4,4" vectorEffect="non-scaling-stroke" />
               
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-6 text-sm text-gray-600">
-                <span>Average class: {displayedGrades.length > 0 ? classAverage.toFixed(1) : '-'}</span>
-                <span className="text-green-600 font-semibold flex items-center gap-1">
-                  <TrendingUp size={16} />
-                  Trend: {displayedGrades.length > 0 ? 'Data-based' : 'No data'}
-                </span>
-              </div>
-            </>
-          )}
-        </div>
+              {/* The Blue Line */}
+              <path 
+                d="M 0 80 L 25 70 L 50 75 L 75 50 L 100 30" 
+                stroke="#3b82f6" 
+                strokeWidth="2.5" 
+                fill="none" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke" 
+              />
+            </svg>
 
-        {/* Radar des compétences */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-            <Activity size={20} className="text-purple-600" />
-            📊 Skills
-          </h3>
-          
-          <div className="space-y-5">
-            {skills.map((skill, index) => (
-              <div key={index}>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">{skill.name}</span>
-                  <span className={`text-sm font-semibold ${
-                    skill.score >= 15 ? 'text-green-600' : 
-                    skill.score >= 12 ? 'text-blue-600' : 'text-yellow-600'
-                  }`}>
-                    {skill.score}/{skill.maxScore}
+            {/* HTML/CSS for the dots (guaranteed to be circles) */}
+            <div className="absolute inset-0">
+              {[
+                { left: '0%', top: '80%' },
+                { left: '25%', top: '70%' },
+                { left: '50%', top: '75%' },
+                { left: '75%', top: '50%' },
+                { left: '100%', top: '30%' }
+              ].map((pt, i) => (
+                <div 
+                  key={i}
+                  className="absolute w-3 h-3 bg-white border-[2.5px] border-[#3b82f6] rounded-full -translate-x-1/2 -translate-y-1/2 shadow-sm z-10"
+                  style={{ left: pt.left, top: pt.top }}
+                />
+              ))}
+            </div>
+            
+            {/* Month Labels aligned to points */}
+            <div className="absolute -bottom-8 left-0 right-0 h-6">
+              {['SEPT', 'OCT', 'NOV', 'DÉC', 'JAN'].map((label, i) => (
+                <div 
+                  key={i} 
+                  className="absolute -translate-x-1/2 flex flex-col items-center"
+                  style={{ left: `${i * 25}%` }}
+                >
+                  <span className={`text-[11px] font-extrabold uppercase tracking-widest ${i === 4 ? 'text-[#3b82f6]' : 'text-gray-400'}`}>
+                    {label}
                   </span>
+                  {i === 4 && <div className="w-8 h-0.5 bg-[#3b82f6] mt-1 rounded-full"></div>}
                 </div>
-                <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full ${skill.color}`}
-                    style={{ width: `${skill.percentage}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-          
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span>Excellent (≥15)</span>
+
+          <div className="flex justify-between items-center mt-12 pt-4">
+            <span className="text-[13px] font-bold text-gray-500">Moyenne classe: 13.8</span>
+            <span className="text-[13px] font-extrabold text-[#22c55e] flex items-center gap-1">
+              TENDANCE: <span className="uppercase ml-1">Progression</span>
+            </span>
+          </div>
+        </div>
+
+
+        {/* Skills Bars */}
+        <div className="bg-white rounded-[24px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="bg-[#f3f4f6] text-[#4f46e5] p-2 rounded-lg flex items-center justify-center">
+              {/* Colorful icon replacement */}
+              <div className="w-5 h-5 flex items-end justify-center gap-0.5">
+                <div className="w-1.5 h-2 bg-[#ec4899] rounded-sm"></div>
+                <div className="w-1.5 h-3.5 bg-[#3b82f6] rounded-sm"></div>
+                <div className="w-1.5 h-5 bg-[#22c55e] rounded-sm"></div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                <span>Good (12-14)</span>
+            </div>
+            <h3 className="text-[18px] font-extrabold text-[#111827]">Compétences</h3>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#111827]">Négociation</span>
+                <span className="text-[13px] font-extrabold text-[#22c55e]">15/20</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                <span>To improve (12)</span>
+              <div className="h-2 w-full bg-[#f3f4f6] rounded-full overflow-hidden">
+                <div className="h-full bg-[#22c55e] rounded-full" style={{ width: '75%' }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#111827]">Marketing</span>
+                <span className="text-[13px] font-extrabold text-[#22c55e]">16.5/20</span>
+              </div>
+              <div className="h-2 w-full bg-[#f3f4f6] rounded-full overflow-hidden">
+                <div className="h-full bg-[#22c55e] rounded-full" style={{ width: '82.5%' }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#111827]">Relation client</span>
+                <span className="text-[13px] font-extrabold text-[#3b82f6]">14/20</span>
+              </div>
+              <div className="h-2 w-full bg-[#f3f4f6] rounded-full overflow-hidden">
+                <div className="h-full bg-[#3b82f6] rounded-full" style={{ width: '70%' }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#111827]">Communication</span>
+                <span className="text-[13px] font-extrabold text-[#3b82f6]">13.5/20</span>
+              </div>
+              <div className="h-2 w-full bg-[#f3f4f6] rounded-full overflow-hidden">
+                <div className="h-full bg-[#3b82f6] rounded-full" style={{ width: '67.5%' }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#111827]">Anglais</span>
+                <span className="text-[13px] font-extrabold text-[#f97316]">11/20</span>
+              </div>
+              <div className="h-2 w-full bg-[#f3f4f6] rounded-full overflow-hidden">
+                <div className="h-full bg-[#f97316] rounded-full" style={{ width: '55%' }}></div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tableau détaillé des notes */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-        <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Trophy size={20} className="text-blue-600" />
-            📝 Detailed ratings
-          </h3>
-          
+      {/* Bottom Table */}
+      <div className="bg-white rounded-[24px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Filter size={16} />
-              <span>Filter:</span>
-            </div>
-            <select
-              value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {subjectOptions.map((subject) => (
-                <option key={subject} value={subject}>
-                  {subject === 'all' ? 'All subjects' : subject}
-                </option>
-              ))}
-            </select>
+            <div className="text-[20px]">📝</div>
+            <h3 className="text-[18px] font-extrabold text-[#111827]">Détail des évaluations</h3>
           </div>
+          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-[13px] font-extrabold text-[#111827] hover:bg-gray-50 transition-colors">
+            Toutes les matières <ChevronDown size={14} />
+          </button>
         </div>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="p-4 text-left text-sm font-semibold text-gray-600">Matter</th>
-                <th className="p-4 text-left text-sm font-semibold text-gray-600">Kind</th>
-                <th className="p-4 text-center text-sm font-semibold text-gray-600">Note</th>
-                <th className="p-4 text-center text-sm font-semibold text-gray-600">Coef.</th>
-                <th className="p-4 text-center text-sm font-semibold text-gray-600">Average class</th>
-                <th className="p-4 text-left text-sm font-semibold text-gray-600">Date</th>
-                <th className="p-4 text-left text-sm font-semibold text-gray-600">Appreciation</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayedGrades.length === 0 && (
-                <tr>
-                  <td className="p-6 text-center text-gray-500" colSpan={7}>
-                    {studentResolved
-                      ? 'Aucune note disponible pour cet etudiant.'
-                      : 'Aucun etudiant associe a la session. Reconnecte-toi avec un compte etudiant lie.'}
-                  </td>
-                </tr>
-              )}
-              {displayedGrades.map((grade, index) => (
-                <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
-                  <td className="p-4">
-                    <span className="font-medium">{grade.subject}</span>
-                  </td>
-                  <td className="p-4">
-                    {(() => {
-                      const type = String(grade.type || '').toLowerCase();
-                      const badgeClass =
-                        type === 'exam' ? 'bg-red-100 text-red-800' :
-                        type === 'oral' ? 'bg-blue-100 text-blue-800' :
-                        type === 'quiz' ? 'bg-green-100 text-green-800' :
-                        'bg-yellow-100 text-yellow-800';
-                      return <span className={`px-3 py-1 rounded-full text-xs font-medium ${badgeClass}`}>{type || 'exam'}</span>;
-                    })()}
-                  </td>
-                  <td className="p-4 text-center">
-                    <span className={`text-xl font-bold ${grade.color}`}>
-                      {grade.grade}
-                    </span>
-                  </td>
-                  <td className="p-4 text-center font-semibold">
-                    {grade.coefficient}
-                  </td>
-                  <td className="p-4 text-center text-gray-600">
-                    {grade.classAverage}
-                  </td>
-                  <td className="p-4 text-gray-600">
-                    {grade.date}
-                  </td>
-                  <td className="p-4">
-                    <span className={`${
-                      grade.grade >= 15 ? 'text-green-600' : 
-                      grade.grade >= 12 ? 'text-blue-600' : 'text-yellow-600'
-                    }`}>
-                      {grade.appreciation}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Résumé du tableau */}
-        <div className="p-4 bg-gray-50 border-t border-gray-200">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-sm">
-            <div className="text-gray-600">
-              Showing <span className="font-semibold">{displayedGrades.length}</span> of {displayedGrades.length} evaluations
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-green-500"></div>
-                <span className="text-gray-600">Excellent (≥15)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-blue-500"></div>
-                <span className="text-gray-600">Good (12-14)</span>
-              </div>
-            </div>
-            <button className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
-              <Eye size={16} />
-              View all details
-            </button>
-          </div>
-        </div>
+
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100 w-1/4">Matière</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Type</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Note</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Coef.</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Moy. Classe</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100">Date</th>
+              <th className="pb-4 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-100 w-1/3">Appréciation</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            {/* Row 1 */}
+            <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+              <td className="py-5 text-[14px] font-extrabold text-[#111827]">Marketing digital</td>
+              <td className="py-5">
+                <span className="bg-[#fce7f3] text-[#ec4899] px-3 py-1 rounded-full text-[10px] font-extrabold">EXAMEN</span>
+              </td>
+              <td className="py-5 text-[16px] font-extrabold text-[#22c55e]">16.5</td>
+              <td className="py-5 text-[14px] font-extrabold text-gray-500">3</td>
+              <td className="py-5 text-[14px] font-bold text-gray-500">14.2</td>
+              <td className="py-5 text-[13px] font-bold text-gray-500">15/01/2026</td>
+              <td className="py-5 text-[13px] italic text-gray-500">Excellent travail, très bonne maîtrise</td>
+            </tr>
+
+            {/* Row 2 */}
+            <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+              <td className="py-5 text-[14px] font-extrabold text-[#111827]">Négociation commerciale</td>
+              <td className="py-5">
+                <span className="bg-[#eff6ff] text-[#3b82f6] px-3 py-1 rounded-full text-[10px] font-extrabold">ORAL</span>
+              </td>
+              <td className="py-5 text-[16px] font-extrabold text-[#22c55e]">15</td>
+              <td className="py-5 text-[14px] font-extrabold text-gray-500">4</td>
+              <td className="py-5 text-[14px] font-bold text-gray-500">13.5</td>
+              <td className="py-5 text-[13px] font-bold text-gray-500">10/01/2026</td>
+              <td className="py-5 text-[13px] italic text-gray-500">Bonne argumentation</td>
+            </tr>
+
+            {/* Row 3 */}
+            <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+              <td className="py-5 text-[14px] font-extrabold text-[#111827]">Relation client</td>
+              <td className="py-5">
+                <span className="bg-[#dcfce7] text-[#16a34a] px-3 py-1 rounded-full text-[10px] font-extrabold">CC</span>
+              </td>
+              <td className="py-5 text-[16px] font-extrabold text-[#111827]">14</td>
+              <td className="py-5 text-[14px] font-extrabold text-gray-500">2</td>
+              <td className="py-5 text-[14px] font-bold text-gray-500">14.8</td>
+              <td className="py-5 text-[13px] font-bold text-gray-500">08/01/2026</td>
+              <td className="py-5 text-[13px] italic text-gray-500">Bon niveau, continuez</td>
+            </tr>
+
+            {/* Row 4 */}
+            <tr className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+              <td className="py-5 text-[14px] font-extrabold text-[#111827]">Culture générale</td>
+              <td className="py-5">
+                <span className="bg-[#fef9c3] text-[#ca8a04] px-3 py-1 rounded-full text-[10px] font-extrabold">ÉCRIT</span>
+              </td>
+              <td className="py-5 text-[16px] font-extrabold text-[#111827]">13.5</td>
+              <td className="py-5 text-[14px] font-extrabold text-gray-500">2</td>
+              <td className="py-5 text-[14px] font-bold text-gray-500">12.9</td>
+              <td className="py-5 text-[13px] font-bold text-gray-500">18/12/2025</td>
+              <td className="py-5 text-[13px] italic text-gray-500">Analyse pertinente</td>
+            </tr>
+
+            {/* Row 5 */}
+            <tr className="hover:bg-gray-50/50 transition-colors group">
+              <td className="py-5 text-[14px] font-extrabold text-[#111827]">Anglais professionnel</td>
+              <td className="py-5">
+                <span className="bg-[#fce7f3] text-[#ec4899] px-3 py-1 rounded-full text-[10px] font-extrabold">EXAMEN</span>
+              </td>
+              <td className="py-5 text-[16px] font-extrabold text-[#22c55e]">11</td>
+              <td className="py-5 text-[14px] font-extrabold text-gray-500">2</td>
+              <td className="py-5 text-[14px] font-bold text-gray-500">12.3</td>
+              <td className="py-5 text-[13px] font-bold text-gray-500">12/12/2025</td>
+              <td className="py-5 text-[13px] italic text-gray-500">À améliorer, travaillez l'oral</td>
+            </tr>
+
+          </tbody>
+        </table>
       </div>
 
-      {/* Section conseils */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-6">
-          <h4 className="font-semibold text-blue-800 mb-3">🎯 Areas for improvement</h4>
-          <ul className="space-y-2 text-blue-700">
-            <li className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-              <span>English: Focus on oral comprehension</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-              <span>General knowledge: Regular reading</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500"></div>
-              <span>Keep your strengths in marketing</span>
-            </li>
-          </ul>
-        </div>
-        
-        <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-2xl p-6">
-          <h4 className="font-semibold text-green-800 mb-3">📈 Next objectives</h4>
-          <ul className="space-y-2 text-green-700">
-            <li className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500"></div>
-              <span>Reach 15.0 average in S2</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-              <span>Improve English by 2 points</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-              <span>Validate 3 more skills</span>
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
   );
 };

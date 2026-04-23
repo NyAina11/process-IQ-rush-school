@@ -5,7 +5,7 @@ export type CompanyDocument = Company & Document;
 
 @Schema({ 
     timestamps: true, 
-    collection: 'companies',
+    collection: 'entreprises',
     strict: false 
 })
 export class Company {

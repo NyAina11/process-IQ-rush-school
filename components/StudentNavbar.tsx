@@ -36,7 +36,7 @@ const StudentNavbar: React.FC<StudentNavbarProps> = ({
   const tabs: Tab[] = [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Tableau de bord',
       icon: <LayoutDashboard size={18} />,
       path: '/etudiant/dashboard'
     },
@@ -54,13 +54,13 @@ const StudentNavbar: React.FC<StudentNavbarProps> = ({
     },
     {
       id: 'presences',
-      label: 'Presences',
+      label: 'Présences',
       icon: <CheckCircle size={18} />,
       path: '/etudiant/presences'
     },
     {
       id: 'rdv',
-      label: 'Pedagogy Meeting',
+      label: 'RDV pédagogie',
       icon: <Users size={18} />,
       path: '/etudiant/rdv'
     },
@@ -138,7 +138,7 @@ const StudentNavbar: React.FC<StudentNavbarProps> = ({
       <div className="absolute -top-8 left-0 flex items-center gap-2">
         <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
         <span className="text-sm text-gray-600">
-          Current section: <span className="font-semibold text-gray-900">
+          Section actuelle : <span className="font-semibold text-gray-900">
             {tabs.find(t => t.id === currentTab)?.label}
           </span>
         </span>
