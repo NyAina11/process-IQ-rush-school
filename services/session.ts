@@ -13,7 +13,7 @@ export const setAuthToken = (token: string) => {
 
 export const getAuthEmail = (): string | null => {
   const payload = decodeJwtPayload(getAuthToken());
-  return payload?.email || payload?.user?.email || null;
+  return payload?.email || payload?.user?.email || payload?.username || null;
 };
 
 export const getAuthUserId = (): string | null => {

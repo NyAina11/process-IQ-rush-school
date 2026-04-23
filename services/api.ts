@@ -1187,6 +1187,7 @@ export const api = {
   // --- STUDENT SPACE ---
   async getCurrentStudent(): Promise<any | null> {
     try {
+      // First try to get student ID from token or localStorage
       const storedStudentId = getStoredStudentId() || getAuthStudentId();
       if (storedStudentId) {
         const response = await fetch(`${BASE_URL}/candidates/${storedStudentId}`, {
@@ -1204,9 +1205,32 @@ export const api = {
         }
       }
 
+      // If no stored ID, try to get from JWT email (but avoid expensive full list fetch)
       const email = (getAuthEmail() || '').trim().toLowerCase();
-      if (!email) return null;
+      if (!email) {
+        console.warn('No student ID in token/localStorage and no email available');
+        return null;
+      }
 
+      // Instead of fetching all candidates (expensive), try to get by email if endpoint exists
+      try {
+        const response = await fetch(`${BASE_URL}/candidats/by-email/${encodeURIComponent(email)}`, {
+          method: 'GET',
+          headers: withAuthHeaders({ Accept: 'application/json' }),
+        });
+        const json = await readJsonSafely(response);
+        if (response.ok && json?.data) {
+          const record = json.data;
+          const recordId = getRecordId(record);
+          if (recordId) setCurrentStudentId(recordId);
+          return looksLikeBackendRecord(record) ? mapBackendToStudent(record) : record;
+        }
+      } catch (emailFetchError) {
+        console.warn('Email lookup endpoint not available, falling back to full list (expensive)');
+      }
+
+      // Last resort: fetch all candidates (expensive but necessary if no email endpoint)
+      console.warn('Performing expensive full candidate list fetch - consider optimizing');
       const response = await fetch(`${BASE_URL}/candidats`, {
         method: 'GET',
         headers: withAuthHeaders({ Accept: 'application/json' }),
@@ -1861,7 +1885,7 @@ export const api = {
         if (response.status === 404) {
           continue;
         }
-        throw new Error(lastError);
+        throw new Error(lastError ?? 'Erreur inconnue lors de la génération de la capture d\'écran');
       }
 
       const screenshotUrl = data?.data?.screenshotUrl;
