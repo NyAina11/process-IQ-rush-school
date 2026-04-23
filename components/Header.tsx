@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Menu, Bell, Globe, BellOff, Check, X, Clock, CheckCircle2, XCircle, Briefcase, Users, Monitor, GraduationCap } from 'lucide-react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { Menu, Bell, Globe, BellOff, Check, X, Clock, CheckCircle2, XCircle, Briefcase, Users, Monitor, GraduationCap, ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import { useValidationStore, ValidationRequest } from '../store/useValidationStore';
 import { useAppStore } from '../store/useAppStore';
 
@@ -11,8 +11,11 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar, onExecuteApproved }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
   const { showToast } = useAppStore();
 
   const userRole = localStorage.getItem('userRole') || 'Guest';
@@ -44,6 +47,9 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, onExecuteApproved }) => 
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotifOpen(false);
       }
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -56,8 +62,24 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, onExecuteApproved }) => 
     if (path.startsWith('/rh')) return 'Ressources Humaines';
     if (path.startsWith('/etudiant')) return 'Espace Étudiant';
     if (path.startsWith('/parametres')) return 'Paramètres';
+    if (path.startsWith('/support')) return 'Support Technique';
     return 'Tableau de bord';
   }, [location.pathname]);
+
+  const modules = useMemo(() => {
+    const allModules = [
+      { id: 'admission', label: 'Admissions', path: '/admission', icon: Briefcase, roles: ['admission', 'commercial', 'super_admin', 'admin'] },
+      { id: 'commercial', label: 'Commercial', path: '/commercial', icon: Monitor, roles: ['commercial', 'super_admin', 'admin'] },
+      { id: 'rh', label: 'RH', path: '/rh', icon: Users, roles: ['rh', 'super_admin', 'admin'] },
+      { id: 'etudiant', label: 'Étudiant', path: '/etudiant', icon: GraduationCap, roles: ['eleve', 'super_admin', 'admin'] },
+    ];
+
+    return allModules.filter(m => isSuperAdmin || m.roles.includes(userRole));
+  }, [isSuperAdmin, userRole]);
+
+  const activeModule = useMemo(() => {
+    return modules.find(m => location.pathname.startsWith(m.path))?.id || null;
+  }, [modules, location.pathname]);
 
   const initials = userRole.slice(0, 2).toUpperCase();
 
@@ -134,44 +156,42 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, onExecuteApproved }) => 
 
   const allNotifs = isSuperAdmin ? notifications : [...notifications, ...pendingForUser];
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/landing');
+    showToast('Déconnexion réussie', 'success');
+  };
+
   return (
     <header className="sticky top-0 z-30 px-6 flex items-center justify-between" style={{ height: 68, background: '#ffffff', borderBottom: '1px solid #e8eaf0', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <div className="flex items-center gap-4">
-        <button
-          onClick={toggleSidebar}
-          className="p-2 rounded-md transition-all active:scale-95 md:hidden"
-          style={{ color: '#6c63ff' }}
-          onMouseEnter={e => (e.currentTarget.style.background = '#ede9ff')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-        >
-          <Menu size={18} />
-        </button>
+      {/* <div className="flex items-center gap-8">
+        <Link to="/home" className="flex items-center gap-3 group">
+          <div className="flex flex-col">
+            <h1 className="leading-none tracking-tight" style={{ fontSize: 18, fontWeight: 900, color: '#1a1d2e' }}>
+              PROCESS<span className="text-[#6c63ff]">IQ</span>
+            </h1>
+          </div>
+        </Link>
+      </div> */}
 
-        <div className="flex flex-col">
-          <h1 className="leading-none text-brand" style={{ fontSize: 18, fontWeight: 800, color: '#1a1d2e' }}>
-            PROCESSIQ
-          </h1>
-        </div>
-      </div>
-
-      {/* Module Switcher (Center) */}
-      <div className="hidden lg:flex items-center gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/60 shadow-sm">
-        <button className="flex items-center gap-2.5 px-5 py-2.5 bg-brand text-white rounded-lg font-black text-[11px] uppercase tracking-widest shadow-lg shadow-brand/20 transition-all active:scale-95">
-          <Briefcase size={15} strokeWidth={2.5} />
-          Admissions
-        </button>
-        <button className="flex items-center gap-2.5 px-5 py-2.5 text-slate-400 hover:text-brand transition-all font-black text-[11px] uppercase tracking-widest active:scale-95">
-          <Monitor size={15} />
-          Commercial
-        </button>
-        <button className="flex items-center gap-2.5 px-5 py-2.5 text-slate-400 hover:text-brand transition-all font-black text-[11px] uppercase tracking-widest active:scale-95">
-          <Users size={15} />
-          RH
-        </button>
-        <button className="flex items-center gap-2.5 px-5 py-2.5 text-slate-400 hover:text-brand transition-all font-black text-[11px] uppercase tracking-widest active:scale-95">
-          <GraduationCap size={15} />
-          Étudiant
-        </button>
+      {/* Module Switcher (Center) - Bento Style */}
+      <div className="hidden lg:flex items-center gap-1.5 bg-slate-100/40 p-1.5 rounded-2xl border border-slate-200/50 backdrop-blur-sm">
+        {modules.map((m) => {
+          const isActive = activeModule === m.id;
+          return (
+            <button
+              key={m.id}
+              onClick={() => navigate(m.path)}
+              className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all duration-300 active:scale-95 ${isActive
+                  ? 'bg-[#6c63ff] text-white shadow-lg shadow-indigo-500/25 ring-1 ring-white/20'
+                  : 'text-slate-500 hover:text-[#6c63ff] hover:bg-white/80'
+                }`}
+            >
+              <m.icon size={15} strokeWidth={isActive ? 2.5 : 2} />
+              {m.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex items-center gap-2">
@@ -233,13 +253,12 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, onExecuteApproved }) => 
                     >
                       <div className="flex items-start gap-3">
                         {/* Icon */}
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                          req.status === 'pending'
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${req.status === 'pending'
                             ? 'bg-amber-50 text-amber-500'
                             : req.status === 'approved'
-                            ? 'bg-emerald-50 text-emerald-500'
-                            : 'bg-rose-50 text-rose-500'
-                        }`}>
+                              ? 'bg-emerald-50 text-emerald-500'
+                              : 'bg-rose-50 text-rose-500'
+                          }`}>
                           {req.status === 'pending' && <Clock size={14} />}
                           {req.status === 'approved' && <CheckCircle2 size={14} />}
                           {req.status === 'rejected' && <XCircle size={14} />}
@@ -249,13 +268,12 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, onExecuteApproved }) => 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-[12px] font-bold text-[#1e1b2e] truncate">{req.action}</span>
-                            <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md ${
-                              req.status === 'pending'
+                            <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md ${req.status === 'pending'
                                 ? 'bg-amber-50 text-amber-600'
                                 : req.status === 'approved'
-                                ? 'bg-emerald-50 text-emerald-600'
-                                : 'bg-rose-50 text-rose-600'
-                            }`}>
+                                  ? 'bg-emerald-50 text-emerald-600'
+                                  : 'bg-rose-50 text-rose-600'
+                              }`}>
                               {req.status === 'pending' ? 'En attente' : req.status === 'approved' ? 'Approuvé' : 'Refusé'}
                             </span>
                           </div>
@@ -321,22 +339,59 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, onExecuteApproved }) => 
 
         <div className="mx-1" style={{ width: 1, height: 20, background: '#e8eaf0' }}></div>
 
-        <div className="flex items-center gap-2.5 pl-1 cursor-pointer group">
-          <div className="hidden sm:flex flex-col items-end">
-            <span className="leading-none group-hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 600, color: '#1a1d2e' }}>
-              {userName || userRole}
-            </span>
-            <span style={{ fontSize: 10, color: '#9ca3af', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>
-              {isSuperAdmin ? 'Validateur' : 'Utilisateur'}
-            </span>
+        <div className="relative" ref={profileRef}>
+          <div
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-xl border border-transparent hover:border-slate-200 hover:bg-slate-50 transition-all cursor-pointer group"
+          >
+            <div className="hidden sm:flex flex-col items-end">
+              <span className="leading-none group-hover:text-[#6c63ff] transition-colors" style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e' }}>
+                {userName || userRole}
+              </span>
+              <span style={{ fontSize: 9, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 3 }}>
+                {isSuperAdmin ? 'Validateur' : 'Utilisateur'}
+              </span>
+            </div>
+            <div className="relative">
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-[#6c63ff] to-[#8b5cf6] text-white shadow-md group-hover:shadow-indigo-500/30 transition-all duration-300 overflow-hidden">
+                <span className="text-[13px] font-black">{initials}</span>
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white border-2 border-white flex items-center justify-center">
+                <div className="w-full h-full rounded-full bg-emerald-500" />
+              </div>
+            </div>
+            <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${profileOpen ? 'rotate-180' : ''}`} />
           </div>
-          <div className="flex items-center justify-center active:scale-95 transition-all" style={{
-            width: 32, height: 32, borderRadius: '50%',
-            background: '#6c63ff', color: '#ffffff',
-            fontSize: 12, fontWeight: 700,
-          }}>
-            {initials}
-          </div>
+
+          {profileOpen && (
+            <div className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-xl z-50 overflow-hidden border border-slate-200 animate-in fade-in slide-in-from-top-2">
+              <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+                <p className="text-[12px] font-bold text-slate-900 truncate">{userName}</p>
+                <p className="text-[10px] text-slate-500 truncate mt-0.5">{userEmail}</p>
+              </div>
+              <div className="p-1.5">
+                <button
+                  onClick={() => { setProfileOpen(false); navigate('/profil'); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-[#6c63ff] transition-all text-[12px] font-semibold"
+                >
+                  <User size={16} /> Mon profil
+                </button>
+                <button
+                  onClick={() => { setProfileOpen(false); navigate('/parametres'); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-[#6c63ff] transition-all text-[12px] font-semibold"
+                >
+                  <Settings size={16} /> Paramètres
+                </button>
+                <div className="my-1 border-t border-slate-100"></div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-rose-500 hover:bg-rose-50 transition-all text-[12px] font-bold"
+                >
+                  <LogOut size={16} /> Déconnexion
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -16,6 +16,10 @@ export class UsersService implements OnModuleInit {
     constructor(@InjectModel(User.name) private userModel: Model<User>) { }
 
     async onModuleInit() {
+        if (process.env.DISABLE_SEEDING === 'true') {
+            console.log('[UsersService] Seeding désactivé via DISABLE_SEEDING.');
+            return;
+        }
         console.log('[UsersService] Vérification et synchronisation des utilisateurs par défaut...');
         try {
             const defaultUsers: DefaultUser[] = [
@@ -100,6 +104,21 @@ export class UsersService implements OnModuleInit {
             console.error('[UsersService] Erreur création utilisateur :', error);
             throw error;
         }
+    }
+    async update(email: string, updateData: any): Promise<any> {
+        console.log(`[UsersService] Mise à jour MongoDB : ${email}`);
+        if (updateData.password && !updateData.password.startsWith('scrypt$')) {
+            updateData.password = hashPassword(updateData.password);
+        }
+        return this.userModel.findOneAndUpdate({ email }, { $set: updateData }, { new: true }).exec();
+    }
+
+    async findAll(): Promise<User[]> {
+        return this.userModel.find({}, { password: 0 }).exec();
+    }
+
+    async delete(email: string): Promise<any> {
+        return this.userModel.deleteOne({ email }).exec();
     }
 }
 

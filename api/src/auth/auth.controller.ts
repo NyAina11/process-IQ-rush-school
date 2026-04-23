@@ -22,4 +22,16 @@ export class AuthController {
     getProfile(@Request() req) {
         return req.user;
     }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('profile')
+    async updateProfile(@Request() req, @Body() updateData: any) {
+        return this.authService.updateProfile(req.user.username, updateData);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('change-password')
+    async changePassword(@Request() req, @Body() body: any) {
+        return this.authService.changePassword(req.user.username, body.oldPassword, body.newPassword);
+    }
 }

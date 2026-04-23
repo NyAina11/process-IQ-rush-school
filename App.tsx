@@ -25,6 +25,7 @@ import StudentAppointments from './pages/student/StudentAppointments';
 import StudentAttendance from './pages/student/StudentAttendance';
 import StudentQuestionnaires from './pages/student/StudentQuestionnaires';
 import SettingsPage from './pages/SettingsPage';
+const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
 import { decodeJwtPayload, getAuthToken, isAuthenticated } from './services/session';
 
 const getEffectiveRole = (): string | null => {
@@ -228,6 +229,15 @@ const App = () => {
                   element={
                     <RequireAuth allowedRoles={['admission', 'rh', 'commercial', 'super_admin', 'admin']}>
                       <SupportView />
+                    </RequireAuth>
+                  }
+                />
+
+                <Route
+                  path="/profil"
+                  element={
+                    <RequireAuth>
+                      <ProfilePage />
                     </RequireAuth>
                   }
                 />

@@ -131,14 +131,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
               >
                 <Users size={15} />
-                <span className="flex-1">Tableau de bord</span>
+                <span className="flex-1">Classe NTC</span>
                 {candidates.length > 0 && (
-                  <span className="ml-auto" style={{ background: '#6c63ff', color: '#ffffff', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>
+                  <span className="ml-auto bg-[#6c63ff] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
                     {candidates.length}
                   </span>
                 )}
               </NavLink>
 
+              <NavLink
+                to="/admission?tab=interviews"
+                onClick={handleLinkClick}
+                className={() => `nav-subitem ${isAdmissionInterviewsActive ? 'active' : ''}`}
+              >
+                <FileText size={15} />
+                <span>Suivi des entretiens</span>
+              </NavLink>
             </div>
           </div>
         )}

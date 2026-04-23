@@ -29,7 +29,17 @@ import {
     Activity,
     ChevronDown,
     ChevronUp,
-    Target
+    Target,
+    Trash2,
+    Phone,
+    XCircle,
+    Ban,
+    Clock,
+    PhoneOff,
+    UserX,
+    MoreHorizontal,
+    LayoutDashboard,
+    Plus
 } from 'lucide-react';
 import Button from './ui/Button';
 import Card from './ui/Card';
@@ -644,6 +654,70 @@ const EvaluationGrid = React.memo(({ studentData, onNext }: { studentData: any, 
 
 // --- INTERVIEWS TRACKING COMPONENT ---
 
+
+// --- STATUS SELECTOR COMPONENT ---
+
+const STATUS_OPTIONS = [
+    { value: 'retenu', label: 'Retenu', icon: CheckCircle2, color: 'bg-emerald-500' },
+    { value: 'non_retenu', label: 'Non Retenu', icon: XCircle, color: 'bg-rose-500' },
+    { value: 'recontacter', label: 'À Recontacter', icon: Phone, color: 'bg-slate-700' },
+    { value: 'injoignable', label: 'Injoignable', icon: PhoneOff, color: 'bg-orange-500' },
+    { value: 'absent', label: 'Absent', icon: UserX, color: 'bg-rose-500' },
+    { value: 'annule', label: 'Annulé', icon: Ban, color: 'bg-rose-400' },
+    { value: 'reprogramme', label: 'Reprogrammé', icon: RotateCcw, color: 'bg-blue-500' },
+];
+
+const StatusSelector = ({ value, onChange }: { value: string; onChange: (val: string) => void }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
+    const currentStatus = STATUS_OPTIONS.find(o => o.value === value) || STATUS_OPTIONS[1]; // default to injoignable if not found or Pending
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative min-w-[180px]" ref={dropdownRef}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-full flex items-center justify-between pl-3 pr-3 py-2.5 rounded-[0.5rem] text-[10px] font-black uppercase tracking-wider text-white shadow-sm transition-all ${currentStatus.color}`}
+            >
+                <div className="flex items-center gap-2">
+                    <currentStatus.icon size={14} strokeWidth={2.5} />
+                    <span>{currentStatus.label}</span>
+                </div>
+                <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-1">
+                    {STATUS_OPTIONS.map((opt) => (
+                        <button
+                            key={opt.value}
+                            onClick={() => {
+                                onChange(opt.value);
+                                setIsOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-left"
+                        >
+                            <opt.icon size={14} className={opt.value === value ? 'text-brand' : 'text-slate-400'} />
+                            <span className={`text-[11px] font-bold ${opt.value === value ? 'text-slate-900' : 'text-slate-500'}`}>
+                                {opt.label}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInterview: (candidate: any) => void }) => {
     const { showToast } = useAppStore();
     const { candidates, loading: isLoading, refresh } = useCandidates();
@@ -759,30 +833,82 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                 </div>
             </div>
 
-            {/* Filter and Controls */}
-            <div className="bg-white border border-[#e5e0f5] rounded-2xl p-4 shadow-sm flex flex-col lg:flex-row lg:items-center gap-4">
-                <div className="relative flex-1 min-w-[280px] group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#6d28d9] transition-colors" size={18} />
-                    <input
+            {/* Suivi des entretiens Header Card */}
+            <div className="rounded-[1.5rem] p-8 mb-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6366f1 100%)' }}>
+                <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }}></div>
+                
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/30">
+                            <Calendar size={28} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h2 className="text-[24px] font-black text-white leading-tight">Suivi des entretiens</h2>
+                            <p className="text-white/80 text-[13px] font-bold mt-0.5">Gestion et planification des entretiens — Classe NTC</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button className="flex items-center gap-2 px-6 py-3 bg-white text-[#6366f1] rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-lg active:scale-95">
+                            <Plus size={16} strokeWidth={3} />
+                            Ajouter un entretien
+                        </button>
+                        <button className="flex items-center gap-2 px-6 py-3 bg-white/10 border border-white/20 text-white rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-white/20 transition-all backdrop-blur-sm active:scale-95">
+                            <Upload size={16} />
+                            Exporter CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Filters Bar */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="md:col-span-3 relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#6366f1] transition-colors">
+                        <Search size={18} />
+                    </div>
+                    <input 
                         type="text"
-                        placeholder="Rechercher un candidat, une formation ou un email..."
+                        placeholder="Rechercher un étudiant..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3.5 bg-[#fafafa] border border-[#e5e0f5] rounded-xl text-[14px] font-medium text-slate-800 placeholder:text-slate-400 outline-none focus:border-[#6d28d9]/40 focus:ring-4 focus:ring-[#6d28d9]/10 focus:bg-white transition-all shadow-sm"
+                        className="w-full pl-12 pr-6 py-4 bg-white border border-slate-200 rounded-2xl text-[13px] font-medium text-slate-600 outline-none focus:border-[#6366f1] focus:ring-4 focus:ring-[#6366f1]/5 transition-all"
                     />
                 </div>
-                <div className="flex items-center gap-3 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 hide-scrollbar">
-                    <div className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[12px] font-bold text-slate-500 mx-1 shrink-0">
-                        <Users size={16} className="text-slate-400" />
-                        {filtered.length} Résultat{filtered.length > 1 ? 's' : ''}
+                <div className="relative group">
+                    <select className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl text-[13px] font-bold text-slate-600 outline-none focus:border-[#6366f1] appearance-none cursor-pointer transition-all">
+                        <option>Tous les statuts</option>
+                        <option>Approuvé</option>
+                        <option>En attente</option>
+                        <option>Refusé</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none transition-transform group-focus-within:rotate-180 duration-300">
+                        <ChevronDown size={18} />
                     </div>
-                    <button className="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 text-[13px] font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm shrink-0">
-                        <Download size={16} className="text-slate-400" /> Exporter listes
-                    </button>
-                    <button className="flex items-center gap-2 px-6 py-3 bg-[#6d28d9] text-white rounded-xl text-[13px] font-semibold hover:bg-[#5b21b6] hover:shadow-lg hover:shadow-indigo-500/20 transition-all shrink-0">
-                        <Calendar size={16} /> Planifier session
-                    </button>
                 </div>
+            </div>
+
+
+            {/* Quick Filters */}
+            <div className="flex flex-wrap gap-2 bg-slate-100/50 p-1.5 rounded-2xl w-fit">
+                <button 
+                    onClick={() => setStatusFilter('upcoming')}
+                    className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${statusFilter === 'upcoming' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-transparent text-slate-500 hover:text-brand'}`}
+                >
+                    <Calendar size={14} strokeWidth={3} /> Entretiens à venir
+                </button>
+                <button 
+                    onClick={() => setStatusFilter('past')}
+                    className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${statusFilter === 'past' ? 'bg-[#22c55e] text-white shadow-lg shadow-[#22c55e]/20' : 'bg-white text-slate-500 hover:text-[#22c55e] shadow-sm'}`}
+                >
+                    <CheckCircle2 size={14} className={statusFilter === 'past' ? 'text-white' : 'text-[#22c55e]'} strokeWidth={3} /> Entretiens passés
+                </button>
+                <button 
+                    onClick={() => setStatusFilter('all')}
+                    className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${statusFilter === 'all' ? 'bg-slate-700 text-white shadow-lg shadow-slate-700/20' : 'bg-white text-slate-500 hover:text-slate-700 shadow-sm'}`}
+                >
+                    <MoreHorizontal size={14} strokeWidth={3} /> Tous
+                </button>
             </div>
 
             {/* Main Table Card */}
@@ -818,21 +944,11 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                                     </td>
                                 </tr>
                             ) : paginatedItems.map((item) => (
-                                <tr key={item.c.id} className="group hover:bg-[#faf9ff] transition-all relative">
-                                    <td className="px-6 py-5 relative">
-                                        {/* Row hover highlight indicator */}
-                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#6d28d9] opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-11 w-11 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-md flex-shrink-0" 
-                                                 style={{ background: 'linear-gradient(135deg, #a78bfa 0%, #6d28d9 100%)' }}>
-                                                {item.c.prenom?.[0]}{item.c.nom?.[0]}
-                                            </div>
-                                            <div>
-                                                <div className="text-[14px] font-bold text-slate-800">{item.c.nom?.toUpperCase()} {item.c.prenom}</div>
-                                                <div className="mt-1 text-[12px] font-medium text-slate-500 flex items-center gap-1.5"><Mail size={12}/> {item.c.email || '—'}</div>
-                                            </div>
-                                        </div>
+                                <tr key={item.c.id} className="hover:bg-slate-50/50 transition-colors group">
+                                    <td className="px-6 py-4 font-black text-slate-800 text-sm uppercase">{item.c.nom}</td>
+                                    <td className="px-6 py-4 font-medium text-slate-600 text-sm">{item.c.prenom}</td>
+                                    <td className="px-6 py-4">
+                                        <input type="text" defaultValue="Sophie Martin" className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1]" />
                                     </td>
                                     <td className="px-6 py-5">
                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] text-[11px] font-bold uppercase tracking-wider">
@@ -905,22 +1021,22 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5 text-right">
-                                        {item.interviewStatus === 'Completed' ? (
-                                            <button
-                                                onClick={() => onLaunchInterview(item.raw)}
-                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#e5e0f5] bg-white text-slate-600 font-semibold text-[12px] hover:text-[#6d28d9] hover:border-[#6d28d9]/30 hover:bg-[#faf9ff] transition-all shadow-sm"
-                                            >
-                                                <RefreshCcw size={14} /> Relancer
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={() => onLaunchInterview(item.raw)}
-                                                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#6d28d9] to-[#4338ca] text-white font-semibold text-[12px] hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-105 transition-all shadow-sm"
-                                            >
-                                                Lancer l'évaluation <ArrowRight size={14} />
-                                            </button>
-                                        )}
+                                    <td className="px-6 py-4">
+                                        <input type="text" placeholder="N°..." className="w-20 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <StatusSelector 
+                                            value={item.interviewStatus === 'Completed' ? 'injoignable' : 'retenu'} 
+                                            onChange={(val) => console.log('Status changed:', val)} 
+                                        />
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <input type="text" placeholder="Notes..." className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <button className="w-9 h-9 flex items-center justify-center bg-[#ef4444] text-white rounded-lg hover:bg-rose-600 transition-colors shadow-sm mx-auto">
+                                            <Trash2 size={16} />
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -1761,11 +1877,11 @@ const AdmissionView = ({ selectedStudent, selectedTab, onClearSelection }: Admis
             setMainTabAnimKey(k => k + 1);
         }, 180);
     }, [mainTab]);
-
     useEffect(() => {
         const nextTab = searchParams.get('tab') === 'interviews' ? 'interviews' : 'dashboard';
         setMainTab(nextTab);
     }, [searchParams]);
+
 
     const [activeTab, setActiveTab] = useState<AdmissionTab>(selectedTab || AdmissionTab.TESTS);
     const [prefilledStudent, setPrefilledStudent] = useState<any>(null);
