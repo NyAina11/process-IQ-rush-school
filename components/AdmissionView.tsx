@@ -950,10 +950,9 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                                 </tr>
                             ) : paginatedItems.map((item) => (
                                 <tr key={item.c.id} className="hover:bg-slate-50/50 transition-colors group">
-                                    <td className="px-6 py-4 font-black text-slate-800 text-sm uppercase">{item.c.nom}</td>
-                                    <td className="px-6 py-4 font-medium text-slate-600 text-sm">{item.c.prenom}</td>
                                     <td className="px-6 py-4">
-                                        <input type="text" defaultValue="Sophie Martin" className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1]" />
+                                        <div className="font-black text-slate-800 text-[13px] uppercase">{item.c.nom} <span className="font-medium text-slate-600 normal-case">{item.c.prenom}</span></div>
+                                        <div className="text-[11px] font-medium text-slate-500 mt-0.5">{item.c.email}</div>
                                     </td>
                                     <td className="px-6 py-5">
                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#f5f3ff] text-[#6d28d9] border border-[#e5e0f5] text-[11px] font-bold uppercase tracking-wider">
@@ -1026,21 +1025,12 @@ const InterviewsTrackingView = React.memo(({ onLaunchInterview }: { onLaunchInte
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <input type="text" placeholder="N°..." className="w-20 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <StatusSelector 
-                                            value={item.interviewStatus === 'Completed' ? 'injoignable' : 'retenu'} 
-                                            onChange={(val) => console.log('Status changed:', val)} 
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <input type="text" placeholder="Notes..." className="w-32 px-4 py-2 bg-white border border-slate-200 rounded-[0.75rem] text-xs font-semibold text-slate-600 outline-none focus:border-[#6366f1] placeholder:text-slate-300" />
-                                    </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button className="w-9 h-9 flex items-center justify-center bg-[#ef4444] text-white rounded-lg hover:bg-rose-600 transition-colors shadow-sm mx-auto">
-                                            <Trash2 size={16} />
+                                        <button 
+                                            onClick={() => onLaunchInterview(item.raw)}
+                                            className={`inline-flex items-center justify-center gap-2 px-4 py-2 text-[11px] font-black uppercase tracking-wider rounded-xl transition-all shadow-sm ${item.interviewStatus === 'Completed' ? 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-[#6B3CD2]' : 'bg-[#6B3CD2] text-white hover:bg-[#5831b0] hover:shadow-md'}`}
+                                        >
+                                            {item.interviewStatus === 'Completed' ? 'Relancer' : 'Lancer'}
                                         </button>
                                     </td>
                                 </tr>
