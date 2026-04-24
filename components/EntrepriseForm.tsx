@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Building, Calculator, PenTool, CheckCircle2, Info, ArrowRight, Save, Loader2, Search } from 'lucide-react';
+import { Building, Calculator, PenTool, CheckCircle2, Info, ArrowRight, Save, Loader2 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAppStore } from '../store/useAppStore';
 import { useApi } from '../hooks/useApi';
@@ -219,8 +219,6 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
     const { showToast, draftCompany, setDraftCompany, clearDraftCompany } = useAppStore();
     const { refresh: refreshCandidates } = useCandidates();
     const [activeSection, setActiveSection] = useState<string | null>('id');
-    const [inseeLookupLoading, setInseeLookupLoading] = useState(false);
-    const [inseeLookupError, setInseeLookupError] = useState<string | null>(null);
     const [isEditingSalary, setIsEditingSalary] = useState(false);
 
     const toggleSection = (section: string) => {
@@ -282,92 +280,7 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
     const formData = watch();
     const siretValue = watch('identification.siret');
 
-    const lookupCompanyWithInsee = useCallback(async () => {
-        const cleanedSiret = String(siretValue || '').replace(/\s/g, '');
 
-        if (!/^\d{14}$/.test(cleanedSiret)) {
-            setInseeLookupError('Le SIRET doit contenir exactement 14 chiffres.');
-            return;
-        }
-
-        setInseeLookupLoading(true);
-        setInseeLookupError(null);
-
-        try {
-            const token = getAuthToken();
-            const response = await fetch(`/api/settings/insee-siren/siret/${encodeURIComponent(cleanedSiret)}`, {
-                method: 'GET',
-                headers: {
-                    Accept: 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                },
-            });
-
-            const payload = await response.json().catch(() => null);
-            if (!response.ok) {
-                throw new Error(payload?.error || payload?.message || 'Recherche SIRET impossible');
-            }
-
-            const result = payload?.data || {};
-            const raw = result?.raw?.etablissement || {};
-            const adresse = raw?.adresseEtablissement || {};
-            const uniteLegale = raw?.uniteLegale || {};
-
-            const numeroVoie = String(adresse.numeroVoieEtablissement || '').trim();
-            const typeVoie = String(adresse.typeVoieEtablissement || '').trim();
-            const libelleVoie = String(adresse.libelleVoieEtablissement || '').trim();
-            const voie = [typeVoie, libelleVoie].filter(Boolean).join(' ').trim();
-            const raisonSociale = String(result.raisonSociale || '').trim();
-            const codeApe = String(result.activitePrincipale || '').replace(/\./g, '').trim().toUpperCase();
-            const codePostal = String(adresse.codePostalEtablissement || '').trim();
-            const ville = String(adresse.libelleCommuneEtablissement || '').trim();
-            const convention = String(uniteLegale.categorieJuridiqueUniteLegale || '').trim();
-
-            if (raisonSociale) {
-                setValue('identification.raison_sociale', raisonSociale, { shouldDirty: true, shouldValidate: true });
-            }
-
-            if (/^[0-9]{4}[A-Z]$/.test(codeApe)) {
-                setValue('identification.code_ape_naf', codeApe, { shouldDirty: true, shouldValidate: true });
-            }
-
-            if (numeroVoie) {
-                setValue('adresse.num', numeroVoie, { shouldDirty: true });
-            }
-
-            if (voie) {
-                setValue('adresse.voie', voie, { shouldDirty: true, shouldValidate: true });
-            }
-
-            if (codePostal) {
-                setValue('adresse.code_postal', codePostal, { shouldDirty: true, shouldValidate: true });
-            }
-
-            if (ville) {
-                setValue('adresse.ville', ville, { shouldDirty: true, shouldValidate: true });
-            }
-
-            if (convention && !watch('identification.convention')) {
-                setValue('identification.convention', convention, { shouldDirty: true });
-            }
-
-            await trigger([
-                'identification.raison_sociale',
-                'identification.code_ape_naf',
-                'adresse.voie',
-                'adresse.code_postal',
-                'adresse.ville',
-            ]);
-
-            showToast('Entreprise récupérée via INSEE', 'success');
-        } catch (error: any) {
-            const message = error?.message || 'Recherche SIRET impossible';
-            setInseeLookupError(message);
-            showToast(message, 'error');
-        } finally {
-            setInseeLookupLoading(false);
-        }
-    }, [setValue, showToast, siretValue, trigger, watch]);
 
     // Auto-save draft
     useEffect(() => {
@@ -785,30 +698,13 @@ const EntrepriseForm: React.FC<EntrepriseFormProps> = ({ onNext, studentRecordId
                         <div className="fiche-form-grid">
                             <div className="full-width">
                                 <Input label="Raison sociale" required placeholder="Nom de l'entreprise" error={errors.identification?.raison_sociale?.message} {...register('identification.raison_sociale')} />
-                                <div className="mt-2 flex flex-wrap items-center gap-3">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        isLoading={inseeLookupLoading}
-                                        leftIcon={!inseeLookupLoading ? <Search size={13} /> : undefined}
-                                        onClick={lookupCompanyWithInsee}
-                                    >
-                                        Rechercher via INSEE
-                                    </Button>
-                                    <span className="text-[11px] text-slate-500">
-                                        PrÃ©remplit les informations sociÃ©tÃ© depuis le SIRET.
-                                    </span>
-                                </div>
-                                {inseeLookupError && (
-                                    <div className="mt-1 text-[12px] font-semibold text-rose-500">{inseeLookupError}</div>
-                                )}
+
+                                
                             </div>
                             <div className="fiche-field">
                                 <Input label="Numéro SIRET" required placeholder="14 chiffres" error={errors.identification?.siret?.message} {...register('identification.siret', {
                                     onChange: (e) => {
                                         e.target.value = formatSIRET(e.target.value);
-                                        if (inseeLookupError) setInseeLookupError(null);
                                     }
                                 })} />
                             </div>
